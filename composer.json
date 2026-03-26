@@ -198,6 +198,9 @@
 		"optimize-autoloader": true,
 		"preferred-install": "dist",
 		"sort-packages": true,
+		"github-protocols": [
+			"https"
+		],
 		"allow-plugins": {
 			"pestphp/pest-plugin": true,
 			"php-http/discovery": true
@@ -209,6 +212,7 @@
 			]
 		}
 	},
+	"replace": {},
 	"minimum-stability": "stable",
 	"prefer-stable": true
 }
