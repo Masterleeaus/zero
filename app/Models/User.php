@@ -10,6 +10,7 @@ use App\Models\Concerns\User\HasCredit;
 use App\Models\Integration\UserIntegration;
 use App\Models\Team\Team;
 use App\Models\Team\TeamMember;
+use App\Traits\BelongsToCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,9 +33,11 @@ class User extends Authenticatable
     use HasFactory;
     use HasRoles;
     use Notifiable;
+    use BelongsToCompany;
 
     protected $fillable = [
         'coingate_subscriber_id',
+        'company_id',
         'team_id',
         'team_manager_id',
         'name',
@@ -108,6 +111,12 @@ class User extends Authenticatable
     protected static function boot(): void
     {
         parent::boot();
+
+        static::creating(static function ($user) {
+            if (empty($user->company_id)) {
+                $user->company_id = $user->team_id;
+            }
+        });
 
         static::deleting(static function ($user) {
             $user->orders()->delete();

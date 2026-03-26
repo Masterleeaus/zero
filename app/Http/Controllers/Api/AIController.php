@@ -634,6 +634,7 @@ class AIController extends Controller
     public function textOutput($prompt, $post, $creativity, $maximum_length, $number_of_results, $user): JsonResponse
     {
         $entry = UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => request('title') ?: null,
             'slug'      => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
@@ -667,6 +668,7 @@ class AIController extends Controller
         $output = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
 
         $entry = new UserOpenai([
+            'company_id' => tenant(),
             'team_id'     => $user->team_id,
             'title'       => request('title') ?: null,
             'slug'        => Str::random(7) . Str::slug($user?->fullName()) . '-workbook',
@@ -811,6 +813,7 @@ class AIController extends Controller
         $text = $response->text;
 
         UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => request('title') ?: null,
             'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-speech-to-text-workbook',
@@ -1292,6 +1295,7 @@ class AIController extends Controller
     private function saveEntryToDatabase(array $imageDetails, User $user, OpenAIGenerator $post, string $code, string $savePath): UserOpenai
     {
         $data = [
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => $imageDetails['nameOfImage'],
             'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbook',
@@ -1456,6 +1460,7 @@ class AIController extends Controller
         $langsAndVoices['voices'][] = $audioName;
 
         $entry = UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'output'    => $audioName,
             'input'     => $audioName,

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
 
 class UserOpenai extends Model
 {
+    use BelongsToCompany;
+
     /**
      * @var \Illuminate\Database\Eloquent\HigherOrderBuilderProxy|\Illuminate\Support\HigherOrderCollectionProxy|mixed
      */
@@ -23,6 +26,7 @@ class UserOpenai extends Model
     protected $fillable = [
         'is_demo',
         'request_id',
+        'company_id',
         'team_id',
         'title',
         'slug',
@@ -54,6 +58,15 @@ class UserOpenai extends Model
         'generator_type',
         'output_url',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(static function (UserOpenai $entry) {
+            if ($entry->company_id === null && auth()->check()) {
+                $entry->company_id = tenant();
+            }
+        });
+    }
 
     // STORAGE
     public const STORAGE_LOCAL = 'public';

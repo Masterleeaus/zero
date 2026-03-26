@@ -3,19 +3,26 @@
 namespace App\Models;
 
 use App\Helpers\Classes\MarketplaceHelper;
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserOpenaiChat extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'user_openai_chat';
 
     protected $guarded = [];
 
     protected static function booted(): void
     {
-        static::creating(static function ($chat) {
+        static::creating(static function (UserOpenaiChat $chat) {
+            if ($chat->company_id === null && auth()->check()) {
+                $chat->company_id = tenant();
+            }
+
             if (MarketplaceHelper::isRegistered('ai-chat-pro') && ! auth()->check()) {
                 $chat->is_guest = true;
             }
