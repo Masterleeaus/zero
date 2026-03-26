@@ -19,6 +19,7 @@ return new class extends Migration
         foreach ($tablesWithTeamId as $tableName) {
             Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                 if (! Schema::hasColumn($tableName, 'company_id')) {
+                    // Soft reference to companies to avoid breaking existing installs without the table/seeded data.
                     $table->unsignedBigInteger('company_id')->nullable()->after('id')->index();
                 }
             });
@@ -52,7 +53,7 @@ return new class extends Migration
             DB::table('team_members')
                 ->leftJoin('teams', 'teams.id', '=', 'team_members.team_id')
                 ->whereNull('team_members.company_id')
-                ->update(['team_members.company_id' => DB::raw('teams.company_id')]);
+                ->update(['company_id' => DB::raw('teams.company_id')]);
         }
     }
 

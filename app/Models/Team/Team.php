@@ -30,9 +30,9 @@ class Team extends Model
     protected static function booted(): void
     {
         static::creating(static function (Team $team) {
-            $creator = $team->user ?? auth()->user();
-            if ($team->company_id === null && $creator) {
-                $team->company_id = $creator->company_id ?? $creator->team_id;
+            if ($team->company_id === null) {
+                $creator = $team->relationLoaded('user') ? $team->user : null;
+                $team->company_id = $creator?->company_id ?? (auth()->check() ? tenant() : null);
             }
         });
     }
