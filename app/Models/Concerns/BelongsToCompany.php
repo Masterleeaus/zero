@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Company;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait BelongsToCompany
@@ -18,17 +19,12 @@ trait BelongsToCompany
         });
     }
 
-    protected function initializeBelongsToCompany(): void
-    {
-        $this->fillable[] = 'company_id';
-    }
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function scopeForCompany($query, $companyId)
+    public function scopeForCompany(Builder $query, $companyId): Builder
     {
         return $query->where($query->qualifyColumn('company_id'), $companyId);
     }
