@@ -51,9 +51,34 @@ return new class extends Migration
             Schema::hasColumn('teams', 'company_id')
         ) {
             DB::table('team_members')
-                ->leftJoin('teams', 'teams.id', '=', 'team_members.team_id')
-                ->whereNull('team_members.company_id')
-                ->update(['company_id' => DB::raw('teams.company_id')]);
+                ->whereNull('company_id')
+                ->chunkById(100, function ($members) {
+                    $teamIds = $members->pluck('team_id')->filter()->unique()->values();
+
+                    if ($teamIds->isEmpty()) {
+                        return;
+                    }
+
+                    $teams = DB::table('teams')
+                        ->whereIn('id', $teamIds)
+                        ->pluck('company_id', 'id');
+
+                    foreach ($members as $member) {
+                        if (! $member->team_id) {
+                            continue;
+                        }
+
+                        $companyId = $teams[$member->team_id] ?? null;
+
+                        if ($companyId === null) {
+                            continue;
+                        }
+
+                        DB::table('team_members')
+                            ->where('id', $member->id)
+                            ->update(['company_id' => $companyId]);
+                    }
+                });
         }
     }
 
