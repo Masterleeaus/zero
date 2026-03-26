@@ -31,6 +31,12 @@ return new class extends Migration
             }
         });
 
+        if (Schema::hasColumn('teams', 'company_id')) {
+            DB::table('teams')
+                ->whereNull('company_id')
+                ->update(['company_id' => DB::raw('id')]);
+        }
+
         Schema::table('team_members', function (Blueprint $table) {
             if (! Schema::hasColumn('team_members', 'company_id')) {
                 $table->unsignedBigInteger('company_id')->nullable()->after('team_id')->index();
