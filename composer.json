@@ -183,7 +183,8 @@
 		"test:coverage": "@test --coverage-php ./coverage/cov/default.cov",
 		"test:coverage:html": "@test --coverage-html ./coverage/html/default",
 		"test:lint": "vendor/bin/pint --test",
-		"lint": "vendor/bin/pint -v"
+		"lint": "vendor/bin/pint -v",
+		"install:no-redis": "composer install --ignore-platform-req=ext-redis --prefer-dist --no-interaction"
 	},
 	"extra": {
 		"laravel": {
