@@ -34,9 +34,11 @@ class TeamMember extends Model
     {
         static::creating(static function (TeamMember $member) {
             if ($member->company_id === null) {
-                $member->company_id = $member->team?->company_id
-                    ?? $member->user?->company_id
-                    ?? $member->user?->team_id
+                $teamCompany = $member->relationLoaded('team') ? $member->team?->company_id : null;
+                $userCompany = $member->relationLoaded('user') ? $member->user?->company_id : null;
+
+                $member->company_id = $teamCompany
+                    ?? $userCompany
                     ?? (auth()->check() ? tenant() : null);
             }
         });

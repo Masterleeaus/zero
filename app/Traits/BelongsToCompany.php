@@ -10,6 +10,10 @@ trait BelongsToCompany
 {
     public function scopeForCompany(Builder $query, ?int $companyId): Builder
     {
+        if ($companyId === null) {
+            return $query;
+        }
+
         return $query->where($this->qualifyColumn('company_id'), $companyId);
     }
 

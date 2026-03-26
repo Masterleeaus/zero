@@ -1377,7 +1377,7 @@ class AIController extends Controller
                 'user_id'   => $user?->id,
                 'input'     => $response,
                 'hash'      => str()->random(256),
-                'company_id'=> tenant(),
+                'company_id' => tenant(),
                 'team_id'   => $user?->team_id,
                 'slug'      => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
                 'openai_id' => $request->openai_id ?? 1,
