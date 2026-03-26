@@ -34,14 +34,10 @@ class TeamMember extends Model
     {
         static::creating(static function (TeamMember $member) {
             if ($member->company_id === null) {
-                $teamCompany = $member->team?->company_id;
-                if ($teamCompany !== null) {
-                    $member->company_id = $teamCompany;
-                } elseif ($member->user) {
-                    $member->company_id = $member->user->company_id ?? $member->user->team_id;
-                } elseif (auth()->check()) {
-                    $member->company_id = tenant();
-                }
+                $member->company_id = $member->team?->company_id
+                    ?? $member->user?->company_id
+                    ?? $member->user?->team_id
+                    ?? (auth()->check() ? tenant() : null);
             }
         });
     }

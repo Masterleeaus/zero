@@ -1153,7 +1153,7 @@ class AIController extends Controller
                     'company_id' => tenant(),
                     'team_id'   => $user?->team_id,
                     'title'     => __('New Video'),
-                    'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbsook',
+                    'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbook',
                     'user_id'   => Auth::id(),
                     'openai_id' => OpenAIGenerator::where('slug', 'ai_video')->first()->id,
                     'input'     => $request->url,

@@ -114,7 +114,7 @@ class User extends Authenticatable
 
         static::creating(static function ($user) {
             if (empty($user->company_id)) {
-                $user->company_id = $user->team_id;
+                $user->company_id = tenant() ?? $user->team_id;
             }
         });
 
