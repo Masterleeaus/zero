@@ -13,7 +13,7 @@ trait BelongsToCompany
     protected static function bootBelongsToCompany(): void
     {
         static::creating(static function ($model) {
-            if (empty($model->company_id) && auth()->check()) {
+            if (is_null($model->company_id) && auth()->check()) {
                 $model->company_id = auth()->user()?->company_id;
             }
         });

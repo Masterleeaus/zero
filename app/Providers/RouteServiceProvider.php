@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
             return;
         }
 
-        $files = glob($corePath . '/*.routes.php') ?: glob($corePath . '/*.php') ?: [];
+        $files = glob($corePath . '/*.routes.php') ?: [];
 
         sort($files);
 
