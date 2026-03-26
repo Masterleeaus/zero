@@ -27,7 +27,10 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware([
                 'web',  ViewSharedMiddleware::class, NewExtensionInstalled::class,
-            ])->group(base_path('routes/web.php'));
+            ])->group(function () {
+                require base_path('routes/web.php');
+                $this->loadCoreRoutes();
+            });
         });
     }
 
@@ -36,5 +39,22 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', static function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+    }
+
+    protected function loadCoreRoutes(): void
+    {
+        $corePath = base_path('routes/core');
+
+        if (! is_dir($corePath)) {
+            return;
+        }
+
+        $files = glob($corePath . '/*.php') ?: [];
+
+        sort($files);
+
+        foreach ($files as $routeFile) {
+            require $routeFile;
+        }
     }
 }
