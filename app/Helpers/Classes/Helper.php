@@ -27,6 +27,36 @@ class Helper
 {
     use Traits\HasApiKeys;
 
+    /**
+     * Return a list of vendor packages using Composer's autoload metadata when available,
+     * falling back to the cached package manifest.
+     */
+    public static function getVendorPackages(): array
+    {
+        $packages = [];
+
+        $autoloadPath = base_path('vendor/autoload.php');
+        $composerAutoloadReal = base_path('vendor/composer/autoload_real.php');
+
+        if (is_file($autoloadPath) && is_file($composerAutoloadReal)) {
+            require_once $autoloadPath;
+
+            if (class_exists(\Composer\InstalledVersions::class)) {
+                $packages = \Composer\InstalledVersions::getInstalledPackages();
+            }
+        }
+
+        if (empty($packages)) {
+            $packageCache = base_path('bootstrap/cache/packages.php');
+
+            if (is_file($packageCache)) {
+                $packages = array_keys(require $packageCache);
+            }
+        }
+
+        return $packages;
+    }
+
     public static function octaneReload(): void
     {
         try {
