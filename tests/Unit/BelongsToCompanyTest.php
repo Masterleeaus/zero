@@ -94,7 +94,7 @@ class BelongsToCompanyTest extends TestCase
         $user->forceFill([
             'id'      => 1,
             'name'    => 'Test User',
-            'surname' => 'Company',
+            'surname' => 'Tester',
             'email'   => 'company' . $companyId . '@example.com',
         ]);
 
