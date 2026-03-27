@@ -1,3 +1,3 @@
-# Keep vendor dependencies out of version control; README.md is retained only as a placeholder.
+# Keep vendor dependencies out of version control; README.md is retained only as a placeholder required for merge.
 /vendor/*
 !/vendor/README.md
