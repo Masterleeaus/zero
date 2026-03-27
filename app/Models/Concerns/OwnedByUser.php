@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\User;
-use Illuminate\Auth\GenericUser;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +26,9 @@ trait OwnedByUser
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function scopeCreatedBy(Builder $query, int|GenericUser $user): Builder
+    public function scopeCreatedBy(Builder $query, int|Authenticatable $user): Builder
     {
-        $userId = $user instanceof GenericUser ? $user->getAuthIdentifier() : $user;
+        $userId = $user instanceof Authenticatable ? $user->getAuthIdentifier() : $user;
 
         return $query->where($query->qualifyColumn('created_by'), $userId);
     }

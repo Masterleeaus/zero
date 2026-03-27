@@ -60,6 +60,20 @@ class BelongsToCompanyTest extends TestCase
         $this->assertSame([5], $visible);
     }
 
+    public function test_scope_is_inactive_when_no_authenticated_user(): void
+    {
+        DB::table('samples')->insert([
+            ['name' => 'tenant-a', 'company_id' => 5],
+            ['name' => 'tenant-b', 'company_id' => 9],
+        ]);
+
+        Auth::logout();
+
+        $all = SampleModel::pluck('company_id')->all();
+
+        $this->assertSame([5, 9], $all);
+    }
+
     public function test_scope_for_company_overrides_default_scope(): void
     {
         DB::table('samples')->insert([
