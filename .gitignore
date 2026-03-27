@@ -1,3 +1,3 @@
-# Keep vendor dependencies out of version control; .gitkeep is retained only as a placeholder.
+# Keep vendor dependencies out of version control; README.md is retained only as a placeholder.
 /vendor/*
-!/vendor/.gitkeep
+!/vendor/README.md
