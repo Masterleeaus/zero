@@ -6,5 +6,8 @@ Route::middleware(['auth', 'updateUserActivity'])
     ->prefix('dashboard')
     ->as('dashboard.')
     ->group(static function () {
-        // TODO: migrate WorkCore workforce routes (cleaners/attendance/leaves/shifts) here.
+        Route::prefix('team')->as('team.')->group(static function () {
+            Route::get('roster', [\App\Http\Controllers\Team\TeamController::class, 'index'])
+                ->name('roster.index');
+        });
     });
