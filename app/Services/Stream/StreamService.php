@@ -616,12 +616,13 @@ class StreamService
                     'id' => $message_id,
                 ],
                 [
-                    'user_id'   => $user->id,
-                    'input'     => $prompt,
-                    'hash'      => str()->random(256),
-                    'team_id'   => $user->team_id,
-                    'slug'      => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
-                    'openai_id' => $openai_id ?? 1,
+                    'user_id'    => $user->id,
+                    'company_id' => tenant(),
+                    'input'      => $prompt,
+                    'hash'       => str()->random(256),
+                    'team_id'    => $user->team_id,
+                    'slug'       => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
+                    'openai_id'  => $openai_id ?? 1,
                 ]);
 
             echo "event: message\n";
@@ -823,6 +824,7 @@ class StreamService
                 $entry->user_id = $user?->id;
                 $entry->input = $prompt;
                 $entry->hash = str()->random(256);
+                $entry->company_id = tenant();
                 $entry->team_id = $user?->team_id;
                 $entry->slug = str()->random(7) . str($user?->fullName())->slug() . '-workbook';
                 $entry->openai_id = $openai_id ?? 1;

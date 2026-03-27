@@ -33,16 +33,18 @@ class UserDashboardService
 
             return UserOpenai::query()
                 ->with('generator', 'isFavoriteDocRelation')
+                ->forCompany(tenant())
                 ->where(function (Builder $query) use ($team, $myCreatedTeam) {
-                    $query->where('user_id', auth()->id())
-                        ->when($team || $myCreatedTeam, function ($query) use ($team, $myCreatedTeam) {
-                            if ($team && $team?->is_shared) {
-                                $query->orWhere('team_id', $team->id);
-                            }
-                            if ($myCreatedTeam) {
-                                $query->orWhere('team_id', $myCreatedTeam->id);
-                            }
-                        });
+                    $query->where('user_id', auth()->id());
+
+                    $query->when($team || $myCreatedTeam, function ($query) use ($team, $myCreatedTeam) {
+                        if ($team && $team?->is_shared) {
+                            $query->orWhere('team_id', $team->id);
+                        }
+                        if ($myCreatedTeam) {
+                            $query->orWhere('team_id', $myCreatedTeam->id);
+                        }
+                    });
                 })
                 ->get();
         });

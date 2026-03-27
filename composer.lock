@@ -16530,13 +16530,14 @@
 			"version": "1.1.0",
 			"source": {
 				"type": "git",
-				"url": "https://git.yoomoney.ru/scm/sdk/yookassa-sdk-validator-php.git",
+				"url": "https://github.com/yoomoney/yookassa-sdk-validator-php.git",
 				"reference": "e3cb397d77613a0c98ae185de6b2dd493d980536"
 			},
 			"dist": {
 				"type": "zip",
-				"url": "https://git.yoomoney.ru/rest/api/latest/projects/SDK/repos/yookassa-sdk-validator-php/archive?at=refs%2Ftags%2F1.1.0&format=zip",
-				"reference": "e3cb397d77613a0c98ae185de6b2dd493d980536"
+				"url": "https://api.github.com/repos/yoomoney/yookassa-sdk-validator-php/zipball/e3cb397d77613a0c98ae185de6b2dd493d980536",
+				"reference": "e3cb397d77613a0c98ae185de6b2dd493d980536",
+				"shasum": ""
 			},
 			"require": {
 				"ext-mbstring": "*",
