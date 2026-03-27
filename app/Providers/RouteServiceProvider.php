@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
+use App\Http\Controllers\Core\Crm\CustomerController;
+use App\Http\Controllers\Core\Crm\EnquiryController;
 use App\Http\Middleware\ViewSharedMiddleware;
+use App\Models\Crm\Customer;
+use App\Models\Crm\Enquiry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -31,6 +35,14 @@ class RouteServiceProvider extends ServiceProvider
                 require base_path('routes/web.php');
                 $this->loadCoreRoutes();
             });
+        });
+
+        Route::bind('customer', static function (string|int $value) {
+            return Customer::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('enquiry', static function (string|int $value) {
+            return Enquiry::query()->whereKey($value)->firstOrFail();
         });
     }
 

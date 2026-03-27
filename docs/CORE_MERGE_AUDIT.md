@@ -3,12 +3,12 @@
 Scan completed against the MagicAI host repository (`/home/runner/work/zero/zero`) and the prepared WorkCore source (`WorkCore.zip` extracted to `/tmp/workcore`). This log captures what exists today, where conflicts sit, and what must be normalised before any code moves.
 
 ## Host snapshot (MagicAI)
-- **Routes**: `routes/panel.php` remains for dashboard, with modular core routes now split into `routes/core/*.routes.php` (CRM, Work, Money, Team, Insights, Support) loaded by `RouteServiceProvider::loadCoreRoutes()`.
-- **Controllers**: AI/marketplace/chatbot first-party controllers (e.g. `Dashboard/*`, `Finance/GatewayController`, `Finance/PaymentProcessController`, `Team/TeamController`, `Chatbot/*`) plus new core placeholders under `App\Http\Controllers\Core\{Crm,Work,Money,Insights}` for native wiring.
+- **Routes**: `routes/panel.php` remains for dashboard, with modular core routes split into `routes/core/*.routes.php` (CRM, Work, Money, Team, Insights, Support) loaded by `RouteServiceProvider::loadCoreRoutes()`. CRM routes now expose full CRUD for customers and enquiries.
+- **Controllers**: AI/marketplace/chatbot first-party controllers plus native core CRM controllers under `App\Http\Controllers\Core\Crm` with real logic (list/create/update/show customers and enquiries).
 - **Providers**: `AppServiceProvider`, `RouteServiceProvider`, `ViewServiceProvider`, `AuthServiceProvider`, `BroadcastServiceProvider`, `EventServiceProvider`, `ChatbotServiceProvider`, `ExtensionServiceProvider`, `MacrosServiceProvider`, `AwsServiceProvider`, `TelescopeServiceProvider`.
-- **Models/tenancy**: `Company` (user-owned, no global scope on company), `Product` now uses `BelongsToCompany` for tenant scope; `UserOpenai`/`Chatbot` still use `company_id`/`team_id` without scopes; `Team` + `TeamMember` for crew grouping.
-- **Navigation**: dynamic menu via `App\Services\Common\MenuService` + `App\Models\Common\Menu`/`MenuGroup`; rendered with existing panel components (`resources/views/default/components/navbar`, `floating-menu`, `bottom-menu`, `table`, `card`, etc.).
-- **Views**: native layouts under `resources/views/default/layout` and `resources/views/default/panel/*`, plus a temporary `resources/views/core/placeholder.blade.php` used for wired WorkCore screens.
+- **Models/tenancy**: `Company` (user-owned, no global scope on company), `Product` uses `BelongsToCompany`; new CRM models `Customer` and `Enquiry` use `BelongsToCompany` + `OwnedByUser`. `UserOpenai`/`Chatbot` still use `company_id`/`team_id` without scopes; `Team` + `TeamMember` for crew grouping.
+- **Navigation**: dynamic menu via `App\Services\Common\MenuService` + `App\Models\Common\Menu`/`MenuGroup`; rendered with panel components (`resources/views/default/components/navbar`, `floating-menu`, `bottom-menu`, `table`, `card`, etc.).
+- **Views**: native layouts under `resources/views/default/layout` and `resources/views/default/panel/*`; CRM screens now live at `resources/views/default/panel/crm/*` (customers/enquiries).
 
 ## WorkCore snapshot (pre-merge package)
 - **Routes**: a single monolithic `routes/web.php` (~73KB) under middleware `['auth', 'multi-company-select', 'email_verified']` with `account` prefix. No modular split.
@@ -28,7 +28,7 @@ Scan completed against the MagicAI host repository (`/home/runner/work/zero/zero
 
 ## Immediate audit follow-ups
 - Enumerate table/column collisions before migrating (customers/enquiries/sites/service_jobs/checklists/finance/workforce/support).
-- Flesh out placeholder controllers with real logic once WorkCore models/controllers are merged; keep using core route files (no WorkCore monolith).
+- Continue replacing placeholders: next domains are sites/service jobs/checklists and quotes/invoices; keep using core route files (no WorkCore monolith).
 - Reconcile payments/gateway overlap with existing `Finance/*` controllers/services.
 - Map WorkCore policies/middleware to host auth/permission model and cache strategy.
 - Normalise language files before exposing UI (avoid mixed client/project/task labels).
