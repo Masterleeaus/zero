@@ -1,2 +1,2 @@
-Placeholder to keep the vendor directory present in the repository as requested.
-Composer-managed dependencies should still be installed via composer.json/composer.lock; other vendor contents remain ignored.
+This placeholder keeps the vendor directory present in version control to satisfy a merge requirement.
+Runtime dependencies must still be installed via composer.json/composer.lock; all other vendor contents remain ignored and should not be committed.
