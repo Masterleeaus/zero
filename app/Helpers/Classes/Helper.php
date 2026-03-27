@@ -39,8 +39,10 @@ class Helper
         $composerAutoloadReal = base_path('vendor/composer/autoload_real.php');
 
         // Avoid fatal errors when the Composer-generated files are not present in the sandbox.
-        if (! class_exists(\Composer\InstalledVersions::class) && is_file($autoloadPath) && is_file($composerAutoloadReal)) {
-            require_once $autoloadPath;
+        if (! class_exists(\Composer\InstalledVersions::class)) {
+            if (is_file($autoloadPath) && is_file($composerAutoloadReal)) {
+                require_once $autoloadPath;
+            }
         }
 
         if (class_exists(\Composer\InstalledVersions::class)) {
