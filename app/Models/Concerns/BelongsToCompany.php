@@ -13,10 +13,6 @@ trait BelongsToCompany
 {
     protected static function bootBelongsToCompany(): void
     {
-        static::$companyIdResolved = false;
-        static::$resolvedCompanyId = null;
-        static::$resolvedUserId = null;
-
         static::addGlobalScope('company', static function (Builder $builder) {
             $companyId = static::resolveCompanyId();
 
@@ -48,22 +44,23 @@ trait BelongsToCompany
 
     protected static function resolveCompanyId(): ?int
     {
-        $authId = Auth::id();
+        $request = app()->bound('request') ? request() : null;
 
-        if (static::$companyIdResolved && static::$resolvedUserId === $authId) {
-            return static::$resolvedCompanyId;
+        if ($request?->attributes->has('company_scope_company_id')) {
+            $cachedUserId = $request->attributes->get('company_scope_user_id');
+
+            if ($cachedUserId === Auth::id()) {
+                return $request->attributes->get('company_scope_company_id');
+            }
         }
 
-        static::$resolvedUserId = $authId;
-        static::$resolvedCompanyId = Auth::user()?->company_id;
-        static::$companyIdResolved = true;
+        $companyId = Auth::user()?->company_id;
 
-        return static::$resolvedCompanyId;
+        if ($request) {
+            $request->attributes->set('company_scope_company_id', $companyId);
+            $request->attributes->set('company_scope_user_id', Auth::id());
+        }
+
+        return $companyId;
     }
-
-    protected static bool $companyIdResolved = false;
-
-    protected static ?int $resolvedCompanyId = null;
-
-    protected static ?int $resolvedUserId = null;
 }

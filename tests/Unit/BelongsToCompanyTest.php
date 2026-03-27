@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class BelongsToCompanyTest extends TestCase
@@ -93,7 +94,7 @@ class BelongsToCompanyTest extends TestCase
             'id'      => 1,
             'name'    => 'Test User',
             'surname' => 'Tester',
-            'email'   => sprintf('company%s-%s@example.com', $companyId, uniqid()),
+            'email'   => sprintf('company%s-%s@example.com', $companyId, Str::uuid()),
         ]);
 
         $user->company_id = $companyId;

@@ -51,7 +51,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $files = glob($corePath . '/*.routes.php') ?: [];
 
-        // Enforce simple naming for core route files (e.g., crm.routes.php).
+        // Enforce simple alphanumeric/underscore naming for core route files (e.g., crm.routes.php).
         $files = array_values(array_filter($files, static function ($file) {
             return (bool) preg_match('/^[A-Za-z0-9_]+\.routes\.php$/', basename($file));
         }));
