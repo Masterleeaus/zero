@@ -54,11 +54,12 @@ trait BelongsToCompany
             }
         }
 
-        $companyId = Auth::user()?->company_id;
+        $user = Auth::user();
+        $companyId = $user ? data_get($user, 'company_id') : null;
 
         if ($request) {
             $request->attributes->set('company_scope_company_id', $companyId);
-            $request->attributes->set('company_scope_user_id', Auth::id());
+            $request->attributes->set('company_scope_user_id', $user?->getAuthIdentifier());
         }
 
         return $companyId;

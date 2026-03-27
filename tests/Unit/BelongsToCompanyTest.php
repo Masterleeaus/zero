@@ -29,6 +29,12 @@ class BelongsToCompanyTest extends TestCase
             $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();
         });
+
+        Schema::table('users', static function (Blueprint $table) {
+            if (! Schema::hasColumn('users', 'company_id')) {
+                $table->unsignedBigInteger('company_id')->nullable();
+            }
+        });
     }
 
     protected function tearDown(): void
@@ -89,15 +95,11 @@ class BelongsToCompanyTest extends TestCase
 
     protected function actingAsCompany(int $companyId): void
     {
-        $user = new User();
-        $user->forceFill([
-            'id'      => 1,
-            'name'    => 'Test User',
-            'surname' => 'Tester',
-            'email'   => sprintf('company%s-%s@example.com', $companyId, Str::uuid()),
+        $user = User::factory()->create([
+            'email' => sprintf('company%s-%s@example.com', $companyId, Str::uuid()),
         ]);
 
-        $user->company_id = $companyId;
+        $user->forceFill(['company_id' => $companyId])->saveQuietly();
 
         Auth::shouldUse('web');
         Auth::setUser($user);
