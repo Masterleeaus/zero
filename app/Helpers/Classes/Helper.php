@@ -38,6 +38,7 @@ class Helper
         $autoloadPath = base_path('vendor/autoload.php');
         $composerAutoloadReal = base_path('vendor/composer/autoload_real.php');
 
+        // Avoid fatal errors when the Composer-generated files are not present in the sandbox.
         if (! class_exists(\Composer\InstalledVersions::class) && is_file($autoloadPath) && is_file($composerAutoloadReal)) {
             require_once $autoloadPath;
         }
@@ -47,7 +48,7 @@ class Helper
         }
 
         if (empty($packages)) {
-            $packageCache = base_path('bootstrap/cache/packages.php');
+            $packageCache = app()->getCachedPackagesPath();
 
             if (is_file($packageCache)) {
                 $packages = array_keys(require $packageCache);
