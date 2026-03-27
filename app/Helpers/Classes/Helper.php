@@ -50,6 +50,7 @@ class Helper
         }
 
         if (empty($packages)) {
+            // Fall back to the cached manifest when Composer metadata is unavailable.
             $packageCache = app()->getCachedPackagesPath();
 
             if (is_file($packageCache)) {
