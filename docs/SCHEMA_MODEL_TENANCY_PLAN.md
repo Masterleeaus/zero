@@ -7,10 +7,10 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
 - WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware.
 
 ## Tenancy implementation plan
-1. Add shared concerns in `app/Models/Concerns`:
-   - `BelongsToCompany` (global scope + `company_id` fillable/mutable + `company()` relation).
-   - `BelongsToTeam` (helper scope for crew filtering, **not** tenant isolation).
-   - Optionally `OwnedByUser` for creator/updater tracking.
+1. Shared concerns in `app/Models/Concerns`:
+   - `BelongsToCompany`: conditional global scope keyed to the authenticated user’s `company_id`, auto-fill on create, and a typed `scopeForCompany`.
+   - `BelongsToTeam`: `team()` relation and `scopeForTeam` for crew grouping (not tenant isolation).
+   - `OwnedByUser`: auto-fill `created_by` from the authenticated user with `scopeCreatedBy` + `creator()` relation.
 2. Apply `BelongsToCompany` to every imported WorkCore model and any host model that becomes tenant-specific (customers, enquiries, sites, service jobs, quotes, invoices, payments, expenses, attendance, leave, shifts, tickets).
 3. Ensure validation rules enforce `company_id` presence; derive from authenticated user’s selected company to avoid trusting request payloads.
 
