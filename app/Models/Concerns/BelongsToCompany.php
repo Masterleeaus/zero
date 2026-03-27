@@ -35,7 +35,9 @@ trait BelongsToCompany
 
     public function scopeForCompany(Builder $query, int $companyId): Builder
     {
-        return $query
+        $scopedQuery = clone $query;
+
+        return $scopedQuery
             ->withoutGlobalScope('company')
             ->where($query->qualifyColumn('company_id'), $companyId);
     }

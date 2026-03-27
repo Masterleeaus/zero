@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Models\Concerns\BelongsToCompany;
-use Illuminate\Auth\GenericUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,8 +90,18 @@ class BelongsToCompanyTest extends TestCase
 
     protected function actingAsCompany(int $companyId): void
     {
+        $user = new User();
+        $user->forceFill([
+            'id'      => 1,
+            'name'    => 'Test User',
+            'surname' => 'Company',
+            'email'   => 'company' . $companyId . '@example.com',
+        ]);
+
+        $user->company_id = $companyId;
+
         Auth::shouldUse('web');
-        Auth::setUser(new GenericUser(['id' => 1, 'company_id' => $companyId]));
+        Auth::setUser($user);
     }
 }
 
