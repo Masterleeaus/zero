@@ -13,6 +13,10 @@ trait BelongsToCompany
 {
     protected static function bootBelongsToCompany(): void
     {
+        static::$companyIdResolved = false;
+        static::$resolvedCompanyId = null;
+        static::$resolvedUserId = null;
+
         static::addGlobalScope('company', static function (Builder $builder) {
             $companyId = static::resolveCompanyId();
 
@@ -22,8 +26,10 @@ trait BelongsToCompany
         });
 
         static::creating(static function ($model) {
-            if (is_null($model->company_id) && ($user = Auth::user())) {
-                $model->company_id = $user->company_id;
+            $companyId = static::resolveCompanyId();
+
+            if (is_null($model->company_id) && $companyId !== null) {
+                $model->company_id = $companyId;
             }
         });
     }
@@ -42,6 +48,22 @@ trait BelongsToCompany
 
     protected static function resolveCompanyId(): ?int
     {
-        return Auth::user()?->company_id;
+        $authId = Auth::id();
+
+        if (static::$companyIdResolved && static::$resolvedUserId === $authId) {
+            return static::$resolvedCompanyId;
+        }
+
+        static::$resolvedUserId = $authId;
+        static::$resolvedCompanyId = Auth::user()?->company_id;
+        static::$companyIdResolved = true;
+
+        return static::$resolvedCompanyId;
     }
+
+    protected static bool $companyIdResolved = false;
+
+    protected static ?int $resolvedCompanyId = null;
+
+    protected static ?int $resolvedUserId = null;
 }

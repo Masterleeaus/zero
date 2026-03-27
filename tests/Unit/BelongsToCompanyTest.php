@@ -67,8 +67,6 @@ class BelongsToCompanyTest extends TestCase
             ['name' => 'tenant-b', 'company_id' => 9],
         ]);
 
-        Auth::logout();
-
         $all = SampleModel::pluck('company_id')->all();
 
         $this->assertSame([5, 9], $all);
@@ -95,7 +93,7 @@ class BelongsToCompanyTest extends TestCase
             'id'      => 1,
             'name'    => 'Test User',
             'surname' => 'Tester',
-            'email'   => "company{$companyId}@example.com",
+            'email'   => sprintf('company%s-%s@example.com', $companyId, uniqid()),
         ]);
 
         $user->company_id = $companyId;
