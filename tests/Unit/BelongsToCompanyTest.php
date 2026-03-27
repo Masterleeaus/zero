@@ -95,7 +95,7 @@ class BelongsToCompanyTest extends TestCase
             'id'      => 1,
             'name'    => 'Test User',
             'surname' => 'Tester',
-            'email'   => 'company' . $companyId . '@example.com',
+            'email'   => "company{$companyId}@example.com",
         ]);
 
         $user->company_id = $companyId;
