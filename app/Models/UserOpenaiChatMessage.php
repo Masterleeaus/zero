@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Extensions\Canvas\System\Http\Models\UserTiptapContent;
 use App\Helpers\Classes\MarketplaceHelper;
+use App\Models\Concerns\BelongsToCompany;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,12 +15,14 @@ use Illuminate\Support\Facades\Schema;
 class UserOpenaiChatMessage extends Model
 {
     use HasFactory;
+    use BelongsToCompany;
 
     protected $table = 'user_openai_chat_messages';
 
     protected $fillable = [
         'user_openai_chat_id',
         'user_id',
+        'company_id',
         'input',
         'response',
         'output',
@@ -65,6 +68,12 @@ class UserOpenaiChatMessage extends Model
             // flip back to empty if no messages remain
             if ($message->chat && $message->chat->messagesWithoutInitial()->count() === 0) {
                 $message->chat->update(['is_empty' => true]);
+            }
+        });
+
+        static::creating(static function ($message) {
+            if (! $message->company_id) {
+                $message->company_id = $message->chat?->company_id ?? auth()->user()?->company_id;
             }
         });
     }

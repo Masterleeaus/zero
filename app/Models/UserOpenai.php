@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
 
 class UserOpenai extends Model
 {
+    use BelongsToCompany;
+
     /**
      * @var \Illuminate\Database\Eloquent\HigherOrderBuilderProxy|\Illuminate\Support\HigherOrderCollectionProxy|mixed
      */
@@ -24,6 +27,7 @@ class UserOpenai extends Model
         'is_demo',
         'request_id',
         'team_id',
+        'company_id',
         'title',
         'slug',
         'user_id',

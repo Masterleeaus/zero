@@ -17,5 +17,6 @@
 - `/dashboard/insights/overview` surfaces per-company counts for enquiries, customers, sites, jobs, quotes, invoices, overdue invoices, and outstanding balances.
 
 ## Remaining gaps
-- Menu entries remain database-driven; ensure menu seed includes Insights/Work/Money items.
+- Menu entries remain database-driven; seeders now update-or-create keys to avoid duplicates and keep parent/order alignment; verify routes exist during runtime.
+- AI/chat surfaces now carry `company_id` (user_openai + chatbot tables) but legacy rows without users may remain null until migrated with full data access.
 - Full test execution depends on Composer install; see TESTING notes in PR for current status.

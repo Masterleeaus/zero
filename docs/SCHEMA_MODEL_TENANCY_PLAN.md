@@ -3,7 +3,7 @@
 Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (not isolation)**, **user_id = actor identity**.
 
 ## Current state
-- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`) also use `BelongsToCompany`; Money models (`Quote`, `Invoice`, `Payment`) now use the same traits; AI/support surfaces (`UserOpenai`, `Chatbot`, tickets) still need company scoping and are under active audit; `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
+- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`) also use `BelongsToCompany`; Money models (`Quote`, `Invoice`, `Payment`) use the same traits. **AI surfaces now carry `company_id`** on `user_openai`, `user_openai_chat`, `user_openai_chat_messages`, and chatbot tables (`chatbot`, `chatbot_data`, `chatbot_data_vectors`, `chatbot_history`) with `BelongsToCompany` applied; backfill sets company from users where available. Support/ticket models remain under review. `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
 - WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware.
 
 ## Tenancy implementation plan

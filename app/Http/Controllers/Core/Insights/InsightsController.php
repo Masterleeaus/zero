@@ -21,37 +21,55 @@ class InsightsController extends CoreController
     {
         $companyId = auth()->user()?->company_id;
 
-        $enquiries = Enquiry::query()->count();
-        $customers = Customer::query()->count();
-        $sites = Site::query()->where('status', 'active')->count();
+        $enquiries = Enquiry::query()->where('company_id', $companyId)->count();
+        $customers = Customer::query()->where('company_id', $companyId)->count();
+        $sites = Site::query()->where('company_id', $companyId)->where('status', 'active')->count();
 
         $jobStatus = ServiceJob::query()
+            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $quoteStatus = Quote::query()
+            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $invoiceStatus = Invoice::query()
+            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $overdueInvoices = Invoice::query()
+            ->where('company_id', $companyId)
             ->whereNotIn('status', ['paid', 'void'])
             ->whereDate('due_date', '<', now())
             ->count();
 
-        $outstandingBalance = (float) Invoice::query()->whereNotIn('status', ['paid', 'void'])->sum('balance');
-        $paymentsTotal = (float) Payment::query()->sum('amount');
-        $quoteToJobCount = ServiceJob::query()->whereNotNull('quote_id')->count();
-        $quoteToInvoiceCount = Invoice::query()->whereNotNull('quote_id')->count();
+        $outstandingBalance = (float) Invoice::query()
+            ->where('company_id', $companyId)
+            ->whereNotIn('status', ['paid', 'void'])
+            ->sum('balance');
+
+        $paymentsTotal = (float) Payment::query()
+            ->where('company_id', $companyId)
+            ->sum('amount');
+
+        $quoteToJobCount = ServiceJob::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('quote_id')
+            ->count();
+
+        $quoteToInvoiceCount = Invoice::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('quote_id')
+            ->count();
 
         return view('default.panel.user.insights.overview', [
             'enquiryCount' => $enquiries,
