@@ -20,12 +20,15 @@ use App\Events\UsersActivityEvent;
 use App\Events\YokassaWebhookEvent;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
+use App\Listeners\InvoiceIssuedListener;
+use App\Listeners\InvoicePaidListener;
 use App\Listeners\IyzicoLifetimeListener;
 use App\Listeners\IyzicoWebhookListener;
 use App\Listeners\PaypalLifetimeListener;
 use App\Listeners\PaypalWebhookListener;
 use App\Listeners\PaystackLifetimeListener;
 use App\Listeners\PaystackWebhookListener;
+use App\Listeners\QuoteAcceptedListener;
 use App\Listeners\StripeLifetimeListener;
 use App\Listeners\StripeWebhookListener;
 use App\Listeners\TwoCheckoutWebhookListener;
@@ -82,12 +85,14 @@ class EventServiceProvider extends ServiceProvider
         PaystackLifetimeEvent::class => [
             PaystackLifetimeListener::class,
         ],
-        // Lifecycle signals (no automation listeners yet)
         QuoteAccepted::class => [
+            QuoteAcceptedListener::class,
         ],
         InvoiceIssued::class => [
+            InvoiceIssuedListener::class,
         ],
         InvoicePaid::class => [
+            InvoicePaidListener::class,
         ],
         UsersActivityEvent::class => [
             UsersActivityListener::class,
