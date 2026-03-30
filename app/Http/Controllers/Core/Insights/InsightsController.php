@@ -28,6 +28,8 @@ use App\Support\DateQueryHelper;
 
 class InsightsController extends CoreController
 {
+    private const EXPENSE_REVENUE_MONTH_WINDOW = 6;
+
     public function overview(Request $request): View
     {
         $companyId = $request->user()?->company_id;
@@ -225,7 +227,8 @@ class InsightsController extends CoreController
                 $jobsByStatus,
                 $topCustomers,
                 $leaveSummary,
-                $expenseVsRevenue
+                $expenseVsRevenue,
+                self::EXPENSE_REVENUE_MONTH_WINDOW
             );
         }
 
@@ -284,7 +287,7 @@ class InsightsController extends CoreController
             $leaveSummary = [];
         }
 
-        $comparisonStart = Carbon::now()->startOfMonth()->subMonths(5);
+        $comparisonStart = Carbon::now()->startOfMonth()->subMonths(self::EXPENSE_REVENUE_MONTH_WINDOW - 1);
 
         try {
             $revenueSixMonths = Invoice::query()
@@ -332,7 +335,8 @@ class InsightsController extends CoreController
             $jobsByStatus,
             $topCustomers,
             $leaveSummary,
-            $expenseVsRevenue
+            $expenseVsRevenue,
+            self::EXPENSE_REVENUE_MONTH_WINDOW
         );
     }
 
@@ -347,7 +351,8 @@ class InsightsController extends CoreController
         array $jobsByStatus,
         Collection $topCustomers,
         array $leaveSummary,
-        Collection $expenseVsRevenue
+        Collection $expenseVsRevenue,
+        int $comparisonWindow = self::EXPENSE_REVENUE_MONTH_WINDOW
     ): View {
         $revenueLabels = $revenueReport->pluck('month')->all();
         $revenueValues = $revenueReport->pluck('revenue')->map(fn ($value) => (float) $value)->all();
@@ -371,6 +376,7 @@ class InsightsController extends CoreController
             'expenseMonths' => $expenseMonths,
             'expenseRevenueSeries' => $expenseRevenueSeries,
             'expenseTotals' => $expenseTotals,
+            'expenseRevenueWindow' => $comparisonWindow,
         ]);
     }
 }

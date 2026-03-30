@@ -23,7 +23,7 @@ class DateQueryHelper
         return match (DB::getDriverName()) {
             'sqlite' => "strftime('%Y-%m', {$column})",
             'pgsql' => "to_char({$column}, 'YYYY-MM')",
-            default => "DATE_FORMAT({$column}, '%Y-%m')",
+            default => /* MySQL / MariaDB */ "DATE_FORMAT({$column}, '%Y-%m')",
         };
     }
 }

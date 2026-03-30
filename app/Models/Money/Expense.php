@@ -20,6 +20,8 @@ class Expense extends Model
     use HasFactory;
     use BelongsToCompany;
 
+    private const MONTH_LOOKBACK_LIMIT = 120; // 10 years of monthly history
+
     protected $guarded = [];
 
     protected $casts = [
@@ -68,8 +70,8 @@ class Expense extends Model
      */
     public static function totalsByMonth(int $companyId, int $months = 6): Collection
     {
-        // Cap to a sensible window (10 years) to avoid heavy aggregations.
-        $months = min(max($months, 1), 120);
+        // Cap to a sensible window to avoid heavy aggregations.
+        $months = min(max($months, 1), self::MONTH_LOOKBACK_LIMIT);
         // Subtract ($months - 1) so the window counts the current month plus the previous periods.
         $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
         $expression = DateQueryHelper::monthExpression('expense_date');

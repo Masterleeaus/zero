@@ -39,7 +39,7 @@
             <x-card>
                 <div class="flex items-center justify-between mb-3">
                     <div class="font-semibold">{{ __('Expense vs Revenue') }}</div>
-                    <div class="text-xs text-slate-500">{{ __('Last 6 months') }}</div>
+                    <div class="text-xs text-slate-500">{{ __('Last :months months', ['months' => $expenseRevenueWindow]) }}</div>
                 </div>
                 <canvas id="expenseRevenueChart" height="140"></canvas>
                 @if ($expenseVsRevenue->isEmpty())
