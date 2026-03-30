@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Actions\TicketAction;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\UserSupport;
+use App\Notifications\LiveNotification;
 use App\Services\Support\SupportLifecycleService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -51,6 +53,18 @@ class SupportController extends Controller
             'status'     => 'open',
         ]);
 
+        $admins = User::where('company_id', $support->company_id)
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'support']))
+            ->get();
+
+        foreach ($admins as $admin) {
+            $admin->notify(new LiveNotification(
+                message: "New support ticket: {$support->subject}",
+                link: route('dashboard.support.view', $support),
+                title: 'New Support Ticket'
+            ));
+        }
+
         TicketAction::ticket($support)
             ->fromUser()
             ->new($request->message)
@@ -84,10 +98,7 @@ class SupportController extends Controller
     {
         $this->authorize('update', $ticket);
 
-        $ticket->update([
-            'status'      => 'resolved',
-            'resolved_at' => now(),
-        ]);
+        $this->lifecycle->resolve($ticket);
 
         return back()->with('message', __('Ticket resolved'));
     }
