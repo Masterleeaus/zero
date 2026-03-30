@@ -776,12 +776,12 @@ class UserController extends Controller
         $items->appends($request->query());
 
         if ($folderID !== null) {
+            $teamId = auth()->user()?->team_id;
             $currfolder = Folders::query()
                 ->where('company_id', tenant())
-                ->where(function (Builder $query) {
-                    $query
-                        ->where('created_by', auth()->id())
-                        ->orWhere('team_id', auth()->user()->team_id);
+                ->where(function (Builder $query) use ($teamId) {
+                    $query->where('created_by', auth()->id())
+                        ->when($teamId, fn (Builder $builder) => $builder->orWhere('team_id', $teamId));
                 })
                 ->findOrFail($folderID);
         } else {
