@@ -9,6 +9,7 @@ use App\Models\Crm\Customer;
 use App\Models\Work\ServiceAgreement;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use App\Services\Work\AgreementSchedulerService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,5 +74,14 @@ class ServiceAgreementController extends CoreController
             'agreement' => $agreement->load(['customer', 'site']),
             'jobs'      => $jobs,
         ]);
+    }
+
+    public function run(Request $request, ServiceAgreement $agreement, AgreementSchedulerService $scheduler): RedirectResponse
+    {
+        abort_if($agreement->company_id !== $request->user()?->company_id, 403);
+
+        $scheduler->runForCompany($agreement->company_id);
+
+        return back()->with('message', __('Agreement scheduled jobs generated'));
     }
 }

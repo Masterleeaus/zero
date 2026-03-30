@@ -55,6 +55,15 @@ Route::middleware(['auth', 'updateUserActivity'])
             Route::post('timelogs/{timelog}/stop', [\App\Http\Controllers\Core\Work\TimelogController::class, 'stop'])
                 ->name('timelogs.stop');
 
+            Route::get('shifts', [\App\Http\Controllers\Core\Work\ShiftController::class, 'index'])
+                ->name('shifts.index');
+            Route::get('shifts/create', [\App\Http\Controllers\Core\Work\ShiftController::class, 'create'])
+                ->name('shifts.create');
+            Route::post('shifts', [\App\Http\Controllers\Core\Work\ShiftController::class, 'store'])
+                ->name('shifts.store');
+            Route::get('shifts/{shift}', [\App\Http\Controllers\Core\Work\ShiftController::class, 'show'])
+                ->name('shifts.show');
+
             Route::get('attendance', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'index'])
                 ->name('attendance.index');
             Route::get('attendance/create', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'create'])
@@ -72,5 +81,7 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('agreements.store');
             Route::get('agreements/{agreement}', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'show'])
                 ->name('agreements.show');
+            Route::post('agreements/{agreement}/run', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'run'])
+                ->name('agreements.run');
         });
     });

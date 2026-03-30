@@ -17,6 +17,12 @@
                     <x-badge>{{ __($agreement->status) }}</x-badge>
                 </div>
             </div>
+            <div class="mt-3 flex justify-end">
+                <form method="post" action="{{ route('dashboard.work.agreements.run', $agreement) }}">
+                    @csrf
+                    <x-button type="submit" size="sm">{{ __('Generate Next Job') }}</x-button>
+                </form>
+            </div>
             <div class="mt-3 grid grid-cols-2 gap-4">
                 <div>
                     <div class="text-sm text-slate-500">{{ __('Customer') }}</div>

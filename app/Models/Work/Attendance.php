@@ -47,4 +47,9 @@ class Attendance extends Model
     {
         return $this->belongsTo(ServiceJob::class);
     }
+
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
+    }
 }

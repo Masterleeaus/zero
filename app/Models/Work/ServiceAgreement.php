@@ -23,6 +23,44 @@ class ServiceAgreement extends Model
         'next_run_at' => 'datetime',
     ];
 
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scheduleNext(): void
+    {
+        if ($this->frequency && $this->next_run_at) {
+            $this->next_run_at = $this->next_run_at->add($this->frequencyInterval());
+            $this->save();
+        }
+    }
+
+    public function createJob(array $attributes = []): ServiceJob
+    {
+        $data = array_merge([
+            'company_id'   => $this->company_id,
+            'customer_id'  => $this->customer_id,
+            'site_id'      => $this->site_id,
+            'agreement_id' => $this->id,
+            'title'        => $attributes['title'] ?? 'Recurring service',
+            'status'       => $attributes['status'] ?? 'scheduled',
+            'scheduled_at' => $attributes['scheduled_at'] ?? $this->next_run_at,
+        ], $attributes);
+
+        return $this->jobs()->create($data);
+    }
+
+    protected function frequencyInterval(): \DateInterval
+    {
+        return match ($this->frequency) {
+            'weekly' => new \DateInterval('P7D'),
+            'monthly' => new \DateInterval('P1M'),
+            'quarterly' => new \DateInterval('P3M'),
+            default => new \DateInterval('P1M'),
+        };
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);

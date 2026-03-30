@@ -13,6 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('service_job_id')->nullable();
+            $table->unsignedBigInteger('shift_id')->nullable();
             $table->timestamp('check_in_at');
             $table->timestamp('check_out_at')->nullable();
             $table->unsignedInteger('duration_minutes')->nullable();
@@ -22,6 +23,7 @@ return new class extends Migration
 
             $table->index(['company_id', 'user_id']);
             $table->index(['company_id', 'service_job_id']);
+            $table->index(['company_id', 'shift_id']);
             $table->index(['company_id', 'status']);
         });
     }
