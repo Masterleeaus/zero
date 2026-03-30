@@ -1,0 +1,12 @@
+{
+    "name": "Engineerings",
+    "alias": "engineerings",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Engineerings\\Providers\\EngineeringsServiceProvider",
+        "Modules\\Engineerings\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

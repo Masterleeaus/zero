@@ -1,0 +1,14 @@
+{
+  "name": "Workflow",
+  "alias": "workflow",
+  "description": "",
+  "keywords": [],
+  "priority": 0,
+  "providers": [
+    "Modules\\Workflow\\Providers\\WorkflowServiceProvider",
+    "Modules\\Workflow\\Providers\\RouteServiceProvider",
+    "Modules\\Workflow\\Providers\\EventServiceProvider"
+  ],
+  "files": [],
+  "version": "4.4.1"
+}
