@@ -1,0 +1,3 @@
+This placeholder keeps the vendor directory present in version control to satisfy an explicit merge requirement even though vendor is normally untracked.
+Runtime dependencies must still be installed via composer.json/composer.lock; all other vendor contents remain ignored and should never be committed.
+If this merge requirement is lifted in the future, remove this placeholder and rely solely on Composer to recreate vendor locally.

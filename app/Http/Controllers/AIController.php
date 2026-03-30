@@ -738,6 +738,7 @@ class AIController extends Controller
         $prompt = $this->applyPromptRules($prompt);
 
         $entry = UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => request('title') ?: null,
             'slug'      => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
@@ -794,6 +795,7 @@ class AIController extends Controller
         $output = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
 
         $entry = new UserOpenai([
+            'company_id' => tenant(),
             'team_id'     => $user->team_id,
             'title'       => request('title') ?: null,
             'slug'        => Str::random(7) . Str::slug($user?->fullName()) . '-workbook',
@@ -1148,9 +1150,10 @@ class AIController extends Controller
                     }
                 }
                 $entry = UserOpenai::create([
+                    'company_id' => tenant(),
                     'team_id'   => $user?->team_id,
                     'title'     => __('New Video'),
-                    'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbsook',
+                    'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbook',
                     'user_id'   => Auth::id(),
                     'openai_id' => OpenAIGenerator::where('slug', 'ai_video')->first()->id,
                     'input'     => $request->url,
@@ -1226,6 +1229,7 @@ class AIController extends Controller
         $text = $response->text;
 
         UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => request('title') ?: null,
             'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-speech-to-text-workbook',
@@ -1309,6 +1313,7 @@ class AIController extends Controller
         $langsAndVoices['voices'][] = $audioName;
 
         UserOpenai::create([
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'output'    => $audioName,
             'input'     => $audioName,
@@ -1372,6 +1377,7 @@ class AIController extends Controller
                 'user_id'   => $user?->id,
                 'input'     => $response,
                 'hash'      => str()->random(256),
+                'company_id' => tenant(),
                 'team_id'   => $user?->team_id,
                 'slug'      => str()->random(7) . str($user?->fullName())->slug() . '-workbook',
                 'openai_id' => $request->openai_id ?? 1,
@@ -2107,6 +2113,7 @@ class AIController extends Controller
         $payload['model'] = $model?->value;
 
         $data = [
+            'company_id' => tenant(),
             'team_id'   => $user->team_id,
             'title'     => $imageDetails['prompt'] ? Str::limit($imageDetails['prompt'], 40) : $imageDetails['nameOfImage'],
             'slug'      => Str::random(7) . Str::slug($user->fullName()) . '-workbook',

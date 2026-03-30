@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Classes\MarketplaceHelper;
-use App\Models\Concerns\BelongsToCompany;
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,10 +22,11 @@ class UserOpenaiChat extends Model
 
     protected static function booted(): void
     {
-        static::creating(static function ($chat) {
-            if (! $chat->company_id && auth()->check()) {
-                $chat->company_id = auth()->user()->company_id;
+        static::creating(static function (UserOpenaiChat $chat) {
+            if ($chat->company_id === null && auth()->check()) {
+                $chat->company_id = tenant();
             }
+
             if (MarketplaceHelper::isRegistered('ai-chat-pro') && ! auth()->check()) {
                 $chat->is_guest = true;
             }

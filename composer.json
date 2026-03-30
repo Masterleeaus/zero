@@ -9,12 +9,6 @@
 	"license": "MIT",
 	"repositories": [
 		{
-			"name": "yoomoney",
-			"type": "vcs",
-			"url": "https://github.com/yoomoney/yookassa-sdk-php.git",
-			"canonical": false
-		},
-		{
 			"type": "path",
 			"url": "./packages/magicai/magicai-updater",
 			"options": {
@@ -125,6 +119,7 @@
 		"spatie/once": "^3.1",
 		"spatie/pdf-to-text": "^1.52",
 		"srmklive/paypal": "~3.0",
+		"symfony/cache": "^6.4.12",
 		"symfony/process": "^6.2",
 		"twilio/sdk": "^8.5",
 		"yajra/laravel-datatables-oracle": "^10.8",
@@ -183,7 +178,8 @@
 		"test:coverage": "@test --coverage-php ./coverage/cov/default.cov",
 		"test:coverage:html": "@test --coverage-html ./coverage/html/default",
 		"test:lint": "vendor/bin/pint --test",
-		"lint": "vendor/bin/pint -v"
+		"lint": "vendor/bin/pint -v",
+		"install:no-redis": "composer install --ignore-platform-req=ext-redis --prefer-dist --no-interaction"
 	},
 	"extra": {
 		"laravel": {
@@ -198,6 +194,9 @@
 		"optimize-autoloader": true,
 		"preferred-install": "dist",
 		"sort-packages": true,
+		"github-protocols": [
+			"https"
+		],
 		"allow-plugins": {
 			"pestphp/pest-plugin": true,
 			"php-http/discovery": true
@@ -209,6 +208,7 @@
 			]
 		}
 	},
+	"replace": {},
 	"minimum-stability": "stable",
 	"prefer-stable": true
 }

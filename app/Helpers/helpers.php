@@ -23,6 +23,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+function tenant(): ?int
+{
+    $user = auth()->user();
+
+    return $user?->company_id ?? $user?->team_id;
+}
+
 function formatSmallNumber($value, $decimals = 10)
 {
     return rtrim(rtrim(sprintf("%.{$decimals}f", $value), '0'), '.');

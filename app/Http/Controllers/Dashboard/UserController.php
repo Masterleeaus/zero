@@ -777,6 +777,7 @@ class UserController extends Controller
 
         if ($folderID !== null) {
             $currfolder = Folders::query()
+                ->where('company_id', tenant())
                 ->where(function (Builder $query) {
                     $query
                         ->where('created_by', auth()->id())

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
-use App\Models\Concerns\BelongsToCompany;
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +26,7 @@ class UserOpenai extends Model
     protected $fillable = [
         'is_demo',
         'request_id',
+        'company_id',
         'team_id',
         'company_id',
         'title',
@@ -58,6 +59,15 @@ class UserOpenai extends Model
         'generator_type',
         'output_url',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(static function (UserOpenai $entry) {
+            if ($entry->company_id === null && auth()->check()) {
+                $entry->company_id = tenant();
+            }
+        });
+    }
 
     // STORAGE
     public const STORAGE_LOCAL = 'public';
