@@ -71,14 +71,25 @@ class QuoteController extends CoreController
 
         $data = $this->validated($request);
 
-        $quote = Quote::create([
-            ...$data,
-            'company_id' => $request->user()->company_id,
-            'created_by' => $request->user()->id,
-            'status'     => 'draft',
-        ]);
+        $quote = DB::transaction(function () use ($data, $request) {
+            $quote = Quote::create([
+                ...$data,
+                'company_id'   => $request->user()->company_id,
+                'created_by'   => $request->user()->id,
+                'status'       => 'draft',
+                'subtotal'     => 0,
+                'tax'          => 0,
+                'total'        => 0,
+            ]);
 
-        $this->syncQuoteItems($quote, $request);
+            $quote->quote_number = $quote->quote_number ?: $this->nextQuoteNumber($quote->company_id);
+            $quote->save();
+
+            $this->syncQuoteItems($quote, $request);
+            $quote->refresh();
+
+            return $quote;
+        });
 
         return redirect()->route('dashboard.money.quotes.show', $quote)
             ->with('status', __('Quote created.'));
@@ -100,8 +111,12 @@ class QuoteController extends CoreController
         $this->authorize('update', $quote);
 
         $data = $this->validated($request, ignoreId: $quote->id);
-        $quote->update($data);
-        $this->syncQuoteItems($quote, $request);
+        DB::transaction(function () use ($quote, $data, $request) {
+            $quote->update($data);
+            $this->syncQuoteItems($quote, $request);
+            $quote->quote_number = $quote->quote_number ?: $this->nextQuoteNumber($quote->company_id);
+            $quote->save();
+        });
 
         return redirect()->route('dashboard.money.quotes.show', $quote)
             ->with('status', __('Quote updated.'));
@@ -163,10 +178,10 @@ class QuoteController extends CoreController
                 'issue_date'     => now(),
                 'due_date'       => $quote->valid_until,
                 'currency'       => $quote->currency,
-                'subtotal'       => $quote->subtotal,
-                'tax'            => $quote->tax,
-                'total'          => $quote->total,
-                'balance'        => $quote->total,
+                'subtotal'       => 0,
+                'tax'            => 0,
+                'total'          => 0,
+                'balance'        => 0,
                 'notes'          => $quote->notes,
             ]);
 
@@ -178,13 +193,18 @@ class QuoteController extends CoreController
                     'quantity'   => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'tax_rate'   => $item->tax_rate,
-                    'line_total' => $item->line_total,
+                    'line_total' => (float) $item->quantity * (float) $item->unit_price,
                     'sort_order' => $item->sort_order,
                 ]);
             }
 
             $invoice->recomputeTotalsFromItems();
             $invoice->refresh();
+
+            if (! $invoice->invoice_number) {
+                $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);
+                $invoice->save();
+            }
 
             event(new \App\Events\InvoiceIssued($invoice));
 
@@ -199,7 +219,7 @@ class QuoteController extends CoreController
     {
         $data = $request->validate([
             'quote_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('quotes', 'quote_number')->ignore($ignoreId),
@@ -210,9 +230,6 @@ class QuoteController extends CoreController
             'issue_date'  => ['nullable', 'date'],
             'valid_until' => ['nullable', 'date', 'after_or_equal:issue_date'],
             'currency'    => ['nullable', 'string', 'max:10'],
-            'subtotal'    => ['required', 'numeric', 'min:0'],
-            'tax'         => ['required', 'numeric', 'min:0'],
-            'total'       => ['required', 'numeric', 'min:0'],
             'notes'       => ['nullable', 'string'],
             'checklist_template_raw' => ['nullable', 'string'],
             'items'       => ['sometimes', 'array'],
@@ -242,21 +259,55 @@ class QuoteController extends CoreController
 
         $quote->items()->delete();
         foreach ($items as $index => $item) {
-            $lineSubtotal = ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0);
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $unitPrice = (float) ($item['unit_price'] ?? 0);
+            $lineSubtotal = $quantity * $unitPrice;
             $quote->items()->create([
                 'company_id' => $quote->company_id,
                 'created_by' => $request->user()->id,
                 'description'=> $item['description'] ?? '',
-                'quantity'   => $item['quantity'] ?? 0,
-                'unit_price' => $item['unit_price'] ?? 0,
+                'quantity'   => $quantity,
+                'unit_price' => $unitPrice,
                 'tax_rate'   => $item['tax_rate'] ?? 0,
-                'line_total' => $item['line_total'] ?? $lineSubtotal,
+                'line_total' => $lineSubtotal,
                 'sort_order' => $item['sort_order'] ?? $index,
             ]);
         }
 
         $quote->load('items');
         $quote->recomputeTotalsFromItems();
+    }
+
+    private function nextQuoteNumber(int $companyId): string
+    {
+        $latest = Quote::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('quote_number')
+            ->orderByDesc('id')
+            ->value('quote_number');
+
+        $next = 1;
+        if ($latest && preg_match('/(\d+)$/', $latest, $matches)) {
+            $next = ((int) $matches[1]) + 1;
+        }
+
+        return 'Q-' . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
+    }
+
+    private function nextInvoiceNumber(int $companyId): string
+    {
+        $latest = \App\Models\Money\Invoice::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('invoice_number')
+            ->orderByDesc('id')
+            ->value('invoice_number');
+
+        $next = 1;
+        if ($latest && preg_match('/(\d+)$/', $latest, $matches)) {
+            $next = ((int) $matches[1]) + 1;
+        }
+
+        return 'INV-' . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
     }
 
     private function customers()

@@ -86,6 +86,20 @@
         </x-card>
 
         <x-card>
+            <div class="grid md:grid-cols-3 gap-4 mb-4">
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Subtotal') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($quote->subtotal, 2) }} {{ $quote->currency }}</div>
+                </div>
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Tax') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($quote->tax, 2) }} {{ $quote->currency }}</div>
+                </div>
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Total') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($quote->total, 2) }} {{ $quote->currency }}</div>
+                </div>
+            </div>
             <div class="font-semibold mb-3">{{ __('Line Items') }}</div>
             <x-table>
                 <x-slot:head>

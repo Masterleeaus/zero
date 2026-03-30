@@ -38,6 +38,10 @@ class PaymentController extends CoreController
             'paid_at'   => ['nullable', 'date'],
         ]);
 
+        if ($invoice->status === 'void') {
+            return back()->withErrors(__('Cannot record payments against a void invoice.'));
+        }
+
         DB::transaction(static function () use ($invoice, $validated, $request): void {
             Payment::create([
                 'company_id' => $request->user()->company_id,

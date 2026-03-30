@@ -11,6 +11,7 @@ use App\Models\Money\Quote;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class InvoiceController extends CoreController
@@ -69,15 +70,27 @@ class InvoiceController extends CoreController
 
         $data = $this->validated($request);
 
-        $invoice = Invoice::create([
-            ...$data,
-            'company_id' => $request->user()->company_id,
-            'created_by' => $request->user()->id,
-            'balance'    => $data['total'],
-            'status'     => $data['status'] ?? 'draft',
-        ]);
+        $invoice = DB::transaction(function () use ($data, $request) {
+            $invoice = Invoice::create([
+                ...$data,
+                'company_id' => $request->user()->company_id,
+                'created_by' => $request->user()->id,
+                'subtotal'   => 0,
+                'tax'        => 0,
+                'total'      => 0,
+                'paid_amount'=> 0,
+                'balance'    => 0,
+                'status'     => $data['status'] ?? 'draft',
+            ]);
 
-        $this->syncInvoiceItems($invoice, $request);
+            $invoice->invoice_number = $invoice->invoice_number ?: $this->nextInvoiceNumber($invoice->company_id);
+            $invoice->save();
+
+            $this->syncInvoiceItems($invoice, $request);
+            $invoice->refresh();
+
+            return $invoice;
+        });
 
         if ($invoice->status === 'issued') {
             event(new \App\Events\InvoiceIssued($invoice));
@@ -107,9 +120,13 @@ class InvoiceController extends CoreController
 
         $previousStatus = $invoice->status;
         $data = $this->validated($request, ignoreId: $invoice->id);
-        $invoice->update($data);
-        $this->syncInvoiceItems($invoice, $request);
-        $invoice->recomputeBalance();
+        DB::transaction(function () use ($invoice, $data, $request) {
+            $invoice->update($data);
+            $this->syncInvoiceItems($invoice, $request);
+            $invoice->invoice_number = $invoice->invoice_number ?: $this->nextInvoiceNumber($invoice->company_id);
+            $invoice->save();
+            $invoice->recomputeBalance();
+        });
 
         if ($invoice->status === 'issued' && $previousStatus !== 'issued') {
             event(new \App\Events\InvoiceIssued($invoice));
@@ -143,7 +160,7 @@ class InvoiceController extends CoreController
     {
         return $request->validate([
             'invoice_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('invoices', 'invoice_number')->ignore($ignoreId),
@@ -154,9 +171,6 @@ class InvoiceController extends CoreController
             'issue_date'  => ['nullable', 'date'],
             'due_date'    => ['nullable', 'date', 'after_or_equal:issue_date'],
             'currency'    => ['nullable', 'string', 'max:10'],
-            'subtotal'    => ['required', 'numeric', 'min:0'],
-            'tax'         => ['required', 'numeric', 'min:0'],
-            'total'       => ['required', 'numeric', 'min:0'],
             'notes'       => ['nullable', 'string'],
             'status'      => ['nullable', Rule::in(['draft', 'issued', 'partial', 'paid', 'overdue', 'void'])],
             'items'       => ['sometimes', 'array'],
@@ -178,15 +192,17 @@ class InvoiceController extends CoreController
 
         $invoice->items()->delete();
         foreach ($items as $index => $item) {
-            $lineSubtotal = ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0);
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $unitPrice = (float) ($item['unit_price'] ?? 0);
+            $lineSubtotal = $quantity * $unitPrice;
             $invoice->items()->create([
                 'company_id' => $invoice->company_id,
                 'created_by' => $request->user()->id,
                 'description'=> $item['description'] ?? '',
-                'quantity'   => $item['quantity'] ?? 0,
-                'unit_price' => $item['unit_price'] ?? 0,
+                'quantity'   => $quantity,
+                'unit_price' => $unitPrice,
                 'tax_rate'   => $item['tax_rate'] ?? 0,
-                'line_total' => $item['line_total'] ?? $lineSubtotal,
+                'line_total' => $lineSubtotal,
                 'sort_order' => $item['sort_order'] ?? $index,
             ]);
         }
@@ -194,6 +210,22 @@ class InvoiceController extends CoreController
         $invoice->load('items');
         $invoice->recomputeTotalsFromItems();
         $invoice->recomputeBalance();
+    }
+
+    private function nextInvoiceNumber(int $companyId): string
+    {
+        $latest = Invoice::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('invoice_number')
+            ->orderByDesc('id')
+            ->value('invoice_number');
+
+        $next = 1;
+        if ($latest && preg_match('/(\d+)$/', $latest, $matches)) {
+            $next = ((int) $matches[1]) + 1;
+        }
+
+        return 'INV-' . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
     }
 
     private function customers()

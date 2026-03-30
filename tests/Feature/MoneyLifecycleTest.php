@@ -99,4 +99,79 @@ class MoneyLifecycleTest extends TestCase
         $this->assertEquals(1, $invoice->items()->count());
         $this->assertEquals(110.00, (float) $invoice->total);
     }
+
+    public function test_totals_are_recomputed_from_items(): void
+    {
+        $user = User::factory()->create(['company_id' => 77]);
+        $customer = Customer::factory()->create(['company_id' => 77]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.store'), [
+                'quote_number' => 'Q-RAW',
+                'customer_id'  => $customer->id,
+                'currency'     => 'USD',
+                'items' => [
+                    ['description' => 'A', 'quantity' => 2, 'unit_price' => 50, 'tax_rate' => 10],
+                    ['description' => 'B', 'quantity' => 1, 'unit_price' => 100, 'tax_rate' => 0],
+                ],
+                'subtotal' => 1,
+                'tax' => 1,
+                'total' => 1,
+            ])->assertRedirect();
+
+        $quote = Quote::where('quote_number', 'Q-RAW')->firstOrFail();
+        $this->assertEquals(200.0, (float) $quote->subtotal);
+        $this->assertEquals(10.0, (float) $quote->tax);
+        $this->assertEquals(210.0, (float) $quote->total);
+    }
+
+    public function test_payment_updates_invoice_status_and_balance(): void
+    {
+        $user = User::factory()->create(['company_id' => 88]);
+        $invoice = Invoice::factory()->create([
+            'company_id' => 88,
+            'subtotal' => 100,
+            'tax' => 0,
+            'total' => 100,
+            'balance' => 100,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.payments.store', $invoice), [
+                'amount' => 100,
+            ])->assertRedirect();
+
+        $invoice->refresh();
+        $this->assertEquals(0.0, (float) $invoice->balance);
+        $this->assertEquals('paid', $invoice->status);
+    }
+
+    public function test_numbering_is_company_scoped_unique(): void
+    {
+        $user = User::factory()->create(['company_id' => 99]);
+        $customer = Customer::factory()->create(['company_id' => 99]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.store'), [
+                'customer_id' => $customer->id,
+                'quote_number' => null,
+                'currency' => 'USD',
+                'items' => [
+                    ['description' => 'X', 'quantity' => 1, 'unit_price' => 10],
+                ],
+            ])->assertRedirect();
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.store'), [
+                'customer_id' => $customer->id,
+                'quote_number' => null,
+                'currency' => 'USD',
+                'items' => [
+                    ['description' => 'Y', 'quantity' => 1, 'unit_price' => 20],
+                ],
+            ])->assertRedirect();
+
+        $numbers = Quote::where('company_id', 99)->pluck('quote_number')->toArray();
+        $this->assertCount(2, array_unique($numbers));
+    }
 }

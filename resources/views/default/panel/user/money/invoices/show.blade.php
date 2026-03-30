@@ -54,6 +54,24 @@
         </x-card>
 
         <x-card>
+            <div class="grid md:grid-cols-4 gap-4 mb-4">
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Subtotal') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($invoice->subtotal, 2) }} {{ $invoice->currency }}</div>
+                </div>
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Tax') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($invoice->tax, 2) }} {{ $invoice->currency }}</div>
+                </div>
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Total') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($invoice->total, 2) }} {{ $invoice->currency }}</div>
+                </div>
+                <div class="p-3 rounded border bg-slate-50">
+                    <div class="text-xs text-slate-500">{{ __('Balance') }}</div>
+                    <div class="text-lg font-semibold">{{ number_format($invoice->balance, 2) }} {{ $invoice->currency }}</div>
+                </div>
+            </div>
             <div class="font-semibold mb-3">{{ __('Line Items') }}</div>
             <x-table>
                 <x-slot:head>
@@ -87,14 +105,18 @@
             <div class="flex justify-between items-center mb-3">
                 <div class="font-semibold">{{ __('Payments') }}</div>
                 <div class="space-x-2">
-                    <form method="post" action="{{ route('dashboard.money.invoices.mark-paid', $invoice) }}" class="inline">
-                        @csrf
-                        <x-button type="submit" variant="secondary">{{ __('Mark Paid') }}</x-button>
-                    </form>
-                    <form method="post" action="{{ route('dashboard.money.invoices.mark-overdue', $invoice) }}" class="inline">
-                        @csrf
-                        <x-button type="submit" variant="ghost">{{ __('Mark Overdue') }}</x-button>
-                    </form>
+                    @if(!in_array($invoice->status, ['paid','void']))
+                        <form method="post" action="{{ route('dashboard.money.invoices.mark-paid', $invoice) }}" class="inline">
+                            @csrf
+                            <x-button type="submit" variant="secondary">{{ __('Mark Paid') }}</x-button>
+                        </form>
+                    @endif
+                    @if(!in_array($invoice->status, ['paid','void','overdue']))
+                        <form method="post" action="{{ route('dashboard.money.invoices.mark-overdue', $invoice) }}" class="inline">
+                            @csrf
+                            <x-button type="submit" variant="ghost">{{ __('Mark Overdue') }}</x-button>
+                        </form>
+                    @endif
                     <x-button href="{{ route('dashboard.money.invoices.edit', $invoice) }}" variant="ghost">
                         {{ __('Edit') }}
                     </x-button>
