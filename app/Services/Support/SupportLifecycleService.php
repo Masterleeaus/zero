@@ -107,7 +107,9 @@ class SupportLifecycleService
             'status'      => 'waiting_on_team',
         ]);
 
-        $assignee = User::where('company_id', $ticket->company_id)->find($userId);
+        $assignee = User::where('company_id', $ticket->company_id)
+            ->whereKey($userId)
+            ->first();
         $assignee?->notify(new LiveNotification(
             message: "Support ticket assigned to you: {$ticket->subject}",
             link: route('dashboard.support.view', $ticket),
@@ -149,6 +151,10 @@ class SupportLifecycleService
         ));
     }
 
+    /**
+     * Notify company administrators about a ticket event (creation/escalation).
+     * Exposed publicly to allow controllers to reuse company-scoped notifications.
+     */
     public function notifyCompanyAdmins(UserSupport $ticket, string $message, string $title): void
     {
         if (! $ticket->company_id) {
