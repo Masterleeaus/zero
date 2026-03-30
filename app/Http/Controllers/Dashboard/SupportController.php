@@ -6,6 +6,7 @@ use App\Actions\TicketAction;
 use App\Http\Controllers\Controller;
 use App\Models\UserSupport;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -14,13 +15,15 @@ class SupportController extends Controller
     public function list()
     {
         $user = auth()->user();
+        $status = request('status');
 
         $items = UserSupport::query()
             ->when(! $user?->isAdmin(), fn ($q) => $q->where('user_id', $user?->id))
+            ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
-            ->get();
+            ->paginate(15);
 
-        return view('default.panel.support.list', compact('items'));
+        return view('default.panel.support.list', compact('items', 'status'));
     }
 
     public function newTicket()
@@ -40,7 +43,7 @@ class SupportController extends Controller
             'category'   => $request->category,
             'subject'    => $request->subject,
             'company_id' => $user->company_id,
-            'status'     => 'Submitted a Ticket',
+            'status'     => 'open',
         ]);
 
         TicketAction::ticket($support)
@@ -68,5 +71,18 @@ class SupportController extends Controller
             ->fromAdminIfTrue($user->isAdmin())
             ->answer($request->input('message'))
             ->send();
+
+        $ticket->update([
+            'status' => $user->isAdmin() ? 'waiting_on_user' : 'waiting_on_team',
+        ]);
+    }
+
+    public function resolve(UserSupport $ticket): RedirectResponse
+    {
+        $this->authorize('update', $ticket);
+
+        $ticket->update(['status' => 'resolved']);
+
+        return back()->with('message', __('Ticket resolved'));
     }
 }

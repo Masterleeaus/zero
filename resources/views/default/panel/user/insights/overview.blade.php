@@ -4,26 +4,50 @@
 @section('content')
     <div class="py-6 space-y-6">
         <div class="space-y-2">
-            <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('CRM') }}</div>
+            <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('CRM & Support') }}</div>
             <div class="grid md:grid-cols-3 gap-4">
-                <x-card class="space-y-1">
-                    <div class="text-sm text-slate-500">{{ __('Enquiries') }}</div>
-                    <div class="text-2xl font-semibold">{{ $enquiryCount }}</div>
+                <x-card>
+                    <div class="font-semibold mb-2">{{ __('Enquiries (open)') }}</div>
+                    <div class="text-2xl font-bold">{{ $enquiryCount }}</div>
+                    <div class="text-sm text-slate-500">{{ __('Recent customers') }}</div>
+                    <ul class="text-sm">
+                        @forelse($recentCustomers as $customer)
+                            <li>{{ $customer->name }}</li>
+                        @empty
+                            <li class="text-slate-400">{{ __('No recent customers') }}</li>
+                        @endforelse
+                    </ul>
                 </x-card>
-                <x-card class="space-y-1">
-                    <div class="text-sm text-slate-500">{{ __('Customers') }}</div>
-                    <div class="text-2xl font-semibold">{{ $customerCount }}</div>
+                <x-card>
+                    <div class="font-semibold mb-2">{{ __('Support') }}</div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Open') }}</span>
+                        <span class="font-semibold">{{ $supportOpen }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Waiting on team') }}</span>
+                        <span class="font-semibold">{{ $supportWaitingTeam }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Waiting on user') }}</span>
+                        <span class="font-semibold">{{ $supportWaitingUser }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Resolved') }}</span>
+                        <span class="font-semibold">{{ $supportResolved }}</span>
+                    </div>
                 </x-card>
-                <x-card class="space-y-1">
-                    <div class="text-sm text-slate-500">{{ __('Active Sites') }}</div>
-                    <div class="text-2xl font-semibold">{{ $activeSites }}</div>
+                <x-card>
+                    <div class="font-semibold mb-2">{{ __('Notifications') }}</div>
+                    <div class="text-2xl font-bold">{{ $unreadNotifications }}</div>
+                    <div class="text-sm text-slate-500">{{ __('Unread notifications') }}</div>
                 </x-card>
             </div>
         </div>
 
         <div class="space-y-2">
-            <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('Work & Money') }}</div>
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('Work Summary') }}</div>
+            <div class="grid md:grid-cols-3 gap-4">
                 <x-card>
                     <div class="font-semibold mb-3">{{ __('Service Jobs by Status') }}</div>
                     <div class="space-y-2">
@@ -35,6 +59,14 @@
                         @empty
                             <p class="text-slate-500">{{ __('No jobs yet') }}</p>
                         @endforelse
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">{{ __('Upcoming Jobs') }}</span>
+                            <span class="font-semibold">{{ $upcomingJobs }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">{{ __('Unassigned Jobs') }}</span>
+                            <span class="font-semibold">{{ $unassignedJobs }}</span>
+                        </div>
                     </div>
                 </x-card>
                 <x-card>
@@ -48,6 +80,20 @@
                         @empty
                             <p class="text-slate-500">{{ __('No quotes yet') }}</p>
                         @endforelse
+                    </div>
+                </x-card>
+                <x-card class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Logged Hours (total)') }}</span>
+                        <span class="font-semibold">{{ $timelogHours }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Attendance open') }}</span>
+                        <span class="font-semibold">{{ $attendanceOpen }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Active Agreements') }}</span>
+                        <span class="font-semibold">{{ $agreementsActive }}</span>
                     </div>
                 </x-card>
             </div>
@@ -79,34 +125,16 @@
                         <span class="font-semibold">{{ number_format($outstandingBalance, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Payments Total') }}</span>
+                        <span class="text-slate-500">{{ __('Payments Received') }}</span>
                         <span class="font-semibold">{{ number_format($paymentsTotal, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Quote → Job Conversions') }}</span>
+                        <span class="text-slate-500">{{ __('Quote → Job') }}</span>
                         <span class="font-semibold">{{ $quoteToJobCount }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Quote → Invoice Conversions') }}</span>
+                        <span class="text-slate-500">{{ __('Quote → Invoice') }}</span>
                         <span class="font-semibold">{{ $quoteToInvoiceCount }}</span>
-                    </div>
-                </x-card>
-                <x-card class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Open Support Tickets') }}</span>
-                        <span class="font-semibold">{{ $supportOpen }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Waiting on Team') }}</span>
-                        <span class="font-semibold">{{ $supportWaitingTeam }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Waiting on User') }}</span>
-                        <span class="font-semibold">{{ $supportWaitingUser }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">{{ __('Logged Hours (total)') }}</span>
-                        <span class="font-semibold">{{ $timelogHours }}</span>
                     </div>
                 </x-card>
             </div>

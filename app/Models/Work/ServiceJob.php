@@ -27,6 +27,7 @@ class ServiceJob extends Model
         'site_id',
         'customer_id',
         'quote_id',
+        'agreement_id',
         'assigned_user_id',
         'title',
         'status',
@@ -41,6 +42,11 @@ class ServiceJob extends Model
     protected $attributes = [
         'status' => 'scheduled',
     ];
+
+    public function agreement(): BelongsTo
+    {
+        return $this->belongsTo(ServiceAgreement::class, 'agreement_id');
+    }
 
     public function site(): BelongsTo
     {

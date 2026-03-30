@@ -52,7 +52,7 @@ class TicketAction
 
     public function answer(string $message): self
     {
-        $this->status = $this->isSenderAdmin() ? 'Waiting for answer' : 'Answered';
+        $this->status = $this->isSenderAdmin() ? 'waiting_on_user' : 'waiting_on_team';
 
         $this->activityType = __('Support request waiting for your answer');
 
@@ -63,7 +63,7 @@ class TicketAction
 
     public function new(string $message): self
     {
-        $this->status = 'Submitted a Ticket';
+        $this->status = 'open';
 
         $this->activityType = __($this->status);
 

@@ -54,5 +54,23 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('timelogs.store');
             Route::post('timelogs/{timelog}/stop', [\App\Http\Controllers\Core\Work\TimelogController::class, 'stop'])
                 ->name('timelogs.stop');
+
+            Route::get('attendance', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'index'])
+                ->name('attendance.index');
+            Route::get('attendance/create', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'create'])
+                ->name('attendance.create');
+            Route::post('attendance', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'store'])
+                ->name('attendance.store');
+            Route::post('attendance/{attendance}/checkout', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'checkout'])
+                ->name('attendance.checkout');
+
+            Route::get('agreements', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'index'])
+                ->name('agreements.index');
+            Route::get('agreements/create', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'create'])
+                ->name('agreements.create');
+            Route::post('agreements', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'store'])
+                ->name('agreements.store');
+            Route::get('agreements/{agreement}', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'show'])
+                ->name('agreements.show');
         });
     });

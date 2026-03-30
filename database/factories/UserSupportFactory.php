@@ -25,7 +25,7 @@ class UserSupportFactory extends Factory
             'priority'   => $this->faker->randomElement(['low', 'medium', 'high']),
             'category'   => $this->faker->randomElement(['general', 'billing', 'technical']),
             'subject'    => $this->faker->sentence(),
-            'status'     => 'Submitted a Ticket',
+            'status'     => 'open',
         ];
     }
 }

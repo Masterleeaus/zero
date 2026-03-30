@@ -109,6 +109,7 @@ Route::middleware(['auth', 'updateUserActivity'])
                 Route::prefix('notifications')->name('notifications.')->group(function () {
                     Route::get('', [NotificationController::class, 'index'])->name('index');
                     Route::post('read', [NotificationController::class, 'markAsRead'])->name('read');
+                    Route::get('unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
                 });
 
                 // premium support
@@ -822,6 +823,7 @@ Route::middleware(['auth', 'updateUserActivity'])
 
             Route::get('/requests/{ticket}', [SupportController::class, 'viewTicket'])->name('view');
             Route::post('/requests/{ticket}/message', [SupportController::class, 'viewTicketSendMessage'])->name('message');
+            Route::post('/requests/{ticket}/resolve', [SupportController::class, 'resolve'])->name('resolve');
         });
 
         // Admin Area2

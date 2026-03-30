@@ -15,13 +15,16 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Payment;
 use App\Models\UserSupport;
 use App\Models\Work\Timelog;
+use App\Models\Work\Attendance;
+use App\Models\Work\ServiceAgreement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class InsightsController extends CoreController
 {
-    public function overview(): View
+    public function overview(Request $request): View
     {
-        $companyId = auth()->user()?->company_id;
+        $companyId = $request->user()?->company_id;
 
         $enquiries = Enquiry::query()->where('company_id', $companyId)->count();
         $customers = Customer::query()->where('company_id', $companyId)->count();
@@ -75,28 +78,71 @@ class InsightsController extends CoreController
 
         $supportOpen = UserSupport::query()
             ->where('company_id', $companyId)
-            ->whereNotIn('status', ['Answered'])
+            ->whereIn('status', ['open'])
             ->count();
 
         $supportWaitingTeam = UserSupport::query()
             ->where('company_id', $companyId)
-            ->where('status', 'Waiting for answer')
+            ->where('status', 'waiting_on_team')
             ->count();
 
         $supportWaitingUser = UserSupport::query()
             ->where('company_id', $companyId)
-            ->where('status', 'Submitted a Ticket')
+            ->where('status', 'waiting_on_user')
+            ->count();
+
+        $supportResolved = UserSupport::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'resolved')
             ->count();
 
         $timelogMinutes = Timelog::query()
             ->where('company_id', $companyId)
             ->sum(DB::raw('COALESCE(duration_minutes, 0)'));
 
+        $attendanceOpen = Attendance::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'open')
+            ->count();
+
+        $agreementsActive = ServiceAgreement::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'active')
+            ->count();
+
+        $upcomingJobs = ServiceJob::query()
+            ->where('company_id', $companyId)
+            ->whereNotNull('scheduled_at')
+            ->where('scheduled_at', '>=', now())
+            ->count();
+
+        $unassignedJobs = ServiceJob::query()
+            ->where('company_id', $companyId)
+            ->whereNull('assigned_user_id')
+            ->count();
+
+        $recentCustomers = Customer::query()
+            ->where('company_id', $companyId)
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $unreadNotifications = auth()->user()
+            ?->notifications()
+            ->whereNull('read_at')
+            ->where(function ($q) use ($companyId) {
+                $q->whereNull('company_id')->orWhere('company_id', $companyId);
+            })
+            ->count() ?? 0;
+
         return view('default.panel.user.insights.overview', [
             'enquiryCount' => $enquiries,
             'customerCount'=> $customers,
+            'recentCustomers' => $recentCustomers,
             'activeSites'  => $sites,
             'jobStatus'    => $jobStatus,
+            'upcomingJobs' => $upcomingJobs,
+            'unassignedJobs' => $unassignedJobs,
             'quoteStatus'  => $quoteStatus,
             'invoiceStatus'=> $invoiceStatus,
             'overdueInvoices' => $overdueInvoices,
@@ -108,7 +154,11 @@ class InsightsController extends CoreController
             'supportOpen' => $supportOpen,
             'supportWaitingTeam' => $supportWaitingTeam,
             'supportWaitingUser' => $supportWaitingUser,
+            'supportResolved' => $supportResolved,
             'timelogHours' => round($timelogMinutes / 60, 1),
+            'attendanceOpen' => $attendanceOpen,
+            'agreementsActive' => $agreementsActive,
+            'unreadNotifications' => $unreadNotifications,
         ]);
     }
 

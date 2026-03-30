@@ -17,7 +17,9 @@ class ServiceJobFactory extends Factory
         return [
             'company_id'   => 1,
             'site_id'      => Site::factory(['company_id' => 1]),
+            'customer_id'  => null,
             'quote_id'     => null,
+            'agreement_id' => null,
             'assigned_user_id' => null,
             'title'        => $this->faker->sentence(3),
             'status'       => 'scheduled',
