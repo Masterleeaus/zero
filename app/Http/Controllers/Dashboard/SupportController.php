@@ -15,14 +15,17 @@ class SupportController extends Controller
     {
         $user = auth()->user();
 
-        $items = $user?->isAdmin() ? UserSupport::all() : $user?->supportRequests;
+        $items = UserSupport::query()
+            ->when(! $user?->isAdmin(), fn ($q) => $q->where('user_id', $user?->id))
+            ->latest()
+            ->get();
 
-        return view('panel.support.list', compact('items'));
+        return view('default.panel.support.list', compact('items'));
     }
 
     public function newTicket()
     {
-        return view('panel.support.new');
+        return view('default.panel.support.new');
     }
 
     public function newTicketSend(Request $request): void
@@ -32,11 +35,12 @@ class SupportController extends Controller
         }
 
         $support = $user->supportRequests()->create([
-            'ticket_id' => Str::upper(Str::random(10)),
-            'priority'  => $request->priority,
-            'category'  => $request->category,
-            'subject'   => $request->subject,
-            'company_id'=> $user->company_id,
+            'ticket_id'  => Str::upper(Str::random(10)),
+            'priority'   => $request->priority,
+            'category'   => $request->category,
+            'subject'    => $request->subject,
+            'company_id' => $user->company_id,
+            'status'     => 'Submitted a Ticket',
         ]);
 
         TicketAction::ticket($support)
@@ -45,24 +49,22 @@ class SupportController extends Controller
             ->send();
     }
 
-    public function viewTicket($ticket_id)
+    public function viewTicket(UserSupport $ticket)
     {
-        $ticket = UserSupport::where('ticket_id', $ticket_id)->firstOrFail();
+        $this->authorize('view', $ticket);
 
-        if ($ticket->user_id === Auth::id() || Auth::user()?->isAdmin()) {
-            return view('panel.support.view', compact('ticket'));
-        }
-
-        return back()->with(['message' => __('Unauthorized'), 'type' => 'error']);
+        return view('default.panel.support.view', compact('ticket'));
     }
 
-    public function viewTicketSendMessage(Request $request): void
+    public function viewTicketSendMessage(Request $request, UserSupport $ticket): void
     {
+        $this->authorize('update', $ticket);
+
         if (! $user = Auth::user()) {
             return;
         }
 
-        TicketAction::ticket($request->input('ticket_id'))
+        TicketAction::ticket($ticket)
             ->fromAdminIfTrue($user->isAdmin())
             ->answer($request->input('message'))
             ->send();

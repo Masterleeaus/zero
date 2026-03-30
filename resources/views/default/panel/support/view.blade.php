@@ -43,8 +43,10 @@
                         <form
                             class="flex items-end gap-3 px-3 pb-3 pt-0"
                             id="support_form"
-                            onsubmit="return sendMessage('{{ $ticket->ticket_id }}');"
+                            method="post"
+                            action="{{ route('dashboard.support.message', $ticket) }}"
                         >
+                            @csrf
                             <x-forms.input
                                 class="h-[52px] rounded-3xl pt-3.5"
                                 id="message"

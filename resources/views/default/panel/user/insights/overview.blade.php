@@ -91,6 +91,24 @@
                         <span class="font-semibold">{{ $quoteToInvoiceCount }}</span>
                     </div>
                 </x-card>
+                <x-card class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Open Support Tickets') }}</span>
+                        <span class="font-semibold">{{ $supportOpen }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Waiting on Team') }}</span>
+                        <span class="font-semibold">{{ $supportWaitingTeam }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Waiting on User') }}</span>
+                        <span class="font-semibold">{{ $supportWaitingUser }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Logged Hours (total)') }}</span>
+                        <span class="font-semibold">{{ $timelogHours }}</span>
+                    </div>
+                </x-card>
             </div>
         </div>
     </div>

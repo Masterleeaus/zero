@@ -45,5 +45,14 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('checklists.edit');
             Route::put('checklists/{checklist}', [\App\Http\Controllers\Core\Work\ChecklistController::class, 'update'])
                 ->name('checklists.update');
+
+            Route::get('timelogs', [\App\Http\Controllers\Core\Work\TimelogController::class, 'index'])
+                ->name('timelogs.index');
+            Route::get('timelogs/create', [\App\Http\Controllers\Core\Work\TimelogController::class, 'create'])
+                ->name('timelogs.create');
+            Route::post('timelogs', [\App\Http\Controllers\Core\Work\TimelogController::class, 'store'])
+                ->name('timelogs.store');
+            Route::post('timelogs/{timelog}/stop', [\App\Http\Controllers\Core\Work\TimelogController::class, 'stop'])
+                ->name('timelogs.stop');
         });
     });

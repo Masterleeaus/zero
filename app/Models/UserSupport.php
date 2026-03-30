@@ -42,4 +42,9 @@ class UserSupport extends Model
             ->where('ticket_id', $ticketId)
             ->first();
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'ticket_id';
+    }
 }

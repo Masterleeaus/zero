@@ -13,6 +13,8 @@ use App\Models\Work\Site;
 use App\Models\Money\Quote;
 use App\Models\Money\Invoice;
 use App\Models\Money\Payment;
+use App\Models\UserSupport;
+use App\Models\Work\Timelog;
 use Illuminate\Support\Facades\DB;
 
 class InsightsController extends CoreController
@@ -71,6 +73,25 @@ class InsightsController extends CoreController
             ->whereNotNull('quote_id')
             ->count();
 
+        $supportOpen = UserSupport::query()
+            ->where('company_id', $companyId)
+            ->whereNotIn('status', ['Answered'])
+            ->count();
+
+        $supportWaitingTeam = UserSupport::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'Waiting for answer')
+            ->count();
+
+        $supportWaitingUser = UserSupport::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'Submitted a Ticket')
+            ->count();
+
+        $timelogMinutes = Timelog::query()
+            ->where('company_id', $companyId)
+            ->sum(DB::raw('COALESCE(duration_minutes, 0)'));
+
         return view('default.panel.user.insights.overview', [
             'enquiryCount' => $enquiries,
             'customerCount'=> $customers,
@@ -84,6 +105,10 @@ class InsightsController extends CoreController
             'quoteToJobCount' => $quoteToJobCount,
             'quoteToInvoiceCount' => $quoteToInvoiceCount,
             'companyId' => $companyId,
+            'supportOpen' => $supportOpen,
+            'supportWaitingTeam' => $supportWaitingTeam,
+            'supportWaitingUser' => $supportWaitingUser,
+            'timelogHours' => round($timelogMinutes / 60, 1),
         ]);
     }
 

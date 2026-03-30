@@ -6,8 +6,9 @@ This environment cannot run the full test/build stack yet. Identified blockers:
 - **Vendors missing**: Without a successful `composer install`, autoloaded classes and Laravel framework binaries are unavailable, so application boot + migrations + tests cannot execute.
 - **DB-dependent flows**: Migrations have not been executed in this environment because of the missing vendor stack; runtime verification of schema/order awaits a full dependency-backed install.
 - **New lifecycle tests pending**: Added lifecycle signal tests rely on Laravel testing harness; they remain unexecutable until Composer dependencies install and migrations run.
-- **New tenancy migration pending**: AI/chat tables gained `company_id` columns with backfill logic; this migration must run against a real database to enforce tenant boundaries on those models. Support/notification/usage company columns are queued in `2026_03_30_122000_add_company_to_support_notifications_usage.php` and require execution to unlock scoped queries.
+- **New tenancy migration pending**: AI/chat tables gained `company_id` columns with backfill logic; this migration must run against a real database to enforce tenant boundaries on those models. Support/notification/usage company columns are queued in `2026_03_30_122000_add_company_to_support_notifications_usage.php` and require execution to unlock scoped queries. Timelog table migration `2026_03_30_140000_create_timelogs_table.php` now also requires execution.
 - **Menu/runtime smoke tests deferred**: Route/menu integrity tests cannot execute without the Laravel test harness; defer until Composer + migrations succeed.
+- **New feature tests pending**: Support/notification/timelog tenancy feature tests were added but cannot run until vendors + DB are available.
 
 Next steps to unblock:
 - Provide a runner with `ext-redis >= 6.1` or adjust dependency versions to match available extensions.

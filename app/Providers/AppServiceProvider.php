@@ -14,6 +14,7 @@ use App\Models\Section\FeaturesMarquee;
 use App\Models\Setting;
 use App\Models\SettingTwo;
 use App\Models\User;
+use App\Models\Notification;
 use App\Observer\AdObserver;
 use App\Observer\FeaturesMarqueeObserver;
 use App\Observer\Frontend\BannerBottomTextObserver;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Notifications\DatabaseNotification;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
@@ -50,6 +52,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        DatabaseNotification::useModel(Notification::class);
+
         $this->forceSchemeHttps();
 
         $this->app->useLangPath(base_path('lang'));
