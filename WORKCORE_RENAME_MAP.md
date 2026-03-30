@@ -15,7 +15,7 @@
 | project_template_milestone | service_job_template_milestones | table | Template milestones for job templates | Absent; rename if template data is restored |
 | project_template_tasks | checklist_template_items | table | Template items for checklists | Absent; map during migration |
 | project_templates | service_job_templates | table/models | Templates for jobs | Absent; map on import |
-| project_time_logs | service_job_time_logs | table | Job time tracking | Host has `timelogs` scoped to jobs; map any legacy `project_time_logs` into `timelogs` with `service_job_id` FK |
+| project_time_logs | timelogs (service_job_id FK) | table | Job time tracking | Host uses `timelogs` scoped to jobs; migrate legacy `project_time_logs` into `timelogs` and update FK/index names to reference `service_job_id` |
 | tasks | checklists | tables/models/routes/views | Checklists replace generic tasks | Host migrations create `checklists`; no `tasks` table exists |
 | task_comments | checklist_comments | table | Comments on checklist items | Absent; map if legacy comments imported |
 | task_comment_emoji | checklist_comment_emoji | table | Emoji reactions on comments | Absent; map on import |
