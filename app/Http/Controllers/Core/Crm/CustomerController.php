@@ -26,7 +26,7 @@ class CustomerController extends CoreController
 
         $customers = $query->latest()->paginate(10)->withQueryString();
 
-        return view('default.panel.crm.customers.index', [
+        return view('default.panel.user.crm.customers.index', [
             'customers' => $customers,
             'search'    => $search,
         ]);
@@ -34,7 +34,7 @@ class CustomerController extends CoreController
 
     public function create(): View
     {
-        return view('default.panel.crm.customers.form', [
+        return view('default.panel.user.crm.customers.form', [
             'customer' => new Customer(),
         ]);
     }
@@ -53,14 +53,14 @@ class CustomerController extends CoreController
 
     public function show(Customer $customer): View
     {
-        return view('default.panel.crm.customers.show', [
+        return view('default.panel.user.crm.customers.show', [
             'customer' => $customer,
         ]);
     }
 
     public function edit(Customer $customer): View
     {
-        return view('default.panel.crm.customers.form', [
+        return view('default.panel.user.crm.customers.form', [
             'customer' => $customer,
         ]);
     }

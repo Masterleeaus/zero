@@ -3,7 +3,7 @@
 Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (not isolation)**, **user_id = actor identity**.
 
 ## Current state
-- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; `UserOpenai`, `Chatbot` and others hold `company_id`/`team_id` without a global scope; `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
+- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`) also use `BelongsToCompany`; `UserOpenai`, `Chatbot` and others hold `company_id`/`team_id` without a global scope; `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
 - WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware.
 
 ## Tenancy implementation plan
@@ -11,7 +11,7 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
    - `BelongsToCompany`: conditional global scope keyed to the authenticated user’s `company_id`, auto-fill on create, and a typed `scopeForCompany`.
    - `BelongsToTeam`: `team()` relation and `scopeForTeam` for crew grouping (not tenant isolation).
    - `OwnedByUser`: auto-fill `created_by` from the authenticated user with `scopeCreatedBy` + `creator()` relation.
-2. Apply `BelongsToCompany` to every imported WorkCore model and any host model that becomes tenant-specific (customers, enquiries, sites, service jobs, quotes, invoices, payments, expenses, attendance, leave, shifts, tickets). Host `Product` plus CRM `Customer` and `Enquiry` are now scoped this way.
+2. Apply `BelongsToCompany` to every imported WorkCore model and any host model that becomes tenant-specific (customers, enquiries, sites, service jobs, quotes, invoices, payments, expenses, attendance, leave, shifts, tickets). Host `Product`, CRM `Customer`/`Enquiry`, and Work `Site`/`ServiceJob`/`Checklist` are now scoped this way.
 3. Ensure validation rules enforce `company_id` presence; derive from authenticated user’s selected company to avoid trusting request payloads.
 
 ## Schema consolidation priorities

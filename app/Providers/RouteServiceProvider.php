@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
-use App\Http\Controllers\Core\Crm\CustomerController;
-use App\Http\Controllers\Core\Crm\EnquiryController;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
+use App\Models\Work\Checklist;
+use App\Models\Work\ServiceJob;
+use App\Models\Work\Site;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -43,6 +44,18 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('enquiry', static function (string|int $value) {
             return Enquiry::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('site', static function (string|int $value) {
+            return Site::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('job', static function (string|int $value) {
+            return ServiceJob::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('checklist', static function (string|int $value) {
+            return Checklist::query()->whereKey($value)->firstOrFail();
         });
     }
 

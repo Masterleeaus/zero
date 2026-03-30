@@ -28,7 +28,7 @@ class EnquiryController extends CoreController
 
         $enquiries = $query->latest()->paginate(10)->withQueryString();
 
-        return view('default.panel.crm.enquiries.index', [
+        return view('default.panel.user.crm.enquiries.index', [
             'enquiries' => $enquiries,
             'search'    => $search,
         ]);
@@ -36,7 +36,7 @@ class EnquiryController extends CoreController
 
     public function create(): View
     {
-        return view('default.panel.crm.enquiries.form', [
+        return view('default.panel.user.crm.enquiries.form', [
             'enquiry'   => new Enquiry(),
             'customers' => Customer::query()->orderBy('name')->get(['id', 'name']),
         ]);
@@ -56,7 +56,7 @@ class EnquiryController extends CoreController
 
     public function show(Enquiry $enquiry): View
     {
-        return view('default.panel.crm.enquiries.show', [
+        return view('default.panel.user.crm.enquiries.show', [
             'enquiry' => $enquiry->load('customer'),
         ]);
     }
