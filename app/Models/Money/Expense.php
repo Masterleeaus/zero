@@ -62,6 +62,7 @@ class Expense extends Model
 
     public static function totalsByMonth(int $companyId, int $months = 6): Collection
     {
+        // Cap to a sensible window (10 years) to avoid heavy aggregations.
         $months = min(max($months, 1), 120);
         $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
         $expression = match (DB::getDriverName()) {

@@ -20,6 +20,7 @@ use App\Models\Work\Timelog;
 use App\Models\Work\Attendance;
 use App\Models\Work\ServiceAgreement;
 use App\Models\Work\Shift;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -204,6 +205,7 @@ class InsightsController extends CoreController
         $rangeStart = match ($range) {
             '30d' => Carbon::now()->subDays(30),
             '90d' => Carbon::now()->subDays(90),
+            // include the current month plus the previous 11 months (12 total)
             default => Carbon::now()->startOfMonth()->subMonthsNoOverflow(11),
         };
 
@@ -214,6 +216,17 @@ class InsightsController extends CoreController
         $expenseVsRevenue = collect();
         $revenueSixMonths = collect();
         $expenseSixMonths = collect();
+
+        if (! $companyId) {
+            return $this->renderReportsView(
+                $range,
+                $revenueReport,
+                $jobsByStatus,
+                $topCustomers,
+                $leaveSummary,
+                $expenseVsRevenue
+            );
+        }
 
         try {
             $revenueReport = Invoice::query()
@@ -301,14 +314,41 @@ class InsightsController extends CoreController
 
                 return [
                     'month' => $month,
-                    'revenue' => (float) (optional($revenueRow)->revenue ?? 0),
-                    'expense' => (float) (optional($expenseRow)->total ?? 0),
+                    'revenue' => (float) ($revenueRow?->revenue ?? 0),
+                    'expense' => (float) ($expenseRow?->total ?? 0),
                 ];
             });
         } catch (\Throwable $e) {
             $expenseVsRevenue = collect();
         }
 
+        return $this->renderReportsView(
+            $range,
+            $revenueReport,
+            $jobsByStatus,
+            $topCustomers,
+            $leaveSummary,
+            $expenseVsRevenue
+        );
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return match (DB::getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', {$column})",
+            'pgsql' => "to_char({$column}, 'YYYY-MM')",
+            default => "DATE_FORMAT({$column}, '%Y-%m')",
+        };
+    }
+
+    private function renderReportsView(
+        string $range,
+        Collection $revenueReport,
+        array $jobsByStatus,
+        Collection $topCustomers,
+        array $leaveSummary,
+        Collection $expenseVsRevenue
+    ): View {
         $revenueLabels = $revenueReport->pluck('month')->all();
         $revenueValues = $revenueReport->pluck('revenue')->map(fn ($value) => (float) $value)->all();
         $jobStatusLabels = array_keys($jobsByStatus);
@@ -332,14 +372,5 @@ class InsightsController extends CoreController
             'expenseRevenueSeries' => $expenseRevenueSeries,
             'expenseTotals' => $expenseTotals,
         ]);
-    }
-
-    private function monthExpression(string $column): string
-    {
-        return match (DB::getDriverName()) {
-            'sqlite' => "strftime('%Y-%m', {$column})",
-            'pgsql' => "to_char({$column}, 'YYYY-MM')",
-            default => "DATE_FORMAT({$column}, '%Y-%m')",
-        };
     }
 }
