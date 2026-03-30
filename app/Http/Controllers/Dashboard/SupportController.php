@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Actions\TicketAction;
 use App\Http\Controllers\Controller;
 use App\Models\UserSupport;
+use App\Services\Support\SupportLifecycleService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +13,14 @@ use Illuminate\Support\Str;
 
 class SupportController extends Controller
 {
+    public function __construct(private SupportLifecycleService $lifecycle) {}
+
     public function list()
     {
         $user = auth()->user();
         $status = request('status');
+
+        $this->evaluateLifecycle($user?->company_id);
 
         $items = UserSupport::query()
             ->when(! $user?->isAdmin(), fn ($q) => $q->where('user_id', $user?->id))
@@ -72,17 +77,28 @@ class SupportController extends Controller
             ->answer($request->input('message'))
             ->send();
 
-        $ticket->update([
-            'status' => $user->isAdmin() ? 'waiting_on_user' : 'waiting_on_team',
-        ]);
+        $this->lifecycle->processReplies($ticket, $user->isAdmin() ? 'agent' : 'user');
     }
 
     public function resolve(UserSupport $ticket): RedirectResponse
     {
         $this->authorize('update', $ticket);
 
-        $ticket->update(['status' => 'resolved']);
+        $ticket->update([
+            'status'      => 'resolved',
+            'resolved_at' => now(),
+        ]);
 
         return back()->with('message', __('Ticket resolved'));
+    }
+
+    protected function evaluateLifecycle(?int $companyId): void
+    {
+        if (! $companyId) {
+            return;
+        }
+
+        $this->lifecycle->markStale($companyId, now()->subDays(7));
+        $this->lifecycle->autoResolveInactive($companyId, now()->subDays(30));
     }
 }

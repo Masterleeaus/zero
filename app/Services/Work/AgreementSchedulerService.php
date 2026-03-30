@@ -79,8 +79,12 @@ class AgreementSchedulerService
 
     protected function hasDuplicateJob(ServiceAgreement $agreement): bool
     {
+        if (! $agreement->next_run_at) {
+            return false;
+        }
+
         return $agreement->jobs()
-            ->whereDate('scheduled_at', $agreement->next_run_at?->toDateString())
+            ->whereDate('scheduled_at', $agreement->next_run_at->toDateString())
             ->exists();
     }
 }

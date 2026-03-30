@@ -15,6 +15,8 @@ class SupportLifecycleService
             $ticket->status = 'waiting_on_team';
         }
 
+        $ticket->resolved_at = null;
+
         $ticket->save();
     }
 

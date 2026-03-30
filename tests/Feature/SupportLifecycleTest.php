@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\UserSupport;
+use App\Services\Support\SupportLifecycleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,21 +11,24 @@ class SupportLifecycleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_status_changes_on_replies(): void
+    public function test_support_lifecycle_transitions_and_timestamps(): void
     {
-        $user = User::factory()->create(['is_admin' => false]);
-        $admin = User::factory()->create(['is_admin' => true]);
-
         $ticket = UserSupport::factory()->create([
-            'company_id' => $user->company_id,
-            'user_id'    => $user->id,
-            'status'     => 'open',
+            'status'      => 'open',
+            'resolved_at' => now()->subDay(),
         ]);
 
-        $this->actingAs($admin)->post(route('dashboard.support.message', $ticket), ['message' => 'Hello']);
-        $this->assertEquals('waiting_on_user', $ticket->fresh()->status);
+        $service = new SupportLifecycleService();
 
-        $this->actingAs($user)->post(route('dashboard.support.message', $ticket), ['message' => 'Reply']);
-        $this->assertEquals('waiting_on_team', $ticket->fresh()->status);
+        $service->processReplies($ticket, 'agent');
+        $this->assertEquals('waiting_on_user', $ticket->fresh()->status);
+        $this->assertNull($ticket->fresh()->resolved_at);
+
+        $service->markStale($ticket->company_id, now()->addDay());
+        $this->assertEquals('stale', $ticket->fresh()->status);
+
+        $service->autoResolveInactive($ticket->company_id, now()->addDay());
+        $this->assertEquals('resolved', $ticket->fresh()->status);
+        $this->assertNotNull($ticket->fresh()->resolved_at);
     }
 }

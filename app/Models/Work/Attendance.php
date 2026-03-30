@@ -57,7 +57,10 @@ class Attendance extends Model
 
     public function shiftMismatch(): bool
     {
-        return $this->shift && $this->check_in_at && $this->shift->start_at && $this->check_in_at->lt($this->shift->start_at->subMinutes(30));
+        return $this->shift
+            && $this->check_in_at
+            && $this->shift->start_at
+            && $this->check_in_at->lt($this->shift->start_at->copy()->subMinutes(30));
     }
 
     public static function statusSummary(int $companyId): array

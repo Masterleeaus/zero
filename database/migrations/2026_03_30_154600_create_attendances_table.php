@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamp('check_in_at');
             $table->timestamp('check_out_at')->nullable();
             $table->unsignedInteger('duration_minutes')->nullable();
-            $table->string('status')->default('open');
+            $table->string('status')->default('planned');
             $table->text('notes')->nullable();
             $table->timestamps();
 

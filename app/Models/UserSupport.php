@@ -17,6 +17,10 @@ class UserSupport extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'resolved_at' => 'datetime',
+    ];
+
     protected static function booted(): void
     {
         static::creating(static function (UserSupport $support) {

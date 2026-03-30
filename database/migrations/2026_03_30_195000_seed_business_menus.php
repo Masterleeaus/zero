@@ -52,6 +52,48 @@ return new class extends Migration {
                 'icon'       => 'tabler-chart-bar',
                 'order'      => 45,
             ],
+            [
+                'key'        => 'work_attendance',
+                'route'      => 'dashboard.work.attendance.index',
+                'label'      => 'Attendance',
+                'icon'       => 'tabler-calendar-check',
+                'order'      => 46,
+            ],
+            [
+                'key'        => 'work_shifts',
+                'route'      => 'dashboard.work.shifts.index',
+                'label'      => 'Shifts',
+                'icon'       => 'tabler-calendar-event',
+                'order'      => 47,
+            ],
+            [
+                'key'        => 'work_agreements',
+                'route'      => 'dashboard.work.agreements.index',
+                'label'      => 'Service Agreements',
+                'icon'       => 'tabler-file-certificate',
+                'order'      => 48,
+            ],
+            [
+                'key'        => 'work_timelogs',
+                'route'      => 'dashboard.work.timelogs.index',
+                'label'      => 'Timelogs',
+                'icon'       => 'tabler-timeline',
+                'order'      => 49,
+            ],
+            [
+                'key'        => 'support_requests',
+                'route'      => 'dashboard.support.index',
+                'label'      => 'Support',
+                'icon'       => 'tabler-lifebuoy',
+                'order'      => 50,
+            ],
+            [
+                'key'        => 'user_notifications',
+                'route'      => 'dashboard.user.notifications.index',
+                'label'      => 'Notifications',
+                'icon'       => 'tabler-bell',
+                'order'      => 51,
+            ],
         ];
 
         foreach ($items as $item) {
@@ -84,6 +126,12 @@ return new class extends Migration {
             'money_quotes',
             'money_invoices',
             'insights_overview',
+            'work_attendance',
+            'work_shifts',
+            'work_agreements',
+            'work_timelogs',
+            'support_requests',
+            'user_notifications',
         ])->delete();
     }
 };

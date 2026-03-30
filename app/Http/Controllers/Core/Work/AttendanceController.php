@@ -56,7 +56,7 @@ class AttendanceController extends CoreController
             'check_in_at'    => $validated['check_in_at'],
             'notes'          => $validated['notes'] ?? null,
             'status'         => 'checked_in',
-        ]);
+        ])->markLateIfNeeded();
 
         return redirect()->route('dashboard.work.attendance.index')
             ->with('message', __('Checked in'));

@@ -122,9 +122,17 @@ class TicketAction
 
     private function updateStatus(): void
     {
-        $this->ticket->update([
-            'status' => $this->status,
-        ]);
+        if (! isset($this->status) || $this->ticket->status === $this->status) {
+            return;
+        }
+
+        $payload = ['status' => $this->status];
+
+        if ($this->status !== 'resolved') {
+            $payload['resolved_at'] = null;
+        }
+
+        $this->ticket->update($payload);
 
     }
 }

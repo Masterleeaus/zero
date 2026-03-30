@@ -4,7 +4,7 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
 
 ## Current state
 - Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`, `Timelog`) also use `BelongsToCompany`; Money models (`Quote`, `Invoice`, `Payment`) use the same traits. **AI surfaces now carry `company_id`** on `user_openai`, `user_openai_chat`, `user_openai_chat_messages`, and chatbot tables (`chatbot`, `chatbot_data`, `chatbot_data_vectors`, `chatbot_history`) with `BelongsToCompany` applied; backfill sets company from users where available. Support/notifications were updated to carry `company_id` on `user_support`, `user_support_messages`, `notifications`, and `usage` with `BelongsToCompany` applied. `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
-- WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware.
+- WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware. Attendance/shifts/agreements migrations now default to tenant-safe status values and include support resolved timestamps.
 
 ## Tenancy implementation plan
 1. Shared concerns in `app/Models/Concerns`:
@@ -32,7 +32,7 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
 - **Line items**: canonical `quote_items` and `invoice_items` tables carry `description`, `quantity`, `unit_price`, `tax_rate`, `line_total`, and `sort_order`; totals on quotes/invoices are recomputed from items to keep subtotal/tax/total aligned.
 - **Tenant columns**: add `company_id` (and `team_id` where crew-relevant) to any WorkCore table lacking it; backfill via authenticated company selection. `service_jobs` gained `customer_id` for quote conversion plus `quote_id` and optional `assigned_user_id` for workforce prep; `checklists` carry optional `assigned_user_id`.
 - **Migration safety**: lifecycle migration avoids brittle column renames by additive `quote_number`/`invoice_number` fields with backfill from legacy `number` columns when present; DBAL not required for column rename. Paid/balance and subtotal/tax fields are additive. Unique indexes on `(company_id, quote_number)` and `(company_id, invoice_number)` enforce numbering; rollbacks drop the named indexes. Service job/customer/site links remain company-scoped; additive migration `2026_03_30_194500_add_assignment_and_quote_links_to_work_tables` adds quote/assignee columns with safe drops on rollback.
-- **Foreign keys**: align FK references to renamed tables; enforce cascading consistent with host conventions.
+- **Foreign keys**: align FK references to renamed tables; enforce cascading consistent with host conventions. Attendance defaults to `planned`; shifts include optional service job linkage; support tickets include `resolved_at` with null-safe rollbacks.
 - **Timestamps & soft deletes**: retain where present; add soft deletes where WorkCore expects archiving.
 
 ## Model reconciliation steps

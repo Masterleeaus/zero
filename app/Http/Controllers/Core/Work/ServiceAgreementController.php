@@ -80,7 +80,7 @@ class ServiceAgreementController extends CoreController
     {
         abort_if($agreement->company_id !== $request->user()?->company_id, 403);
 
-        $scheduler->runForCompany($agreement->company_id);
+        $scheduler->runDueAgreements($agreement->company_id);
 
         return back()->with('message', __('Agreement scheduled jobs generated'));
     }
