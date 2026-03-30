@@ -43,8 +43,10 @@
                         <form
                             class="flex items-end gap-3 px-3 pb-3 pt-0"
                             id="support_form"
-                            onsubmit="return sendMessage('{{ $ticket->ticket_id }}');"
+                            method="post"
+                            action="{{ route('dashboard.support.message', $ticket) }}"
                         >
+                            @csrf
                             <x-forms.input
                                 class="h-[52px] rounded-3xl pt-3.5"
                                 id="message"
@@ -93,6 +95,12 @@
                         <x-tabler-chart-bubble class="size-5" />
                         {{ __($ticket->status) }}
                     </p>
+                    @if(auth()->user()?->isAdmin() && $ticket->status !== 'resolved')
+                        <form method="post" action="{{ route('dashboard.support.resolve', $ticket) }}" class="px-5 py-4">
+                            @csrf
+                            <x-button type="submit" size="sm">{{ __('Mark Resolved') }}</x-button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </x-card>

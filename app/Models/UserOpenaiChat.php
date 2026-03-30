@@ -16,6 +16,10 @@ class UserOpenaiChat extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'company_id' => 'integer',
+    ];
+
     protected static function booted(): void
     {
         static::creating(static function (UserOpenaiChat $chat) {

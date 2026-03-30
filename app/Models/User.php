@@ -24,6 +24,7 @@ use Laravel\Cashier\Billable;
 use Laravel\Cashier\Subscription as Subscriptions;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Notification as TenantNotification;
 
 class User extends Authenticatable
 {
@@ -125,6 +126,11 @@ class User extends Authenticatable
         static::deleted(static function ($user) {
             $user->orders()->delete();
         });
+    }
+
+    public function notifications()
+    {
+        return $this->morphMany(TenantNotification::class, 'notifiable')->orderByDesc('created_at');
     }
 
     public function integrations(): HasMany

@@ -5,24 +5,35 @@ namespace App\Http\Controllers\Dashboard;
 use App\Actions\TicketAction;
 use App\Http\Controllers\Controller;
 use App\Models\UserSupport;
+use App\Services\Support\SupportLifecycleService;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class SupportController extends Controller
 {
+    public function __construct(private SupportLifecycleService $lifecycle) {}
+
     public function list()
     {
         $user = auth()->user();
+        $status = request('status');
 
-        $items = $user?->isAdmin() ? UserSupport::all() : $user?->supportRequests;
+        $this->evaluateLifecycle($user?->company_id);
 
-        return view('panel.support.list', compact('items'));
+        $items = UserSupport::query()
+            ->when(! $user?->isAdmin(), fn ($q) => $q->where('user_id', $user?->id))
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->latest()
+            ->paginate(15);
+
+        return view('default.panel.support.list', compact('items', 'status'));
     }
 
     public function newTicket()
     {
-        return view('panel.support.new');
+        return view('default.panel.support.new');
     }
 
     public function newTicketSend(Request $request): void
@@ -32,10 +43,12 @@ class SupportController extends Controller
         }
 
         $support = $user->supportRequests()->create([
-            'ticket_id' => Str::upper(Str::random(10)),
-            'priority'  => $request->priority,
-            'category'  => $request->category,
-            'subject'   => $request->subject,
+            'ticket_id'  => Str::upper(Str::random(10)),
+            'priority'   => $request->priority,
+            'category'   => $request->category,
+            'subject'    => $request->subject,
+            'company_id' => $user->company_id,
+            'status'     => 'open',
         ]);
 
         TicketAction::ticket($support)
@@ -44,26 +57,48 @@ class SupportController extends Controller
             ->send();
     }
 
-    public function viewTicket($ticket_id)
+    public function viewTicket(UserSupport $ticket)
     {
-        $ticket = UserSupport::where('ticket_id', $ticket_id)->firstOrFail();
+        $this->authorize('view', $ticket);
 
-        if ($ticket->user_id === Auth::id() || Auth::user()?->isAdmin()) {
-            return view('panel.support.view', compact('ticket'));
-        }
-
-        return back()->with(['message' => __('Unauthorized'), 'type' => 'error']);
+        return view('default.panel.support.view', compact('ticket'));
     }
 
-    public function viewTicketSendMessage(Request $request): void
+    public function viewTicketSendMessage(Request $request, UserSupport $ticket): void
     {
+        $this->authorize('update', $ticket);
+
         if (! $user = Auth::user()) {
             return;
         }
 
-        TicketAction::ticket($request->input('ticket_id'))
+        TicketAction::ticket($ticket)
             ->fromAdminIfTrue($user->isAdmin())
             ->answer($request->input('message'))
             ->send();
+
+        $this->lifecycle->processReplies($ticket, $user->isAdmin() ? 'agent' : 'user');
+    }
+
+    public function resolve(UserSupport $ticket): RedirectResponse
+    {
+        $this->authorize('update', $ticket);
+
+        $ticket->update([
+            'status'      => 'resolved',
+            'resolved_at' => now(),
+        ]);
+
+        return back()->with('message', __('Ticket resolved'));
+    }
+
+    protected function evaluateLifecycle(?int $companyId): void
+    {
+        if (! $companyId) {
+            return;
+        }
+
+        $this->lifecycle->markStale($companyId, now()->subDays(7));
+        $this->lifecycle->autoResolveInactive($companyId, now()->subDays(30));
     }
 }

@@ -106,6 +106,12 @@ Route::middleware(['auth', 'updateUserActivity'])
                 // dash_notify_seen
                 Route::post('/dash_notify_seen', [UserController::class, 'markDashNotifySeen'])->name('dash_notify_seen');
 
+                Route::prefix('notifications')->name('notifications.')->group(function () {
+                    Route::get('', [NotificationController::class, 'index'])->name('index');
+                    Route::post('read', [NotificationController::class, 'markAsRead'])->name('read');
+                    Route::get('unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
+                });
+
                 // premium support
                 Route::get('premium-support', PremiumSupportController::class)->name('premium-support');
 
@@ -811,11 +817,13 @@ Route::middleware(['auth', 'updateUserActivity'])
         // Support Area
         Route::prefix('support')->name('support.')->group(function () {
             Route::get('/my-requests', [SupportController::class, 'list'])->name('list')->middleware(CheckTemplateTypeAndPlan::class);
+            Route::get('/', [SupportController::class, 'list'])->name('index');
             Route::get('/new-support-request', [SupportController::class, 'newTicket'])->name('new');
-            Route::post('/new-support-request/send', [SupportController::class, 'newTicketSend']);
+            Route::post('/new-support-request/send', [SupportController::class, 'newTicketSend'])->name('store');
 
-            Route::get('/requests/{ticket_id}', [SupportController::class, 'viewTicket'])->name('view');
-            Route::post('/requests-action/send-message', [SupportController::class, 'viewTicketSendMessage']);
+            Route::get('/requests/{ticket}', [SupportController::class, 'viewTicket'])->name('view');
+            Route::post('/requests/{ticket}/message', [SupportController::class, 'viewTicketSendMessage'])->name('message');
+            Route::post('/requests/{ticket}/resolve', [SupportController::class, 'resolve'])->name('resolve');
         });
 
         // Admin Area2

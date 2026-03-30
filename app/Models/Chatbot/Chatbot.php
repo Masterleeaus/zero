@@ -3,6 +3,7 @@
 namespace App\Models\Chatbot;
 
 use App\Models\User;
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,10 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Chatbot extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'chatbot';
 
     protected $fillable = [
         'user_id',
+        'company_id',
         'title',
         'role',
         'model',

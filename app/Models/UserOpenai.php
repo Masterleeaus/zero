@@ -28,6 +28,7 @@ class UserOpenai extends Model
         'request_id',
         'company_id',
         'team_id',
+        'company_id',
         'title',
         'slug',
         'user_id',
