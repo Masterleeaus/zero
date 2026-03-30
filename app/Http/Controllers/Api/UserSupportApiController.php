@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserSupport;
 use App\Models\UserSupportMessage;
-use App\Notifications\LiveNotification;
+use App\Services\Support\SupportLifecycleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +16,8 @@ use Illuminate\Support\Str;
 
 class UserSupportApiController extends Controller
 {
+    public function __construct(private SupportLifecycleService $lifecycle) {}
+
     /**
      * Gets all support requests
      *
@@ -288,17 +290,11 @@ class UserSupportApiController extends Controller
             'subject'   => $request->subject,
         ]);
 
-        $admins = User::where('company_id', $support->company_id)
-            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'support']))
-            ->get();
-
-        foreach ($admins as $admin) {
-            $admin->notify(new LiveNotification(
-                message: "New support ticket: {$support->subject}",
-                link: route('dashboard.support.view', $support),
-                title: 'New Support Ticket'
-            ));
-        }
+        $this->lifecycle->notifyCompanyAdmins(
+            $support,
+            "New support ticket: {$support->subject}",
+            'New Support Ticket'
+        );
 
         $support->messages()->create([
             'message' => $request->message,

@@ -36,11 +36,19 @@ class SupportLifecycleService
             ->where('company_id', $companyId)
             ->whereIn('status', ['waiting_on_user', 'waiting_on_team'])
             ->where('updated_at', '<', $before)
-            ->cursor()
-            ->each(function (UserSupport $ticket) use (&$updated) {
-                $ticket->update(['status' => 'stale']);
-                $this->notifyOwner($ticket, 'stale');
-                $updated++;
+            ->chunkById(100, function ($tickets) use (&$updated) {
+                $ids = $tickets->pluck('id');
+
+                if ($ids->isEmpty()) {
+                    return;
+                }
+
+                UserSupport::query()->whereIn('id', $ids)->update(['status' => 'stale']);
+                $updated += $ids->count();
+
+                $tickets->each(function (UserSupport $ticket) {
+                    $this->notifyOwner($ticket, 'stale');
+                });
             });
 
         return $updated;
@@ -49,20 +57,32 @@ class SupportLifecycleService
     public function autoResolveInactive(int $companyId, Carbon $before): int
     {
         $updated = 0;
+        $resolvedAt = now();
 
         UserSupport::query()
             ->where('company_id', $companyId)
             ->whereNotIn('status', ['resolved', 'closed'])
             ->where('updated_at', '<', $before)
-            ->cursor()
-            ->each(function (UserSupport $ticket) use (&$updated) {
-                $ticket->update([
-                    'status'      => 'resolved',
-                    'resolved_at' => now(),
-                ]);
+            ->chunkById(100, function ($tickets) use (&$updated, $resolvedAt) {
+                $ids = $tickets->pluck('id');
 
-                $this->notifyOwner($ticket, 'resolved');
-                $updated++;
+                if ($ids->isEmpty()) {
+                    return;
+                }
+
+                UserSupport::query()
+                    ->whereIn('id', $ids)
+                    ->update([
+                        'status'      => 'resolved',
+                        'resolved_at' => $resolvedAt,
+                    ]);
+
+                $updated += $ids->count();
+
+                $tickets->each(function (UserSupport $ticket) use ($resolvedAt) {
+                    $ticket->resolved_at = $resolvedAt;
+                    $this->notifyOwner($ticket, 'resolved');
+                });
             });
 
         return $updated;
@@ -129,7 +149,7 @@ class SupportLifecycleService
         ));
     }
 
-    protected function notifyCompanyAdmins(UserSupport $ticket, string $message, string $title): void
+    public function notifyCompanyAdmins(UserSupport $ticket, string $message, string $title): void
     {
         if (! $ticket->company_id) {
             return;
