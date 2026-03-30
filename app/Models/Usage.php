@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Usage extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'usage';
 
     protected $fillable = [
+        'company_id',
         'total_user_count',
         'this_week_user_count',
         'last_week_user_count',
@@ -26,11 +30,13 @@ class Usage extends Model
      */
     public static function getSingle($user = null)
     {
-        if ($user) {
-            return static::where('user_id', $user->id)->firstOrCreate();
+        if ($user && isset($user->company_id)) {
+            return static::firstOrCreate([
+                'company_id' => $user->company_id,
+            ]);
         }
 
-        return static::firstOrCreate([]);
+        return static::firstOrCreate(['company_id' => null]);
     }
 
     public function updateWordCounts($count): void
