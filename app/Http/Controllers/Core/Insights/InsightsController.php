@@ -27,125 +27,107 @@ class InsightsController extends CoreController
 {
     public function overview(Request $request): View
     {
+        // $companyId is retained for static-method calls that require an explicit argument.
+        // All Eloquent queries below rely on the BelongsToCompany global scope instead.
         $companyId = $request->user()?->company_id;
 
-        $enquiries = Enquiry::query()->where('company_id', $companyId)->count();
-        $customers = Customer::query()->where('company_id', $companyId)->count();
-        $sites = Site::query()->where('company_id', $companyId)->where('status', 'active')->count();
+        $enquiries = Enquiry::query()->count();
+        $customers = Customer::query()->count();
+        $sites     = Site::query()->where('status', 'active')->count();
 
         $jobStatus = ServiceJob::query()
-            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $quoteStatus = Quote::query()
-            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $invoiceStatus = Invoice::query()
-            ->where('company_id', $companyId)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
         $overdueInvoices = Invoice::query()
-            ->where('company_id', $companyId)
             ->whereNotIn('status', ['paid', 'void'])
             ->whereDate('due_date', '<', now())
             ->count();
 
         $outstandingBalance = (float) Invoice::query()
-            ->where('company_id', $companyId)
             ->whereNotIn('status', ['paid', 'void'])
             ->sum('balance');
 
-        $paymentsTotal = (float) Payment::query()
-            ->where('company_id', $companyId)
-            ->sum('amount');
+        $paymentsTotal = (float) Payment::query()->sum('amount');
 
         $quoteToJobCount = ServiceJob::query()
-            ->where('company_id', $companyId)
             ->whereNotNull('quote_id')
             ->count();
 
         $quoteToInvoiceCount = Invoice::query()
-            ->where('company_id', $companyId)
             ->whereNotNull('quote_id')
             ->count();
 
         $supportOpen = UserSupport::query()
-            ->where('company_id', $companyId)
             ->whereIn('status', ['open'])
             ->count();
 
         $supportWaitingTeam = UserSupport::query()
-            ->where('company_id', $companyId)
             ->where('status', 'waiting_on_team')
             ->count();
 
         $supportWaitingUser = UserSupport::query()
-            ->where('company_id', $companyId)
             ->where('status', 'waiting_on_user')
             ->count();
 
         $supportResolved = UserSupport::query()
-            ->where('company_id', $companyId)
             ->where('status', 'resolved')
             ->count();
 
         $timelogMinutes = Timelog::query()
-            ->where('company_id', $companyId)
             ->sum(DB::raw('COALESCE(duration_minutes, 0)'));
 
         $attendanceOpen = Attendance::query()
-            ->where('company_id', $companyId)
             ->where('status', 'checked_in')
             ->count();
 
         $attendanceSummary = Attendance::statusSummary($companyId);
 
-        $shiftsScheduled = Shift::query()->where('company_id', $companyId)->count();
-        $shiftsUnassigned = Shift::query()->where('company_id', $companyId)->unassigned()->count();
-        $lateAttendance = $attendanceSummary['late'] ?? 0;
+        $shiftsScheduled   = Shift::query()->count();
+        $shiftsUnassigned  = Shift::query()->unassigned()->count();
+        $lateAttendance    = $attendanceSummary['late'] ?? 0;
 
         $dueAgreements = ServiceAgreement::query()
-            ->where('company_id', $companyId)
             ->where('status', 'active')
             ->whereNotNull('next_run_at')
             ->whereDate('next_run_at', '<=', now())
             ->count();
 
         $agreementsActive = ServiceAgreement::query()
-            ->where('company_id', $companyId)
             ->where('status', 'active')
             ->count();
 
-        $leaveTotals = Leave::query()->where('company_id', $companyId)->count();
-        $upcomingLeave = Leave::query()->where('company_id', $companyId)->upcoming()->count();
+        $leaveTotals         = Leave::query()->count();
+        $upcomingLeave       = Leave::query()->upcoming()->count();
         $leaveShiftConflicts = Leave::conflictsWithShifts($companyId);
 
-        $expenseTotal = Expense::totalForCompany($companyId);
+        $expenseTotal      = Expense::totalForCompany($companyId);
         $expenseByCategory = Expense::totalsByCategory($companyId);
 
         $upcomingJobs = ServiceJob::query()
-            ->where('company_id', $companyId)
             ->whereNotNull('scheduled_at')
             ->where('scheduled_at', '>=', now())
             ->count();
 
         $unassignedJobs = ServiceJob::query()
-            ->where('company_id', $companyId)
             ->whereNull('assigned_user_id')
             ->count();
 
         $recentCustomers = Customer::query()
-            ->where('company_id', $companyId)
             ->latest()
             ->limit(5)
             ->get();

@@ -15,7 +15,6 @@ class ExpenseCategoryController extends CoreController
     public function index(Request $request): View
     {
         $categories = ExpenseCategory::query()
-            ->where('company_id', $request->user()->company_id)
             ->latest()
             ->paginate(20);
 
