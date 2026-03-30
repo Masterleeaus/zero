@@ -22,6 +22,7 @@ use App\Models\Work\ServiceAgreement;
 use App\Models\Work\Shift;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class InsightsController extends CoreController
 {
@@ -195,8 +196,146 @@ class InsightsController extends CoreController
         ]);
     }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
-        return $this->placeholder(__('Reports'), __('Reports scoped to the current company.'));
+        $companyId = $request->user()?->company_id;
+        $range = $request->string('range')->toString();
+        $range = in_array($range, ['30d', '90d', '12m'], true) ? $range : '12m';
+        $rangeStart = match ($range) {
+            '30d' => Carbon::now()->subDays(30),
+            '90d' => Carbon::now()->subDays(90),
+            default => Carbon::now()->startOfMonth()->subMonthsNoOverflow(11),
+        };
+
+        $revenueReport = collect();
+        $jobsByStatus = [];
+        $topCustomers = collect();
+        $leaveSummary = [];
+        $expenseVsRevenue = collect();
+        $revenueSixMonths = collect();
+        $expenseSixMonths = collect();
+
+        try {
+            $revenueReport = Invoice::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'paid')
+                ->whereDate('updated_at', '>=', $rangeStart->toDateString())
+                ->selectRaw($this->monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+        } catch (\Throwable $e) {
+            $revenueReport = collect();
+        }
+
+        try {
+            $jobsByStatus = ServiceJob::query()
+                ->where('company_id', $companyId)
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
+        } catch (\Throwable $e) {
+            $jobsByStatus = [];
+        }
+
+        try {
+            $topCustomers = Invoice::query()
+                ->where('invoices.company_id', $companyId)
+                ->where('status', 'paid')
+                ->whereDate('invoices.updated_at', '>=', $rangeStart->toDateString())
+                ->join('customers', 'invoices.customer_id', '=', 'customers.id')
+                ->where('customers.company_id', $companyId)
+                ->selectRaw('customers.name, SUM(invoices.total) as total_paid')
+                ->groupBy('customers.id', 'customers.name')
+                ->orderByDesc('total_paid')
+                ->limit(10)
+                ->get();
+        } catch (\Throwable $e) {
+            $topCustomers = collect();
+        }
+
+        try {
+            $leaveSummary = Leave::query()
+                ->where('company_id', $companyId)
+                ->whereMonth('start_date', Carbon::now()->month)
+                ->selectRaw('type, COUNT(*) as total')
+                ->groupBy('type')
+                ->pluck('total', 'type')
+                ->toArray();
+        } catch (\Throwable $e) {
+            $leaveSummary = [];
+        }
+
+        $comparisonStart = Carbon::now()->startOfMonth()->subMonths(5);
+
+        try {
+            $revenueSixMonths = Invoice::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'paid')
+                ->whereDate('updated_at', '>=', $comparisonStart->toDateString())
+                ->selectRaw($this->monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+        } catch (\Throwable $e) {
+            $revenueSixMonths = collect();
+        }
+
+        try {
+            $expenseSixMonths = Expense::totalsByMonth($companyId, 6);
+        } catch (\Throwable $e) {
+            $expenseSixMonths = collect();
+        }
+
+        try {
+            $comparisonMonths = collect($revenueSixMonths->pluck('month')->merge($expenseSixMonths->pluck('month')))
+                ->unique()
+                ->sort()
+                ->values();
+
+            $expenseVsRevenue = $comparisonMonths->map(function ($month) use ($revenueSixMonths, $expenseSixMonths) {
+                return [
+                    'month' => $month,
+                    'revenue' => (float) ($revenueSixMonths->firstWhere('month', $month)->revenue ?? 0),
+                    'expense' => (float) ($expenseSixMonths->firstWhere('month', $month)->total ?? 0),
+                ];
+            });
+        } catch (\Throwable $e) {
+            $expenseVsRevenue = collect();
+        }
+
+        $revenueLabels = $revenueReport->pluck('month')->all();
+        $revenueValues = $revenueReport->pluck('revenue')->map(fn ($value) => (float) $value)->all();
+        $jobStatusLabels = array_keys($jobsByStatus);
+        $jobStatusValues = array_map('intval', array_values($jobsByStatus));
+        $expenseMonths = $expenseVsRevenue->pluck('month')->all();
+        $expenseRevenueSeries = $expenseVsRevenue->pluck('revenue')->map(fn ($value) => (float) $value)->all();
+        $expenseTotals = $expenseVsRevenue->pluck('expense')->map(fn ($value) => (float) $value)->all();
+
+        return view('default.panel.user.insights.reports', [
+            'range' => $range,
+            'revenueReport' => $revenueReport,
+            'jobsByStatus' => $jobsByStatus,
+            'topCustomers' => $topCustomers,
+            'leaveSummary' => $leaveSummary,
+            'expenseVsRevenue' => $expenseVsRevenue,
+            'revenueLabels' => $revenueLabels,
+            'revenueValues' => $revenueValues,
+            'jobStatusLabels' => $jobStatusLabels,
+            'jobStatusValues' => $jobStatusValues,
+            'expenseMonths' => $expenseMonths,
+            'expenseRevenueSeries' => $expenseRevenueSeries,
+            'expenseTotals' => $expenseTotals,
+        ]);
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return match (DB::getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', {$column})",
+            'pgsql' => "to_char({$column}, 'YYYY-MM')",
+            default => "DATE_FORMAT({$column}, '%Y-%m')",
+        };
     }
 }

@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class Expense extends Model
 {
@@ -56,5 +58,24 @@ class Expense extends Model
             ->groupBy('expense_category_id')
             ->pluck('total', 'expense_category_id')
             ->toArray();
+    }
+
+    public static function totalsByMonth(int $companyId, int $months = 6): Collection
+    {
+        $months = max($months, 1);
+        $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
+        $expression = match (DB::getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', expense_date)",
+            'pgsql' => "to_char(expense_date, 'YYYY-MM')",
+            default => "DATE_FORMAT(expense_date, '%Y-%m')",
+        };
+
+        return static::query()
+            ->where('company_id', $companyId)
+            ->whereDate('expense_date', '>=', $start->toDateString())
+            ->selectRaw("{$expression} as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
     }
 }
