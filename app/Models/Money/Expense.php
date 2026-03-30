@@ -22,6 +22,7 @@ class Expense extends Model
     protected $casts = [
         'expense_date' => 'date',
         'amount'       => 'decimal:2',
+        'approved_at'  => 'datetime',
     ];
 
     public function category(): BelongsTo
@@ -32,6 +33,11 @@ class Expense extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function scopeBetweenDates(Builder $query, ?string $start, ?string $end): Builder

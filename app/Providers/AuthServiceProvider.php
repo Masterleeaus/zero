@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Money\Invoice;
+use App\Models\Money\Expense;
 use App\Models\Money\Payment;
 use App\Models\Money\Quote;
 use App\Models\UserSupport;
+use App\Policies\ExpensePolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\QuotePolicy;
@@ -25,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
         Invoice::class      => InvoicePolicy::class,
         Payment::class      => PaymentPolicy::class,
         UserSupport::class  => UserSupportPolicy::class,
+        Expense::class      => ExpensePolicy::class,
     ];
 
     /**
