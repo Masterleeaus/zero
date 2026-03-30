@@ -62,7 +62,7 @@ class Expense extends Model
 
     public static function totalsByMonth(int $companyId, int $months = 6): Collection
     {
-        $months = max($months, 1);
+        $months = min(max($months, 1), 120);
         $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
         $expression = match (DB::getDriverName()) {
             'sqlite' => "strftime('%Y-%m', expense_date)",

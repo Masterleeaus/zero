@@ -289,16 +289,20 @@ class InsightsController extends CoreController
         }
 
         try {
-            $comparisonMonths = collect($revenueSixMonths->pluck('month')->merge($expenseSixMonths->pluck('month')))
+            $comparisonMonths = $revenueSixMonths->pluck('month')
+                ->merge($expenseSixMonths->pluck('month'))
                 ->unique()
                 ->sort()
                 ->values();
 
             $expenseVsRevenue = $comparisonMonths->map(function ($month) use ($revenueSixMonths, $expenseSixMonths) {
+                $revenueRow = $revenueSixMonths->firstWhere('month', $month);
+                $expenseRow = $expenseSixMonths->firstWhere('month', $month);
+
                 return [
                     'month' => $month,
-                    'revenue' => (float) ($revenueSixMonths->firstWhere('month', $month)->revenue ?? 0),
-                    'expense' => (float) ($expenseSixMonths->firstWhere('month', $month)->total ?? 0),
+                    'revenue' => (float) (optional($revenueRow)->revenue ?? 0),
+                    'expense' => (float) (optional($expenseRow)->total ?? 0),
                 ];
             });
         } catch (\Throwable $e) {
@@ -308,7 +312,7 @@ class InsightsController extends CoreController
         $revenueLabels = $revenueReport->pluck('month')->all();
         $revenueValues = $revenueReport->pluck('revenue')->map(fn ($value) => (float) $value)->all();
         $jobStatusLabels = array_keys($jobsByStatus);
-        $jobStatusValues = array_map('intval', array_values($jobsByStatus));
+        $jobStatusValues = array_map(fn ($value) => (int) $value, array_values($jobsByStatus));
         $expenseMonths = $expenseVsRevenue->pluck('month')->all();
         $expenseRevenueSeries = $expenseVsRevenue->pluck('revenue')->map(fn ($value) => (float) $value)->all();
         $expenseTotals = $expenseVsRevenue->pluck('expense')->map(fn ($value) => (float) $value)->all();
