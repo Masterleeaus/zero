@@ -1,0 +1,22 @@
+{
+    "name": "ManagedPremises",
+    "alias": "managedpremises",
+    "description": "Property & jobsite profiles for tradies, real estate agents, and cleaners.",
+    "keywords": [
+        "property",
+        "jobsite",
+        "tradies",
+        "real-estate",
+        "cleaning"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\ManagedPremises\\Providers\\ManagedPremisesServiceProvider",
+        "Modules\\ManagedPremises\\Providers\\ViewServiceProvider",
+        "Modules\\ManagedPremises\\Providers\\EventServiceProvider",
+        "Modules\\ManagedPremises\\Providers\\AuthServiceProvider",
+        "Modules\\ManagedPremises\\Providers\\RouteServiceProvider"
+    ],
+    "files": [],
+    "version": "1.0.0"
+}

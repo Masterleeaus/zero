@@ -1,0 +1,23 @@
+{
+    "name": "ZoneManagement",
+    "alias": "zonemanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ZoneManagement\\Providers\\ZoneManagementServiceProvider",
+        "Modules\\ZoneManagement\\Providers\\EventServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": [],
+    "active": 1,
+    "order": 0,
+    "permissions": [],
+    "roles_permissions": {
+        "admin": [],
+        "manager": []
+    }
+}

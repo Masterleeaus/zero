@@ -1,0 +1,20 @@
+{
+  "name": "nwidart/managedpremises",
+  "description": "Property & jobsite profiles for tradies, agents, and cleaners.",
+  "type": "laravel-module",
+  "authors": [{"name": "Titan"}],
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Modules\\ManagedPremises\\Providers\\ManagedPremisesServiceProvider",
+        "Modules\\ManagedPremises\\Providers\\EventServiceProvider"
+      ],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\ManagedPremises\\": ""
+    }
+  }
+}

@@ -3,7 +3,7 @@
 namespace App\Models\Team;
 
 use App\Models\User;
-use App\Traits\BelongsToCompany;
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

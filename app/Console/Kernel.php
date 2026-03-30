@@ -41,6 +41,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:clear-ai-realtime-image')->daily();
 
         $schedule->command('app:test-command')->everyMinute();
+
+        $schedule->command('agreements:run-scheduled')->hourly();
     }
 
     // $schedule->command(RunHealthChecksCommand::class)->everyFiveMinutes();

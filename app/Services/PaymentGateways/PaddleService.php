@@ -353,8 +353,6 @@ class PaddleService implements BaseGatewayService
             return to_route('dashboard.user.payment.subscription')->with(['message' => $ex->getMessage(), 'type' => 'error']);
         }
 
-        return true;
-        // TODO: Implement subscribeCheckout() method.
     }
 
     public static function prepaidCheckout(Request $request, $referral = null)
@@ -628,7 +626,18 @@ class PaddleService implements BaseGatewayService
 
     public static function checkIfTrial()
     {
-        // TODO: Implement checkIfTrial() method.
+        $user = Auth::user();
+        $sub = getCurrentActiveSubscription($user->id);
+
+        if ($sub !== null) {
+            try {
+                return $sub->stripe_status === 'trialing' && $sub->trial_ends_at && now()->lt($sub->trial_ends_at);
+            } catch (\Throwable $th) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     public static function getSubscriptionRenewDate()

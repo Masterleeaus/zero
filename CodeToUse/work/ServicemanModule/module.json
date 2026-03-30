@@ -1,0 +1,23 @@
+{
+    "name": "ServicemanModule",
+    "alias": "servicemanmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ServicemanModule\\Providers\\ServicemanModuleServiceProvider",
+        "Modules\\ServicemanModule\\Providers\\EventServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": [],
+    "active": 1,
+    "order": 0,
+    "permissions": [],
+    "roles_permissions": {
+        "admin": [],
+        "manager": []
+    }
+}

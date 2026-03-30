@@ -1,0 +1,13 @@
+{
+    "name": "SiteInspection",
+    "alias": "siteinspection",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SiteInspection\\Providers\\InspectionServiceProvider",
+        "Modules\\SiteInspection\\Providers\\EventServiceProvider",
+        "Modules\\\\Inspection\\\\Providers\\\\AuthServiceProvider"
+    ],
+    "files": []
+}
