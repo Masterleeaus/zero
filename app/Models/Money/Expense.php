@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Money;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Support\DateQueryHelper;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -64,12 +65,9 @@ class Expense extends Model
     {
         // Cap to a sensible window (10 years) to avoid heavy aggregations.
         $months = min(max($months, 1), 120);
+        // Includes the current month plus the previous ($months - 1) months.
         $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
-        $expression = match (DB::getDriverName()) {
-            'sqlite' => "strftime('%Y-%m', expense_date)",
-            'pgsql' => "to_char(expense_date, 'YYYY-MM')",
-            default => "DATE_FORMAT(expense_date, '%Y-%m')",
-        };
+        $expression = DateQueryHelper::monthExpression('expense_date');
 
         return static::query()
             ->where('company_id', $companyId)

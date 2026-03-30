@@ -24,6 +24,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Support\DateQueryHelper;
 
 class InsightsController extends CoreController
 {
@@ -217,7 +218,7 @@ class InsightsController extends CoreController
         $revenueSixMonths = collect();
         $expenseSixMonths = collect();
 
-        if (! $companyId) {
+        if (! $request->user() || $companyId === null) {
             return $this->renderReportsView(
                 $range,
                 $revenueReport,
@@ -233,7 +234,7 @@ class InsightsController extends CoreController
                 ->where('company_id', $companyId)
                 ->where('status', 'paid')
                 ->whereDate('updated_at', '>=', $rangeStart->toDateString())
-                ->selectRaw($this->monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->selectRaw(DateQueryHelper::monthExpression('updated_at') . ' as month, SUM(total) as revenue')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -272,6 +273,7 @@ class InsightsController extends CoreController
             $leaveSummary = Leave::query()
                 ->where('company_id', $companyId)
                 ->whereMonth('start_date', Carbon::now()->month)
+                ->whereYear('start_date', Carbon::now()->year)
                 ->selectRaw('type, COUNT(*) as total')
                 ->groupBy('type')
                 ->pluck('total', 'type')
@@ -287,7 +289,7 @@ class InsightsController extends CoreController
                 ->where('company_id', $companyId)
                 ->where('status', 'paid')
                 ->whereDate('updated_at', '>=', $comparisonStart->toDateString())
-                ->selectRaw($this->monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->selectRaw(DateQueryHelper::monthExpression('updated_at') . ' as month, SUM(total) as revenue')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -330,15 +332,6 @@ class InsightsController extends CoreController
             $leaveSummary,
             $expenseVsRevenue
         );
-    }
-
-    private function monthExpression(string $column): string
-    {
-        return match (DB::getDriverName()) {
-            'sqlite' => "strftime('%Y-%m', {$column})",
-            'pgsql' => "to_char({$column}, 'YYYY-MM')",
-            default => "DATE_FORMAT({$column}, '%Y-%m')",
-        };
     }
 
     private function renderReportsView(
