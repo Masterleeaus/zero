@@ -142,8 +142,11 @@ class InvoiceController extends CoreController
     public function markPaid(Invoice $invoice): RedirectResponse
     {
         $this->authorize('markPaid', $invoice);
-        $invoice->update(['status' => 'paid', 'balance' => 0, 'paid_amount' => $invoice->total]);
-        event(new \App\Events\InvoicePaid($invoice));
+
+        if ($invoice->status !== 'paid') {
+            $invoice->update(['status' => 'paid', 'balance' => 0, 'paid_amount' => $invoice->total]);
+            event(new \App\Events\InvoicePaid($invoice));
+        }
 
         return back()->with('status', __('Invoice marked as paid.'));
     }

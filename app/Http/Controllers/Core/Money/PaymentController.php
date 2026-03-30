@@ -42,7 +42,9 @@ class PaymentController extends CoreController
             return back()->withErrors(__('Cannot record payments against a void invoice.'));
         }
 
-        DB::transaction(static function () use ($invoice, $validated, $request): void {
+        $previousStatus = $invoice->status;
+
+        DB::transaction(static function () use ($invoice, $validated, $request, $previousStatus): void {
             Payment::create([
                 'company_id' => $request->user()->company_id,
                 'created_by' => $request->user()->id,
@@ -52,7 +54,7 @@ class PaymentController extends CoreController
 
             $invoice->refresh();
             $invoice->recomputeBalance();
-            if ($invoice->balance <= 0) {
+            if ($invoice->balance <= 0 && $previousStatus !== 'paid') {
                 $invoice->status = 'paid';
                 event(new \App\Events\InvoicePaid($invoice));
             } elseif ($invoice->paid_amount > 0) {

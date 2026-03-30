@@ -11,7 +11,7 @@
 
 ## Money lifecycle
 - Totals are recomputed from line items; payments recalc `paid_amount`/`balance` and set status to `paid` only when balance clears; void invoices reject payments.
-- Signals: `QuoteAccepted` dispatched when a quote is accepted (manual status change or job conversion); `InvoiceIssued` fired when invoices are created or issued from quotes; `InvoicePaid` only when balance reaches zero after payment recompute.
+- Signals are now transition-guarded: `QuoteAccepted` fires only on first acceptance, `InvoiceIssued` fires only when moving into `issued`, and `InvoicePaid` fires only when moving into `paid` after balance reaches zero (partial payments stay `partial`).
 
 ## Insights
 - `/dashboard/insights/overview` surfaces per-company counts for enquiries, customers, sites, jobs, quotes, invoices, overdue invoices, and outstanding balances.

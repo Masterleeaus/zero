@@ -130,9 +130,10 @@ class QuoteController extends CoreController
             'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'rejected', 'expired'])],
         ]);
 
+        $previousStatus = $quote->status;
         $quote->update(['status' => $request->string('status')->toString()]);
 
-        if ($quote->status === 'accepted') {
+        if ($quote->status === 'accepted' && $previousStatus !== 'accepted') {
             event(new \App\Events\QuoteAccepted($quote));
         }
 
@@ -148,9 +149,12 @@ class QuoteController extends CoreController
         ]);
 
         DB::transaction(function () use ($service, $quote, $data, $request) {
+            $previousStatus = $quote->status;
             $service->convertToServiceJob($quote, $data['site_id'], $request->user());
             $quote->update(['status' => 'accepted']);
-            event(new \App\Events\QuoteAccepted($quote));
+            if ($previousStatus !== 'accepted') {
+                event(new \App\Events\QuoteAccepted($quote));
+            }
         });
 
         return redirect()->route('dashboard.work.service-jobs.index')
