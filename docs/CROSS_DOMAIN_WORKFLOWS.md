@@ -14,9 +14,10 @@
 - Signals are now transition-guarded: `QuoteAccepted` fires only on first acceptance, `InvoiceIssued` fires only when moving into `issued`, and `InvoicePaid` fires only when moving into `paid` after balance reaches zero (partial payments stay `partial`).
 
 ## Insights
-- `/dashboard/insights/overview` surfaces per-company counts for enquiries, customers, sites, jobs, quotes, invoices, overdue invoices, and outstanding balances.
+- `/dashboard/insights/overview` surfaces per-company counts for enquiries, customers, sites, jobs, quotes, invoices, overdue invoices, and outstanding balances. Support and notification counts stay tenant-scoped via `company_id`.
 
 ## Remaining gaps
 - Menu entries remain database-driven; seeders now update-or-create keys to avoid duplicates and keep parent/order alignment; verify routes exist during runtime.
 - AI/chat surfaces now carry `company_id` (user_openai + chatbot tables) but legacy rows without users may remain null until migrated with full data access.
+- Support/notification flows use tenant models but older null-company records may still need cleanup once production data is accessible.
 - Full test execution depends on Composer install; see TESTING notes in PR for current status.

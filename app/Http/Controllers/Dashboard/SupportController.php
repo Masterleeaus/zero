@@ -36,6 +36,7 @@ class SupportController extends Controller
             'priority'  => $request->priority,
             'category'  => $request->category,
             'subject'   => $request->subject,
+            'company_id'=> $user->company_id,
         ]);
 
         TicketAction::ticket($support)
