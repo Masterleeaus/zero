@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace App\Models\Money;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Support\DateQueryHelper;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class Expense extends Model
 {
     use HasFactory;
     use BelongsToCompany;
+
+    private const MAX_MONTH_LOOKBACK = 120; // 10 years of monthly history
 
     protected $guarded = [];
 
@@ -56,5 +61,27 @@ class Expense extends Model
             ->groupBy('expense_category_id')
             ->pluck('total', 'expense_category_id')
             ->toArray();
+    }
+
+    /**
+     * Return monthly expense totals for the given company, including the current month.
+     *
+     * @return Collection<int, array{month: string, total: string}>
+     */
+    public static function totalsByMonth(int $companyId, int $months = 6): Collection
+    {
+        // Cap to a sensible window to avoid heavy aggregations.
+        $months = min(max($months, 1), self::MAX_MONTH_LOOKBACK);
+        // Subtract ($months - 1) so the window counts the current month plus the previous periods.
+        $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
+        $expression = DateQueryHelper::monthExpression('expense_date');
+
+        return static::query()
+            ->where('company_id', $companyId)
+            ->whereDate('expense_date', '>=', $start->toDateString())
+            ->selectRaw("{$expression} as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
     }
 }
