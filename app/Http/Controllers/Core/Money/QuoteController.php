@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Money\Quote;
+use App\Models\Money\Invoice;
 use App\Models\Work\Site;
 use App\Services\Money\QuoteService;
 use Illuminate\Contracts\View\View;
@@ -49,7 +50,7 @@ class QuoteController extends CoreController
         $this->authorize('view', $quote);
 
         return view('default.panel.user.money.quotes.show', [
-            'quote' => $quote->load(['customer', 'invoices', 'items']),
+            'quote' => $quote->load(['customer', 'latestInvoice', 'invoices', 'items']),
             'sites' => $this->sites(),
         ]);
     }
@@ -127,7 +128,7 @@ class QuoteController extends CoreController
         $this->authorize('changeStatus', $quote);
 
         $request->validate([
-            'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'rejected', 'expired'])],
+            'status' => ['required', Rule::in(Quote::STATUSES)],
         ]);
 
         $previousStatus = $quote->status;
@@ -165,51 +166,51 @@ class QuoteController extends CoreController
     {
         $this->authorize('convert', $quote);
 
-        if ($quote->status !== 'accepted') {
-            return back()->withErrors(__('Quote must be accepted before invoicing.'));
+        if (! in_array($quote->status, ['approved', 'sent'], true)) {
+            return back()->withErrors(__('Quote must be approved or sent before invoicing.'));
+        }
+
+        if (! $quote->items()->exists()) {
+            return back()->withErrors(__('Quote must have at least one line item before invoicing.'));
         }
 
         $invoice = DB::transaction(function () use ($quote, $request) {
             $quote->load('items');
-            $invoice = \App\Models\Money\Invoice::create([
+            $invoice = Invoice::create([
                 'company_id'     => $quote->company_id,
                 'created_by'     => $request->user()->id,
                 'customer_id'    => $quote->customer_id,
                 'quote_id'       => $quote->id,
-                'invoice_number' => $quote->quote_number ? $quote->quote_number . '-INV' : null,
+                'invoice_number' => $this->nextInvoiceNumber($quote->company_id),
                 'title'          => $quote->title,
-                'status'         => 'issued',
-                'issue_date'     => now(),
-                'due_date'       => $quote->valid_until,
+                'status'         => 'draft',
+                'issue_date'     => now()->toDateString(),
+                'due_date'       => now()->addDays(30)->toDateString(),
                 'currency'       => $quote->currency,
-                'subtotal'       => 0,
-                'tax'            => 0,
-                'total'          => 0,
-                'balance'        => 0,
+                'subtotal'       => $quote->subtotal,
+                'tax'            => $quote->tax,
+                'total'          => $quote->total,
+                'paid_amount'    => 0,
+                'balance'        => $quote->total,
                 'notes'          => $quote->notes,
             ]);
 
             foreach ($quote->items as $item) {
                 $invoice->items()->create([
-                    'company_id' => $invoice->company_id,
+                    'company_id' => $quote->company_id,
                     'created_by' => $request->user()->id,
                     'description'=> $item->description,
                     'quantity'   => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'tax_rate'   => $item->tax_rate,
                     'line_total' => (float) $item->quantity * (float) $item->unit_price,
-                    'sort_order' => $item->sort_order,
+                    'sort_order' => (int) ($item->sort_order ?? 0),
                 ]);
             }
 
-            $invoice->recomputeTotalsFromItems();
-            $invoice->refresh();
+            $quote->update(['status' => Quote::STATUS_CONVERTED]);
 
-            if (! $invoice->invoice_number) {
-                $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);
-                $invoice->save();
-            }
-
+            // Legacy naming: listeners expect InvoiceIssued after conversion even while the invoice remains in draft.
             event(new \App\Events\InvoiceIssued($invoice));
 
             return $invoice;

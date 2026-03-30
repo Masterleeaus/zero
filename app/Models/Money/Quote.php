@@ -7,6 +7,7 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\Invoice;
 use App\Models\Money\QuoteItem;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
@@ -15,12 +16,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quote extends Model
 {
     use HasFactory;
     use BelongsToCompany;
     use OwnedByUser;
+
+    public const STATUS_CONVERTED = 'converted';
+
+    /**
+     * Valid status values.
+     * - accepted: used when turning a quote into a service job
+     * - approved/sent: required before conversion to invoice
+     * - converted: marks quotes already invoiced
+     */
+    public const STATUSES = [
+        'draft',
+        'sent',
+        'accepted',
+        'rejected',
+        'expired',
+        'approved',
+        self::STATUS_CONVERTED,
+    ];
 
     protected $fillable = [
         'company_id',
@@ -61,6 +81,11 @@ class Quote extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function latestInvoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class)->latestOfMany();
     }
 
     public function items(): HasMany
