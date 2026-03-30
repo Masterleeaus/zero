@@ -7,6 +7,7 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\InvoiceItem;
 use App\Models\Money\Payment;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,11 +70,32 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function recomputeBalance(): void
     {
         $totalPaid = $this->payments()->sum('amount');
         $this->paid_amount = $totalPaid;
         $this->balance = max(0, (float) $this->total - (float) $totalPaid);
         $this->save();
+    }
+
+    public function recomputeTotalsFromItems(): void
+    {
+        $items = $this->items;
+        $subtotal = $items->sum(fn (InvoiceItem $item) => (float) ($item->quantity * $item->unit_price));
+        $tax = $items->sum(function (InvoiceItem $item) {
+            $line = (float) ($item->quantity * $item->unit_price);
+            return $line * ((float) $item->tax_rate) / 100;
+        });
+
+        $this->update([
+            'subtotal' => $subtotal,
+            'tax'      => $tax,
+            'total'    => $subtotal + $tax,
+        ]);
     }
 }

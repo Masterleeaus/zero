@@ -28,8 +28,10 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
 ## Migration strategy
 - **Collision check**: compare WorkCore tables against existing host tables before import. If names collide but schemas differ, prefer ALTER migrations over parallel tables.
 - **Renaming**: migrate `projects` → `sites`, `tasks` → `service_jobs` or `checklists` based on usage; ensure FK/indices updated.
-- **Finance tables**: host lacked quote/invoice tables, so `quotes` and `invoices` were introduced with `company_id` tenancy and links to customers/quotes. Lifecycle fields added (quote_number/invoice_number, subtotal, tax, totals, paid_amount/balance, valid_until, site_id, checklist_template). A new `payments` table was created for invoice payments (company-scoped). Existing gateway/subscription payment tables remain separate and were not reused.
-- **Tenant columns**: add `company_id` (and `team_id` where crew-relevant) to any WorkCore table lacking it; backfill via authenticated company selection.
+- **Finance tables**: host lacked quote/invoice tables, so `quotes` and `invoices` were introduced with `company_id` tenancy and links to customers/quotes. Lifecycle fields added (quote_number/invoice_number, subtotal, tax, totals, paid_amount/balance, valid_until, site_id, checklist_template). A new `payments` table was created for invoice payments (company-scoped). Existing gateway/subscription payment tables remain separate and were not reused. Line-item tables `quote_items` and `invoice_items` were added with company_id + created_by for reconciliation.
+- **Line items**: canonical `quote_items` and `invoice_items` tables carry `description`, `quantity`, `unit_price`, `tax_rate`, `line_total`, and `sort_order`; totals on quotes/invoices are recomputed from items to keep subtotal/tax/total aligned.
+- **Tenant columns**: add `company_id` (and `team_id` where crew-relevant) to any WorkCore table lacking it; backfill via authenticated company selection. `service_jobs` gained `customer_id` for quote conversion.
+- **Migration safety**: lifecycle migration avoids brittle column renames by additive `quote_number`/`invoice_number` fields with backfill from legacy `number` columns when present; DBAL not required for column rename. Paid/balance and subtotal/tax fields are additive.
 - **Foreign keys**: align FK references to renamed tables; enforce cascading consistent with host conventions.
 - **Timestamps & soft deletes**: retain where present; add soft deletes where WorkCore expects archiving.
 

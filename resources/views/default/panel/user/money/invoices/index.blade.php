@@ -5,6 +5,10 @@
         <x-tabler-file-plus class="size-4" />
         {{ __('New Invoice') }}
     </x-button>
+    <x-button href="{{ route('dashboard.money.payments.index') }}" variant="ghost">
+        <x-tabler-cash class="size-4" />
+        {{ __('Payments') }}
+    </x-button>
 @endsection
 
 @section('content')

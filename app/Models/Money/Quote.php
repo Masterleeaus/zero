@@ -7,8 +7,10 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\QuoteItem;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,6 +63,11 @@ class Quote extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(QuoteItem::class);
+    }
+
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);
@@ -69,5 +76,22 @@ class Quote extends Model
     public function serviceJobs(): HasMany
     {
         return $this->hasMany(ServiceJob::class);
+    }
+
+    public function recomputeTotalsFromItems(): void
+    {
+        /** @var Collection<int, QuoteItem> $items */
+        $items = $this->items;
+        $subtotal = $items->sum(fn (QuoteItem $item) => (float) ($item->quantity * $item->unit_price));
+        $tax = $items->sum(function (QuoteItem $item) {
+            $line = (float) ($item->quantity * $item->unit_price);
+            return $line * ((float) $item->tax_rate) / 100;
+        });
+
+        $this->update([
+            'subtotal' => $subtotal,
+            'tax'      => $tax,
+            'total'    => $subtotal + $tax,
+        ]);
     }
 }

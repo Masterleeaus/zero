@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Crm\Customer;
 use App\Models\Money\Invoice;
+use App\Models\Money\QuoteItem;
 use App\Models\Money\Payment;
 use App\Models\Money\Quote;
 use App\Models\Work\Checklist;
@@ -64,5 +65,38 @@ class MoneyLifecycleTest extends TestCase
         $this->assertInstanceOf(ServiceJob::class, $job);
         $this->assertEquals(2, Checklist::where('service_job_id', $job->id)->count());
         $this->assertEquals($quote->company_id, $job->company_id);
+    }
+
+    public function test_quote_to_invoice_conversion_copies_items(): void
+    {
+        $user = User::factory()->create(['company_id' => 55]);
+        $quote = Quote::factory()->create([
+            'company_id'  => 55,
+            'status'      => 'accepted',
+            'quote_number'=> 'Q-INV-1',
+            'subtotal'    => 100,
+            'tax'         => 10,
+            'total'       => 110,
+        ]);
+
+        QuoteItem::create([
+            'company_id' => 55,
+            'created_by' => $user->id,
+            'quote_id'   => $quote->id,
+            'description'=> 'Work',
+            'quantity'   => 1,
+            'unit_price' => 100,
+            'tax_rate'   => 10,
+            'line_total' => 100,
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
+            ->assertRedirect();
+
+        $invoice = Invoice::where('quote_id', $quote->id)->firstOrFail();
+        $this->assertEquals(1, $invoice->items()->count());
+        $this->assertEquals(110.00, (float) $invoice->total);
     }
 }

@@ -54,6 +54,36 @@
         </x-card>
 
         <x-card>
+            <div class="font-semibold mb-3">{{ __('Line Items') }}</div>
+            <x-table>
+                <x-slot:head>
+                    <tr>
+                        <th>{{ __('Description') }}</th>
+                        <th>{{ __('Qty') }}</th>
+                        <th>{{ __('Unit Price') }}</th>
+                        <th>{{ __('Tax %') }}</th>
+                        <th>{{ __('Line Total') }}</th>
+                    </tr>
+                </x-slot:head>
+                <x-slot:body>
+                    @forelse($invoice->items as $item)
+                        <tr>
+                            <td>{{ $item->description }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->unit_price }}</td>
+                            <td>{{ $item->tax_rate }}</td>
+                            <td>{{ $item->line_total }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-slate-500 py-4">{{ __('No items') }}</td>
+                        </tr>
+                    @endforelse
+                </x-slot:body>
+            </x-table>
+        </x-card>
+
+        <x-card>
             <div class="flex justify-between items-center mb-3">
                 <div class="font-semibold">{{ __('Payments') }}</div>
                 <div class="space-x-2">

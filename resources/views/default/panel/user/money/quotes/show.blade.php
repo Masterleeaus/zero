@@ -86,6 +86,36 @@
         </x-card>
 
         <x-card>
+            <div class="font-semibold mb-3">{{ __('Line Items') }}</div>
+            <x-table>
+                <x-slot:head>
+                    <tr>
+                        <th>{{ __('Description') }}</th>
+                        <th>{{ __('Qty') }}</th>
+                        <th>{{ __('Unit Price') }}</th>
+                        <th>{{ __('Tax %') }}</th>
+                        <th>{{ __('Line Total') }}</th>
+                    </tr>
+                </x-slot:head>
+                <x-slot:body>
+                    @forelse($quote->items as $item)
+                        <tr>
+                            <td>{{ $item->description }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->unit_price }}</td>
+                            <td>{{ $item->tax_rate }}</td>
+                            <td>{{ $item->line_total }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-slate-500 py-4">{{ __('No items') }}</td>
+                        </tr>
+                    @endforelse
+                </x-slot:body>
+            </x-table>
+        </x-card>
+
+        <x-card>
             <div class="font-semibold mb-3">{{ __('Convert to Service Job') }}</div>
             <form method="post" action="{{ route('dashboard.money.quotes.convert-job', $quote) }}" class="grid md:grid-cols-3 gap-3">
                 @csrf
@@ -101,6 +131,21 @@
                     </x-button>
                 </div>
             </form>
+        </x-card>
+
+        <x-card>
+            <div class="font-semibold mb-3">{{ __('Create Invoice from Quote') }}</div>
+            @if($quote->status === 'accepted')
+                <form method="post" action="{{ route('dashboard.money.quotes.convert-invoice', $quote) }}">
+                    @csrf
+                    <x-button type="submit">
+                        <x-tabler-file-invoice class="size-4" />
+                        {{ __('Generate Invoice') }}
+                    </x-button>
+                </form>
+            @else
+                <p class="text-slate-500 text-sm">{{ __('Quote must be accepted before invoicing.') }}</p>
+            @endif
         </x-card>
     </div>
 @endsection

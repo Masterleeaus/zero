@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Money\Invoice;
+use App\Models\Money\InvoiceItem;
 use App\Models\Money\Quote;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ class InvoiceController extends CoreController
 {
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Invoice::class);
+
         $query = Invoice::query()->with(['customer', 'quote']);
 
         if ($status = $request->string('status')->toString()) {
@@ -42,13 +45,17 @@ class InvoiceController extends CoreController
 
     public function show(Invoice $invoice): View
     {
+        $this->authorize('view', $invoice);
+
         return view('default.panel.user.money.invoices.show', [
-            'invoice' => $invoice->load(['customer', 'quote', 'payments']),
+            'invoice' => $invoice->load(['customer', 'quote', 'payments', 'items']),
         ]);
     }
 
     public function create(Request $request): View
     {
+        $this->authorize('create', Invoice::class);
+
         return view('default.panel.user.money.invoices.form', [
             'invoice'   => new Invoice(),
             'customers' => $this->customers(),
@@ -58,6 +65,8 @@ class InvoiceController extends CoreController
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', Invoice::class);
+
         $data = $this->validated($request);
 
         $invoice = Invoice::create([
@@ -67,6 +76,8 @@ class InvoiceController extends CoreController
             'balance'    => $data['total'],
             'status'     => $data['status'] ?? 'draft',
         ]);
+
+        $this->syncInvoiceItems($invoice, $request);
 
         if ($invoice->status === 'issued') {
             event(new \App\Events\InvoiceIssued($invoice));
@@ -81,7 +92,7 @@ class InvoiceController extends CoreController
 
     public function edit(Invoice $invoice): View
     {
-        $this->authorizeCompany($invoice->company_id);
+        $this->authorize('update', $invoice);
 
         return view('default.panel.user.money.invoices.form', [
             'invoice'   => $invoice,
@@ -92,11 +103,12 @@ class InvoiceController extends CoreController
 
     public function update(Request $request, Invoice $invoice): RedirectResponse
     {
-        $this->authorizeCompany($invoice->company_id);
+        $this->authorize('update', $invoice);
 
         $previousStatus = $invoice->status;
         $data = $this->validated($request, ignoreId: $invoice->id);
         $invoice->update($data);
+        $this->syncInvoiceItems($invoice, $request);
         $invoice->recomputeBalance();
 
         if ($invoice->status === 'issued' && $previousStatus !== 'issued') {
@@ -112,7 +124,7 @@ class InvoiceController extends CoreController
 
     public function markPaid(Invoice $invoice): RedirectResponse
     {
-        $this->authorizeCompany($invoice->company_id);
+        $this->authorize('markPaid', $invoice);
         $invoice->update(['status' => 'paid', 'balance' => 0, 'paid_amount' => $invoice->total]);
         event(new \App\Events\InvoicePaid($invoice));
 
@@ -121,7 +133,7 @@ class InvoiceController extends CoreController
 
     public function markOverdue(Invoice $invoice): RedirectResponse
     {
-        $this->authorizeCompany($invoice->company_id);
+        $this->authorize('markOverdue', $invoice);
         $invoice->update(['status' => 'overdue']);
 
         return back()->with('status', __('Invoice marked as overdue.'));
@@ -147,7 +159,41 @@ class InvoiceController extends CoreController
             'total'       => ['required', 'numeric', 'min:0'],
             'notes'       => ['nullable', 'string'],
             'status'      => ['nullable', Rule::in(['draft', 'issued', 'partial', 'paid', 'overdue', 'void'])],
+            'items'       => ['sometimes', 'array'],
+            'items.*.description' => ['required_with:items', 'string', 'max:255'],
+            'items.*.quantity'    => ['required_with:items', 'numeric', 'min:0'],
+            'items.*.unit_price'  => ['required_with:items', 'numeric', 'min:0'],
+            'items.*.tax_rate'    => ['nullable', 'numeric', 'min:0'],
+            'items.*.line_total'  => ['nullable', 'numeric', 'min:0'],
+            'items.*.sort_order'  => ['nullable', 'integer', 'min:0'],
         ]);
+    }
+
+    private function syncInvoiceItems(Invoice $invoice, Request $request): void
+    {
+        $items = collect($request->input('items', []));
+        if ($items->isEmpty()) {
+            return;
+        }
+
+        $invoice->items()->delete();
+        foreach ($items as $index => $item) {
+            $lineSubtotal = ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0);
+            $invoice->items()->create([
+                'company_id' => $invoice->company_id,
+                'created_by' => $request->user()->id,
+                'description'=> $item['description'] ?? '',
+                'quantity'   => $item['quantity'] ?? 0,
+                'unit_price' => $item['unit_price'] ?? 0,
+                'tax_rate'   => $item['tax_rate'] ?? 0,
+                'line_total' => $item['line_total'] ?? $lineSubtotal,
+                'sort_order' => $item['sort_order'] ?? $index,
+            ]);
+        }
+
+        $invoice->load('items');
+        $invoice->recomputeTotalsFromItems();
+        $invoice->recomputeBalance();
     }
 
     private function customers()
@@ -166,10 +212,4 @@ class InvoiceController extends CoreController
             ->get(['id', 'quote_number']);
     }
 
-    private function authorizeCompany(int $companyId): void
-    {
-        if (auth()->user()?->company_id !== $companyId) {
-            abort(403);
-        }
-    }
 }

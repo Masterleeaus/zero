@@ -82,14 +82,12 @@ class EventServiceProvider extends ServiceProvider
         PaystackLifetimeEvent::class => [
             PaystackLifetimeListener::class,
         ],
+        // Lifecycle signals (no automation listeners yet)
         QuoteAccepted::class => [
-            //
         ],
         InvoiceIssued::class => [
-            //
         ],
         InvoicePaid::class => [
-            //
         ],
         UsersActivityEvent::class => [
             UsersActivityListener::class,

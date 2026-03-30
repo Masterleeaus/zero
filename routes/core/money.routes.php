@@ -43,5 +43,9 @@ Route::middleware(['auth', 'updateUserActivity'])
 
             Route::post('invoices/{invoice}/payments', [\App\Http\Controllers\Core\Money\PaymentController::class, 'store'])
                 ->name('payments.store');
+            Route::get('payments', [\App\Http\Controllers\Core\Money\PaymentController::class, 'index'])
+                ->name('payments.index');
+            Route::post('quotes/{quote}/create-invoice', [\App\Http\Controllers\Core\Money\QuoteController::class, 'convertToInvoice'])
+                ->name('quotes.convert-invoice');
         });
     });

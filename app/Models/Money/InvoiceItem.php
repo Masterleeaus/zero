@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Payment extends Model
+class InvoiceItem extends Model
 {
     use HasFactory;
     use BelongsToCompany;
@@ -20,28 +20,23 @@ class Payment extends Model
         'company_id',
         'created_by',
         'invoice_id',
-        'amount',
-        'method',
-        'reference',
-        'paid_at',
+        'description',
+        'quantity',
+        'unit_price',
+        'tax_rate',
+        'line_total',
+        'sort_order',
     ];
 
     protected $casts = [
-        'amount'  => 'decimal:2',
-        'paid_at' => 'datetime',
+        'quantity'   => 'decimal:2',
+        'unit_price' => 'decimal:2',
+        'tax_rate'   => 'decimal:2',
+        'line_total' => 'decimal:2',
     ];
 
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (Payment $payment) {
-            if (! $payment->paid_at) {
-                $payment->paid_at = now();
-            }
-        });
     }
 }
