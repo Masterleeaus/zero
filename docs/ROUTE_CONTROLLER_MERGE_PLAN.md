@@ -3,7 +3,7 @@
 ## Current state
 - Host dashboard routes live in `routes/panel.php` plus modular core route files in `routes/core/*.routes.php` loaded via `RouteServiceProvider::loadCoreRoutes()` (CRM, Work, Money, Team, Support, Insights). Public/auth/api routes are still split (`routes/web.php`, `routes/auth.php`, `routes/api.php`, `routes/webhooks.php`, `routes/channels.php`, `routes/console.php`).
 - CRM core routes now deliver real screens for customers and enquiries (list/create/show/update) under `App\Http\Controllers\Core\Crm`; views moved under `resources/views/default/panel/user/crm/*`.
-- Work core routes now deliver real screens for sites, service jobs, and checklists under `App\Http\Controllers\Core\Work` with native views in `resources/views/default/panel/work/*`.
+- Work core routes now deliver real screens for sites, service jobs, and checklists under `App\Http\Controllers\Core\Work` with native views in `resources/views/default/panel/user/work/*`.
 - WorkCore ships a monolithic `routes/web.php` (prefixed `account`, middleware `auth|multi-company-select|email_verified`) containing all CRM/Work/Money/Team/Support endpoints and blade responses.
 - Controller naming overlaps: `DashboardController`, `SettingsController`, `NotificationController`, `SearchController`, `Payment*`, `Invoice*`, `OrderController`, `Gdpr*`, `Attendance*`, `Leave*`.
 
@@ -11,7 +11,7 @@
 - Core route files now exist and are loaded from `RouteServiceProvider`:
   - `routes/core/crm.routes.php` (customers/enquiries routes with CRUD registered)
   - `routes/core/work.routes.php` (sites/service jobs/checklists routes registered; logic pending)
-  - `routes/core/money.routes.php` (quotes/invoices routes registered; logic pending)
+  - `routes/core/money.routes.php` (quotes/invoices routes registered; native list/detail logic now present)
   - `routes/core/team.routes.php` (team roster wired to host TeamController)
   - `routes/core/support.routes.php` (placeholder, to be filled next)
   - `routes/core/insights.routes.php` (overview/reports routes registered)
@@ -21,7 +21,7 @@
 ## Controller placement & merge rules
 - **CRM**: move `Client*`, `Lead*`, `Deal*`, `Proposal*`, `Gdpr*`, `Contact*`, `Category/SubCategory*` into `App\Http\Controllers\Crm`; adjust names to `Customer`, `Enquiry`, `Pipeline` vocabulary. Real controllers now live under `App\Http\Controllers\Core\Crm` with list/create/show/update and native views.
 - **Work**: move `Project*` (sites), `Task*` (service job/checklist), `SubTask*`, `Timelog*`, `GanttLinkController`, `Discussion*`, `Calendar` into `App\Http\Controllers\Work`; split CRUD vs workflow endpoints. Native controllers now exist under `App\Http\Controllers\Core\Work` for site/service job/checklist CRUD with tenancy and filters; remaining advanced flows (timelogs, discussions, templates) still to merge.
-- **Money**: merge `Invoice*`, `Estimate/Quote*`, `CreditNote`, `Payment*`, `Expense*`, `Order*`, `BankAccount*` with existing finance flow (`Finance\GatewayController`, `Finance\PaymentProcessController`). Introduce interfaces if bindings collide. Placeholder controllers exist under `App\Http\Controllers\Core\Money` (to be replaced).
+- **Money**: merge `Invoice*`, `Estimate/Quote*`, `CreditNote`, `Payment*`, `Expense*`, `Order*`, `BankAccount*` with existing finance flow (`Finance\GatewayController`, `Finance\PaymentProcessController`). Introduce interfaces if bindings collide. Core now has `QuoteController` and `InvoiceController` with list/detail views; remaining finance controllers still to merge.
 - **Team**: move `Employee*` (cleaners), `Attendance*`, `Leave*`, `Shift*`, `Promotion*`, `Department/Designation*`, `Award*`, `EmergencyContact*` into `App\Http\Controllers\Teamwork`; keep `team_id` as grouping only. Core route currently points to host `App\Http\Controllers\Team\TeamController`.
 - **Support**: move `Ticket*`, `Notice*`, `KnowledgeBase*`, `Discussion*` into `App\Http\Controllers\Support`; reuse `Dashboard\SupportController` surfaces where possible. Routes pending.
 - **Insights**: move reporting controllers (`IncomeVsExpenseReportController`, `SalesReportController`, `TaskReportController`, `TimelogReportController`, `AttendanceReportController`, `LeadReportController`) into `App\Http\Controllers\Insights`. Placeholder controller exists under `App\Http\Controllers\Core\Insights`.

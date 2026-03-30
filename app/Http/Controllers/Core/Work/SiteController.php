@@ -30,7 +30,7 @@ class SiteController extends CoreController
 
         $sites = $query->latest()->paginate(10)->withQueryString();
 
-        return view('default.panel.work.sites.index', [
+        return view('default.panel.user.work.sites.index', [
             'sites'  => $sites,
             'search' => $search ?? '',
             'status' => $status ?? '',
@@ -39,7 +39,7 @@ class SiteController extends CoreController
 
     public function create(): View
     {
-        return view('default.panel.work.sites.form', [
+        return view('default.panel.user.work.sites.form', [
             'site' => new Site(),
         ]);
     }
@@ -58,14 +58,14 @@ class SiteController extends CoreController
 
     public function show(Site $site): View
     {
-        return view('default.panel.work.sites.show', [
+        return view('default.panel.user.work.sites.show', [
             'site' => $site->load('jobs'),
         ]);
     }
 
     public function edit(Site $site): View
     {
-        return view('default.panel.work.sites.form', [
+        return view('default.panel.user.work.sites.form', [
             'site' => $site,
         ]);
     }

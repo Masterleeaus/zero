@@ -8,6 +8,8 @@ use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
+use App\Models\Money\Invoice;
+use App\Models\Money\Quote;
 use App\Models\Work\Checklist;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
@@ -56,6 +58,14 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('checklist', static function (string|int $value) {
             return Checklist::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('quote', static function (string|int $value) {
+            return Quote::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('invoice', static function (string|int $value) {
+            return Invoice::query()->whereKey($value)->firstOrFail();
         });
     }
 

@@ -35,7 +35,7 @@ class ServiceJobController extends CoreController
 
         $jobs = $query->latest()->paginate(10)->withQueryString();
 
-        return view('default.panel.work.jobs.index', [
+        return view('default.panel.user.work.jobs.index', [
             'jobs'    => $jobs,
             'sites'   => Site::query()->orderBy('name')->get(['id', 'name']),
             'filters' => [
@@ -48,7 +48,7 @@ class ServiceJobController extends CoreController
 
     public function create(Request $request): View
     {
-        return view('default.panel.work.jobs.form', [
+        return view('default.panel.user.work.jobs.form', [
             'job'    => new ServiceJob(),
             'sites'  => Site::query()->orderBy('name')->get(['id', 'name']),
             'siteId' => $request->integer('site_id') ?: null,
@@ -69,14 +69,14 @@ class ServiceJobController extends CoreController
 
     public function show(ServiceJob $job): View
     {
-        return view('default.panel.work.jobs.show', [
+        return view('default.panel.user.work.jobs.show', [
             'job' => $job->load(['site', 'checklists']),
         ]);
     }
 
     public function edit(ServiceJob $job): View
     {
-        return view('default.panel.work.jobs.form', [
+        return view('default.panel.user.work.jobs.form', [
             'job'    => $job,
             'sites'  => Site::query()->orderBy('name')->get(['id', 'name']),
             'siteId' => $job->site_id,

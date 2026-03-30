@@ -32,7 +32,7 @@ class ChecklistController extends CoreController
 
         $checklists = $query->latest()->paginate(10)->withQueryString();
 
-        return view('default.panel.work.checklists.index', [
+        return view('default.panel.user.work.checklists.index', [
             'checklists' => $checklists,
             'jobs'       => ServiceJob::query()->orderByDesc('id')->get(['id', 'title']),
             'filters'    => [
@@ -45,7 +45,7 @@ class ChecklistController extends CoreController
 
     public function create(Request $request): View
     {
-        return view('default.panel.work.checklists.form', [
+        return view('default.panel.user.work.checklists.form', [
             'checklist' => new Checklist(),
             'jobs'      => ServiceJob::query()->orderByDesc('id')->get(['id', 'title']),
             'jobId'     => $request->integer('job_id') ?: null,
@@ -66,14 +66,14 @@ class ChecklistController extends CoreController
 
     public function show(Checklist $checklist): View
     {
-        return view('default.panel.work.checklists.show', [
+        return view('default.panel.user.work.checklists.show', [
             'checklist' => $checklist->load('job.site'),
         ]);
     }
 
     public function edit(Checklist $checklist): View
     {
-        return view('default.panel.work.checklists.form', [
+        return view('default.panel.user.work.checklists.form', [
             'checklist' => $checklist,
             'jobs'      => ServiceJob::query()->orderByDesc('id')->get(['id', 'title']),
             'jobId'     => $checklist->service_job_id,
