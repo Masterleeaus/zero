@@ -72,7 +72,7 @@ class MoneyLifecycleTest extends TestCase
         $user = User::factory()->create(['company_id' => 55]);
         $quote = Quote::factory()->create([
             'company_id'  => 55,
-            'status'      => 'accepted',
+            'status'      => 'approved',
             'quote_number'=> 'Q-INV-1',
             'subtotal'    => 100,
             'tax'         => 10,
@@ -98,6 +98,46 @@ class MoneyLifecycleTest extends TestCase
         $invoice = Invoice::where('quote_id', $quote->id)->firstOrFail();
         $this->assertEquals(1, $invoice->items()->count());
         $this->assertEquals(110.00, (float) $invoice->total);
+        $this->assertEquals('draft', $invoice->status);
+        $this->assertEquals(Quote::STATUS_CONVERTED, $quote->fresh()->status);
+    }
+
+    public function test_quote_to_invoice_requires_valid_status(): void
+    {
+        $user = User::factory()->create(['company_id' => 56]);
+        $quote = Quote::factory()->create([
+            'company_id' => 56,
+            'status'     => 'draft',
+            'subtotal'   => 50,
+            'tax'        => 5,
+            'total'      => 55,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
+            ->assertRedirect()
+            ->assertSessionHasErrors();
+
+        $this->assertNull(Invoice::where('quote_id', $quote->id)->first());
+    }
+
+    public function test_quote_to_invoice_requires_line_items(): void
+    {
+        $user = User::factory()->create(['company_id' => 57]);
+        $quote = Quote::factory()->create([
+            'company_id' => 57,
+            'status'     => 'approved',
+            'subtotal'   => 50,
+            'tax'        => 5,
+            'total'      => 55,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
+            ->assertRedirect()
+            ->assertSessionHasErrors();
+
+        $this->assertNull(Invoice::where('quote_id', $quote->id)->first());
     }
 
     public function test_totals_are_recomputed_from_items(): void
