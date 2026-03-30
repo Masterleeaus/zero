@@ -135,7 +135,9 @@ class ServiceJobController extends CoreController
             'assigned_user_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id'),
+                Rule::exists('users', 'id')->where(function ($query) use ($request) {
+                    return $query->where('company_id', $request->user()->company_id);
+                }),
             ],
         ]);
     }

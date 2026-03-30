@@ -1985,7 +1985,7 @@ class MenuService
                 'order'            => 23,
                 'is_active'        => true,
                 'params'           => [],
-                'type'             => 'collaps',
+                'type'             => 'collapse',
                 'extension'        => null,
                 'active_condition' => [
                     'dashboard.money.quotes.*',
