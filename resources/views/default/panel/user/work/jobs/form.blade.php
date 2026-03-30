@@ -23,8 +23,26 @@
                         @endforeach
                     </x-select>
                 </div>
+                <div>
+                    <label class="form-label">{{ __('Customer') }}</label>
+                    <x-select name="customer_id">
+                        <option value="">{{ __('Select customer') }}</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}" @selected(old('customer_id', $job->customer_id) == $customer->id)>
+                                {{ $customer->name }}
+                            </option>
+                        @endforeach
+                    </x-select>
+                </div>
                 <x-input label="{{ __('Title') }}" name="title" required value="{{ old('title', $job->title) }}" />
-                <x-input label="{{ __('Status') }}" name="status" value="{{ old('status', $job->status) }}" />
+                <div>
+                    <label class="form-label">{{ __('Status') }}</label>
+                    <x-select name="status">
+                        @foreach($statuses as $status)
+                            <option value="{{ $status }}" @selected(old('status', $job->status ?? 'scheduled') === $status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>
+                        @endforeach
+                    </x-select>
+                </div>
                 <x-input label="{{ __('Scheduled At') }}" type="datetime-local" name="scheduled_at"
                          value="{{ old('scheduled_at', optional($job->scheduled_at)->format('Y-m-d\\TH:i')) }}" />
             </div>

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Core\Work;
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use App\Models\Crm\Customer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,9 +15,11 @@ use Illuminate\Validation\Rule;
 
 class ServiceJobController extends CoreController
 {
+    private array $statuses = ['scheduled', 'in_progress', 'completed', 'cancelled'];
+
     public function index(Request $request): View
     {
-        $query = ServiceJob::query()->with('site');
+        $query = ServiceJob::query()->with(['site', 'customer']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
@@ -37,7 +40,7 @@ class ServiceJobController extends CoreController
 
         return view('default.panel.user.work.jobs.index', [
             'jobs'    => $jobs,
-            'sites'   => Site::query()->orderBy('name')->get(['id', 'name']),
+            'sites'   => $this->sites(),
             'filters' => [
                 'status'  => $status ?? '',
                 'site_id' => $siteId ?? '',
@@ -50,8 +53,10 @@ class ServiceJobController extends CoreController
     {
         return view('default.panel.user.work.jobs.form', [
             'job'    => new ServiceJob(),
-            'sites'  => Site::query()->orderBy('name')->get(['id', 'name']),
+            'sites'  => $this->sites(),
+            'customers' => $this->customers(),
             'siteId' => $request->integer('site_id') ?: null,
+            'statuses' => $this->statuses,
         ]);
     }
 
@@ -70,7 +75,7 @@ class ServiceJobController extends CoreController
     public function show(ServiceJob $job): View
     {
         return view('default.panel.user.work.jobs.show', [
-            'job' => $job->load(['site', 'checklists']),
+            'job' => $job->load(['site', 'customer', 'checklists']),
         ]);
     }
 
@@ -78,8 +83,10 @@ class ServiceJobController extends CoreController
     {
         return view('default.panel.user.work.jobs.form', [
             'job'    => $job,
-            'sites'  => Site::query()->orderBy('name')->get(['id', 'name']),
+            'sites'  => $this->sites(),
+            'customers' => $this->customers(),
             'siteId' => $job->site_id,
+            'statuses' => $this->statuses,
         ]);
     }
 
@@ -110,10 +117,32 @@ class ServiceJobController extends CoreController
                     });
                 }),
             ],
+            'customer_id'  => [
+                'nullable',
+                'integer',
+                Rule::exists('customers', 'id')->where(static function ($query) {
+                    return $query->when(auth()->check(), function ($q) {
+                        $q->where('company_id', auth()->user()->company_id);
+                    });
+                }),
+            ],
             'title'        => ['required', 'string', 'max:255'],
-            'status'       => ['nullable', 'string', 'max:50'],
+            'status'       => ['nullable', Rule::in($this->statuses)],
             'scheduled_at' => ['nullable', 'date'],
             'notes'        => ['nullable', 'string'],
         ]);
+    }
+
+    private function sites()
+    {
+        return Site::query()->orderBy('name')->get(['id', 'name']);
+    }
+
+    private function customers()
+    {
+        return Customer::query()
+            ->when(auth()->check(), fn ($q) => $q->where('company_id', auth()->user()->company_id))
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }

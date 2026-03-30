@@ -23,6 +23,12 @@
                     <div class="text-sm text-slate-500">{{ __('Site') }}</div>
                     <div>{{ $job->site?->name }}</div>
                 </div>
+                @if($job->customer)
+                    <div>
+                        <div class="text-sm text-slate-500">{{ __('Customer') }}</div>
+                        <div>{{ $job->customer?->name }}</div>
+                    </div>
+                @endif
                 @if($job->scheduled_at)
                     <div>
                         <div class="text-sm text-slate-500">{{ __('Scheduled At') }}</div>
