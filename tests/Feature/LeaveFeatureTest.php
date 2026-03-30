@@ -62,4 +62,25 @@ class LeaveFeatureTest extends TestCase
         $response->assertViewHas('leaveTotals', 1);
         $response->assertViewHas('leaveShiftConflicts', 1);
     }
+
+    public function test_conflicts_with_shift_helper(): void
+    {
+        $user = User::factory()->create(['company_id' => 21]);
+        $leave = Leave::factory()->create([
+            'company_id' => $user->company_id,
+            'user_id'    => $user->id,
+            'start_date' => now()->format('Y-m-d'),
+            'end_date'   => now()->addDay()->format('Y-m-d'),
+        ]);
+
+        $shift = Shift::factory()->create([
+            'company_id' => $user->company_id,
+            'user_id'    => $user->id,
+            'start_at'   => now(),
+            'end_at'     => now()->addHours(4),
+        ]);
+
+        $this->assertTrue(Leave::conflictsWithShift($shift));
+        $this->assertEquals(1, Leave::conflictsWithShifts($leave->company_id));
+    }
 }

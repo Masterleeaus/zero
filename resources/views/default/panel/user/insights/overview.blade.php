@@ -111,6 +111,23 @@
                         <span class="font-semibold">{{ $leaveShiftConflicts }}</span>
                     </div>
                 </x-card>
+                <x-card class="space-y-2">
+                    <div class="font-semibold">{{ __('Expenses') }}</div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Total Spend') }}</span>
+                        <span class="font-semibold">{{ number_format($expenseTotal, 2) }}</span>
+                    </div>
+                    <div class="space-y-1">
+                        @forelse($expenseByCategory as $categoryId => $total)
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">{{ __('Category') }} #{{ $categoryId }}</span>
+                                <span class="font-semibold">{{ number_format($total, 2) }}</span>
+                            </div>
+                        @empty
+                            <p class="text-slate-500 text-sm">{{ __('No expenses yet') }}</p>
+                        @endforelse
+                    </div>
+                </x-card>
             </div>
         </div>
 

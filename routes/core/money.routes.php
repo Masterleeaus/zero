@@ -47,5 +47,31 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('payments.index');
             Route::post('quotes/{quote}/create-invoice', [\App\Http\Controllers\Core\Money\QuoteController::class, 'convertToInvoice'])
                 ->name('quotes.convert-invoice');
+
+            Route::get('expenses', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'index'])
+                ->name('expenses.index');
+            Route::get('expenses/create', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'create'])
+                ->name('expenses.create');
+            Route::post('expenses', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'store'])
+                ->name('expenses.store');
+            Route::get('expenses/{expense}/edit', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'edit'])
+                ->name('expenses.edit');
+            Route::put('expenses/{expense}', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'update'])
+                ->name('expenses.update');
+            Route::delete('expenses/{expense}', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'destroy'])
+                ->name('expenses.destroy');
+
+            Route::get('expense-categories', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'index'])
+                ->name('expense-categories.index');
+            Route::get('expense-categories/create', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'create'])
+                ->name('expense-categories.create');
+            Route::post('expense-categories', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'store'])
+                ->name('expense-categories.store');
+            Route::get('expense-categories/{expenseCategory}/edit', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'edit'])
+                ->name('expense-categories.edit');
+            Route::put('expense-categories/{expenseCategory}', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'update'])
+                ->name('expense-categories.update');
+            Route::delete('expense-categories/{expenseCategory}', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'destroy'])
+                ->name('expense-categories.destroy');
         });
     });

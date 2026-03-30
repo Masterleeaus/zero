@@ -6,6 +6,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\User;
+use App\Models\Work\Shift;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -53,5 +54,15 @@ class Leave extends Model
                     ->whereRaw('date(shifts.end_at) >= leaves.start_date');
             })
             ->count();
+    }
+
+    public static function conflictsWithShift(Shift $shift): bool
+    {
+        return static::query()
+            ->where('company_id', $shift->company_id)
+            ->where('user_id', $shift->user_id)
+            ->whereDate('start_date', '<=', optional($shift->end_at)?->toDateString())
+            ->whereDate('end_date', '>=', optional($shift->start_at)?->toDateString())
+            ->exists();
     }
 }
