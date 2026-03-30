@@ -9,12 +9,18 @@ use Carbon\Carbon;
 
 class SupportLifecycleService
 {
+    private const STATUS_WAITING_ON_USER = 'waiting_on_user';
+    private const STATUS_WAITING_ON_TEAM = 'waiting_on_team';
+    private const STATUS_STALE = 'stale';
+    private const STATUS_RESOLVED = 'resolved';
+    private const STATUS_ESCALATED = 'escalated';
+
     public function processReplies(UserSupport $ticket, string $direction): UserSupport
     {
         if ($direction === 'agent') {
-            $ticket->status = 'waiting_on_user';
+            $ticket->status = self::STATUS_WAITING_ON_USER;
         } elseif ($direction === 'user') {
-            $ticket->status = 'waiting_on_team';
+            $ticket->status = self::STATUS_WAITING_ON_TEAM;
         }
 
         $ticket->resolved_at = null;
@@ -43,11 +49,11 @@ class SupportLifecycleService
                     return;
                 }
 
-                UserSupport::query()->whereIn('id', $ids)->update(['status' => 'stale']);
+                UserSupport::query()->whereIn('id', $ids)->update(['status' => self::STATUS_STALE]);
                 $updated += $ids->count();
 
                 $tickets->each(function (UserSupport $ticket) {
-                    $this->notifyOwner($ticket, 'stale');
+                    $this->notifyOwner($ticket, self::STATUS_STALE);
                 });
             });
 
@@ -61,7 +67,7 @@ class SupportLifecycleService
 
         UserSupport::query()
             ->where('company_id', $companyId)
-            ->whereNotIn('status', ['resolved', 'closed'])
+            ->whereNotIn('status', [self::STATUS_RESOLVED, 'closed'])
             ->where('updated_at', '<', $before)
             ->chunkById(100, function ($tickets) use (&$updated, $resolvedAt) {
                 $ids = $tickets->pluck('id');
@@ -73,15 +79,14 @@ class SupportLifecycleService
                 UserSupport::query()
                     ->whereIn('id', $ids)
                     ->update([
-                        'status'      => 'resolved',
+                        'status'      => self::STATUS_RESOLVED,
                         'resolved_at' => $resolvedAt,
                     ]);
 
                 $updated += $ids->count();
 
-                $tickets->each(function (UserSupport $ticket) use ($resolvedAt) {
-                    $ticket->resolved_at = $resolvedAt;
-                    $this->notifyOwner($ticket, 'resolved');
+                $tickets->each(function (UserSupport $ticket) {
+                    $this->notifyOwner($ticket, self::STATUS_RESOLVED);
                 });
             });
 
@@ -91,11 +96,11 @@ class SupportLifecycleService
     public function resolve(UserSupport $ticket): UserSupport
     {
         $ticket->update([
-            'status'      => 'resolved',
+            'status'      => self::STATUS_RESOLVED,
             'resolved_at' => now(),
         ]);
 
-        $this->notifyOwner($ticket, 'resolved');
+        $this->notifyOwner($ticket, self::STATUS_RESOLVED);
 
         return $ticket->fresh();
     }
@@ -104,7 +109,7 @@ class SupportLifecycleService
     {
         $ticket->update([
             'assigned_to' => $userId,
-            'status'      => 'waiting_on_team',
+            'status'      => self::STATUS_WAITING_ON_TEAM,
         ]);
 
         $assignee = User::where('company_id', $ticket->company_id)
@@ -116,16 +121,16 @@ class SupportLifecycleService
             title: 'Ticket Assigned'
         ));
 
-        $this->notifyOwner($ticket, 'waiting_on_team');
+        $this->notifyOwner($ticket, self::STATUS_WAITING_ON_TEAM);
 
         return $ticket->fresh();
     }
 
     public function escalate(UserSupport $ticket, string $reason = ''): UserSupport
     {
-        $ticket->update(['priority' => 'high', 'status' => 'escalated']);
+        $ticket->update(['priority' => 'high', 'status' => self::STATUS_ESCALATED]);
 
-        $this->notifyOwner($ticket, 'escalated');
+        $this->notifyOwner($ticket, self::STATUS_ESCALATED);
 
         $this->notifyCompanyAdmins(
             $ticket,
