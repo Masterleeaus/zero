@@ -29,12 +29,13 @@ class InsightsReportsTest extends TestCase
         $user = User::factory()->create(['company_id' => $companyId]);
         $this->actingAs($user);
 
-        $customer = Customer::factory()->create(['company_id' => $companyId, 'name' => 'Report Customer']);
+        $customerName = 'Report Customer';
+        $customerId = Customer::factory()->create(['company_id' => $companyId, 'name' => $customerName])->id;
         $quote = Quote::factory()->create(['company_id' => $companyId]);
 
         Invoice::factory()->create([
             'company_id' => $companyId,
-            'customer_id' => $customer->id,
+            'customer_id' => $customerId,
             'quote_id' => $quote->id,
             'status' => 'paid',
             'total' => 250,
@@ -102,7 +103,7 @@ class InsightsReportsTest extends TestCase
         $this->assertEquals(250.0, (float) $data['revenueReport']->first()->revenue);
         $this->assertSame(['open' => 1], $data['jobsByStatus']);
         $this->assertEquals(1, $data['topCustomers']->count());
-        $this->assertEquals('Report Customer', $data['topCustomers']->first()->name);
+        $this->assertEquals($customerName, $data['topCustomers']->first()->name);
         $this->assertEquals(250.0, (float) $data['topCustomers']->first()->total_paid);
         $this->assertEquals(1, $data['leaveSummary']['sick']);
         $this->assertNotEmpty($data['expenseVsRevenue']);

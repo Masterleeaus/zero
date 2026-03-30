@@ -16,7 +16,7 @@ class DateQueryHelper
      */
     public static function monthExpression(string $column): string
     {
-        if (! preg_match('/^[A-Za-z0-9_\\.]+$/', $column)) {
+        if (! preg_match('/^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?$/', $column)) {
             throw new InvalidArgumentException('Invalid column name provided for month expression.');
         }
 

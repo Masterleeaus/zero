@@ -229,12 +229,14 @@ class InsightsController extends CoreController
             );
         }
 
+        $invoiceMonthExpression = DateQueryHelper::monthExpression('updated_at');
+
         try {
             $revenueReport = Invoice::query()
                 ->where('company_id', $companyId)
                 ->where('status', 'paid')
                 ->whereDate('updated_at', '>=', $rangeStart->toDateString())
-                ->selectRaw(DateQueryHelper::monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->selectRaw($invoiceMonthExpression . ' as month, SUM(total) as revenue')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -289,7 +291,7 @@ class InsightsController extends CoreController
                 ->where('company_id', $companyId)
                 ->where('status', 'paid')
                 ->whereDate('updated_at', '>=', $comparisonStart->toDateString())
-                ->selectRaw(DateQueryHelper::monthExpression('updated_at') . ' as month, SUM(total) as revenue')
+                ->selectRaw($invoiceMonthExpression . ' as month, SUM(total) as revenue')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
