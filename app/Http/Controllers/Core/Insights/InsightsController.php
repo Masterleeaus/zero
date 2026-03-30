@@ -287,7 +287,7 @@ class InsightsController extends CoreController
             $leaveSummary = [];
         }
 
-        $comparisonStart = Carbon::now()->startOfMonth()->subMonths(self::EXPENSE_REVENUE_MONTH_WINDOW - 1);
+        $comparisonStart = $this->expenseRevenueStartDate();
 
         try {
             $revenueSixMonths = Invoice::query()
@@ -378,5 +378,12 @@ class InsightsController extends CoreController
             'expenseTotals' => $expenseTotals,
             'expenseRevenueWindow' => $comparisonWindow,
         ]);
+    }
+
+    private function expenseRevenueStartDate(): Carbon
+    {
+        return Carbon::now()
+            ->startOfMonth()
+            ->subMonths(self::EXPENSE_REVENUE_MONTH_WINDOW - 1);
     }
 }
