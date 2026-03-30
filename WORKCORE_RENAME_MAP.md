@@ -21,6 +21,13 @@
 | task_comment_emoji | checklist_comment_emoji | table | Emoji reactions on comments | Absent; map on import |
 | task_notes | checklist_notes | table | Notes for checklist items | Absent; map on import |
 | task_settings | checklist_settings | table/config | Checklist options | Absent; map on import |
+| estimates | quotes | domain language/tables | Titan service vocabulary | Host already uses `quotes`; any legacy `estimates` must migrate to quotes tables |
+| estimate_requests | quote_requests | table | Quote request intake | Add/rename when importing legacy data |
+| estimate_items | quote_items | table | Line items | Host has `quote_items`; migrate legacy estimate items accordingly |
+| estimate_item_images | quote_item_images | table | Item images | Add/rename if restoring attachments |
+| estimate_templates | quote_templates | table | Quote templates | Add/rename on import |
+| estimate_template_items | quote_template_items | table | Template line items | Add/rename on import |
+| estimate_template_item_images | quote_template_item_images | table | Template item images | Add/rename on import |
 | tickets | service_issues | domain language/tables/routes | Rename support tickets to service issues | Current host uses `user_support` with `ticket_id`; renaming still pending (see schema notes) |
 | ticket_activities | service_issue_activities | table | Activity log for service issues | Not present; map legacy data when support domain is renamed |
 | ticket_custom_forms | service_issue_custom_forms | table | Custom fields | Not present; map on support rename |
