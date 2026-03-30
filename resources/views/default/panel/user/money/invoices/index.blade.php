@@ -1,7 +1,7 @@
 @extends('panel.layout.app')
 @section('title', __('Invoices'))
 @section('titlebar_actions')
-    <x-button href="#">
+    <x-button href="{{ route('dashboard.money.invoices.create') }}">
         <x-tabler-file-plus class="size-4" />
         {{ __('New Invoice') }}
     </x-button>
@@ -13,7 +13,7 @@
             <x-input name="q" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('Search invoices') }}" />
             <x-select name="status">
                 <option value="">{{ __('All statuses') }}</option>
-                @foreach(['draft', 'sent', 'paid', 'overdue', 'cancelled'] as $option)
+                @foreach(['draft', 'issued', 'partial', 'paid', 'overdue', 'void'] as $option)
                     <option value="{{ $option }}" @selected(($filters['status'] ?? '') === $option)>{{ ucfirst($option) }}</option>
                 @endforeach
             </x-select>
@@ -42,7 +42,7 @@
             <x-slot:body>
                 @forelse($invoices as $invoice)
                     <tr>
-                        <td>{{ $invoice->number }}</td>
+                        <td>{{ $invoice->invoice_number }}</td>
                         <td>{{ $invoice->customer?->name }}</td>
                         <td><x-badge variant="info">{{ ucfirst($invoice->status) }}</x-badge></td>
                         <td>{{ $invoice->total }}</td>

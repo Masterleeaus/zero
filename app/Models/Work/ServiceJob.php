@@ -22,6 +22,7 @@ class ServiceJob extends Model
         'created_by',
         'team_id',
         'site_id',
+        'customer_id',
         'title',
         'status',
         'scheduled_at',
@@ -39,6 +40,11 @@ class ServiceJob extends Model
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Crm\Customer::class);
     }
 
     public function checklists(): HasMany

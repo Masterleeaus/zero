@@ -14,16 +14,21 @@ class QuoteFactory extends Factory
 
     public function definition(): array
     {
+        $subtotal = $this->faker->randomFloat(2, 80, 900);
+        $tax = $this->faker->randomFloat(2, 5, 50);
+
         return [
             'company_id' => 1,
             'customer_id' => Customer::factory(['company_id' => 1]),
-            'number'     => $this->faker->unique()->bothify('Q-####'),
+            'quote_number' => $this->faker->unique()->bothify('Q-####'),
             'title'      => $this->faker->sentence(3),
             'status'     => 'draft',
             'issue_date' => $this->faker->date(),
-            'due_date'   => $this->faker->date(),
+            'valid_until'   => $this->faker->date(),
             'currency'   => 'USD',
-            'total'      => $this->faker->randomFloat(2, 100, 1000),
+            'subtotal'   => $subtotal,
+            'tax'        => $tax,
+            'total'      => $subtotal + $tax,
         ];
     }
 }

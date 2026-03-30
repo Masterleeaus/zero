@@ -3,7 +3,7 @@
 Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (not isolation)**, **user_id = actor identity**.
 
 ## Current state
-- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`) also use `BelongsToCompany`; Money models (`Quote`, `Invoice`) now use the same traits; `UserOpenai`, `Chatbot` and others hold `company_id`/`team_id` without a global scope; `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
+- Host models: `Company` is user-owned; `Product` and CRM models (`Customer`, `Enquiry`) use `BelongsToCompany` for tenant scoping; Work models (`Site`, `ServiceJob`, `Checklist`) also use `BelongsToCompany`; Money models (`Quote`, `Invoice`, `Payment`) now use the same traits; `UserOpenai`, `Chatbot` and others hold `company_id`/`team_id` without a global scope; `Team` manages crew membership. Tenant-aware traits live in `app/Models/Concerns`.
 - WorkCore models/migrations: most tables include `company_id` + optional `team_id`/`added_by`/`last_updated_by`. No shared scope helper; route group expects `multi-company-select` middleware.
 
 ## Tenancy implementation plan
@@ -11,7 +11,7 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
    - `BelongsToCompany`: conditional global scope keyed to the authenticated user’s `company_id`, auto-fill on create, and a typed `scopeForCompany`.
    - `BelongsToTeam`: `team()` relation and `scopeForTeam` for crew grouping (not tenant isolation).
    - `OwnedByUser`: auto-fill `created_by` from the authenticated user with `scopeCreatedBy` + `creator()` relation.
-2. Apply `BelongsToCompany` to every imported WorkCore model and any host model that becomes tenant-specific (customers, enquiries, sites, service jobs, quotes, invoices, payments, expenses, attendance, leave, shifts, tickets). Host `Product`, CRM `Customer`/`Enquiry`, Work `Site`/`ServiceJob`/`Checklist`, and Money `Quote`/`Invoice` are now scoped this way.
+2. Apply `BelongsToCompany` to every imported WorkCore model and any host model that becomes tenant-specific (customers, enquiries, sites, service jobs, quotes, invoices, payments, expenses, attendance, leave, shifts, tickets). Host `Product`, CRM `Customer`/`Enquiry`, Work `Site`/`ServiceJob`/`Checklist`, and Money `Quote`/`Invoice`/`Payment` are now scoped this way; `ServiceJob` now also holds `customer_id` for quote conversion.
 3. Ensure validation rules enforce `company_id` presence; derive from authenticated user’s selected company to avoid trusting request payloads.
 
 ## Schema consolidation priorities
@@ -28,7 +28,7 @@ Tenant doctrine: **company_id = tenant boundary**, **team_id = crew grouping (no
 ## Migration strategy
 - **Collision check**: compare WorkCore tables against existing host tables before import. If names collide but schemas differ, prefer ALTER migrations over parallel tables.
 - **Renaming**: migrate `projects` → `sites`, `tasks` → `service_jobs` or `checklists` based on usage; ensure FK/indices updated.
-- **Finance tables**: host lacked quote/invoice tables, so `quotes` and `invoices` were introduced with `company_id` tenancy and links to customers/quotes.
+- **Finance tables**: host lacked quote/invoice tables, so `quotes` and `invoices` were introduced with `company_id` tenancy and links to customers/quotes. Lifecycle fields added (quote_number/invoice_number, subtotal, tax, totals, paid_amount/balance, valid_until, site_id, checklist_template). A new `payments` table was created for invoice payments (company-scoped). Existing gateway/subscription payment tables remain separate and were not reused.
 - **Tenant columns**: add `company_id` (and `team_id` where crew-relevant) to any WorkCore table lacking it; backfill via authenticated company selection.
 - **Foreign keys**: align FK references to renamed tables; enforce cascading consistent with host conventions.
 - **Timestamps & soft deletes**: retain where present; add soft deletes where WorkCore expects archiving.

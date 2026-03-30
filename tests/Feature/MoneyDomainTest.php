@@ -18,8 +18,8 @@ class MoneyDomainTest extends TestCase
     public function test_quotes_are_scoped_to_company(): void
     {
         $user = User::factory()->create(['company_id' => 11]);
-        Quote::factory()->create(['company_id' => 11, 'number' => 'Q-1111']);
-        Quote::factory()->create(['company_id' => 12, 'number' => 'Q-2222']);
+        Quote::factory()->create(['company_id' => 11, 'quote_number' => 'Q-1111']);
+        Quote::factory()->create(['company_id' => 12, 'quote_number' => 'Q-2222']);
 
         $this->actingAs($user);
 
@@ -32,8 +32,8 @@ class MoneyDomainTest extends TestCase
     public function test_invoices_are_scoped_to_company(): void
     {
         $user = User::factory()->create(['company_id' => 11]);
-        Invoice::factory()->create(['company_id' => 11, 'number' => 'INV-1111']);
-        Invoice::factory()->create(['company_id' => 12, 'number' => 'INV-2222']);
+        Invoice::factory()->create(['company_id' => 11, 'invoice_number' => 'INV-1111']);
+        Invoice::factory()->create(['company_id' => 12, 'invoice_number' => 'INV-2222']);
 
         $this->actingAs($user);
 

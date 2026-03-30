@@ -10,6 +10,7 @@ use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
 use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
+use App\Models\Money\Payment;
 use App\Models\Work\Checklist;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
@@ -66,6 +67,10 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('invoice', static function (string|int $value) {
             return Invoice::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('payment', static function (string|int $value) {
+            return Payment::query()->whereKey($value)->firstOrFail();
         });
     }
 

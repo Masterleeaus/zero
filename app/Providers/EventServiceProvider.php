@@ -4,12 +4,15 @@ namespace App\Providers;
 
 use App\Events\BankTransferEvent;
 use App\Events\FreePaymentEvent;
+use App\Events\InvoiceIssued;
+use App\Events\InvoicePaid;
 use App\Events\IyzicoLifetimeEvent;
 use App\Events\IyzicoWebhookEvent;
 use App\Events\PaypalLifetimeEvent;
 use App\Events\PaypalWebhookEvent;
 use App\Events\PaystackLifetimeEvent;
 use App\Events\PaystackWebhookEvent;
+use App\Events\QuoteAccepted;
 use App\Events\StripeLifetimeEvent;
 use App\Events\StripeWebhookEvent;
 use App\Events\TwoCheckoutWebhookEvent;
@@ -78,6 +81,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         PaystackLifetimeEvent::class => [
             PaystackLifetimeListener::class,
+        ],
+        QuoteAccepted::class => [
+            //
+        ],
+        InvoiceIssued::class => [
+            //
+        ],
+        InvoicePaid::class => [
+            //
         ],
         UsersActivityEvent::class => [
             UsersActivityListener::class,

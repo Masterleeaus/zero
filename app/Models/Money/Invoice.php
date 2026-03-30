@@ -7,9 +7,13 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\Payment;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
@@ -22,13 +26,17 @@ class Invoice extends Model
         'created_by',
         'customer_id',
         'quote_id',
-        'number',
+        'invoice_number',
         'title',
         'status',
         'issue_date',
         'due_date',
         'currency',
+        'subtotal',
+        'tax',
         'total',
+        'paid_amount',
+        'balance',
         'notes',
     ];
 
@@ -36,6 +44,10 @@ class Invoice extends Model
         'issue_date' => 'date',
         'due_date'   => 'date',
         'total'      => 'decimal:2',
+        'subtotal'   => 'decimal:2',
+        'tax'        => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'balance'     => 'decimal:2',
     ];
 
     protected $attributes = [
@@ -50,5 +62,18 @@ class Invoice extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function recomputeBalance(): void
+    {
+        $totalPaid = $this->payments()->sum('amount');
+        $this->paid_amount = $totalPaid;
+        $this->balance = max(0, (float) $this->total - (float) $totalPaid);
+        $this->save();
     }
 }

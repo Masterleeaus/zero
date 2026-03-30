@@ -1,7 +1,7 @@
 @extends('panel.layout.app')
 @section('title', __('Quotes'))
 @section('titlebar_actions')
-    <x-button href="#">
+    <x-button href="{{ route('dashboard.money.quotes.create') }}">
         <x-tabler-file-plus class="size-4" />
         {{ __('New Quote') }}
     </x-button>
@@ -13,7 +13,7 @@
             <x-input name="q" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('Search quotes') }}" />
             <x-select name="status">
                 <option value="">{{ __('All statuses') }}</option>
-                @foreach(['draft', 'sent', 'accepted', 'declined'] as $option)
+                @foreach(['draft', 'sent', 'accepted', 'rejected', 'expired'] as $option)
                     <option value="{{ $option }}" @selected(($filters['status'] ?? '') === $option)>{{ ucfirst($option) }}</option>
                 @endforeach
             </x-select>
@@ -42,7 +42,7 @@
             <x-slot:body>
                 @forelse($quotes as $quote)
                     <tr>
-                        <td>{{ $quote->number }}</td>
+                        <td>{{ $quote->quote_number }}</td>
                         <td>{{ $quote->customer?->name }}</td>
                         <td><x-badge variant="info">{{ ucfirst($quote->status) }}</x-badge></td>
                         <td>{{ $quote->total }}</td>
