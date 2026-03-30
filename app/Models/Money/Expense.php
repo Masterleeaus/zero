@@ -61,6 +61,11 @@ class Expense extends Model
             ->toArray();
     }
 
+    /**
+     * Return monthly expense totals for the given company, including the current month.
+     *
+     * @return Collection<int, array{month: string, total: string}>
+     */
     public static function totalsByMonth(int $companyId, int $months = 6): Collection
     {
         // Cap to a sensible window (10 years) to avoid heavy aggregations.

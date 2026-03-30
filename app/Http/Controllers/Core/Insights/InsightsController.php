@@ -207,7 +207,7 @@ class InsightsController extends CoreController
             '30d' => Carbon::now()->subDays(30),
             '90d' => Carbon::now()->subDays(90),
             // include the current month plus the previous 11 months (12 total)
-            default => Carbon::now()->startOfMonth()->subMonthsNoOverflow(11),
+            default => Carbon::now()->startOfMonth()->subMonths(11),
         };
 
         $revenueReport = collect();
@@ -334,6 +334,11 @@ class InsightsController extends CoreController
         );
     }
 
+    /**
+     * Prepare and render the reports view with chart-ready datasets.
+     *
+     * @return View
+     */
     private function renderReportsView(
         string $range,
         Collection $revenueReport,

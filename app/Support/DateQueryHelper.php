@@ -9,6 +9,11 @@ use InvalidArgumentException;
 
 class DateQueryHelper
 {
+    /**
+     * Build a driver-specific SQL expression that formats a date column as YYYY-MM.
+     *
+     * @throws InvalidArgumentException when an unexpected column name is provided.
+     */
     public static function monthExpression(string $column): string
     {
         if (! preg_match('/^[A-Za-z0-9_\\.]+$/', $column)) {
