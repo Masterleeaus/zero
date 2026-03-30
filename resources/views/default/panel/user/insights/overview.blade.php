@@ -47,7 +47,7 @@
 
         <div class="space-y-2">
             <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('Work Summary') }}</div>
-            <div class="grid md:grid-cols-3 gap-4">
+            <div class="grid md:grid-cols-4 gap-4">
                 <x-card>
                     <div class="font-semibold mb-3">{{ __('Service Jobs by Status') }}</div>
                     <div class="space-y-2">
@@ -94,6 +94,21 @@
                     <div class="flex justify-between">
                         <span class="text-slate-500">{{ __('Active Agreements') }}</span>
                         <span class="font-semibold">{{ $agreementsActive }}</span>
+                    </div>
+                </x-card>
+                <x-card class="space-y-2">
+                    <div class="font-semibold">{{ __('Leave Summary') }}</div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Total leave records') }}</span>
+                        <span class="font-semibold">{{ $leaveTotals }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Upcoming leave') }}</span>
+                        <span class="font-semibold">{{ $upcomingLeave }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">{{ __('Leave vs shift conflicts') }}</span>
+                        <span class="font-semibold">{{ $leaveShiftConflicts }}</span>
                     </div>
                 </x-card>
             </div>

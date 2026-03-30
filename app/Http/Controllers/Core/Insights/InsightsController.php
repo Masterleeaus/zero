@@ -10,6 +10,7 @@ use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use App\Models\Work\Leave;
 use App\Models\Money\Quote;
 use App\Models\Money\Invoice;
 use App\Models\Money\Payment;
@@ -124,6 +125,10 @@ class InsightsController extends CoreController
             ->where('status', 'active')
             ->count();
 
+        $leaveTotals = Leave::query()->where('company_id', $companyId)->count();
+        $upcomingLeave = Leave::query()->where('company_id', $companyId)->upcoming()->count();
+        $leaveShiftConflicts = Leave::conflictsWithShifts($companyId);
+
         $upcomingJobs = ServiceJob::query()
             ->where('company_id', $companyId)
             ->whereNotNull('scheduled_at')
@@ -178,6 +183,9 @@ class InsightsController extends CoreController
             'shiftsUnassigned' => $shiftsUnassigned,
             'lateAttendance' => $lateAttendance,
             'unreadNotifications' => $unreadNotifications,
+            'leaveTotals' => $leaveTotals,
+            'upcomingLeave' => $upcomingLeave,
+            'leaveShiftConflicts' => $leaveShiftConflicts,
         ]);
     }
 

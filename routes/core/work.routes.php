@@ -66,6 +66,21 @@ Route::middleware(['auth', 'updateUserActivity'])
             Route::post('shifts/{shift}/assign-job', [\App\Http\Controllers\Core\Work\ShiftController::class, 'assignJobToShift'])
                 ->name('shifts.assign');
 
+            Route::get('leaves', [\App\Http\Controllers\Core\Work\LeaveController::class, 'index'])
+                ->name('leaves.index');
+            Route::get('leaves/create', [\App\Http\Controllers\Core\Work\LeaveController::class, 'create'])
+                ->name('leaves.create');
+            Route::post('leaves', [\App\Http\Controllers\Core\Work\LeaveController::class, 'store'])
+                ->name('leaves.store');
+            Route::get('leaves/{leave}', [\App\Http\Controllers\Core\Work\LeaveController::class, 'show'])
+                ->name('leaves.show');
+            Route::get('leaves/{leave}/edit', [\App\Http\Controllers\Core\Work\LeaveController::class, 'edit'])
+                ->name('leaves.edit');
+            Route::put('leaves/{leave}', [\App\Http\Controllers\Core\Work\LeaveController::class, 'update'])
+                ->name('leaves.update');
+            Route::delete('leaves/{leave}', [\App\Http\Controllers\Core\Work\LeaveController::class, 'destroy'])
+                ->name('leaves.destroy');
+
             Route::get('attendance', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'index'])
                 ->name('attendance.index');
             Route::get('attendance/create', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'create'])
