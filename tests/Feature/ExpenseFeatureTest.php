@@ -53,4 +53,26 @@ class ExpenseFeatureTest extends TestCase
         $response->assertOk();
         $response->assertViewHas('expenseTotal', 50.0);
     }
+
+    public function test_expense_totals_by_category_are_scoped(): void
+    {
+        $user = User::factory()->create(['company_id' => 20]);
+        $category = ExpenseCategory::factory()->create(['company_id' => 20]);
+        Expense::factory()->create([
+            'company_id' => $user->company_id,
+            'expense_category_id' => $category->id,
+            'amount' => 25,
+        ]);
+        Expense::factory()->create([
+            'company_id' => $user->company_id,
+            'expense_category_id' => $category->id,
+            'amount' => 75,
+        ]);
+        Expense::factory()->create(); // other company
+
+        $this->assertSame(
+            [ $category->id => 100.0 ],
+            Expense::totalsByCategory($user->company_id)
+        );
+    }
 }
