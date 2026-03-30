@@ -39,6 +39,9 @@ class ExpenseFeatureTest extends TestCase
             'expense_category_id' => $category->id,
             'status' => 'pending',
         ]);
+
+        $expense = Expense::first();
+        $this->assertEquals('pending', $expense->status);
     }
 
     public function test_expense_metrics_available_in_insights(): void

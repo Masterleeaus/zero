@@ -119,7 +119,9 @@ class ExpenseController extends CoreController
             'rejection_reason'=> null,
         ]);
 
-        $submitter = User::find($expense->created_by);
+        $submitter = User::query()
+            ->where('company_id', $expense->company_id)
+            ->find($expense->created_by);
         $submitter?->notify(new LiveNotification(
             message: "Your expense '{$expense->title}' has been approved.",
             link: route('dashboard.money.expenses.show', $expense),
@@ -144,7 +146,9 @@ class ExpenseController extends CoreController
             'rejection_reason' => $validated['reason'] ?? null,
         ]);
 
-        $submitter = User::find($expense->created_by);
+        $submitter = User::query()
+            ->where('company_id', $expense->company_id)
+            ->find($expense->created_by);
         $submitter?->notify(new LiveNotification(
             message: "Your expense '{$expense->title}' was rejected.",
             link: route('dashboard.money.expenses.show', $expense),

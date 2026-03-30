@@ -46,7 +46,7 @@
                                     default => 'warning',
                                 };
                             @endphp
-                            <x-badge variant="{{ $variant }}">{{ ucfirst($expense->status ?? 'pending') }}</x-badge>
+                            <x-badge variant="{{ $variant }}">{{ ucfirst($expense->status ?? '') }}</x-badge>
                         </td>
                         <td>{{ $expense->expense_date?->format('Y-m-d') }}</td>
                         <td class="text-end">{{ number_format($expense->amount, 2) }}</td>
