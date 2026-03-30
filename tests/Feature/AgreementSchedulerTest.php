@@ -21,12 +21,13 @@ class AgreementSchedulerTest extends TestCase
         ]);
 
         $service = new AgreementSchedulerService();
-        $service->runForCompany(5);
+        $result = $service->runDueAgreements(5);
 
         $this->assertDatabaseHas('service_jobs', [
             'agreement_id' => $agreement->id,
             'company_id' => 5,
         ]);
         $this->assertTrue($agreement->fresh()->next_run_at->greaterThan(now()));
+        $this->assertEquals(1, $result['created']);
     }
 }

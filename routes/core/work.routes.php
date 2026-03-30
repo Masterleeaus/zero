@@ -63,6 +63,8 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('shifts.store');
             Route::get('shifts/{shift}', [\App\Http\Controllers\Core\Work\ShiftController::class, 'show'])
                 ->name('shifts.show');
+            Route::post('shifts/{shift}/assign-job', [\App\Http\Controllers\Core\Work\ShiftController::class, 'assignJobToShift'])
+                ->name('shifts.assign');
 
             Route::get('attendance', [\App\Http\Controllers\Core\Work\AttendanceController::class, 'index'])
                 ->name('attendance.index');

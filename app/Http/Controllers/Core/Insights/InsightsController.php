@@ -17,6 +17,7 @@ use App\Models\UserSupport;
 use App\Models\Work\Timelog;
 use App\Models\Work\Attendance;
 use App\Models\Work\ServiceAgreement;
+use App\Models\Work\Shift;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -102,7 +103,20 @@ class InsightsController extends CoreController
 
         $attendanceOpen = Attendance::query()
             ->where('company_id', $companyId)
-            ->where('status', 'open')
+            ->where('status', 'checked_in')
+            ->count();
+
+        $attendanceSummary = Attendance::statusSummary($companyId);
+
+        $shiftsScheduled = Shift::query()->where('company_id', $companyId)->count();
+        $shiftsUnassigned = Shift::query()->where('company_id', $companyId)->unassigned()->count();
+        $lateAttendance = $attendanceSummary['late'] ?? 0;
+
+        $dueAgreements = ServiceAgreement::query()
+            ->where('company_id', $companyId)
+            ->where('status', 'active')
+            ->whereNotNull('next_run_at')
+            ->whereDate('next_run_at', '<=', now())
             ->count();
 
         $agreementsActive = ServiceAgreement::query()
@@ -157,7 +171,12 @@ class InsightsController extends CoreController
             'supportResolved' => $supportResolved,
             'timelogHours' => round($timelogMinutes / 60, 1),
             'attendanceOpen' => $attendanceOpen,
+            'attendanceSummary' => $attendanceSummary,
             'agreementsActive' => $agreementsActive,
+            'dueAgreements' => $dueAgreements,
+            'shiftsScheduled' => $shiftsScheduled,
+            'shiftsUnassigned' => $shiftsUnassigned,
+            'lateAttendance' => $lateAttendance,
             'unreadNotifications' => $unreadNotifications,
         ]);
     }

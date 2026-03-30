@@ -21,6 +21,7 @@ class ServiceAgreement extends Model
 
     protected $casts = [
         'next_run_at' => 'datetime',
+        'expired_at'  => 'datetime',
     ];
 
     public function scopeActive($query)
@@ -59,6 +60,11 @@ class ServiceAgreement extends Model
             'quarterly' => new \DateInterval('P3M'),
             default => new \DateInterval('P1M'),
         };
+    }
+
+    public function scopeNotPaused($query)
+    {
+        return $query->where('status', '!=', 'paused');
     }
 
     public function customer(): BelongsTo

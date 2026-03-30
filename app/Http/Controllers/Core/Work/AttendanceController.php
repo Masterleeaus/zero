@@ -55,7 +55,7 @@ class AttendanceController extends CoreController
             'service_job_id' => $validated['service_job_id'] ?? null,
             'check_in_at'    => $validated['check_in_at'],
             'notes'          => $validated['notes'] ?? null,
-            'status'         => 'open',
+            'status'         => 'checked_in',
         ]);
 
         return redirect()->route('dashboard.work.attendance.index')

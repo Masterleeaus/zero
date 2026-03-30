@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Helpers\Classes\Helper;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -26,13 +27,17 @@ class NotificationController extends Controller
 
     public function unreadCount(Request $request)
     {
-        $count = $request->user()
-            ?->notifications()
-            ->where(function ($q) use ($request) {
-                $q->whereNull('company_id')->orWhere('company_id', $request->user()->company_id);
-            })
-            ->whereNull('read_at')
-            ->count();
+        $user = $request->user();
+        $cacheKey = "notifications.unread.{$user->id}.{$user->company_id}";
+
+        $count = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($user, $request) {
+            return $user?->notifications()
+                ->where(function ($q) use ($request) {
+                    $q->whereNull('company_id')->orWhere('company_id', $request->user()->company_id);
+                })
+                ->whereNull('read_at')
+                ->count();
+        });
 
         return response()->json(['unread' => $count]);
     }
@@ -42,10 +47,13 @@ class NotificationController extends Controller
         if (Helper::appIsNotDemo()) {
             if ($request->has('id')) {
                 $notification = $request->user()->notifications()
-                    ->where('company_id', $request->user()->company_id)
+                    ->where(function ($q) use ($request) {
+                        $q->whereNull('company_id')->orWhere('company_id', $request->user()->company_id);
+                    })
                     ->where('id', $request->id)->first();
                 if ($notification) {
                     $notification->markAsRead();
+                    Cache::forget("notifications.unread.{$request->user()->id}.{$request->user()->company_id}");
                 }
 
                 return $request->wantsJson()
@@ -59,6 +67,8 @@ class NotificationController extends Controller
                 })
                 ->whereNull('read_at')
                 ->update(['read_at' => now()]);
+
+            Cache::forget("notifications.unread.{$request->user()->id}.{$request->user()->company_id}");
 
             return $request->wantsJson()
                 ? response()->json(['success' => true])

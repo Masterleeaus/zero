@@ -26,6 +26,29 @@ class Shift extends Model
         'end_at'   => 'datetime',
     ];
 
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('service_job_id');
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('end_at', '<', now())->whereNotIn('status', ['completed', 'cancelled']);
+    }
+
+    public function assignServiceJob(ServiceJob $job): void
+    {
+        $this->service_job_id = $job->id;
+        $this->status         = 'assigned';
+        $this->save();
+    }
+
+    public function markCompleted(): void
+    {
+        $this->status = 'completed';
+        $this->save();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Core\CoreController;
 use App\Models\Work\Shift;
 use App\Models\Work\ServiceJob;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -52,5 +53,24 @@ class ShiftController extends CoreController
         $this->authorize('view', $shift);
 
         return view('default.panel.user.work.shifts.show', compact('shift'));
+    }
+
+    public function assignJobToShift(Request $request, Shift $shift): RedirectResponse|JsonResponse
+    {
+        abort_if($shift->company_id !== $request->user()->company_id, 403);
+
+        $data = $request->validate([
+            'service_job_id' => ['required', 'exists:service_jobs,id'],
+        ]);
+
+        $job = ServiceJob::query()
+            ->where('company_id', $request->user()->company_id)
+            ->findOrFail($data['service_job_id']);
+
+        $shift->assignServiceJob($job);
+
+        return $request->wantsJson()
+            ? response()->json(['success' => true])
+            : back()->with('message', __('Shift updated'));
     }
 }
