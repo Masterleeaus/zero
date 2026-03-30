@@ -17,6 +17,8 @@ class ServiceJobFactory extends Factory
         return [
             'company_id'   => 1,
             'site_id'      => Site::factory(['company_id' => 1]),
+            'quote_id'     => null,
+            'assigned_user_id' => null,
             'title'        => $this->faker->sentence(3),
             'status'       => 'scheduled',
             'scheduled_at' => $this->faker->dateTimeBetween('now', '+3 days'),

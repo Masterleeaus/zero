@@ -57,6 +57,7 @@ class ServiceJobController extends CoreController
             'customers' => $this->customers(),
             'siteId' => $request->integer('site_id') ?: null,
             'statuses' => $this->statuses,
+            'assignees' => $this->assignees(),
         ]);
     }
 
@@ -87,6 +88,7 @@ class ServiceJobController extends CoreController
             'customers' => $this->customers(),
             'siteId' => $job->site_id,
             'statuses' => $this->statuses,
+            'assignees' => $this->assignees(),
         ]);
     }
 
@@ -130,6 +132,11 @@ class ServiceJobController extends CoreController
             'status'       => ['nullable', Rule::in($this->statuses)],
             'scheduled_at' => ['nullable', 'date'],
             'notes'        => ['nullable', 'string'],
+            'assigned_user_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id'),
+            ],
         ]);
     }
 
@@ -141,6 +148,14 @@ class ServiceJobController extends CoreController
     private function customers()
     {
         return Customer::query()
+            ->when(auth()->check(), fn ($q) => $q->where('company_id', auth()->user()->company_id))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    private function assignees()
+    {
+        return \App\Models\User::query()
             ->when(auth()->check(), fn ($q) => $q->where('company_id', auth()->user()->company_id))
             ->orderBy('name')
             ->get(['id', 'name']);

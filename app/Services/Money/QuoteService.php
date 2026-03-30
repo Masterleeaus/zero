@@ -30,12 +30,11 @@ class QuoteService
                 'created_by' => $user->id,
                 'site_id'    => $site->id,
                 'customer_id'=> $quote->customer_id,
+                'quote_id'   => $quote->id,
                 'title'      => $quote->title ?: $quote->quote_number,
                 'status'     => 'scheduled',
                 'notes'      => $quote->notes,
             ]);
-
-            $quote->serviceJobs()->save($job);
 
             $this->copyChecklistTemplate($quote, $job, $user->company_id, $user->id);
 

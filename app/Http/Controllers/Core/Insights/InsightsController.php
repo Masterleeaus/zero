@@ -12,6 +12,7 @@ use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
 use App\Models\Money\Quote;
 use App\Models\Money\Invoice;
+use App\Models\Money\Payment;
 use Illuminate\Support\Facades\DB;
 
 class InsightsController extends CoreController
@@ -48,6 +49,9 @@ class InsightsController extends CoreController
             ->count();
 
         $outstandingBalance = (float) Invoice::query()->whereNotIn('status', ['paid', 'void'])->sum('balance');
+        $paymentsTotal = (float) Payment::query()->sum('amount');
+        $quoteToJobCount = ServiceJob::query()->whereNotNull('quote_id')->count();
+        $quoteToInvoiceCount = Invoice::query()->whereNotNull('quote_id')->count();
 
         return view('default.panel.user.insights.overview', [
             'enquiryCount' => $enquiries,
@@ -58,6 +62,9 @@ class InsightsController extends CoreController
             'invoiceStatus'=> $invoiceStatus,
             'overdueInvoices' => $overdueInvoices,
             'outstandingBalance' => $outstandingBalance,
+            'paymentsTotal' => $paymentsTotal,
+            'quoteToJobCount' => $quoteToJobCount,
+            'quoteToInvoiceCount' => $quoteToInvoiceCount,
             'companyId' => $companyId,
         ]);
     }

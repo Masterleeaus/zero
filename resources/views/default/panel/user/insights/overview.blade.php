@@ -70,6 +70,18 @@
                     <span class="text-slate-500">{{ __('Outstanding Balance') }}</span>
                     <span class="font-semibold">{{ number_format($outstandingBalance, 2) }}</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">{{ __('Payments Total') }}</span>
+                    <span class="font-semibold">{{ number_format($paymentsTotal, 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">{{ __('Quote → Job Conversions') }}</span>
+                    <span class="font-semibold">{{ $quoteToJobCount }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">{{ __('Quote → Invoice Conversions') }}</span>
+                    <span class="font-semibold">{{ $quoteToInvoiceCount }}</span>
+                </div>
             </x-card>
         </div>
     </div>

@@ -6,10 +6,13 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\User;
+use App\Models\Team\Team;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ServiceJob extends Model
 {
@@ -23,6 +26,8 @@ class ServiceJob extends Model
         'team_id',
         'site_id',
         'customer_id',
+        'quote_id',
+        'assigned_user_id',
         'title',
         'status',
         'scheduled_at',
@@ -45,6 +50,21 @@ class ServiceJob extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Crm\Customer::class);
+    }
+
+    public function quote(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\Quote::class);
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function checklists(): HasMany

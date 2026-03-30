@@ -6,6 +6,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ class Checklist extends Model
         'created_by',
         'team_id',
         'service_job_id',
+        'assigned_user_id',
         'title',
         'is_completed',
         'notes',
@@ -37,5 +39,10 @@ class Checklist extends Model
     public function job(): BelongsTo
     {
         return $this->belongsTo(ServiceJob::class, 'service_job_id');
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 }

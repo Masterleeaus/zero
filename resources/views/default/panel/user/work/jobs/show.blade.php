@@ -35,6 +35,12 @@
                         <div>{{ $job->scheduled_at?->format('Y-m-d H:i') }}</div>
                     </div>
                 @endif
+                @if($job->assignedUser)
+                    <div>
+                        <div class="text-sm text-slate-500">{{ __('Assignee') }}</div>
+                        <div>{{ $job->assignedUser?->name }}</div>
+                    </div>
+                @endif
             </div>
 
             @if($job->notes)

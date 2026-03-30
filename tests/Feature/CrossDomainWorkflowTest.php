@@ -55,6 +55,7 @@ class CrossDomainWorkflowTest extends TestCase
         $this->assertEquals($customer->id, $job->customer_id);
         $this->assertEquals($site->id, $job->site_id);
         $this->assertEquals(2, $job->checklists()->count());
+        $this->assertEquals($quote->id, $job->quote_id);
     }
 
     public function test_quote_to_invoice_conversion_keeps_items_and_totals(): void

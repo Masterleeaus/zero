@@ -34,6 +34,17 @@
                         @endforeach
                     </x-select>
                 </div>
+                <div>
+                    <label class="form-label">{{ __('Assignee') }}</label>
+                    <x-select name="assigned_user_id">
+                        <option value="">{{ __('Unassigned') }}</option>
+                        @foreach($assignees as $assignee)
+                            <option value="{{ $assignee->id }}" @selected(old('assigned_user_id', $job->assigned_user_id) == $assignee->id)>
+                                {{ $assignee->name }}
+                            </option>
+                        @endforeach
+                    </x-select>
+                </div>
                 <x-input label="{{ __('Title') }}" name="title" required value="{{ old('title', $job->title) }}" />
                 <div>
                     <label class="form-label">{{ __('Status') }}</label>
