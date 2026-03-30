@@ -11,6 +11,7 @@ use App\Models\Money\Invoice;
 use App\Models\Money\QuoteItem;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -118,5 +119,10 @@ class Quote extends Model
             'tax'      => $tax,
             'total'    => $subtotal + $tax,
         ]);
+    }
+
+    public function scopeAccepted(Builder $query): Builder
+    {
+        return $query->whereIn($query->qualifyColumn('status'), ['accepted', 'approved']);
     }
 }
