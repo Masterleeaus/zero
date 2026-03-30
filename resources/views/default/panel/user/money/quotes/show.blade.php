@@ -53,7 +53,6 @@
                     </x-button>
                 </div>
             </div>
-            <div class="font-semibold mb-3">{{ __('Invoices') }}</div>
             <x-table>
                 <x-slot:head>
                     <tr>
