@@ -37,7 +37,10 @@ class RouteServiceProvider extends ServiceProvider
                 'web',  ViewSharedMiddleware::class, NewExtensionInstalled::class,
             ])->group(function () {
                 require base_path('routes/web.php');
-                $this->loadCoreRoutes();
+
+                Route::middleware(['auth', 'throttle:120,1'])->group(function () {
+                    $this->loadCoreRoutes();
+                });
             });
         });
 
