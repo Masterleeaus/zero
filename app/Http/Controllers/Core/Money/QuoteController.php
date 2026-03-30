@@ -127,7 +127,7 @@ class QuoteController extends CoreController
         $this->authorize('changeStatus', $quote);
 
         $request->validate([
-            'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'rejected', 'expired'])],
+            'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'approved', 'rejected', 'expired', 'converted'])],
         ]);
 
         $previousStatus = $quote->status;
@@ -165,8 +165,8 @@ class QuoteController extends CoreController
     {
         $this->authorize('update', $quote);
 
-        if (! in_array($quote->status, ['accepted', 'sent'], true)) {
-            return back()->withErrors(__('Quote must be accepted or sent before invoicing.'));
+        if (! in_array($quote->status, ['accepted', 'approved', 'sent'], true)) {
+            return back()->withErrors(__('Quote must be accepted/approved or sent before invoicing.'));
         }
 
         $quote->loadMissing('items');
@@ -209,6 +209,7 @@ class QuoteController extends CoreController
 
             $invoice->recomputeTotalsFromItems();
             $invoice->refresh();
+            $invoice->update(['balance' => $invoice->total]);
 
             if (! $invoice->invoice_number) {
                 $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);

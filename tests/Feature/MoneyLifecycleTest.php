@@ -77,6 +77,8 @@ class MoneyLifecycleTest extends TestCase
             'subtotal'    => 100,
             'tax'         => 10,
             'total'       => 110,
+            'currency'    => 'USD',
+            'notes'       => 'Some notes',
         ]);
 
         QuoteItem::create([
@@ -98,6 +100,54 @@ class MoneyLifecycleTest extends TestCase
         $invoice = Invoice::where('quote_id', $quote->id)->firstOrFail();
         $this->assertEquals(1, $invoice->items()->count());
         $this->assertEquals(110.00, (float) $invoice->total);
+        $this->assertEquals(110.00, (float) $invoice->balance);
+        $this->assertEquals('converted', $quote->fresh()->status);
+        $this->assertEquals('USD', $invoice->currency);
+        $this->assertEquals('Some notes', $invoice->notes);
+    }
+
+    public function test_quote_to_invoice_allows_sent_status(): void
+    {
+        $user = User::factory()->create(['company_id' => 56]);
+        $quote = Quote::factory()->create([
+            'company_id'  => 56,
+            'status'      => 'sent',
+            'currency'    => 'EUR',
+        ]);
+
+        QuoteItem::create([
+            'company_id' => 56,
+            'created_by' => $user->id,
+            'quote_id'   => $quote->id,
+            'description'=> 'Item',
+            'quantity'   => 2,
+            'unit_price' => 25,
+            'tax_rate'   => 0,
+            'line_total' => 50,
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
+            ->assertRedirect();
+
+        $invoice = Invoice::where('quote_id', $quote->id)->firstOrFail();
+        $this->assertEquals('EUR', $invoice->currency);
+    }
+
+    public function test_quote_to_invoice_requires_items(): void
+    {
+        $user = User::factory()->create(['company_id' => 57]);
+        $quote = Quote::factory()->create([
+            'company_id'  => 57,
+            'status'      => 'accepted',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
+            ->assertSessionHasErrors();
+
+        $this->assertNull(Invoice::where('quote_id', $quote->id)->first());
     }
 
     public function test_totals_are_recomputed_from_items(): void
