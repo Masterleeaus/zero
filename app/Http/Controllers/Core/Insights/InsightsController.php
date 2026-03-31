@@ -22,6 +22,7 @@ use App\Models\Work\ServiceAgreement;
 use App\Models\Work\Shift;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Support\DateQueryHelper;
@@ -34,169 +35,206 @@ class InsightsController extends CoreController
     {
         $companyId = $request->user()?->company_id;
 
-        $enquiries = Enquiry::query()->where('company_id', $companyId)->count();
-        $customers = Customer::query()->where('company_id', $companyId)->count();
-        $sites = Site::query()->where('company_id', $companyId)->where('status', 'active')->count();
+        $stats = Cache::remember("insights_overview_{$companyId}", 300, static function () use ($companyId) {
+            $enquiries = Enquiry::query()->where('company_id', $companyId)->count();
+            $customers = Customer::query()->where('company_id', $companyId)->count();
+            $sites = Site::query()->where('company_id', $companyId)->where('status', 'active')->count();
 
-        $jobStatus = ServiceJob::query()
-            ->where('company_id', $companyId)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
+            $jobStatus = ServiceJob::query()
+                ->where('company_id', $companyId)
+                ->select('status', DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
 
-        $quoteStatus = Quote::query()
-            ->where('company_id', $companyId)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
+            $quoteStatus = Quote::query()
+                ->where('company_id', $companyId)
+                ->select('status', DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
 
-        $invoiceStatus = Invoice::query()
-            ->where('company_id', $companyId)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
+            $invoiceStatus = Invoice::query()
+                ->where('company_id', $companyId)
+                ->select('status', DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
 
-        $overdueInvoices = Invoice::query()
-            ->where('company_id', $companyId)
-            ->whereNotIn('status', ['paid', 'void'])
-            ->whereDate('due_date', '<', now())
-            ->count();
+            $overdueInvoices = Invoice::query()
+                ->where('company_id', $companyId)
+                ->whereNotIn('status', ['paid', 'void'])
+                ->whereDate('due_date', '<', now())
+                ->count();
 
-        $outstandingBalance = (float) Invoice::query()
-            ->where('company_id', $companyId)
-            ->whereNotIn('status', ['paid', 'void'])
-            ->sum('balance');
+            $outstandingBalance = (float) Invoice::query()
+                ->where('company_id', $companyId)
+                ->whereNotIn('status', ['paid', 'void'])
+                ->sum('balance');
 
-        $paymentsTotal = (float) Payment::query()
-            ->where('company_id', $companyId)
-            ->sum('amount');
+            $paymentsTotal = (float) Payment::query()
+                ->where('company_id', $companyId)
+                ->sum('amount');
 
-        $quoteToJobCount = ServiceJob::query()
-            ->where('company_id', $companyId)
-            ->whereNotNull('quote_id')
-            ->count();
+            $quoteToJobCount = ServiceJob::query()
+                ->where('company_id', $companyId)
+                ->whereNotNull('quote_id')
+                ->count();
 
-        $quoteToInvoiceCount = Invoice::query()
-            ->where('company_id', $companyId)
-            ->whereNotNull('quote_id')
-            ->count();
+            $quoteToInvoiceCount = Invoice::query()
+                ->where('company_id', $companyId)
+                ->whereNotNull('quote_id')
+                ->count();
 
-        $supportOpen = UserSupport::query()
-            ->where('company_id', $companyId)
-            ->whereIn('status', ['open'])
-            ->count();
+            $supportOpen = UserSupport::query()
+                ->where('company_id', $companyId)
+                ->whereIn('status', ['open'])
+                ->count();
 
-        $supportWaitingTeam = UserSupport::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'waiting_on_team')
-            ->count();
+            $supportWaitingTeam = UserSupport::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'waiting_on_team')
+                ->count();
 
-        $supportWaitingUser = UserSupport::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'waiting_on_user')
-            ->count();
+            $supportWaitingUser = UserSupport::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'waiting_on_user')
+                ->count();
 
-        $supportResolved = UserSupport::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'resolved')
-            ->count();
+            $supportResolved = UserSupport::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'resolved')
+                ->count();
 
-        $timelogMinutes = Timelog::query()
-            ->where('company_id', $companyId)
-            ->sum(DB::raw('COALESCE(duration_minutes, 0)'));
+            $timelogMinutes = Timelog::query()
+                ->where('company_id', $companyId)
+                ->sum(DB::raw('COALESCE(duration_minutes, 0)'));
 
-        $attendanceOpen = Attendance::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'checked_in')
-            ->count();
+            $attendanceOpen = Attendance::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'checked_in')
+                ->count();
 
-        $attendanceSummary = Attendance::statusSummary($companyId);
+            $attendanceSummary = Attendance::statusSummary($companyId);
 
-        $shiftsScheduled = Shift::query()->where('company_id', $companyId)->count();
-        $shiftsUnassigned = Shift::query()->where('company_id', $companyId)->unassigned()->count();
-        $lateAttendance = $attendanceSummary['late'] ?? 0;
+            $shiftsScheduled = Shift::query()->where('company_id', $companyId)->count();
+            $shiftsUnassigned = Shift::query()->where('company_id', $companyId)->unassigned()->count();
+            $lateAttendance = $attendanceSummary['late'] ?? 0;
 
-        $dueAgreements = ServiceAgreement::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'active')
-            ->whereNotNull('next_run_at')
-            ->whereDate('next_run_at', '<=', now())
-            ->count();
+            $dueAgreements = ServiceAgreement::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'active')
+                ->whereNotNull('next_run_at')
+                ->whereDate('next_run_at', '<=', now())
+                ->count();
 
-        $agreementsActive = ServiceAgreement::query()
-            ->where('company_id', $companyId)
-            ->where('status', 'active')
-            ->count();
+            $agreementsActive = ServiceAgreement::query()
+                ->where('company_id', $companyId)
+                ->where('status', 'active')
+                ->count();
 
-        $leaveTotals = Leave::query()->where('company_id', $companyId)->count();
-        $upcomingLeave = Leave::query()->where('company_id', $companyId)->upcoming()->count();
-        $leaveShiftConflicts = Leave::conflictsWithShifts($companyId);
+            $leaveTotals = Leave::query()->where('company_id', $companyId)->count();
+            $upcomingLeave = Leave::query()->where('company_id', $companyId)->upcoming()->count();
+            $leaveShiftConflicts = Leave::conflictsWithShifts($companyId);
 
-        $expenseTotal = Expense::totalForCompany($companyId);
-        $expenseByCategory = Expense::totalsByCategory($companyId);
+            $expenseTotal = Expense::totalForCompany($companyId);
+            $expenseByCategory = Expense::totalsByCategory($companyId);
 
-        $upcomingJobs = ServiceJob::query()
-            ->where('company_id', $companyId)
-            ->whereNotNull('scheduled_at')
-            ->where('scheduled_at', '>=', now())
-            ->count();
+            $upcomingJobs = ServiceJob::query()
+                ->where('company_id', $companyId)
+                ->whereNotNull('scheduled_at')
+                ->where('scheduled_at', '>=', now())
+                ->count();
 
-        $unassignedJobs = ServiceJob::query()
-            ->where('company_id', $companyId)
-            ->whereNull('assigned_user_id')
-            ->count();
+            $unassignedJobs = ServiceJob::query()
+                ->where('company_id', $companyId)
+                ->whereNull('assigned_user_id')
+                ->count();
 
-        $recentCustomers = Customer::query()
-            ->where('company_id', $companyId)
-            ->latest()
-            ->limit(5)
-            ->get();
+            $recentCustomers = Customer::query()
+                ->where('company_id', $companyId)
+                ->latest()
+                ->limit(5)
+                ->get();
 
-        $unreadNotifications = auth()->user()
-            ?->notifications()
-            ->whereNull('read_at')
-            ->where(function ($q) use ($companyId) {
-                $q->whereNull('company_id')->orWhere('company_id', $companyId);
-            })
-            ->count() ?? 0;
+            $unreadNotifications = auth()->user()
+                ?->notifications()
+                ->whereNull('read_at')
+                ->where(function ($q) use ($companyId) {
+                    $q->whereNull('company_id')->orWhere('company_id', $companyId);
+                })
+                ->count() ?? 0;
+
+            return [
+                'enquiries' => $enquiries,
+                'customers' => $customers,
+                'sites' => $sites,
+                'jobStatus' => $jobStatus,
+                'quoteStatus' => $quoteStatus,
+                'invoiceStatus' => $invoiceStatus,
+                'overdueInvoices' => $overdueInvoices,
+                'outstandingBalance' => $outstandingBalance,
+                'paymentsTotal' => $paymentsTotal,
+                'quoteToJobCount' => $quoteToJobCount,
+                'quoteToInvoiceCount' => $quoteToInvoiceCount,
+                'supportOpen' => $supportOpen,
+                'supportWaitingTeam' => $supportWaitingTeam,
+                'supportWaitingUser' => $supportWaitingUser,
+                'supportResolved' => $supportResolved,
+                'timelogMinutes' => $timelogMinutes,
+                'attendanceOpen' => $attendanceOpen,
+                'attendanceSummary' => $attendanceSummary,
+                'shiftsScheduled' => $shiftsScheduled,
+                'shiftsUnassigned' => $shiftsUnassigned,
+                'lateAttendance' => $lateAttendance,
+                'dueAgreements' => $dueAgreements,
+                'agreementsActive' => $agreementsActive,
+                'leaveTotals' => $leaveTotals,
+                'upcomingLeave' => $upcomingLeave,
+                'leaveShiftConflicts' => $leaveShiftConflicts,
+                'expenseTotal' => $expenseTotal,
+                'expenseByCategory' => $expenseByCategory,
+                'upcomingJobs' => $upcomingJobs,
+                'unassignedJobs' => $unassignedJobs,
+                'recentCustomers' => $recentCustomers,
+                'unreadNotifications' => $unreadNotifications,
+            ];
+        });
 
         return view('default.panel.user.insights.overview', [
-            'enquiryCount' => $enquiries,
-            'customerCount'=> $customers,
-            'recentCustomers' => $recentCustomers,
-            'activeSites'  => $sites,
-            'jobStatus'    => $jobStatus,
-            'upcomingJobs' => $upcomingJobs,
-            'unassignedJobs' => $unassignedJobs,
-            'quoteStatus'  => $quoteStatus,
-            'invoiceStatus'=> $invoiceStatus,
-            'overdueInvoices' => $overdueInvoices,
-            'outstandingBalance' => $outstandingBalance,
-            'paymentsTotal' => $paymentsTotal,
-            'quoteToJobCount' => $quoteToJobCount,
-            'quoteToInvoiceCount' => $quoteToInvoiceCount,
+            'enquiryCount' => $stats['enquiries'],
+            'customerCount'=> $stats['customers'],
+            'recentCustomers' => $stats['recentCustomers'],
+            'activeSites'  => $stats['sites'],
+            'jobStatus'    => $stats['jobStatus'],
+            'upcomingJobs' => $stats['upcomingJobs'],
+            'unassignedJobs' => $stats['unassignedJobs'],
+            'quoteStatus'  => $stats['quoteStatus'],
+            'invoiceStatus'=> $stats['invoiceStatus'],
+            'overdueInvoices' => $stats['overdueInvoices'],
+            'outstandingBalance' => $stats['outstandingBalance'],
+            'paymentsTotal' => $stats['paymentsTotal'],
+            'quoteToJobCount' => $stats['quoteToJobCount'],
+            'quoteToInvoiceCount' => $stats['quoteToInvoiceCount'],
             'companyId' => $companyId,
-            'supportOpen' => $supportOpen,
-            'supportWaitingTeam' => $supportWaitingTeam,
-            'supportWaitingUser' => $supportWaitingUser,
-            'supportResolved' => $supportResolved,
-            'timelogHours' => round($timelogMinutes / 60, 1),
-            'attendanceOpen' => $attendanceOpen,
-            'attendanceSummary' => $attendanceSummary,
-            'agreementsActive' => $agreementsActive,
-            'dueAgreements' => $dueAgreements,
-            'shiftsScheduled' => $shiftsScheduled,
-            'shiftsUnassigned' => $shiftsUnassigned,
-            'lateAttendance' => $lateAttendance,
-            'unreadNotifications' => $unreadNotifications,
-            'leaveTotals' => $leaveTotals,
-            'upcomingLeave' => $upcomingLeave,
-            'leaveShiftConflicts' => $leaveShiftConflicts,
-            'expenseTotal' => $expenseTotal,
-            'expenseByCategory' => $expenseByCategory,
+            'supportOpen' => $stats['supportOpen'],
+            'supportWaitingTeam' => $stats['supportWaitingTeam'],
+            'supportWaitingUser' => $stats['supportWaitingUser'],
+            'supportResolved' => $stats['supportResolved'],
+            'timelogHours' => round($stats['timelogMinutes'] / 60, 1),
+            'attendanceOpen' => $stats['attendanceOpen'],
+            'attendanceSummary' => $stats['attendanceSummary'],
+            'agreementsActive' => $stats['agreementsActive'],
+            'dueAgreements' => $stats['dueAgreements'],
+            'shiftsScheduled' => $stats['shiftsScheduled'],
+            'shiftsUnassigned' => $stats['shiftsUnassigned'],
+            'lateAttendance' => $stats['lateAttendance'],
+            'unreadNotifications' => $stats['unreadNotifications'],
+            'leaveTotals' => $stats['leaveTotals'],
+            'upcomingLeave' => $stats['upcomingLeave'],
+            'leaveShiftConflicts' => $stats['leaveShiftConflicts'],
+            'expenseTotal' => $stats['expenseTotal'],
+            'expenseByCategory' => $stats['expenseByCategory'],
         ]);
     }
 

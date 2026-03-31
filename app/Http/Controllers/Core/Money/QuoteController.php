@@ -21,7 +21,7 @@ class QuoteController extends CoreController
     {
         $this->authorize('viewAny', Quote::class);
 
-        $query = Quote::query()->with('customer');
+        $query = Quote::query()->with(['customer', 'items']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
