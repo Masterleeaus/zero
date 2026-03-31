@@ -21,7 +21,12 @@ class ServiceIssueController extends Controller
         $user = $request->user();
 
         $issues = ServiceIssue::query()
-            ->when($user && ! $user->isAdmin(), fn ($q) => $q->where('assigned_to', $user->id)->orWhere('user_id', $user->id))
+            ->when(
+                $user && ! $user->isAdmin(),
+                fn ($q) => $q->where(fn ($builder) => $builder
+                    ->where('assigned_to', $user->id)
+                    ->orWhere('user_id', $user->id))
+            )
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->string('priority')))
             ->latest()
