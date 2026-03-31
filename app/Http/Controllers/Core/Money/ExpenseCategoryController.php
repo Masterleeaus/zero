@@ -8,6 +8,7 @@ use App\Http\Controllers\Core\CoreController;
 use App\Models\Money\ExpenseCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ExpenseCategoryController extends CoreController
@@ -32,7 +33,13 @@ class ExpenseCategoryController extends CoreController
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('expense_categories', 'name')
+                    ->where('company_id', $request->user()->company_id),
+            ],
             'description' => ['nullable', 'string'],
         ]);
 
@@ -59,7 +66,14 @@ class ExpenseCategoryController extends CoreController
         abort_if($expenseCategory->company_id !== $request->user()->company_id, 403);
 
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('expense_categories', 'name')
+                    ->where('company_id', $expenseCategory->company_id)
+                    ->ignore($expenseCategory->id),
+            ],
             'description' => ['nullable', 'string'],
         ]);
 
