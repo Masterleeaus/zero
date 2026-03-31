@@ -129,6 +129,12 @@ function formatCamelCase($input)
 
 /**
  * Resolve WorkCore-friendly labels using configured mappings.
+ *
+ * Dots and hyphens in the provided key are converted to underscores before
+ * snake_casing to align with config label definitions.
+ *
+ * @param  string      $key      Label lookup key.
+ * @param  string|null $default  Optional fallback value.
  */
 function workcore_label(string $key, ?string $default = null): string
 {
