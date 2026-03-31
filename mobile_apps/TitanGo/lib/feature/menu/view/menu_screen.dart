@@ -35,7 +35,9 @@ class MenuScreen extends StatelessWidget {
       MenuModel(icon: Images.aboutUs, title: 'help_support'.tr, route: '_help_support'),
       MenuModel(icon: Images.history, title: 'booking_history'.tr, route: RouteHelper.getBookingHistoryRoute()),
 
-      // Footer / legal
+      // Footer / legal – only privacy/terms/cancellation policy shown.
+      // About Us and Refund Policy intentionally excluded from the
+      // cleaner-first worker utility panel for a cleaner UX.
       ...(configModel
           ?.content
           ?.businessPages

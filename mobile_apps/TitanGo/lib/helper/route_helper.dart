@@ -25,6 +25,7 @@ class RouteHelper {
   static const String bookingRequest = '/booking-request';
   static const String forgotPassword = '/forgot-password';
   static const String changePassword = '/change-password';
+  static const String maintenanceRoute = '/maintenance-screen';
   static const String reportIssue = '/report-issue';
   static const String supplyIssue = '/supply-issue';
   static const String askTitan = '/ask-titan';

@@ -42,27 +42,9 @@ class MenuButton extends StatelessWidget {
         }else if(menu!.route!.contains('language')) {
           Get.back();
           Get.bottomSheet(const ChooseLanguageBottomSheet(), backgroundColor: Colors.transparent, isScrollControlled: true);
-        }else if(menu!.route == '_checklists') {
+        }else if(_isSpecialRoute(menu!.route!)) {
           Get.back();
-          Get.to(() => const ChecklistsScreen());
-        }else if(menu!.route == '_supply_issues') {
-          Get.back();
-          Get.to(() => const SupplyIssueScreen());
-        }else if(menu!.route == '_report_issue') {
-          Get.back();
-          Get.to(() => const ReportIssueScreen());
-        }else if(menu!.route == '_ask_titan') {
-          Get.back();
-          Get.to(() => const AskTitanScreen());
-        }else if(menu!.route == '_voice_control') {
-          Get.back();
-          Get.to(() => const VoiceControlScreen());
-        }else if(menu!.route == '_training') {
-          Get.back();
-          Get.to(() => const TrainingScreen());
-        }else if(menu!.route == '_help_support') {
-          Get.back();
-          Get.toNamed(RouteHelper.getInboxScreenRoute());
+          _navigateSpecial(menu!.route!);
         }else {
           Get.offNamed(menu!.route!);
         }
@@ -85,5 +67,32 @@ class MenuButton extends StatelessWidget {
       ]),
     );
   }
-}
 
+  static bool _isSpecialRoute(String route) => route.startsWith('_');
+
+  static void _navigateSpecial(String route) {
+    switch (route) {
+      case '_checklists':
+        Get.to(() => const ChecklistsScreen());
+        break;
+      case '_supply_issues':
+        Get.to(() => const SupplyIssueScreen());
+        break;
+      case '_report_issue':
+        Get.to(() => const ReportIssueScreen());
+        break;
+      case '_ask_titan':
+        Get.to(() => const AskTitanScreen());
+        break;
+      case '_voice_control':
+        Get.to(() => const VoiceControlScreen());
+        break;
+      case '_training':
+        Get.to(() => const TrainingScreen());
+        break;
+      case '_help_support':
+        Get.toNamed(RouteHelper.getInboxScreenRoute());
+        break;
+    }
+  }
+}

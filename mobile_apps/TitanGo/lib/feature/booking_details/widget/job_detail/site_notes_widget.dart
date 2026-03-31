@@ -97,8 +97,7 @@ class SiteNotesWidget extends StatelessWidget {
                       _SiteNoteRow(
                         icon: Icons.person_outline_rounded,
                         label: 'contact_person'.tr,
-                        value:
-                            '${address?.contactPersonName ?? ''} ${address?.contactPersonNumber != null && address!.contactPersonNumber!.isNotEmpty ? '· ${address.contactPersonNumber}' : ''}',
+                        value: _formatContactPerson(address),
                       ),
                     ],
                   ],
@@ -119,6 +118,14 @@ class SiteNotesWidget extends StatelessWidget {
       if (address.country?.isNotEmpty == true) address.country!,
     ];
     return parts.join(', ');
+  }
+
+  String _formatContactPerson(ServiceAddress? address) {
+    final name = address?.contactPersonName ?? '';
+    final phone = address?.contactPersonNumber ?? '';
+    if (name.isNotEmpty && phone.isNotEmpty) return '$name · $phone';
+    if (name.isNotEmpty) return name;
+    return phone;
   }
 
   Widget _buildNoNotes(BuildContext context) {
