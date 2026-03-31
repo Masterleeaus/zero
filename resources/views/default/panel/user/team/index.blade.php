@@ -1,6 +1,6 @@
 @extends('panel.layout.app')
 
-@section('title', __('Team Members'))
+@section('title', __('team.members.title'))
 @section('titlebar_actions', '')
 @section('content')
     <div class="py-10">

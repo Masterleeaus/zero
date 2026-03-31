@@ -186,6 +186,10 @@ class AppServiceProvider extends ServiceProvider
 
     private function bootBladeDirectives(): void
     {
+        Blade::directive('vertical', function ($key) {
+            return "<?php echo workcore_label({$key}); ?>";
+        });
+
         Blade::directive('formatNumber', function ($expression) {
             return "<?php echo is_numeric($expression) ? rtrim(rtrim(number_format((float) $expression, 2), '0'), '.') : ($expression); ?>";
         });

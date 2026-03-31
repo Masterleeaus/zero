@@ -17,7 +17,7 @@
                     <tr>
                         <th>{{ __('Title') }}</th>
                         <th>{{ __('Customer') }}</th>
-                        <th>{{ __('Site') }}</th>
+                        <th>{{ __('work.labels.site') }}</th>
                         <th>{{ __('Frequency') }}</th>
                         <th>{{ __('Next Run') }}</th>
                         <th>{{ __('Status') }}</th>

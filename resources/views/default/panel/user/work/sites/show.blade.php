@@ -1,5 +1,5 @@
 @extends('panel.layout.app')
-@section('title', __('Site'))
+@section('title', __('work.labels.site'))
 @section('titlebar_actions')
     <x-button href="{{ route('dashboard.work.sites.edit', $site) }}">
         <x-tabler-pencil class="size-4" />
@@ -12,7 +12,7 @@
         <x-card>
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <div class="text-sm text-slate-500">{{ __('Name') }}</div>
+                    <div class="text-sm text-slate-500">{{ __('work.sites.table_name') }}</div>
                     <div class="text-lg font-semibold">{{ $site->name }}</div>
                 </div>
                 <div>
@@ -21,7 +21,7 @@
                 </div>
                 @if($site->reference)
                     <div>
-                        <div class="text-sm text-slate-500">{{ __('Reference') }}</div>
+                        <div class="text-sm text-slate-500">{{ __('work.sites.table_reference') }}</div>
                         <div>{{ $site->reference }}</div>
                     </div>
                 @endif
@@ -55,18 +55,18 @@
 
         <x-card>
             <div class="flex items-center justify-between mb-3">
-                <div class="font-semibold">{{ __('Service Jobs') }}</div>
+                <div class="font-semibold">{{ __('work.jobs.title') }}</div>
                 <x-button size="xs" href="{{ route('dashboard.work.service-jobs.create', ['site_id' => $site->id]) }}">
-                    <x-tabler-plus class="size-4" /> {{ __('Add Job') }}
+                    <x-tabler-plus class="size-4" /> {{ __('work.jobs.add') }}
                 </x-button>
             </div>
             <x-table>
                 <x-slot:head>
                     <tr>
-                        <th>{{ __('Title') }}</th>
-                        <th>{{ __('Status') }}</th>
-                        <th>{{ __('Scheduled') }}</th>
-                        <th class="text-end">{{ __('Action') }}</th>
+                        <th>{{ __('work.jobs.table_title') }}</th>
+                        <th>{{ __('work.jobs.table_status') }}</th>
+                        <th>{{ __('work.jobs.table_scheduled') }}</th>
+                        <th class="text-end">{{ __('work.jobs.table_action') }}</th>
                     </tr>
                 </x-slot:head>
                 <x-slot:body>
@@ -84,7 +84,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-slate-500 py-4">{{ __('No jobs yet') }}</td>
+                            <td colspan="4" class="text-center text-slate-500 py-4">{{ __('work.jobs.empty') }}</td>
                         </tr>
                     @endforelse
                 </x-slot:body>

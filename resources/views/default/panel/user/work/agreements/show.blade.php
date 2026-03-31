@@ -20,7 +20,7 @@
             <div class="mt-3 flex justify-end">
                 <form method="post" action="{{ route('dashboard.work.agreements.run', $agreement) }}">
                     @csrf
-                    <x-button type="submit" size="sm">{{ __('Generate Next Job') }}</x-button>
+                    <x-button type="submit" size="sm">{{ __('work.jobs.generate_next') }}</x-button>
                 </form>
             </div>
             <div class="mt-3 grid grid-cols-2 gap-4">
@@ -29,14 +29,14 @@
                     <div>{{ $agreement->customer?->name ?? '—' }}</div>
                 </div>
                 <div>
-                    <div class="text-sm text-slate-500">{{ __('Site') }}</div>
+                    <div class="text-sm text-slate-500">{{ __('work.labels.site') }}</div>
                     <div>{{ $agreement->site?->name ?? '—' }}</div>
                 </div>
             </div>
         </x-card>
 
         <x-card>
-            <div class="font-semibold mb-2">{{ __('Linked Jobs') }}</div>
+            <div class="font-semibold mb-2">{{ __('work.jobs.linked') }}</div>
             <x-table>
                 <x-slot:head>
                     <tr>
@@ -54,7 +54,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="py-3 text-center text-slate-500">{{ __('No jobs linked yet.') }}</td>
+                            <td colspan="3" class="py-3 text-center text-slate-500">{{ __('work.jobs.linked_empty') }}</td>
                         </tr>
                     @endforelse
                 </x-slot:body>
