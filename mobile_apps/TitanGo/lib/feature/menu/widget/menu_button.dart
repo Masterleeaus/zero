@@ -1,3 +1,7 @@
+import 'package:demandium_serviceman/feature/checklist/view/checklists_screen.dart';
+import 'package:demandium_serviceman/feature/reports/view/report_issue_screen.dart';
+import 'package:demandium_serviceman/feature/reports/view/supply_issue_screen.dart';
+import 'package:demandium_serviceman/feature/titan_ai/view/titan_ai_screens.dart';
 import 'package:get/get.dart';
 import 'package:demandium_serviceman/utils/core_export.dart';
 
@@ -38,8 +42,28 @@ class MenuButton extends StatelessWidget {
         }else if(menu!.route!.contains('language')) {
           Get.back();
           Get.bottomSheet(const ChooseLanguageBottomSheet(), backgroundColor: Colors.transparent, isScrollControlled: true);
-        }
-        else {
+        }else if(menu!.route == '_checklists') {
+          Get.back();
+          Get.to(() => const ChecklistsScreen());
+        }else if(menu!.route == '_supply_issues') {
+          Get.back();
+          Get.to(() => const SupplyIssueScreen());
+        }else if(menu!.route == '_report_issue') {
+          Get.back();
+          Get.to(() => const ReportIssueScreen());
+        }else if(menu!.route == '_ask_titan') {
+          Get.back();
+          Get.to(() => const AskTitanScreen());
+        }else if(menu!.route == '_voice_control') {
+          Get.back();
+          Get.to(() => const VoiceControlScreen());
+        }else if(menu!.route == '_training') {
+          Get.back();
+          Get.to(() => const TrainingScreen());
+        }else if(menu!.route == '_help_support') {
+          Get.back();
+          Get.toNamed(RouteHelper.getInboxScreenRoute());
+        }else {
           Get.offNamed(menu!.route!);
         }
       },

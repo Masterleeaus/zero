@@ -34,7 +34,7 @@ class BookingRequestItem extends StatelessWidget {
                         color: Theme.of(context).textTheme.bodySmall!.color!.withValues(alpha:0.7),
                       ),
                     ),
-                    Text(" # ${repeatBooking?.readableId ?? bookingRequestModel?.readableId ?? ""}",
+                    Text("${'booking'.tr} # ${repeatBooking?.readableId ?? bookingRequestModel?.readableId ?? ""}",
                       style: robotoBold.copyWith(
                         color: Theme.of(context).textTheme.bodyLarge!.color!.withValues(alpha:0.8),
                         fontSize: Dimensions.fontSizeLarge,
@@ -143,7 +143,7 @@ class BookingRequestItem extends StatelessWidget {
             child: Row(spacing: Dimensions.paddingSizeExtraSmall, children: [
               Icon(Icons.location_on_rounded, size: 17),
               Text(
-                (repeatBooking?.serviceLocation == "provider" || bookingRequestModel?.serviceLocation == "provider") ?  "provider_location".tr : "customer_location".tr ,
+                (repeatBooking?.serviceLocation == "provider" || bookingRequestModel?.serviceLocation == "provider") ?  "provider_location".tr : "service_location".tr ,
                 style: robotoMedium.copyWith(
                     color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.8)
                 ),

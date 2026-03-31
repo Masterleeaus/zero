@@ -1,3 +1,4 @@
+import 'package:demandium_serviceman/feature/checklist/view/checklists_screen.dart';
 import 'package:demandium_serviceman/utils/core_export.dart';
 import 'package:get/get.dart';
 
@@ -51,7 +52,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
     _screens = [
       const DashBoardScreen(),
       const BookingListScreen(),
-      const BookingHistoryScreen(),
+      const ChecklistsScreen(),
       const Text("More"),
     ];
 

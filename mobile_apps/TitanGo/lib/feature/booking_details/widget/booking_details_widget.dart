@@ -1,3 +1,5 @@
+import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/checklist_launcher_widget.dart';
+import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/site_notes_widget.dart';
 import 'package:get/get.dart';
 import 'package:demandium_serviceman/utils/core_export.dart';
 
@@ -79,6 +81,12 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
 
                   BookingInformationView(bookingDetails: bookingDetails!, isSubBooking: widget.isSubBooking,),
 
+                  // Site Notes / Property Memory block
+                  const SiteNotesWidget(),
+
+                  // Checklist launcher
+                  const ChecklistLauncherWidget(),
+
                   BookingSummeryView(bookingDetails: bookingDetails),
 
                   BookingDetailsProviderInfo(bookingDetails: bookingDetails),
@@ -91,7 +99,7 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
                       const SizedBox(height: Dimensions.paddingSizeDefault,),
-                      Text('completed_service_picture'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
+                      Text('job_proof'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
 
                       Container(
@@ -118,7 +126,7 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
                                       Get.to(ImageDetailScreen(
                                         imageList: bookingDetails.photoEvidenceFullPath ?? [],
                                         index: index,
-                                        appbarTitle: 'completed_service_picture'.tr,
+                                        appbarTitle: 'job_proof'.tr,
 
                                       ),
                                       );
@@ -141,7 +149,7 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
                   Get.find<SplashController>().configModel?.content?.bookingImageVerification == 1 && showDeliveryConfirmImage && bookingDetails.bookingStatus != 'completed' ? Padding(
                     padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('completed_service_picture'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
+                      Text('job_proof'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
 
                       Container(

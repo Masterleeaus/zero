@@ -70,7 +70,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
                   },
                   tabs: [
                     SizedBox(width: MediaQuery.of(context).size.width * 0.5,child: Tab(text: 'booking_details'.tr)),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.5, child: Tab(text: 'status'.tr)),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.5, child: Tab(text: 'job_timeline'.tr)),
                   ],
                 ),
               ),
