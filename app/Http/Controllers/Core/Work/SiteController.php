@@ -14,7 +14,7 @@ class SiteController extends CoreController
 {
     public function index(Request $request): View
     {
-        $query = Site::query();
+        $query = Site::query()->with('jobs');
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
@@ -28,7 +28,7 @@ class SiteController extends CoreController
             });
         }
 
-        $sites = $query->latest()->paginate(10)->withQueryString();
+        $sites = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.work.sites.index', [
             'sites'  => $sites,

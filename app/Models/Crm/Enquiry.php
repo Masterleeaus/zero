@@ -43,4 +43,9 @@ class Enquiry extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

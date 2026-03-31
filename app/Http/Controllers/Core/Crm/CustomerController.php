@@ -14,7 +14,7 @@ class CustomerController extends CoreController
 {
     public function index(Request $request): View
     {
-        $query = Customer::query();
+        $query = Customer::query()->with('enquiries');
 
         if ($search = $request->string('q')->trim()->toString()) {
             $query->where(static function ($builder) use ($search) {
@@ -24,7 +24,7 @@ class CustomerController extends CoreController
             });
         }
 
-        $customers = $query->latest()->paginate(10)->withQueryString();
+        $customers = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.crm.customers.index', [
             'customers' => $customers,

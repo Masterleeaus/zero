@@ -22,7 +22,7 @@ class ExpenseController extends CoreController
             ->with('category')
             ->betweenDates($request->get('start_date'), $request->get('end_date'))
             ->latest('expense_date')
-            ->paginate(20)
+            ->paginate(25)
             ->withQueryString();
 
         $categories = $this->categories($companyId);
