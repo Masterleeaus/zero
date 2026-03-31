@@ -17,4 +17,14 @@ class WorkCoreBootTest extends TestCase
     {
         $this->assertSame('Jobs', workcore_label('sites'));
     }
+
+    public function test_workcore_label_normalizes_hyphenated_keys(): void
+    {
+        $this->assertSame('Job', workcore_label('service-job'));
+    }
+
+    public function test_workcore_label_falls_back_to_title_cased_key(): void
+    {
+        $this->assertSame('Unknown', workcore_label('unknown-key', 'Unknown'));
+    }
 }

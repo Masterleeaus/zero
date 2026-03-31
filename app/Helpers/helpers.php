@@ -129,6 +129,7 @@ function formatCamelCase($input)
 
 function workcore_label(string $key, ?string $default = null): string
 {
+    // Normalize dotted or hyphenated keys to align with config label definitions.
     $normalized = Str::snake(str_replace(['.', '-'], '_', $key));
     $labels = config('workcore.labels', []);
 
