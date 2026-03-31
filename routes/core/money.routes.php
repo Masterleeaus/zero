@@ -54,12 +54,18 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('expenses.create');
             Route::post('expenses', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'store'])
                 ->name('expenses.store');
+            Route::get('expenses/{expense}', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'show'])
+                ->name('expenses.show');
             Route::get('expenses/{expense}/edit', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'edit'])
                 ->name('expenses.edit');
             Route::put('expenses/{expense}', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'update'])
                 ->name('expenses.update');
             Route::delete('expenses/{expense}', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'destroy'])
                 ->name('expenses.destroy');
+            Route::post('expenses/{expense}/approve', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'approve'])
+                ->name('expenses.approve');
+            Route::post('expenses/{expense}/reject', [\App\Http\Controllers\Core\Money\ExpenseController::class, 'reject'])
+                ->name('expenses.reject');
 
             Route::get('expense-categories', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'index'])
                 ->name('expense-categories.index');

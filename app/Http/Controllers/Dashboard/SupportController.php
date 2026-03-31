@@ -51,6 +51,12 @@ class SupportController extends Controller
             'status'     => 'open',
         ]);
 
+        $this->lifecycle->notifyCompanyAdmins(
+            $support,
+            "New support ticket: {$support->subject}",
+            'New Support Ticket'
+        );
+
         TicketAction::ticket($support)
             ->fromUser()
             ->new($request->message)
@@ -84,10 +90,7 @@ class SupportController extends Controller
     {
         $this->authorize('update', $ticket);
 
-        $ticket->update([
-            'status'      => 'resolved',
-            'resolved_at' => now(),
-        ]);
+        $this->lifecycle->resolve($ticket);
 
         return back()->with('message', __('Ticket resolved'));
     }

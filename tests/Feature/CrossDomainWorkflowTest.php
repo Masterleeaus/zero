@@ -66,10 +66,11 @@ class CrossDomainWorkflowTest extends TestCase
         $quote = Quote::factory()->create([
             'company_id' => 11,
             'customer_id'=> $customer->id,
-            'status'     => 'accepted',
-            'subtotal'   => 0,
-            'tax'        => 0,
-            'total'      => 0,
+            // Use 'sent' to cover the allowed conversion path alongside the approved status.
+            'status'     => 'sent',
+            'subtotal'   => 100,
+            'tax'        => 10,
+            'total'      => 110,
         ]);
 
         QuoteItem::create([
@@ -93,6 +94,8 @@ class CrossDomainWorkflowTest extends TestCase
         $this->assertEquals(100.0, (float) $invoice->subtotal);
         $this->assertEquals(10.0, (float) $invoice->tax);
         $this->assertEquals(110.0, (float) $invoice->total);
+        $this->assertEquals('draft', $invoice->status);
+        $this->assertEquals(Quote::STATUS_CONVERTED, $quote->fresh()->status);
     }
 
     public function test_payment_updates_balance_and_status(): void

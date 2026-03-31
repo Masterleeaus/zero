@@ -45,8 +45,8 @@
                 <div class="space-x-2">
                     <form method="post" action="{{ route('dashboard.money.quotes.status', $quote) }}" class="inline">
                         @csrf
-                        <input type="hidden" name="status" value="accepted">
-                        <x-button type="submit" variant="secondary">{{ __('Mark Accepted') }}</x-button>
+                        <input type="hidden" name="status" value="approved">
+                        <x-button type="submit" variant="secondary">{{ __('Mark Approved') }}</x-button>
                     </form>
                     <x-button href="{{ route('dashboard.money.quotes.edit', $quote) }}" variant="ghost">
                         {{ __('Edit') }}
@@ -148,7 +148,12 @@
 
         <x-card>
             <div class="font-semibold mb-3">{{ __('Create Invoice from Quote') }}</div>
-            @if($quote->status === 'accepted')
+            @if($quote->latestInvoice)
+                <x-button href="{{ route('dashboard.money.invoices.show', $quote->latestInvoice) }}">
+                    <x-tabler-file-invoice class="size-4" />
+                    {{ __('View Invoice') }}
+                </x-button>
+            @elseif(in_array($quote->status, ['approved', 'sent']))
                 <form method="post" action="{{ route('dashboard.money.quotes.convert-invoice', $quote) }}">
                     @csrf
                     <x-button type="submit">
@@ -157,7 +162,7 @@
                     </x-button>
                 </form>
             @else
-                <p class="text-slate-500 text-sm">{{ __('Quote must be accepted before invoicing.') }}</p>
+                <p class="text-slate-500 text-sm">{{ __('Quote must be approved or sent before invoicing.') }}</p>
             @endif
         </x-card>
     </div>
