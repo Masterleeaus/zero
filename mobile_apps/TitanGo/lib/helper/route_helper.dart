@@ -26,6 +26,13 @@ class RouteHelper {
   static const String forgotPassword = '/forgot-password';
   static const String changePassword = '/change-password';
   static const String maintenanceRoute = '/maintenance-screen';
+  static const String reportIssue = '/report-issue';
+  static const String supplyIssue = '/supply-issue';
+  static const String askTitan = '/ask-titan';
+  static const String voiceControl = '/voice-control';
+  static const String training = '/training';
+  static const String checklists = '/checklists';
+  static const String bookingHistory = '/booking-history';
 
 
   static String getInitialRoute() => initial;
@@ -68,6 +75,13 @@ class RouteHelper {
 
   static String getNotificationRoute() => notification;
   static String getMaintenanceRoute() => maintenanceRoute;
+  static String getReportIssueRoute() => reportIssue;
+  static String getSupplyIssueRoute() => supplyIssue;
+  static String getAskTitanRoute() => askTitan;
+  static String getVoiceControlRoute() => voiceControl;
+  static String getTrainingRoute() => training;
+  static String getChecklistsRoute() => checklists;
+  static String getBookingHistoryRoute() => bookingHistory;
 
 
   static List<GetPage> routes = [
@@ -141,6 +155,13 @@ class RouteHelper {
     )),
     GetPage(name: update, page: () => UpdateScreen(isUpdate: Get.parameters['update'] == 'true')),
     GetPage(name: maintenanceRoute, page: () => const MaintenanceScreen()),
+    GetPage(name: reportIssue, page: () => const ReportIssueScreen()),
+    GetPage(name: supplyIssue, page: () => const SupplyIssueScreen()),
+    GetPage(name: askTitan, page: () => const AskTitanScreen()),
+    GetPage(name: voiceControl, page: () => const VoiceControlScreen()),
+    GetPage(name: training, page: () => const TrainingScreen()),
+    GetPage(name: checklists, page: () => const ChecklistsScreen()),
+    GetPage(name: bookingHistory, page: () => const BookingHistoryScreen()),
   ];
 
   static Widget getRoute(Widget navigateTo) {

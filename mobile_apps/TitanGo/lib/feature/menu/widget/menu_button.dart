@@ -1,3 +1,7 @@
+import 'package:demandium_serviceman/feature/checklist/view/checklists_screen.dart';
+import 'package:demandium_serviceman/feature/reports/view/report_issue_screen.dart';
+import 'package:demandium_serviceman/feature/reports/view/supply_issue_screen.dart';
+import 'package:demandium_serviceman/feature/titan_ai/view/titan_ai_screens.dart';
 import 'package:get/get.dart';
 import 'package:demandium_serviceman/utils/core_export.dart';
 
@@ -38,8 +42,10 @@ class MenuButton extends StatelessWidget {
         }else if(menu!.route!.contains('language')) {
           Get.back();
           Get.bottomSheet(const ChooseLanguageBottomSheet(), backgroundColor: Colors.transparent, isScrollControlled: true);
-        }
-        else {
+        }else if(_isSpecialRoute(menu!.route!)) {
+          Get.back();
+          _navigateSpecial(menu!.route!);
+        }else {
           Get.offNamed(menu!.route!);
         }
       },
@@ -61,5 +67,32 @@ class MenuButton extends StatelessWidget {
       ]),
     );
   }
-}
 
+  static bool _isSpecialRoute(String route) => route.startsWith('_');
+
+  static void _navigateSpecial(String route) {
+    switch (route) {
+      case '_checklists':
+        Get.to(() => const ChecklistsScreen());
+        break;
+      case '_supply_issues':
+        Get.to(() => const SupplyIssueScreen());
+        break;
+      case '_report_issue':
+        Get.to(() => const ReportIssueScreen());
+        break;
+      case '_ask_titan':
+        Get.to(() => const AskTitanScreen());
+        break;
+      case '_voice_control':
+        Get.to(() => const VoiceControlScreen());
+        break;
+      case '_training':
+        Get.to(() => const TrainingScreen());
+        break;
+      case '_help_support':
+        Get.toNamed(RouteHelper.getInboxScreenRoute());
+        break;
+    }
+  }
+}
