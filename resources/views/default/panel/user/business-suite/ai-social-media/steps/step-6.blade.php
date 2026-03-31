@@ -102,7 +102,6 @@
             name="repeat"
             type="checkbox"
             checked
-            type="checkbox"
             switcher
             label="{{ __('Repeat?') }}"
         />

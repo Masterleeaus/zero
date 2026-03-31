@@ -10,7 +10,7 @@
 		</x-button>
 	</h3>
 	<p>
-		@lang('Choose the social media platforms you would like to pubish your post. Feel free to select multiple platforms at once.')
+		@lang('Choose the social media platforms you would like to publish your post. Feel free to select multiple platforms at once.')
 	</p>
 </div>
 

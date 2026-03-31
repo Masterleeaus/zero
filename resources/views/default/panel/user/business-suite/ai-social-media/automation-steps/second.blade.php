@@ -65,7 +65,6 @@
 			<x-forms.input
 				id="product_id[]"
 				label="{{ __('Select a Product') }}"
-				size="lg"
 				name="product_id[]"
 				type="select"
 				size="lg"

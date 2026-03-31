@@ -7,7 +7,7 @@
             variant="secondary"
             href="{{ LaravelLocalization::localizeUrl(route('dashboard.user.automation.campaign.list')) }}"
         >
-            {{ __('Campagins') }}
+            {{ __('Campaigns') }}
         </x-button>
     </h3>
     <p>

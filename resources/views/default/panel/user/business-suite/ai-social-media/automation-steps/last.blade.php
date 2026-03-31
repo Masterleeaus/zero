@@ -34,7 +34,6 @@
 				name="repeat"
 				type="checkbox"
 				checked
-				type="checkbox"
 				switcher
 				label="{{ __('Repeat?') }}"
 			/>
@@ -82,7 +81,6 @@
 			type="checkbox"
 			label="{{ __('Share now for test') }}"
 			name="share_test"
-			type="checkbox"
 			switcher
 		/>
 
@@ -167,4 +165,3 @@
 		});
 	</script>
 @endpush
-
