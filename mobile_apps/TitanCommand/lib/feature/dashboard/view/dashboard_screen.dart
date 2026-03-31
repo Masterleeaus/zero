@@ -60,8 +60,7 @@ class _DashBoardScreenState extends State<DashBoardScreen>{
                 TopCardSection(toolTip: toolTip),
                 SizedBox(height: Dimensions.paddingSizeSmall),
 
-                const AdvertisementSection(),
-                SizedBox(height: Dimensions.paddingSizeSmall),
+                // AdvertisementSection removed - operations command uses quality/training features in menu instead
 
                 const EarningStatisticsWidget(),
                 SizedBox(height: Dimensions.paddingSizeSmall),

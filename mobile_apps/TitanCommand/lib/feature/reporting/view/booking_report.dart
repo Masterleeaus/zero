@@ -26,7 +26,7 @@ class _BookingReportState extends State<BookingReport> {
     return GetBuilder<BookingReportController>(builder: (bookingReportController){
       return Scaffold(
         backgroundColor: Theme.of(context).cardColor.withValues(alpha:0.97),
-        appBar: ReportAppBarView(title: 'booking_report'.tr, fromPage: 'booking', isFiltered: bookingReportController.isFiltered,),
+        appBar: ReportAppBarView(title: 'job_report'.tr, fromPage: 'booking', isFiltered: bookingReportController.isFiltered,),
         body:  bookingReportController.bookingReportModel !=null ? CustomScrollView(
           controller: bookingReportController.scrollController,
           slivers: [
