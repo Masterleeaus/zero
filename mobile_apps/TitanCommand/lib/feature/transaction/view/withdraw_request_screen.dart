@@ -99,7 +99,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'withdraw_request'.tr),
+      appBar: CustomAppBar(title: 'payout_request'.tr),
       body: GetBuilder<TransactionController>(
         builder: (transactionMoneyController) {
           return SingleChildScrollView(
@@ -121,7 +121,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
                     ),
                     const SizedBox(height: Dimensions.paddingSizeLarge,),
 
-                    TextFieldTitle(title:'select_withdraw_method'.tr,
+                    TextFieldTitle(title:'select_payout_method'.tr,
                       requiredMark: true,
                       fontSize: Dimensions.fontSizeExtraSmall,
                       isPadding: false,
@@ -322,7 +322,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
                       label: Transform.rotate(
                         angle: Get.find<LocalizationController>().isLtr ? pi * 2 : pi,
                         child: Text(
-                          'send_withdraw_request'.tr,
+                          'send_payout_request'.tr,
                           style: robotoMedium.copyWith(
                             fontSize: Dimensions.fontSizeLarge,
                             color: Theme.of(context).primaryColor,

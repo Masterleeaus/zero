@@ -33,7 +33,7 @@ class BookingRequestItem extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text("booking".tr,
+                      Text("job".tr,
                         style: robotoMedium.copyWith(
                           fontSize: Dimensions.fontSizeLarge,
                           color: Theme.of(context).textTheme.bodySmall!.color!.withValues(alpha:0.7),
@@ -80,7 +80,7 @@ class BookingRequestItem extends StatelessWidget {
                   child: Column(children: [
                     Row(
                       children: [
-                        Text("${'booking_date'.tr}: ",
+                        Text("${'job_date'.tr}: ",
                             style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall,   color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha:0.6))
                         ),
                         Expanded(
@@ -140,7 +140,7 @@ class BookingRequestItem extends StatelessWidget {
             child: Row(spacing: Dimensions.paddingSizeExtraSmall, children: [
               Icon(Icons.location_on_rounded, size: 17),
               Text(
-                booking.serviceLocation == "provider" ?  "your_location".tr : "customer_location".tr ,
+                booking.serviceLocation == "provider" ?  "our_location".tr : "client_site".tr ,
                 style: robotoMedium.copyWith(
                     color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.8)
                 ),

@@ -34,7 +34,7 @@ class TopCardSection extends StatelessWidget {
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                child: Text("business_summery".tr,
+                child: Text("operations_snapshot".tr,
                   style: robotoMedium.copyWith(
                     fontSize: Dimensions.fontSizeDefault,
                     fontWeight: FontWeight.w600,
@@ -70,7 +70,7 @@ class TopCardSection extends StatelessWidget {
                           amount: dashboardController.dashboardTopCards!=null && dashboardController.dashboardTopCards!.totalSubscribedServices!=null
                               ? dashboardController.dashboardTopCards!.totalSubscribedServices.toString()
                               :"0",
-                          title: "subscribed_services".tr,
+                          title: "active_services".tr,
                           iconData: Images.topCardService,
                         ),
                       ],
@@ -86,7 +86,7 @@ class TopCardSection extends StatelessWidget {
                           amount: dashboardController.dashboardTopCards!=null && dashboardController.dashboardTopCards!.totalServiceMan!=null
                               ? dashboardController.dashboardTopCards!.totalServiceMan.toString()
                               :"0",
-                          title: "total_service_men".tr,
+                          title: "team_members".tr,
                           iconData: Images.serviceMan,
                         ),
 
@@ -96,7 +96,7 @@ class TopCardSection extends StatelessWidget {
                           amount: dashboardController.dashboardTopCards!=null && dashboardController.dashboardTopCards!.totalBookingServed!=null
                               ? dashboardController.dashboardTopCards!.totalBookingServed.toString()
                               :"0",
-                          title: "total_booking_served".tr,
+                          title: "jobs_completed".tr,
                           iconData: Images.serviceMan,
                         ),
                       ],

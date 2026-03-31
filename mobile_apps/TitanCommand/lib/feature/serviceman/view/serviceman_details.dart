@@ -260,7 +260,7 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget{
         Get.find<BusinessSubscriptionController>().openTrialEndBottomSheet().then((isTrial){
           if(isTrial){
             showCustomDialog(child: ConfirmationDialog(
-                title: "delete_this_service_man".tr,
+                title: "delete_this_cleaner".tr,
                 icon: Images.servicemanImage,
                 description: 'this_operation_cannot_be_undone'.tr,
                 onYesPressed: () async{

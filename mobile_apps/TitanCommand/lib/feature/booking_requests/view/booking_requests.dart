@@ -26,7 +26,7 @@ class _BookingRequestScreenState extends State<BookingRequestScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: MainAppBar(title: 'booking_requests'.tr,color: Theme.of(context).primaryColor,fromBookingRequest: true,),
+      appBar: MainAppBar(title: 'schedule'.tr,color: Theme.of(context).primaryColor,fromBookingRequest: true,),
       body: GetBuilder<UserProfileController>(builder: (userController){
         return GetBuilder<BookingRequestController>(
           builder:(bookingRequestController){

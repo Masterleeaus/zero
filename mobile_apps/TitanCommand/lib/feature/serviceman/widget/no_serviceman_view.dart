@@ -51,7 +51,7 @@ class NoServicemanView extends StatelessWidget {
                     Get.to(()=>const AddNewServicemanScreen());
                   }
                 });},
-                btnTxt: "add_serviceman".tr,
+                btnTxt: "add_cleaner".tr,
                 icon: Icons.add_circle_outline,
               ),
             ),

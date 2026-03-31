@@ -83,7 +83,7 @@ class BookingServiceLocation extends StatelessWidget {
                       style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault,  color: Theme.of(context).textTheme.bodySmall!.color),
                       children: <TextSpan>[
                         TextSpan(
-                          text: " ${serviceLocation == "provider" ? "your_location".tr : 'customer_location'.tr} ",
+                          text: " ${serviceLocation == "provider" ? "our_location".tr : 'client_site'.tr} ",
                           style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault,  color: Theme.of(context).textTheme.bodyLarge!.color),
                         ),
                         TextSpan(
