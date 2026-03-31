@@ -12,7 +12,7 @@ return new class extends Migration {
         if (! Schema::hasTable('service_issues')) {
             Schema::create('service_issues', static function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('company_id')->index()->nullable();
+                $table->unsignedBigInteger('company_id')->index();
                 $table->unsignedBigInteger('user_id')->nullable()->index();
                 $table->unsignedBigInteger('assigned_to')->nullable()->index();
                 $table->string('subject');
@@ -36,7 +36,7 @@ return new class extends Migration {
             Schema::create('service_issue_messages', static function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('service_issue_id')->index();
-                $table->unsignedBigInteger('company_id')->index()->nullable();
+                $table->unsignedBigInteger('company_id')->index();
                 $table->unsignedBigInteger('user_id')->nullable()->index();
                 $table->boolean('is_internal')->default(false)->index();
                 $table->text('message')->nullable();

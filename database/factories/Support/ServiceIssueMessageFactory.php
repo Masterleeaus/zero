@@ -16,9 +16,15 @@ class ServiceIssueMessageFactory extends Factory
 
     public function definition(): array
     {
+        $issueRef = null;
+
         return [
-            'service_issue_id' => static fn () => ServiceIssue::factory()->create()->id,
-            'company_id'       => static function (array $attributes) {
+            'service_issue_id' => static function () use (&$issueRef) {
+                $issueRef = $issueRef ?? ServiceIssue::factory()->create();
+
+                return $issueRef->id;
+            },
+            'company_id'       => static function (array $attributes) use (&$issueRef) {
                 if (isset($attributes['company_id'])) {
                     return $attributes['company_id'];
                 }
@@ -27,7 +33,9 @@ class ServiceIssueMessageFactory extends Factory
                     return ServiceIssue::find($attributes['service_issue_id'])?->company_id;
                 }
 
-                return null;
+                $issueRef = $issueRef ?? ServiceIssue::factory()->create();
+
+                return $issueRef->company_id;
             },
             'user_id'          => static function (array $attributes) {
                 if (isset($attributes['user_id'])) {
