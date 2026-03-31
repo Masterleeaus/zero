@@ -12,7 +12,7 @@ return [
         'checklists'     => 'Cleaning Checklist Items',
         'attendance'     => 'Shift Log',
         'shift'          => 'Availability',
-        'shifts'         => 'Availability',
+        'shifts'         => 'Availabilities',
         'issues_support' => 'Service Requests',
         'knowledge_base' => 'Playbooks',
     ],
