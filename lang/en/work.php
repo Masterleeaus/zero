@@ -49,7 +49,6 @@ return [
         'empty'      => 'No ' . strtolower(workcore_label('sites')) . ' yet',
         'add_job'    => 'Add ' . workcore_label('service_job'),
         'table_name' => 'Name',
-        'table_site' => workcore_label('site'),
         'table_status' => 'Status',
         'table_deadline' => 'Deadline',
         'table_reference' => 'Reference',

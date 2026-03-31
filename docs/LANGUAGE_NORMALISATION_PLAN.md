@@ -3,9 +3,8 @@
 | Internal key   | Display label        |
 | -------------- | -------------------- |
 | sites          | Jobs                 |
-| service_jobs   | Cleaning Checklist   |
+| service_jobs   | Cleaning Checklists  |
 | attendance     | Shift Log            |
-| shifts         | Availability         |
+| shifts         | Availabilities       |
 | issues_support | Service Requests     |
 | knowledge_base | Playbooks            |
-
