@@ -31,8 +31,8 @@ class MenuHelper
         'brand_voice',
         'support',
         'photo_studio_extension',
-        'ai_social_media_extension',
-        'ai_social_media_extension',
+        'ai_business_suite_extension',
+        'ai_business_suite_extension',
         'ext_chat_bot',
     ];
 
@@ -40,7 +40,7 @@ class MenuHelper
         'ai_chat_all',
         'ai_editor',
         'ai_writer',
-        'ai_social_media_extension',
+        'ai_business_suite_extension',
         'ext_chat_bot',
         'brand_voice',
         'photo_studio_extension',
@@ -65,7 +65,7 @@ class MenuHelper
         'ai_article_wizard',
         'ai_voice_isolator',
         'ext_voice_chatbot',
-        'ext_social_media_dropdown',
+        'ext_business_suite_dropdown',
         'ai_influencer',
         'creative_suite',
         'url_to_video',

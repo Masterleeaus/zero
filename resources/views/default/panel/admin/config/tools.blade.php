@@ -191,7 +191,7 @@
             </div>
         </div>
 
-        @includeIf('social-media::setting.particles.ai-tools-settings')
+        @includeIf('business-suite::setting.particles.ai-tools-settings')
 
         @includeIf('photo-studio::particles.default-photo-studio')
 
@@ -455,7 +455,7 @@
                     label="{{ __('Select Model Option') }}"
                     switcher
                 />
-                @includeIf('ai-social-media::partials.ai-tool-settings')
+                @includeIf('ai-business-suite::partials.ai-tool-settings')
                 @includeFirst([
                     'photo-studio::particles.photo-studio-general-setting',
                     'default.panel.admin.settings.particles.photo-studio-general-setting',

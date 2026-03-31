@@ -51,14 +51,14 @@ class CheckTemplateTypeAndPlan
             'dashboard.user.brand.index'                 => 'brand_voice',
             'dashboard.support.list'                     => 'support',
             'dashboard.user.photo-studio.index'          => 'photo_studio_extension',
-            'dashboard.user.automation.index'            => 'ai_social_media_extension',
-            'dashboard.user.automation.list'             => 'ai_social_media_extension',
+            'dashboard.user.automation.index'            => 'ai_business_suite_extension',
+            'dashboard.user.automation.list'             => 'ai_business_suite_extension',
             'dashboard.chatbot.index'                    => 'ext_chat_bot',
-            'dashboard.user.social-media.index'          => 'ext_social_media_dropdown',
-            'dashboard.user.social-media.campaign.index' => 'ext_social_media_dropdown',
-            'dashboard.user.social-media.platforms'      => 'ext_social_media_dropdown',
-            'dashboard.user.social-media.post.index'     => 'ext_social_media_dropdown',
-            'dashboard.user.social-media.calendar'       => 'ext_social_media_dropdown',
+            'dashboard.user.business-suite.index'          => 'ext_business_suite_dropdown',
+            'dashboard.user.business-suite.campaign.index' => 'ext_business_suite_dropdown',
+            'dashboard.user.business-suite.platforms'      => 'ext_business_suite_dropdown',
+            'dashboard.user.business-suite.post.index'     => 'ext_business_suite_dropdown',
+            'dashboard.user.business-suite.calendar'       => 'ext_business_suite_dropdown',
             'dashboard.user.ai-music-pro.index'          => 'ext_ai_music_pro',
             'dashboard.user.ai-presentation.index'       => 'ai_presentation',
         ];
@@ -111,7 +111,7 @@ class CheckTemplateTypeAndPlan
             return ! ($isPremium === 1 || $isAccessTypePremium);
         }
         // now even if slug exist in route, openai table does not contain all slugs
-        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation'];
+        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_business_suite_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation'];
         // if openai record exist or slug is in the list of slugs that are not in openai generator
         if ($openAi || in_array($slug, $slugsNotInOpenAiGenerator, true)) {
             $setting = $this->settingSlug($slug);

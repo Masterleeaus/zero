@@ -27,8 +27,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        if (setting('dash_theme') === 'social-media-agent-dashboard') {
-            Theme::set('social-media-agent-dashboard');
+        if (setting('dash_theme') === 'business-suite-agent-dashboard') {
+            Theme::set('business-suite-agent-dashboard');
         }
 
         return view('panel.authentication.login', [
@@ -107,9 +107,9 @@ class AuthenticatedSessionController extends Controller
             event(new UsersActivityEvent($user->email, $user->type, $request->ip(), $request->header('User-Agent')));
         }
 
-        if ((setting('frontend_additional_url_type') !== 'ai-image-pro') && (setting('dash_theme') === 'social-media-agent-dashboard')) {
+        if ((setting('frontend_additional_url_type') !== 'ai-image-pro') && (setting('dash_theme') === 'business-suite-agent-dashboard')) {
             return response()->json([
-                'link' => '/dashboard/user/social-media/agent',
+                'link' => '/dashboard/user/business-suite/agent',
             ]);
         }
 

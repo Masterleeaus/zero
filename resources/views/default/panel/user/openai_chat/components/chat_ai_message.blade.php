@@ -257,7 +257,7 @@
 							'border bg-transparent hover:border-primary' =>
 								$is_chat_pro && $suggestion_style === 'pill',
 							'dark:text-accent dark:hover:text-primary-foreground' =>
-								$theme === 'social-media-dashboard' && $suggestion_style === 'pill',
+								$theme === 'business-suite-dashboard' && $suggestion_style === 'pill',
 							'px-0 py-1.5 text-start justify-start [font-weight:inherit]' =>
 								$is_chat_pro && $suggestion_style === 'inline',
 							'hover:text-primary' => $suggestion_style === 'inline',

@@ -79,8 +79,8 @@ class SubscriptionPlanCreate extends Component
             'plan.reset_credits_on_renewal'                => 'boolean',
             'plan.last_date'                               => 'date|nullable',
             'plan.hidden_url'                              => 'nullable',
-            'plan.social_media_agent_limits.agents'        => 'nullable|integer|min:-1',
-            'plan.social_media_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
+            'plan.business_suite_agent_limits.agents'        => 'nullable|integer|min:-1',
+            'plan.business_suite_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.monthly_posts'          => 'nullable|integer|min:-1',
             'plan.voice_call_seconds_limit'                => 'nullable|integer|min:-1',
@@ -159,7 +159,7 @@ class SubscriptionPlanCreate extends Component
 
         $isSensitiveDataChanged = $this->isSensitiveDataChanged();
         $this->changePlanValuesWithSuppliedEntities();
-        $this->normalizeSocialMediaAgentLimits();
+        $this->normalizeBusinessSuiteAgentLimits();
         $this->normalizeBlogPilotLimits();
         $this->plan->save();
         if ($isSensitiveDataChanged) {
@@ -222,9 +222,9 @@ class SubscriptionPlanCreate extends Component
         }
     }
 
-    private function normalizeSocialMediaAgentLimits(): void
+    private function normalizeBusinessSuiteAgentLimits(): void
     {
-        $limits = (array) ($this->plan->social_media_agent_limits ?? []);
+        $limits = (array) ($this->plan->business_suite_agent_limits ?? []);
         foreach (['agents', 'monthly_posts'] as $key) {
             $value = $limits[$key] ?? null;
             if ($value === null || $value === '') {
@@ -235,7 +235,7 @@ class SubscriptionPlanCreate extends Component
             $limits[$key] = max(-1, (int) $value);
         }
 
-        $this->plan->social_media_agent_limits = $limits;
+        $this->plan->business_suite_agent_limits = $limits;
     }
 
     private function normalizeBlogPilotLimits(): void

@@ -97,7 +97,7 @@
                 @endif
 
 
-                @includeIf('social-media-agent::notifications.notifications-drawer')
+                @includeIf('business-suite-agent::notifications.notifications-drawer')
 
                 {{-- Dark/light switch --}}
                 @if (Theme::getSetting('dashboard.supportedColorSchemes') === 'all')

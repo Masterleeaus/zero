@@ -954,12 +954,12 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.chatbot-customer-tags.index'),
             ],
 
-            'ext_social_media_dropdown' => [
+            'ext_business_suite_dropdown' => [
                 'parent_key'       => null,
-                'key'              => 'ext_social_media_dropdown',
-                'route'            => 'dashboard.user.social-media.index',
-                'label'            => 'AI Social Media',
-                'data-name'        => Introduction::SOCIAL_MEDIA,
+                'key'              => 'ext_business_suite_dropdown',
+                'route'            => 'dashboard.user.business-suite.index',
+                'label'            => 'Business Suite',
+                'data-name'        => Introduction::BUSINESS_SUITE,
                 'icon'             => 'tabler-thumb-up',
                 'svg'              => null,
                 'order'            => 5,
@@ -968,14 +968,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.*',
+                    'dashboard.user.business-suite.*',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.index') && MarketplaceHelper::isRegistered('social-media'),
+                'show_condition' => Route::has('dashboard.user.business-suite.index') && MarketplaceHelper::isRegistered('business-suite'),
             ],
-            'ext_social_media' => [
-                'parent_key'       => 'ext_social_media_dropdown',
-                'key'              => 'ext_social_media',
-                'route'            => 'dashboard.user.social-media.index',
+            'ext_business_suite' => [
+                'parent_key'       => 'ext_business_suite_dropdown',
+                'key'              => 'ext_business_suite',
+                'route'            => 'dashboard.user.business-suite.index',
                 'label'            => 'Dashboard',
                 'data-name'        => null,
                 'icon'             => null,
@@ -986,14 +986,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.index',
+                    'dashboard.user.business-suite.index',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.index'),
+                'show_condition' => Route::has('dashboard.user.business-suite.index'),
             ],
-            'ext_social_media_campaign' => [
-                'parent_key'       => 'ext_social_media_dropdown',
-                'key'              => 'ext_social_media_campaign',
-                'route'            => 'dashboard.user.social-media.campaign.index',
+            'ext_business_suite_campaign' => [
+                'parent_key'       => 'ext_business_suite_dropdown',
+                'key'              => 'ext_business_suite_campaign',
+                'route'            => 'dashboard.user.business-suite.campaign.index',
                 'label'            => 'Campaigns',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1004,14 +1004,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.campaign.*',
+                    'dashboard.user.business-suite.campaign.*',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.index'),
+                'show_condition' => Route::has('dashboard.user.business-suite.index'),
             ],
-            'ext_social_media_platform' => [
-                'parent_key'       => 'ext_social_media_dropdown',
-                'key'              => 'ext_social_media_platform',
-                'route'            => 'dashboard.user.social-media.platforms',
+            'ext_business_suite_platform' => [
+                'parent_key'       => 'ext_business_suite_dropdown',
+                'key'              => 'ext_business_suite_platform',
+                'route'            => 'dashboard.user.business-suite.platforms',
                 'label'            => 'Platforms',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1022,16 +1022,16 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.platforms',
-                    'dashboard.user.social-media.platforms.*',
+                    'dashboard.user.business-suite.platforms',
+                    'dashboard.user.business-suite.platforms.*',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.platforms'),
+                'show_condition' => Route::has('dashboard.user.business-suite.platforms'),
             ],
-            'ext_social_media_post' => [
-                'parent_key'       => 'ext_social_media_dropdown',
-                'key'              => 'ext_social_media_post',
-                'route'            => 'dashboard.user.social-media.post.index',
-                'label'            => 'Social Media Posts',
+            'ext_business_suite_post' => [
+                'parent_key'       => 'ext_business_suite_dropdown',
+                'key'              => 'ext_business_suite_post',
+                'route'            => 'dashboard.user.business-suite.post.index',
+                'label'            => 'Business Suite Posts',
                 'data-name'        => null,
                 'icon'             => null,
                 'svg'              => null,
@@ -1041,14 +1041,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.post.*',
+                    'dashboard.user.business-suite.post.*',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.post.index'),
+                'show_condition' => Route::has('dashboard.user.business-suite.post.index'),
             ],
-            'ext_social_media_calendar' => [
-                'parent_key'       => 'ext_social_media_dropdown',
-                'key'              => 'ext_social_media_calendar',
-                'route'            => 'dashboard.user.social-media.calendar',
+            'ext_business_suite_calendar' => [
+                'parent_key'       => 'ext_business_suite_dropdown',
+                'key'              => 'ext_business_suite_calendar',
+                'route'            => 'dashboard.user.business-suite.calendar',
                 'label'            => 'Calendar',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1059,16 +1059,16 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.calendar',
+                    'dashboard.user.business-suite.calendar',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.calendar'),
+                'show_condition' => Route::has('dashboard.user.business-suite.calendar'),
             ],
-            'ext_social_media_agent_dropdown' => [
+            'ext_business_suite_agent_dropdown' => [
                 'parent_key'       => null,
-                'key'              => 'ext_social_media_agent_dropdown',
-                'route'            => 'dashboard.user.social-media.agent.index',
-                'label'            => 'AI Social Media Agent',
-                'data-name'        => Introduction::SOCIAL_MEDIA,
+                'key'              => 'ext_business_suite_agent_dropdown',
+                'route'            => 'dashboard.user.business-suite.agent.index',
+                'label'            => 'Business Suite Agent',
+                'data-name'        => Introduction::BUSINESS_SUITE,
                 'icon'             => 'tabler-thumb-up',
                 'svg'              => null,
                 'order'            => 5,
@@ -1077,14 +1077,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.*',
+                    'dashboard.user.business-suite.agent.*',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.index') && MarketplaceHelper::isRegistered('social-media-agent'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.index') && MarketplaceHelper::isRegistered('business-suite-agent'),
             ],
-            'ext_social_media_agent_dashboard' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_dashboard',
-                'route'            => 'dashboard.user.social-media.agent.index',
+            'ext_business_suite_agent_dashboard' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_dashboard',
+                'route'            => 'dashboard.user.business-suite.agent.index',
                 'label'            => 'Dashboard',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1095,14 +1095,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.index',
+                    'dashboard.user.business-suite.agent.index',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.index'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.index'),
             ],
-            'ext_social_media_agent_agents' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_agents',
-                'route'            => 'dashboard.user.social-media.agent.agents',
+            'ext_business_suite_agent_agents' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_agents',
+                'route'            => 'dashboard.user.business-suite.agent.agents',
                 'label'            => 'Agents',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1113,14 +1113,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.agents',
+                    'dashboard.user.business-suite.agent.agents',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.agents'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.agents'),
             ],
-            'ext_social_media_agent_agents_archived_posts' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_agents_archived_posts',
-                'route'            => 'dashboard.user.social-media.agent.posts',
+            'ext_business_suite_agent_archived_posts' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_archived_posts',
+                'route'            => 'dashboard.user.business-suite.agent.posts',
                 'label'            => 'Archived Posts',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1131,14 +1131,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.posts',
+                    'dashboard.user.business-suite.agent.posts',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.posts'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.posts'),
             ],
-            'ext_social_media_agent_calendar' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_calendar',
-                'route'            => 'dashboard.user.social-media.agent.calendar',
+            'ext_business_suite_agent_calendar' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_calendar',
+                'route'            => 'dashboard.user.business-suite.agent.calendar',
                 'label'            => 'Calendar',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1149,14 +1149,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.calendar',
+                    'dashboard.user.business-suite.agent.calendar',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.calendar'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.calendar'),
             ],
-            'ext_social_media_agent_analytics' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_analytics',
-                'route'            => 'dashboard.user.social-media.agent.analytics',
+            'ext_business_suite_agent_analytics' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_analytics',
+                'route'            => 'dashboard.user.business-suite.agent.analytics',
                 'label'            => 'Analytics',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1167,14 +1167,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.analytics',
+                    'dashboard.user.business-suite.agent.analytics',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.analytics'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.analytics'),
             ],
-            'ext_social_media_agent_accounts' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_accounts',
-                'route'            => 'dashboard.user.social-media.agent.accounts',
+            'ext_business_suite_agent_accounts' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_accounts',
+                'route'            => 'dashboard.user.business-suite.agent.accounts',
                 'label'            => 'Accounts',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1185,14 +1185,14 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.accounts',
+                    'dashboard.user.business-suite.agent.accounts',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.accounts'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.accounts'),
             ],
-            'ext_social_media_agent_chat' => [
-                'parent_key'       => 'ext_social_media_agent_dropdown',
-                'key'              => 'ext_social_media_agent_chat',
-                'route'            => 'dashboard.user.social-media.agent.chat.index',
+            'ext_business_suite_agent_chat' => [
+                'parent_key'       => 'ext_business_suite_agent_dropdown',
+                'key'              => 'ext_business_suite_agent_chat',
+                'route'            => 'dashboard.user.business-suite.agent.chat.index',
                 'label'            => 'Chat',
                 'data-name'        => null,
                 'icon'             => null,
@@ -1203,9 +1203,9 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.user.social-media.agent.chat.*',
+                    'dashboard.user.business-suite.agent.chat.*',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.agent.chat.index'),
+                'show_condition'   => Route::has('dashboard.user.business-suite.agent.chat.index'),
             ],
             'ext_blogpilot_dropdown' => [
                 'parent_key'       => null,
@@ -2847,10 +2847,10 @@ class MenuService
                 'show_condition' => true,
                 'is_admin'       => true,
             ],
-            'social_media_agent_chat_settings' => [
+            'business_suite_agent_chat_settings' => [
                 'parent_key'       => 'chat_settings',
-                'key'              => 'social_media_agent_chat_settings',
-                'route'            => 'dashboard.admin.social-media.agent.chat.settings',
+                'key'              => 'business_suite_agent_chat_settings',
+                'route'            => 'dashboard.admin.business-suite.agent.chat.settings',
                 'label'            => 'Social Media Agent Chat',
                 'icon'             => null,
                 'svg'              => null,
@@ -2860,9 +2860,9 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.admin.social-media.agent.chat.settings',
+                    'dashboard.admin.business-suite.agent.chat.settings',
                 ],
-                'show_condition' => Route::has('dashboard.admin.social-media.agent.chat.settings'),
+                'show_condition' => Route::has('dashboard.admin.business-suite.agent.chat.settings'),
                 'is_admin'       => true,
             ],
             'external_chat_settings' => [
@@ -2956,10 +2956,10 @@ class MenuService
                 'show_condition' => true,
                 'is_admin'       => true,
             ],
-            'social_media_accounts' => [
+            'business_suite_accounts' => [
                 'parent_key'       => 'frontend',
-                'key'              => 'social_media_accounts',
-                'route'            => 'dashboard.admin.frontend.socialmedia',
+                'key'              => 'business_suite_accounts',
+                'route'            => 'dashboard.admin.frontend.business-accounts',
                 'label'            => 'Social Media Accounts',
                 'icon'             => null,
                 'svg'              => null,
@@ -2969,7 +2969,7 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => null,
                 'active_condition' => [
-                    'dashboard.admin.frontend.socialmedia',
+                    'dashboard.admin.frontend.business-accounts',
                 ],
                 'show_condition' => true,
                 'is_admin'       => true,
@@ -3043,7 +3043,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.frontend.channel-setting.*',
                 ],
-                'show_condition' => setting('front_theme') === 'social-media-front',
+                'show_condition' => setting('front_theme') === 'business-suite-front',
                 'is_admin'       => true,
             ],
             'content_box' => [
@@ -3061,7 +3061,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.frontend.content-box.*',
                 ],
-                'show_condition' => setting('front_theme') === 'social-media-front',
+                'show_condition' => setting('front_theme') === 'business-suite-front',
                 'is_admin'       => true,
             ],
             'curtain_section' => [
@@ -3079,7 +3079,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.frontend.curtain.*',
                 ],
-                'show_condition' => in_array(setting('front_theme'), ['social-media-front', 'marketing-bot']),
+                'show_condition' => in_array(setting('front_theme'), ['business-suite-front', 'marketing-bot']),
                 'is_admin'       => true,
             ],
             'features_section' => [
@@ -4353,11 +4353,11 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.user.openai.detectaicontent.index'),
             ],
-            'ai_social_media_extension' => [
+            'ai_business_suite_extension' => [
                 'parent_key'       => null,
-                'key'              => 'ai_social_media_extension',
+                'key'              => 'ai_business_suite_extension',
                 'route'            => 'dashboard.user.automation.index',
-                'label'            => 'AI Social Media',
+                'label'            => 'Business Suite',
                 'icon'             => 'tabler-share', // tabler-thumb-up
                 'svg'              => null,
                 'order'            => 6,
@@ -4374,7 +4374,7 @@ class MenuService
                 'parent_key'       => null,
                 'key'              => 'scheduled_posts_extension',
                 'route'            => 'dashboard.user.automation.list',
-                'label'            => 'Social Media Posts',
+                'label'            => 'Business Suite Posts',
                 'icon'             => 'tabler-report',
                 'svg'              => null,
                 'order'            => 6,
@@ -4387,9 +4387,9 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.user.automation.list') && $is_automation_active,
             ],
-            'ai_social_media_settings_extension' => [
+            'ai_business_suite_settings_extension' => [
                 'parent_key'       => 'settings',
-                'key'              => 'ai_social_media_settings_extension',
+                'key'              => 'ai_business_suite_settings_extension',
                 'route'            => 'dashboard.admin.automation.settings',
                 'label'            => 'AI Social Media Settings',
                 'icon'             => null,
@@ -4455,10 +4455,10 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('ai-image-pro'),
             ],
-            'social_media_agent_chat_settings_extension' => [
+            'business_suite_agent_chat_settings_extension' => [
                 'parent_key'       => 'settings',
-                'key'              => 'social_media_agent_chat_settings_extension',
-                'route'            => 'dashboard.admin.social-media.agent.chat.settings',
+                'key'              => 'business_suite_agent_chat_settings_extension',
+                'route'            => 'dashboard.admin.business-suite.agent.chat.settings',
                 'label'            => 'Social Media Agent Chat Settings',
                 'icon'             => null,
                 'svg'              => null,
@@ -4468,9 +4468,9 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.admin.social-media.agent.chat.settings',
+                    'dashboard.admin.business-suite.agent.chat.settings',
                 ],
-                'show_condition' => Route::has('dashboard.admin.social-media.agent.chat.settings'),
+                'show_condition' => Route::has('dashboard.admin.business-suite.agent.chat.settings'),
             ],
             'content_manager_extension' => [
                 'parent_key'       => 'settings',
@@ -4489,10 +4489,10 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('content-manager'),
             ],
-            'social_media_settings_extension' => [
+            'business_suite_settings_extension' => [
                 'parent_key'       => 'settings',
-                'key'              => 'social_media_settings_extension',
-                'route'            => 'dashboard.admin.social-media.setting.index',
+                'key'              => 'business_suite_settings_extension',
+                'route'            => 'dashboard.admin.business-suite.setting.index',
                 'label'            => 'Social Media Platform Settings',
                 'icon'             => null,
                 'svg'              => null,
@@ -4502,9 +4502,9 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => true,
                 'active_condition' => [
-                    'dashboard.admin.social-media.setting.index',
+                    'dashboard.admin.business-suite.setting.index',
                 ],
-                'show_condition' => Route::has('dashboard.admin.social-media.setting.index'),
+                'show_condition' => Route::has('dashboard.admin.business-suite.setting.index'),
             ],
             'chatbot_instagram_settings_extension' => [
                 'parent_key'       => 'settings',
@@ -4852,7 +4852,7 @@ class MenuService
             'ai_product_shot', 'ai_writer', 'ai_chat_all', 'ai_image_generator', 'ai_video', 'seo_tool_extension', 'ai_voiceover',
             'ai_pdf', 'ai_vision', 'ai_speech_to_text', 'photo_studio_extension', 'ai_rewriter', 'ai_editor',
             'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown',
-            'ai_realtime_voice_chat', 'ai_social_media_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_social_media_dropdown',
+            'ai_realtime_voice_chat', 'ai_business_suite_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_business_suite_dropdown',
             'ext_ai_music_pro', 'ai_influencer', 'creative_suite', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
         ];
 

@@ -325,8 +325,8 @@ class User extends Authenticatable
 
     public function twitterSettings()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\TwitterSettings::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\TwitterSettings::class);
+        if (class_exists(\App\Extensions\AIBusinessSuite\System\Models\TwitterSettings::class)) {
+            return $this->hasMany(\App\Extensions\AIBusinessSuite\System\Models\TwitterSettings::class);
         }
 
         return null;
@@ -334,8 +334,8 @@ class User extends Authenticatable
 
     public function linkedinSettings()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\LinkedinTokens::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\LinkedinTokens::class);
+        if (class_exists(\App\Extensions\AIBusinessSuite\System\Models\LinkedinTokens::class)) {
+            return $this->hasMany(\App\Extensions\AIBusinessSuite\System\Models\LinkedinTokens::class);
         }
 
         return null;
@@ -343,8 +343,8 @@ class User extends Authenticatable
 
     public function scheduledPosts()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\ScheduledPost::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\ScheduledPost::class);
+        if (class_exists(\App\Extensions\AIBusinessSuite\System\Models\ScheduledPost::class)) {
+            return $this->hasMany(\App\Extensions\AIBusinessSuite\System\Models\ScheduledPost::class);
         }
 
         return null;

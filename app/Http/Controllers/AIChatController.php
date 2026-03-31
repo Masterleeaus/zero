@@ -117,7 +117,7 @@ class AIChatController extends Controller
 
     /**
      * Get paginated chats for the sidebar via AJAX.
-     * Supports all extensions (chatpro, chatpro-image, social-media-agent, default).
+     * Supports all extensions (chatpro, chatpro-image, business-suite-agent, default).
      */
     public function getChats(Request $request): JsonResponse
     {
@@ -135,7 +135,7 @@ class AIChatController extends Controller
         $categoryId = $validated['category_id'] ?? null;
         $folderId = $validated['folder_id'] ?? null;
 
-        $isChatProContext = in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent'], true);
+        $isChatProContext = in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'business-suite-agent'], true);
         $foldersEnabled = $isChatProContext && MarketplaceHelper::isRegistered('ai-chat-pro-folders');
 
         $selectColumns = ['id', 'title', 'created_at', 'is_pinned', 'updated_at', 'reference_url', 'doc_name', 'website_url'];
@@ -531,8 +531,8 @@ class AIChatController extends Controller
             $chatView = 'ai-chat-pro-image-chat::includes.chat_area_container';
         }
 
-        if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
-            $chatView = 'social-media-agent::chat.includes.chat_area_container';
+        if (in_array($website_url, ['business-suite-agent']) && MarketplaceHelper::isRegistered('business-suite-agent')) {
+            $chatView = 'business-suite-agent::chat.includes.chat_area_container';
         }
 
         $html = view($chatView, compact(
@@ -609,7 +609,7 @@ class AIChatController extends Controller
         $chat = new UserOpenaiChat;
         $website_url = $request->website_url ?? null;
 
-        if (in_array($website_url, ['social-media-agent', 'chatpro-image'], true)) {
+        if (in_array($website_url, ['business-suite-agent', 'chatpro-image'], true)) {
             $chat->chat_type = $website_url;
         }
 
@@ -713,8 +713,8 @@ class AIChatController extends Controller
             $chatView = 'ai-chat-pro-image-chat::includes.chat_area_container';
         }
 
-        if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
-            $chatView = 'social-media-agent::chat.includes.chat_area_container';
+        if (in_array($website_url, ['business-suite-agent']) && MarketplaceHelper::isRegistered('business-suite-agent')) {
+            $chatView = 'business-suite-agent::chat.includes.chat_area_container';
         }
 
         $elevenlabsAgentId = null;
@@ -1065,8 +1065,8 @@ class AIChatController extends Controller
             return $query;
         }
 
-        if ($websiteUrl === 'social-media-agent') {
-            return $query->where('chat_type', 'social-media-agent');
+        if ($websiteUrl === 'business-suite-agent') {
+            return $query->where('chat_type', 'business-suite-agent');
         }
 
         return $query;

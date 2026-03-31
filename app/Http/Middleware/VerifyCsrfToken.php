@@ -26,7 +26,7 @@ class VerifyCsrfToken extends Middleware
         'generator/webhook/fal-ai',
         'dashboard/admin/config/more',
         'translations/lang/update-all',
-        'social-media/*',
+        'business-suite/*',
         'chatbot/instagram/*',
     ];
 }

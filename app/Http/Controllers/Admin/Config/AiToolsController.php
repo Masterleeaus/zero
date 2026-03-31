@@ -92,8 +92,8 @@ class AiToolsController extends Controller
                 'ai_automation'                   => $request->has('ai_automation') ? 1 : 0,
                 'photo_studio'                    => $request->has('photo_studio') ? 1 : 0,
                 'ai_realtime_image'               => $request->has('ai_realtime_image') ? 1 : 0,
-                'social_media_image_model'        => $request->has('social_media_image_model') ? $request->get('social_media_image_model') : setting('social_media_image_model'),
-                'social_media_agent_image_model'  => $request->has('social_media_agent_image_model') ? $request->get('social_media_agent_image_model') : setting('social_media_agent_image_model', 'nano-banana-pro'),
+                'business_suite_image_model'        => $request->has('business_suite_image_model') ? $request->get('business_suite_image_model') : setting('business_suite_image_model'),
+                'business_suite_agent_image_model'  => $request->has('business_suite_agent_image_model') ? $request->get('business_suite_agent_image_model') : setting('business_suite_agent_image_model', 'nano-banana-pro'),
             ]
         )->save();
 
