@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Team;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,24 @@ class WeeklyTimesheetController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Weekly timesheets'),
-            __('Submit and review weekly timesheets from WorkCore.')
-        );
+        $status = request()->string('status')->toString();
+
+        $timesheets = WorkcoreDemoData::timesheets()->when($status, static function ($collection) use ($status) {
+            return $collection->where('status', $status);
+        });
+
+        return view('default.panel.user.team.timesheets.index', [
+            'timesheets' => $timesheets,
+            'filters'    => ['status' => $status],
+        ]);
     }
 
     public function show(string $timesheet): View
     {
-        return $this->placeholder(
-            __('Timesheet detail'),
-            __('Timesheet :timesheet overview.', ['timesheet' => $timesheet])
-        );
+        return view('default.panel.user.team.timesheets.show', [
+            'timesheet' => WorkcoreDemoData::timesheets()->firstWhere('number', $timesheet)
+                ?? WorkcoreDemoData::timesheets()->first(),
+        ]);
     }
 
     public function submit(Request $request, string $timesheet): RedirectResponse
@@ -51,4 +58,3 @@ class WeeklyTimesheetController extends CoreController
         ]);
     }
 }
-

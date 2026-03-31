@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Crm;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,17 @@ class DealController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Deals'),
-            __('Pipeline views and deal list will appear here.')
-        );
+        return view('default.panel.user.crm.deals.index', [
+            'deals' => WorkcoreDemoData::deals(),
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Create deal'),
-            __('Start a new deal in the pipeline.')
-        );
+        return view('default.panel.user.crm.deals.form', [
+            'deal'  => null,
+            'stages' => ['prospecting', 'qualification', 'proposal', 'negotiation', 'won', 'lost'],
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,18 +37,18 @@ class DealController extends CoreController
 
     public function show(string $deal): View
     {
-        return $this->placeholder(
-            __('Deal detail'),
-            __('Deal :deal details and history.', ['deal' => $deal])
-        );
+        return view('default.panel.user.crm.deals.show', [
+            'deal' => WorkcoreDemoData::deals()->firstWhere('id', $deal)
+                ?? WorkcoreDemoData::deals()->first(),
+        ]);
     }
 
     public function edit(string $deal): View
     {
-        return $this->placeholder(
-            __('Edit deal'),
-            __('Update information for deal :deal.', ['deal' => $deal])
-        );
+        return view('default.panel.user.crm.deals.form', [
+            'deal'   => WorkcoreDemoData::deals()->firstWhere('id', $deal),
+            'stages' => ['prospecting', 'qualification', 'proposal', 'negotiation', 'won', 'lost'],
+        ]);
     }
 
     public function update(Request $request, string $deal): RedirectResponse
@@ -69,10 +69,13 @@ class DealController extends CoreController
 
     public function kanban(): View
     {
-        return $this->placeholder(
-            __('Deal board'),
-            __('Kanban pipeline view sourced from WorkCore.')
-        );
+        $deals = WorkcoreDemoData::deals()
+            ->groupBy('stage')
+            ->sortKeys();
+
+        return view('default.panel.user.crm.deals.kanban', [
+            'columns' => $deals,
+        ]);
     }
 
     public function updateStatus(Request $request, string $deal): RedirectResponse
@@ -83,4 +86,3 @@ class DealController extends CoreController
         ]);
     }
 }
-

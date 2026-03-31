@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Team;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,26 +14,24 @@ class ZoneController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Zones'),
-            __('Operational zones and regions from WorkCore.')
-        );
+        return view('default.panel.user.team.zones.index', [
+            'zones' => WorkcoreDemoData::zones(),
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Create zone'),
-            __('Add a geographic zone for scheduling.')
-        );
+        return view('default.panel.user.team.zones.form', [
+            'zone' => null,
+        ]);
     }
 
     public function show(string $zone): View
     {
-        return $this->placeholder(
-            __('Zone detail'),
-            __('Details for zone :zone.', ['zone' => $zone])
-        );
+        return view('default.panel.user.team.zones.show', [
+            'zone' => WorkcoreDemoData::zones()->firstWhere('code', $zone)
+                ?? WorkcoreDemoData::zones()->first(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,10 +44,9 @@ class ZoneController extends CoreController
 
     public function edit(string $zone): View
     {
-        return $this->placeholder(
-            __('Edit zone'),
-            __('Update zone :zone.', ['zone' => $zone])
-        );
+        return view('default.panel.user.team.zones.form', [
+            'zone' => WorkcoreDemoData::zones()->firstWhere('code', $zone),
+        ]);
     }
 
     public function update(Request $request, string $zone): RedirectResponse

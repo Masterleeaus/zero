@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,16 @@ class TaxController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Tax rates'),
-            __('Company tax rates sourced from WorkCore.')
-        );
+        return view('default.panel.user.money.taxes.index', [
+            'taxes' => WorkcoreDemoData::taxes(),
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Create tax rate'),
-            __('Define a tax rate for quotes and invoices.')
-        );
+        return view('default.panel.user.money.taxes.form', [
+            'tax' => null,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,18 +36,17 @@ class TaxController extends CoreController
 
     public function show(string $tax): View
     {
-        return $this->placeholder(
-            __('Tax rate detail'),
-            __('Details for tax rate :tax.', ['tax' => $tax])
-        );
+        return view('default.panel.user.money.taxes.show', [
+            'tax' => WorkcoreDemoData::taxes()->firstWhere('name', $tax)
+                ?? WorkcoreDemoData::taxes()->first(),
+        ]);
     }
 
     public function edit(string $tax): View
     {
-        return $this->placeholder(
-            __('Edit tax rate'),
-            __('Update tax rate :tax.', ['tax' => $tax])
-        );
+        return view('default.panel.user.money.taxes.form', [
+            'tax' => WorkcoreDemoData::taxes()->firstWhere('name', $tax),
+        ]);
     }
 
     public function update(Request $request, string $tax): RedirectResponse

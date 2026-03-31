@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Team;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,18 @@ class CleanerProfileController extends CoreController
 {
     public function show(string $user): View
     {
-        return $this->placeholder(
-            __('Cleaner profile'),
-            __('Profile for user :user.', ['user' => $user])
-        );
+        return view('default.panel.user.team.cleaners.show', [
+            'cleaner' => WorkcoreDemoData::cleanerProfile(),
+            'userId'  => $user,
+        ]);
     }
 
     public function edit(string $user): View
     {
-        return $this->placeholder(
-            __('Edit cleaner profile'),
-            __('Update profile for user :user.', ['user' => $user])
-        );
+        return view('default.panel.user.team.cleaners.form', [
+            'cleaner' => WorkcoreDemoData::cleanerProfile(),
+            'userId'  => $user,
+        ]);
     }
 
     public function update(Request $request, string $user): RedirectResponse
@@ -35,4 +36,3 @@ class CleanerProfileController extends CoreController
         ]);
     }
 }
-

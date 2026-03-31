@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,16 @@ class BankAccountController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Bank accounts'),
-            __('Company settlement accounts managed via WorkCore.')
-        );
+        return view('default.panel.user.money.bank-accounts.index', [
+            'accounts' => WorkcoreDemoData::bankAccounts(),
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Add bank account'),
-            __('Register a bank account for payouts.')
-        );
+        return view('default.panel.user.money.bank-accounts.form', [
+            'account' => null,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,18 +36,17 @@ class BankAccountController extends CoreController
 
     public function show(string $account): View
     {
-        return $this->placeholder(
-            __('Bank account detail'),
-            __('Details for bank account :account.', ['account' => $account])
-        );
+        return view('default.panel.user.money.bank-accounts.show', [
+            'account' => WorkcoreDemoData::bankAccounts()->firstWhere('last4', $account)
+                ?? WorkcoreDemoData::bankAccounts()->first(),
+        ]);
     }
 
     public function edit(string $account): View
     {
-        return $this->placeholder(
-            __('Edit bank account'),
-            __('Update bank account :account.', ['account' => $account])
-        );
+        return view('default.panel.user.money.bank-accounts.form', [
+            'account' => WorkcoreDemoData::bankAccounts()->firstWhere('last4', $account),
+        ]);
     }
 
     public function update(Request $request, string $account): RedirectResponse
