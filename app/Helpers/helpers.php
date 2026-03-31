@@ -131,7 +131,8 @@ function formatCamelCase($input)
  * Resolve WorkCore-friendly labels using configured mappings.
  *
  * Dots and hyphens in the provided key are converted to underscores before
- * snake_casing to align with config label definitions.
+ * snake_casing so inputs like `service-job`, `service.job`, or `serviceJob`
+ * resolve consistently to the same config label key.
  *
  * @param  string      $key      Label lookup key.
  * @param  string|null $default  Optional fallback value.
@@ -148,6 +149,7 @@ function workcore_label(string $key, ?string $default = null): string
         return $labels[$normalized];
     }
 
+    // Support legacy/non-normalized keys that may already exist in config.
     if (array_key_exists($key, $labels)) {
         return $labels[$key];
     }
