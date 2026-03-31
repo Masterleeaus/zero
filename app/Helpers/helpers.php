@@ -127,6 +127,37 @@ function formatCamelCase($input)
     return ucwords(str_replace('_', ' ', $input));
 }
 
+/**
+ * Resolve WorkCore-friendly labels using configured mappings.
+ *
+ * Dots and hyphens in the provided key are converted to underscores before
+ * snake_casing so inputs like `service-job`, `service.job`, or `serviceJob`
+ * resolve consistently to the same config label key (canonical snake_case).
+ *
+ * @param  string      $key      Label lookup key.
+ * @param  string|null $default  Optional fallback value.
+ * @return string                 Resolved label or fallback text.
+ */
+function workcore_label(string $key, ?string $default = null): string
+{
+    $normalized = Str::of($key)
+        ->replace(['.', '-'], '_')
+        ->snake()
+        ->value();
+    $labels = config('workcore.labels', []);
+
+    if (array_key_exists($normalized, $labels)) {
+        return $labels[$normalized];
+    }
+
+    // Support legacy/non-normalized keys that may already exist in config.
+    if (array_key_exists($key, $labels)) {
+        return $labels[$key];
+    }
+
+    return $default ?? Str::title(str_replace(['_', '-'], ' ', $key));
+}
+
 function checkCouponInRequest($code = null)
 {
     if ($code !== null) {
