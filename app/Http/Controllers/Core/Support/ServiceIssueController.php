@@ -106,7 +106,10 @@ class ServiceIssueController extends Controller
     {
         $message = $this->storeMessage($request, $issue, false);
 
-        $this->lifecycle->processReplies($issue, $request->boolean('is_agent') ? 'agent' : 'user');
+        $user = $request->user();
+        $direction = $user && method_exists($user, 'isAdmin') && $user->isAdmin() ? 'agent' : 'user';
+
+        $this->lifecycle->processReplies($issue, $direction);
 
         return response()->json($message, 201);
     }
