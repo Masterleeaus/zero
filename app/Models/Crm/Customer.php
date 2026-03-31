@@ -6,18 +6,24 @@ namespace App\Models\Crm;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\Crm\Enquiry;
+use App\Models\Money\Invoice;
+use App\Models\Money\Quote;
 use App\Models\User;
 use App\Models\Crm\Enquiry;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
     use HasFactory;
     use BelongsToCompany;
     use OwnedByUser;
+    use SoftDeletes;
 
     protected $fillable = [
         'company_id',
@@ -42,5 +48,16 @@ class Customer extends Model
     public function enquiries(): HasMany
     {
         return $this->hasMany(Enquiry::class);
+        return $this->hasMany(\App\Models\Crm\Enquiry::class);
+    }
+
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

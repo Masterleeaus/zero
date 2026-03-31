@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserSupport;
 use App\Models\UserSupportMessage;
+use App\Services\Support\SupportLifecycleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class UserSupportApiController extends Controller
 {
+    public function __construct(private SupportLifecycleService $lifecycle) {}
+
     /**
      * Gets all support requests
      *
@@ -286,6 +289,12 @@ class UserSupportApiController extends Controller
             'category'  => $request->category,
             'subject'   => $request->subject,
         ]);
+
+        $this->lifecycle->notifyCompanyAdmins(
+            $support,
+            "New support ticket: {$support->subject}",
+            'New Support Ticket'
+        );
 
         $support->messages()->create([
             'message' => $request->message,

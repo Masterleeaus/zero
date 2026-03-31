@@ -8,8 +8,10 @@ use App\Enums\Roles;
 use App\Models\User;
 use App\Models\Money\Expense;
 use App\Models\Money\ExpenseCategory;
+use App\Notifications\LiveNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ExpenseFeatureTest extends TestCase
@@ -36,7 +38,11 @@ class ExpenseFeatureTest extends TestCase
             'title' => 'Laptop stand',
             'company_id' => 11,
             'expense_category_id' => $category->id,
+            'status' => 'pending',
         ]);
+
+        $expense = Expense::first();
+        $this->assertEquals('pending', $expense->status);
     }
 
     public function test_expense_metrics_available_in_insights(): void
@@ -82,14 +88,16 @@ class ExpenseFeatureTest extends TestCase
     {
         Notification::fake();
 
-        $submitter = User::factory()->create(['company_id' => 30, 'type' => Roles::USER]);
-        $admin = User::factory()->create(['company_id' => 30, 'type' => Roles::ADMIN]);
+        $admin = User::factory()->create(['company_id' => 30]);
+        Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $admin->assignRole('admin');
+
+        $submitter = User::factory()->create(['company_id' => 30]);
         $category = ExpenseCategory::factory()->create(['company_id' => 30]);
         $expense = Expense::factory()->create([
-            'company_id'          => 30,
+            'company_id' => 30,
             'expense_category_id' => $category->id,
-            'created_by'          => $submitter->id,
-            'status'              => 'pending',
+            'created_by' => $submitter->id,
         ]);
 
         $this->actingAs($admin);
@@ -199,5 +207,31 @@ class ExpenseFeatureTest extends TestCase
 
         $response->assertRedirect(route('dashboard.money.expense-categories.index'));
         $this->assertDatabaseHas('expense_categories', ['company_id' => 41, 'name' => 'Travel']);
+        $this->assertDatabaseCount('expense_categories', 1);
+    }
+
+    public function test_expense_category_can_repeat_across_companies(): void
+    {
+        $firstUser = User::factory()->create(['company_id' => 60]);
+        $secondUser = User::factory()->create(['company_id' => 61]);
+
+        $this->actingAs($firstUser);
+        $this->post(route('dashboard.money.expense-categories.store'), [
+            'name' => 'Equipment',
+        ])->assertRedirect();
+
+        $this->actingAs($secondUser);
+        $this->post(route('dashboard.money.expense-categories.store'), [
+            'name' => 'Equipment',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('expense_categories', [
+            'company_id' => 60,
+            'name' => 'Equipment',
+        ]);
+        $this->assertDatabaseHas('expense_categories', [
+            'company_id' => 61,
+            'name' => 'Equipment',
+        ]);
     }
 }

@@ -23,6 +23,7 @@ class PaymentController extends CoreController
             ->latest('paid_at')
             ->latest()
             ->paginate(25)
+            ->paginate(15)
             ->withQueryString();
 
         return view('default.panel.user.money.payments.index', compact('payments'));

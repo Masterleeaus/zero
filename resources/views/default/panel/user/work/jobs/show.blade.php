@@ -1,5 +1,5 @@
 @extends('panel.layout.app')
-@section('title', __('Service Job'))
+@section('title', __('work.labels.service_job'))
 @section('titlebar_actions')
     <x-button href="{{ route('dashboard.work.service-jobs.edit', $job) }}">
         <x-tabler-pencil class="size-4" />
@@ -20,7 +20,7 @@
                     <x-badge variant="info">{{ ucfirst($job->status) }}</x-badge>
                 </div>
                 <div>
-                    <div class="text-sm text-slate-500">{{ __('Site') }}</div>
+                    <div class="text-sm text-slate-500">{{ __('work.labels.site') }}</div>
                     <div>{{ $job->site?->name }}</div>
                 </div>
                 @if($job->customer)
@@ -53,16 +53,16 @@
 
         <x-card>
             <div class="flex items-center justify-between mb-3">
-                <div class="font-semibold">{{ __('Checklist') }}</div>
+                <div class="font-semibold">{{ __('work.checklists.title') }}</div>
                 <x-button size="xs" href="{{ route('dashboard.work.checklists.create', ['job_id' => $job->id]) }}">
-                    <x-tabler-plus class="size-4" /> {{ __('Add Item') }}
+                    <x-tabler-plus class="size-4" /> {{ __('work.checklists.add_item') }}
                 </x-button>
             </div>
             <x-table>
                 <x-slot:head>
                     <tr>
                         <th>{{ __('Title') }}</th>
-                        <th>{{ __('Completed') }}</th>
+                        <th>{{ __('work.checklists.completed') }}</th>
                         <th class="text-end">{{ __('Action') }}</th>
                     </tr>
                 </x-slot:head>
@@ -86,7 +86,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center text-slate-500 py-4">{{ __('No checklist items') }}</td>
+                            <td colspan="3" class="text-center text-slate-500 py-4">{{ __('work.checklists.empty') }}</td>
                         </tr>
                     @endforelse
                 </x-slot:body>

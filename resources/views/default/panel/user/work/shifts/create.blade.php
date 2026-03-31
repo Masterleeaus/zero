@@ -1,9 +1,9 @@
 @extends('panel.layout.app')
-@section('title', __('Create Shift'))
+@section('title', __('work.shifts.new'))
 
 @section('content')
     <div class="py-6 space-y-4 max-w-3xl">
-        <h1 class="text-xl font-semibold">{{ __('Create Shift') }}</h1>
+        <h1 class="text-xl font-semibold">{{ __('work.shifts.new') }}</h1>
         <x-card>
             <form method="post" action="{{ route('dashboard.work.shifts.store') }}" class="space-y-4">
                 @csrf
@@ -13,14 +13,14 @@
                             <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
                     </x-form.select>
-                    <x-form.select name="service_job_id" label="{{ __('Service Job (optional)') }}">
+                    <x-form.select name="service_job_id" label="{{ __('work.labels.service_job') }} ({{ __('optional') }})">
                         <option value="">{{ __('None') }}</option>
                         @foreach($jobs as $job)
                             <option value="{{ $job->id }}">{{ $job->title }}</option>
                         @endforeach
                     </x-form.select>
-                    <x-form.input type="datetime-local" name="start_at" label="{{ __('Start At') }}" required />
-                    <x-form.input type="datetime-local" name="end_at" label="{{ __('End At') }}" required />
+                    <x-form.input type="datetime-local" name="start_at" label="{{ __('work.shifts.start') }}" required />
+                    <x-form.input type="datetime-local" name="end_at" label="{{ __('work.shifts.end') }}" required />
                 </div>
                 <x-form.input type="text" name="status" label="{{ __('Status') }}" value="scheduled" />
                 <div class="flex justify-end">

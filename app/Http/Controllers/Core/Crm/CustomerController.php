@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Core\Crm;
 
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Crm\Customer;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +55,13 @@ class CustomerController extends CoreController
     public function show(Customer $customer): View
     {
         return view('default.panel.user.crm.customers.show', [
-            'customer' => $customer,
+            'customer'  => $customer->load(['quotes', 'invoices']),
+            'contacts'  => WorkcoreDemoData::customerContacts(),
+            'notes'     => WorkcoreDemoData::customerNotes(),
+            'documents' => WorkcoreDemoData::customerDocuments(),
+            'deals'     => WorkcoreDemoData::deals()->take(3),
+            'quotes'    => $customer->quotes,
+            'invoices'  => $customer->invoices,
         ]);
     }
 

@@ -27,6 +27,7 @@
                 <tr>
                     <th>{{ __('Title') }}</th>
                     <th>{{ __('Category') }}</th>
+                    <th>{{ __('Status') }}</th>
                     <th>{{ __('Date') }}</th>
                     <th>{{ __('Status') }}</th>
                     <th class="text-end">{{ __('Amount') }}</th>
@@ -38,6 +39,16 @@
                     <tr>
                         <td><a href="{{ route('dashboard.money.expenses.show', $expense) }}" class="text-blue-600 hover:underline">{{ $expense->title }}</a></td>
                         <td>{{ $expense->category?->name ?? __('Uncategorised') }}</td>
+                        <td>
+                            @php
+                                $variant = match ($expense->status) {
+                                    'approved' => 'success',
+                                    'rejected' => 'danger',
+                                    default => 'warning',
+                                };
+                            @endphp
+                            <x-badge variant="{{ $variant }}">{{ ucfirst($expense->status ?? '') }}</x-badge>
+                        </td>
                         <td>{{ $expense->expense_date?->format('Y-m-d') }}</td>
                         <td>
                             @if($expense->status === 'approved')
@@ -50,6 +61,7 @@
                         </td>
                         <td class="text-end">{{ number_format($expense->amount, 2) }}</td>
                         <td class="text-end">
+                            <x-button size="sm" variant="ghost" href="{{ route('dashboard.money.expenses.show', $expense) }}">{{ __('View') }}</x-button>
                             <x-button size="sm" variant="secondary" href="{{ route('dashboard.money.expenses.edit', $expense) }}">{{ __('Edit') }}</x-button>
                             <form method="post" action="{{ route('dashboard.money.expenses.destroy', $expense) }}" class="inline">
                                 @csrf

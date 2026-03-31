@@ -1,5 +1,5 @@
 @extends('panel.layout.app')
-@section('title', $site->exists ? __('Edit Site') : __('New Site'))
+@section('title', $site->exists ? __('work.sites.edit') : __('work.sites.new'))
 
 @section('content')
     <div class="py-6">

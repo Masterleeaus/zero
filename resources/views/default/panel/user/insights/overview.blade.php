@@ -49,7 +49,7 @@
             <div class="text-sm uppercase tracking-wide text-slate-500">{{ __('Work Summary') }}</div>
             <div class="grid md:grid-cols-4 gap-4">
                 <x-card>
-                    <div class="font-semibold mb-3">{{ __('Service Jobs by Status') }}</div>
+                    <div class="font-semibold mb-3">{{ __('insights.overview.service_jobs_by_status') }}</div>
                     <div class="space-y-2">
                         @forelse($jobStatus as $status => $total)
                             <div class="flex justify-between">

@@ -1,5 +1,5 @@
 @extends('panel.layout.app')
-@section('title', __('Checklist Item'))
+@section('title', __('work.checklists.title'))
 
 @section('titlebar_actions')
     <x-button href="{{ route('dashboard.work.checklists.edit', $checklist) }}">
@@ -25,11 +25,11 @@
                     @endif
                 </div>
                 <div>
-                    <div class="text-sm text-slate-500">{{ __('Service Job') }}</div>
+                    <div class="text-sm text-slate-500">{{ __('work.labels.service_job') }}</div>
                     <div>{{ $checklist->job?->title }}</div>
                 </div>
                 <div>
-                    <div class="text-sm text-slate-500">{{ __('Site') }}</div>
+                    <div class="text-sm text-slate-500">{{ __('work.labels.site') }}</div>
                     <div>{{ $checklist->job?->site?->name }}</div>
                 </div>
             </div>

@@ -1,85 +1,29 @@
-# Security Audit — CVE Findings & Remediations
+# Security & CVE Audit
 
-**Audit Date:** 2026-03-30  
-**Scope:** Composer dependency CVEs (PKSA-4g5g-4rkv-myqs, PKSA-64jn-3d9t-gncx) and core route rate-limiting
+## Composer audit (2026-03-30)
+- Ran `composer audit --locked`.
+- Ignored advisory list removed from `composer.json`.
+- Remaining advisory: `PKSA-y2cr-5h3j-g3ys` (firebase/php-jwt < 7.0.0, CVE-2025-45769 – weak encryption, **low** severity). Upgrade to 7.x is blocked because:
+  - `nerdzlab/socialite-apple-sign-in` 2.2.2 requires `firebase/php-jwt` `^5.2|^6.0`.
+  - `laravel/passport` 12.x requires `firebase/php-jwt` `^6.4`.
+  - No released versions of those packages allow 7.x yet. Monitor upstream and upgrade when compatible.
 
----
+## Actions taken
+- Upgraded vulnerable packages:
+  - `aws/aws-sdk-php` → 3.375.0 (addresses GHSA-27qh-8cxx-2cr5, policy document injection, **high**).
+  - `google/protobuf` → 4.33.6 (GHSA-p2gh-cfq4-4wjc DoS via malformed messages, **high**).
+  - `league/commonmark` → 2.8.2 (GHSA-hh8v-hgvp-g3f5 embed allowed_domains bypass, GHSA-4v6x-c7xx-hw9f raw HTML bypass, **medium**).
+  - `phpseclib/phpseclib` → 3.0.50 (GHSA-94g3-g5v7-q4jg AES-CBC padding oracle timing, **high**).
+  - `phpoffice/phpspreadsheet` → 5.5.0 (CVE-2025-54370 / GHSA-rx7m-68vc-ppxh SSRF in HTML reader, **high**).
+- Research on previously ignored advisories:
+  - `PKSA-4g5g-4rkv-myqs` (CVE-2025-55166) affects `enshrined/svg-sanitize` < 0.22.0 (XSS via mixed-case attributes). Current version is 0.22.0, so not vulnerable.
+  - `PKSA-64jn-3d9t-gncx` (CVE-2025-54370) affects `phpoffice/phpspreadsheet` < 5.0.0. Upgraded to 5.5.0.
+- Added rate limiting for core routes (`auth` + `throttle:120,1`) via `RouteServiceProvider`.
+- Verified Sentry PII remains disabled by default (`send_default_pii` uses env default false).
+- Web routes continue to load through the `web` middleware stack, so CSRF protection is applied; API routes use the `api` stack.
 
-## 1. Vulnerability Summary
-
-### CVE-2025-55166 — `enshrined/svg-sanitize` (PKSA-4g5g-4rkv-myqs)
-
-| Field        | Detail |
-|--------------|--------|
-| Package      | `enshrined/svg-sanitize` |
-| CVE ID       | CVE-2025-55166 |
-| PKSA ID      | PKSA-4g5g-4rkv-myqs |
-| Severity     | High (XSS) |
-| Affected     | < 0.22.0 |
-| Fix version  | 0.22.0 |
-| Description  | Attribute sanitization bypass via case-insensitive attribute names (e.g. `xlink:hReF`), enabling persistent Cross-Site Scripting (XSS) in applications that render user-supplied SVG files inline. |
-
-**Resolution:** The project already requires `"enshrined/svg-sanitize": "^0.22.0"`, which satisfies the fix version. The advisory suppression entry `PKSA-4g5g-4rkv-myqs` has been **removed** from `composer.json`.
-
----
-
-### CVE-2025-54370 — `phpoffice/phpspreadsheet` (PKSA-64jn-3d9t-gncx)
-
-| Field        | Detail |
-|--------------|--------|
-| Package      | `phpoffice/phpspreadsheet` |
-| CVE ID       | CVE-2025-54370 |
-| PKSA ID      | PKSA-64jn-3d9t-gncx |
-| GHSA ID      | GHSA-rx7m-68vc-ppxh |
-| Severity     | High (CVSS v4.0: 8.7 / v3.1: 7.5) |
-| Affected     | < 5.0.0 (no 4.x patch released) |
-| Fix version  | 5.0.0 |
-| Description  | Server-Side Request Forgery (SSRF) in the `PhpOffice\PhpSpreadsheet\Worksheet\Drawing::setPath()` method. User-controlled input passed through the HTML reader can embed arbitrary URLs (e.g. `<img src>` attributes), triggering requests to internal network resources. |
-
-**Resolution:** The version constraint has been upgraded from `^4.5` to `^5.0`. No 4.x patch was released by the upstream maintainers; 5.0.0 is the earliest fixed release for users on the 4.x branch. The advisory suppression entry `PKSA-64jn-3d9t-gncx` has been **removed** from `composer.json`.
-
----
-
-## 2. composer.json `audit.ignore` Removal
-
-Both advisory IDs have been removed from `config.audit.ignore` in `composer.json`. The `audit` block has been deleted entirely so that `composer audit` will now report any future regressions without suppression.
-
----
-
-## 3. Rate Limiting — Core Route Groups
-
-`throttle:120,1` middleware has been added to the outer `Route::middleware([...])` group in every file under `routes/core/`:
-
-| File | Middleware Added |
-|------|-----------------|
-| `routes/core/crm.routes.php` | `throttle:120,1` |
-| `routes/core/insights.routes.php` | `throttle:120,1` |
-| `routes/core/money.routes.php` | `throttle:120,1` |
-| `routes/core/support.routes.php` | `throttle:120,1` |
-| `routes/core/team.routes.php` | `throttle:120,1` |
-| `routes/core/work.routes.php` | `throttle:120,1` |
-
-This limits authenticated dashboard users to **120 requests per minute** on all core routes, mitigating brute-force and scraping risks.
-
----
-
-## 4. Sentry PII Configuration
-
-`config/sentry.php` already has:
-
-```php
-'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
-```
-
-The default is `false`, ensuring that personally identifiable information (IP addresses, cookies, request bodies) is **not** sent to Sentry unless explicitly opted in via the `SENTRY_SEND_DEFAULT_PII` environment variable. No change required.
-
----
-
-## 5. Security Summary
-
-| # | Finding | Status |
-|---|---------|--------|
-| 1 | CVE-2025-55166 — XSS in `enshrined/svg-sanitize` | ✅ Already at fixed version (^0.22.0); audit ignore removed |
-| 2 | CVE-2025-54370 — SSRF in `phpoffice/phpspreadsheet` | ✅ Upgraded constraint from ^4.5 to ^5.0; audit ignore removed |
-| 3 | Missing rate limiting on core routes | ✅ `throttle:120,1` added to all 6 core route files |
-| 4 | Sentry PII leakage | ✅ `send_default_pii` defaults to `false` — no change needed |
+## Upgrade constraints and follow-ups
+- `firebase/php-jwt` remains at 6.11.1 until dependent packages publish 7.x-compatible releases. Track:
+  - `nerdzlab/socialite-apple-sign-in` for a release supporting `^7.0`.
+  - `laravel/passport` major upgrade path that permits `^7.0`.
+- Composer dependency installation still fails against the private `git.yoomoney.ru` mirror (network/auth required), so vendor installation/tests could not be executed in this environment.

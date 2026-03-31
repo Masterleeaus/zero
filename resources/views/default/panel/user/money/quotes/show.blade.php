@@ -45,8 +45,8 @@
                 <div class="space-x-2">
                     <form method="post" action="{{ route('dashboard.money.quotes.status', $quote) }}" class="inline">
                         @csrf
-                        <input type="hidden" name="status" value="accepted">
-                        <x-button type="submit" variant="secondary">{{ __('Mark Accepted') }}</x-button>
+                        <input type="hidden" name="status" value="approved">
+                        <x-button type="submit" variant="secondary">{{ __('Mark Approved') }}</x-button>
                     </form>
                     <x-button href="{{ route('dashboard.money.quotes.edit', $quote) }}" variant="ghost">
                         {{ __('Edit') }}
@@ -129,10 +129,10 @@
         </x-card>
 
         <x-card>
-            <div class="font-semibold mb-3">{{ __('Convert to Service Job') }}</div>
+            <div class="font-semibold mb-3">{{ __('money.quotes.convert_job') }}</div>
             <form method="post" action="{{ route('dashboard.money.quotes.convert-job', $quote) }}" class="grid md:grid-cols-3 gap-3">
                 @csrf
-                <x-select name="site_id" label="{{ __('Site') }}" required>
+                <x-select name="site_id" label="{{ __('money.quotes.site') }}" required>
                     @foreach($sites as $site)
                         <option value="{{ $site->id }}" @selected($quote->site_id == $site->id)>{{ $site->name }}</option>
                     @endforeach
@@ -140,7 +140,7 @@
                 <div class="md:col-span-3">
                     <x-button type="submit">
                         <x-tabler-briefcase class="size-4" />
-                        {{ __('Create Service Job') }}
+                        {{ __('money.quotes.create_job') }}
                     </x-button>
                 </div>
             </form>
@@ -157,6 +157,12 @@
                     </x-button>
                 @endforeach
             @elseif(in_array($quote->status, ['accepted', 'approved', 'sent']) && $quote->items->isNotEmpty())
+            @if($quote->latestInvoice)
+                <x-button href="{{ route('dashboard.money.invoices.show', $quote->latestInvoice) }}">
+                    <x-tabler-file-invoice class="size-4" />
+                    {{ __('View Invoice') }}
+                </x-button>
+            @elseif(in_array($quote->status, ['approved', 'sent']))
                 <form method="post" action="{{ route('dashboard.money.quotes.convert-invoice', $quote) }}">
                     @csrf
                     <x-button type="submit">
@@ -165,7 +171,7 @@
                     </x-button>
                 </form>
             @else
-                <p class="text-slate-500 text-sm">{{ __('Quote must be accepted/approved or sent with at least one line item before invoicing.') }}</p>
+                <p class="text-slate-500 text-sm">{{ __('Quote must be approved or sent before invoicing.') }}</p>
             @endif
         </x-card>
     </div>

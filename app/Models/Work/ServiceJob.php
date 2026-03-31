@@ -8,6 +8,7 @@ use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\User;
 use App\Models\Team\Team;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,5 +77,10 @@ class ServiceJob extends Model
     public function checklists(): HasMany
     {
         return $this->hasMany(Checklist::class, 'service_job_id');
+    }
+
+    public function scopeUnassigned(Builder $query): Builder
+    {
+        return $query->whereNull($query->qualifyColumn('assigned_user_id'));
     }
 }

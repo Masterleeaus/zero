@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class ExpenseCategoryController extends CoreController
 {
@@ -37,8 +38,7 @@ class ExpenseCategoryController extends CoreController
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('expense_categories', 'name')
-                    ->where('company_id', $request->user()->company_id),
+                Rule::unique('expense_categories')->where('company_id', $request->user()->company_id),
             ],
             'description' => ['nullable', 'string'],
         ]);
@@ -70,8 +70,8 @@ class ExpenseCategoryController extends CoreController
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('expense_categories', 'name')
-                    ->where('company_id', $expenseCategory->company_id)
+                Rule::unique('expense_categories')
+                    ->where('company_id', $request->user()->company_id)
                     ->ignore($expenseCategory->id),
             ],
             'description' => ['nullable', 'string'],
