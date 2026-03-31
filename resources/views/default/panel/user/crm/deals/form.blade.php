@@ -23,7 +23,7 @@
                     </x-select>
                     <x-input name="value" type="number" step="0.01" label="{{ __('Value') }}" value="{{ $deal['value'] ?? '' }}" />
                 </div>
-                <x-textarea name="notes" label="{{ __('Notes') }}">{{ $deal['notes'] ?? '' }}</x-textarea>
+                <x-textarea name="notes" label="{{ __('Notes') }}">{{ data_get($deal, 'notes', '') }}</x-textarea>
                 <div class="flex gap-3">
                     <x-button type="submit">
                         <x-tabler-check class="size-4" />

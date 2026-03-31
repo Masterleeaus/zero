@@ -46,22 +46,22 @@
                 <template x-for="(item, index) in items" :key="item.key">
                     <tr>
                         <td class="p-2">
-                            <input type="text" class="w-full form-input" x-model="item.description" :name="`${fieldName}[${index}][description]`">
+                            <input type="text" class="w-full form-input" x-model="item.description" :name="`${fieldName}[${index}][description]`" aria-label="{{ __('Description') }}">
                         </td>
                         <td class="p-2">
-                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.quantity" :name="`${fieldName}[${index}][quantity]`">
+                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.quantity" :name="`${fieldName}[${index}][quantity]`" aria-label="{{ __('Quantity') }}">
                         </td>
                         <td class="p-2">
-                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.unit_price" :name="`${fieldName}[${index}][unit_price]`">
+                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.unit_price" :name="`${fieldName}[${index}][unit_price]`" aria-label="{{ __('Unit Price') }}">
                         </td>
                         <td class="p-2">
-                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.tax_rate" :name="`${fieldName}[${index}][tax_rate]`">
+                            <input type="number" step="0.01" class="w-full form-input" x-model.number="item.tax_rate" :name="`${fieldName}[${index}][tax_rate]`" aria-label="{{ __('Tax rate') }}">
                         </td>
                         <td class="p-2">
-                            <input type="number" step="0.01" class="w-full form-input" :value="(item.quantity * item.unit_price).toFixed(2)" readonly>
+                            <input type="number" step="0.01" class="w-full form-input" :value="(item.quantity * item.unit_price).toFixed(2)" readonly aria-label="{{ __('Line total') }}">
                         </td>
                         <td class="p-2">
-                            <input type="number" class="w-full form-input" x-model.number="item.sort_order" :name="`${fieldName}[${index}][sort_order]`">
+                            <input type="number" class="w-full form-input" x-model.number="item.sort_order" :name="`${fieldName}[${index}][sort_order]`" aria-label="{{ __('Sort order') }}">
                         </td>
                         <td class="p-2 text-right space-x-1">
                             <button type="button" class="text-xs text-slate-500" x-on:click="moveUp(index)">↑</button>
@@ -82,8 +82,8 @@
     @php
         $lineItemEditorScript = <<<'SCRIPT'
 <script>
-    window.lineItemEditor = function(seedItems, fieldName = 'items') {
-        return {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('lineItemEditor', (seedItems, fieldName = 'items') => ({
             items: seedItems || [],
             fieldName,
             add() {
@@ -113,8 +113,8 @@
             reindex() {
                 this.items = this.items.map((item, idx) => ({ ...item, sort_order: idx }));
             },
-        };
-    };
+        }));
+    });
 </script>
 SCRIPT;
     @endphp

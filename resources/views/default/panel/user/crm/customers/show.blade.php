@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto py-10 space-y-8">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ workcore_label('customer') }}</p>
+                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ __('Customer') }}</p>
                 <h1 class="text-2xl font-semibold mt-1">{{ $customer->name }}</h1>
                 <p class="text-slate-500 mt-1">{{ __('Status') }}: <span class="font-medium text-slate-700">{{ ucfirst($customer->status) }}</span></p>
             </div>

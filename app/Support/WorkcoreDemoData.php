@@ -111,8 +111,8 @@ class WorkcoreDemoData
     public static function lineItemsSeed(): Collection
     {
         return collect([
-            ['description' => __('Standard clean'), 'quantity' => 1, 'unit_price' => 150, 'tax_rate' => 12, 'sort_order' => 0],
-            ['description' => __('Supplies'), 'quantity' => 1, 'unit_price' => 35, 'tax_rate' => 0, 'sort_order' => 1],
+            ['description' => 'Standard clean', 'quantity' => 1, 'unit_price' => 150, 'tax_rate' => 12, 'sort_order' => 0],
+            ['description' => 'Supplies', 'quantity' => 1, 'unit_price' => 35, 'tax_rate' => 0, 'sort_order' => 1],
         ]);
     }
 }
