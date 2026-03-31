@@ -40,7 +40,7 @@ return [
             'domain' => 'invoices',
             'kind' => 'invoice',
             'required_payload_fields' => ['invoice_id', 'amount_cents'],
-            'approval' => ['always' => True, 'roles' => ['director']],
+            'approval' => ['always' => true, 'roles' => ['director']],
         ],
         'quote.accepted' => [
             'domain' => 'quotes',
@@ -51,7 +51,7 @@ return [
             'domain' => 'jobs',
             'kind' => 'attendance',
             'required_payload_fields' => ['job_id', 'worker_id'],
-            'approval' => ['always' => True, 'roles' => ['dispatch_lead']],
+            'approval' => ['always' => true, 'roles' => ['dispatch_lead']],
         ],
         'process.state-changed' => [
             'domain' => 'governance',

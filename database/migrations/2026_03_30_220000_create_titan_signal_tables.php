@@ -96,10 +96,25 @@ return new class extends Migration {
                 $table->index(['company_id', 'status', 'created_at'], 'idx_tz_approval_queue_company_status');
             });
         }
+
+        if (! Schema::hasTable('tz_audit_log')) {
+            Schema::create('tz_audit_log', static function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->string('process_id', 80);
+                $table->string('signal_id', 80)->nullable();
+                $table->string('action', 80);
+                $table->unsignedBigInteger('performed_by')->nullable()->index();
+                $table->json('details')->nullable();
+                $table->timestamp('created_at')->nullable();
+                $table->index(['process_id', 'created_at'], 'idx_tz_audit_log_process');
+                $table->index(['action', 'created_at'], 'idx_tz_audit_log_action');
+            });
+        }
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('tz_audit_log');
         Schema::dropIfExists('tz_approval_queue');
         Schema::dropIfExists('tz_signal_queue');
         Schema::dropIfExists('tz_signals');
