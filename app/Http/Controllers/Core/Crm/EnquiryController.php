@@ -7,9 +7,11 @@ namespace App\Http\Controllers\Core\Crm;
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
+use App\Models\Money\Quote;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EnquiryController extends CoreController
 {
@@ -71,6 +73,30 @@ class EnquiryController extends CoreController
             'type'    => 'success',
             'message' => __('Enquiry updated.'),
         ]);
+    }
+
+    public function convertToQuote(Enquiry $enquiry): RedirectResponse
+    {
+        $this->authorize('update', $enquiry);
+
+        $quote = DB::transaction(function () use ($enquiry) {
+            $q = Quote::create([
+                'company_id'  => $enquiry->company_id,
+                'created_by'  => auth()->id(),
+                'customer_id' => $enquiry->customer_id,
+                'enquiry_id'  => $enquiry->id,
+                'title'       => $enquiry->name,
+                'status'      => 'draft',
+                'currency'    => auth()->user()->company->currency ?? 'AUD',
+            ]);
+
+            $enquiry->update(['status' => 'quoted', 'quote_id' => $q->id]);
+
+            return $q;
+        });
+
+        return redirect()->route('dashboard.money.quotes.edit', $quote)
+            ->with('status', __('Quote created from enquiry.'));
     }
 
     /**

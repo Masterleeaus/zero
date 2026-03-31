@@ -30,5 +30,7 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('enquiries.show');
             Route::put('enquiries/{enquiry}', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'update'])
                 ->name('enquiries.update');
+            Route::post('enquiries/{enquiry}/convert-to-quote', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'convertToQuote'])
+                ->name('enquiries.convert-to-quote');
         });
     });

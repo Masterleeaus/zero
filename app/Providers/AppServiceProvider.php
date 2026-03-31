@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Notifications\DatabaseNotification;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
@@ -70,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerHealthChecks();
         $this->bootBladeDirectives();
+        $this->bootCarbonMacros();
         $this->bootObservers();
     }
 
@@ -223,6 +225,29 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::directive('endPushOnceFor', static function () {
             return '<?php $__env->stopPush(); endif; ?>';
+        });
+
+        Blade::directive('vertical', function ($key) {
+            return "<?php echo workcore_label({$key}); ?>";
+        });
+    }
+
+    protected function bootCarbonMacros(): void
+    {
+        CarbonInterval::macro('formatHuman', function () {
+            /** @var CarbonInterval $this */
+            $parts = [];
+            if ($this->hours) {
+                $parts[] = $this->hours . 'h';
+            }
+            if ($this->minutes) {
+                $parts[] = $this->minutes . 'm';
+            }
+            if ($this->seconds && empty($parts)) {
+                $parts[] = $this->seconds . 's';
+            }
+
+            return implode(' ', $parts) ?: '0m';
         });
     }
 }

@@ -6,14 +6,13 @@ namespace App\Models\Crm;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
-use App\Models\Money\Quote;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Enquiry extends Model
+class Deal extends Model
 {
     use HasFactory;
     use BelongsToCompany;
@@ -23,27 +22,23 @@ class Enquiry extends Model
         'company_id',
         'created_by',
         'customer_id',
-        'name',
-        'email',
-        'phone',
+        'title',
+        'value',
+        'currency',
         'status',
-        'source',
+        'stage',
+        'expected_close_date',
         'notes',
-        'team_id',
-        'quote_id',
-        'follow_up_at',
-        'follow_up_note',
-        'follow_up_done',
     ];
 
     protected $attributes = [
-        'status'         => 'open',
-        'follow_up_done' => false,
+        'status' => 'open',
+        'currency' => 'AUD',
     ];
 
     protected $casts = [
-        'follow_up_at'   => 'datetime',
-        'follow_up_done' => 'boolean',
+        'value' => 'decimal:2',
+        'expected_close_date' => 'date',
     ];
 
     public function customer(): BelongsTo
@@ -56,16 +51,8 @@ class Enquiry extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function quote(): BelongsTo
+    public function notes(): HasMany
     {
-        return $this->belongsTo(Quote::class);
-    }
-
-    public function scopeDueFollowUps(Builder $query, int $companyId): Builder
-    {
-        return $query->where('company_id', $companyId)
-            ->where('follow_up_at', '<=', now())
-            ->where('follow_up_done', false)
-            ->whereNotNull('follow_up_at');
+        return $this->hasMany(DealNote::class);
     }
 }
