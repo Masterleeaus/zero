@@ -145,7 +145,7 @@
   "connection_to_api_server_failed": "एपीआई सर्वर से कनेक्शन विफल रहा",
   "error_otp_message": "ओटीपी मेल नहीं खाता",
   "phone_number_not_found": "फ़ोन नंबर नहीं मिला",
-  "enter_the_verification_sent_to": "भेजे गए सत्यापन कोड को दर्ज करें",
+  "enter_the_verification_sent_to": "Enter the verification code sent to",
   "did_not_receive_the_code": "कोड प्राप्त नहीं हुआ",
   "resend": "पुन: भेजें",
   "empty_notifications": "खाली सूचनाएं!",

@@ -145,7 +145,7 @@
   "connection_to_api_server_failed": "فشل الاتصال بخادم API",
   "error_otp_message": "كلمة المرور لمرة واحدة غير متطابقة",
   "phone_number_not_found": "لم يتم العثور على رقم الهاتف",
-  "enter_the_verification_sent_to": "أدخل رمز التحقق المرسل إليه",
+  "enter_the_verification_sent_to": "Enter the verification code sent to",
   "did_not_receive_the_code": "لم تتلق الرمز",
   "resend": "إعادة الإرسال",
   "empty_notifications": "الإخطارات الفارغة!",

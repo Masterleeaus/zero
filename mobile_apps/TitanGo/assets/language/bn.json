@@ -145,7 +145,7 @@
   "connection_to_api_server_failed": "api সার্ভারের সাথে কানেক্ট ব্যর্থ হয়েছে৷",
   "error_otp_message": "ওটিপি মেলে না",
   "phone_number_not_found": "ফোন নম্বর পাওয়া যায়নি",
-  "enter_the_verification_sent_to": "পাঠানো ভেরিফিকেশন কোড এন্ট্রি করুন",
+  "enter_the_verification_sent_to": "Enter the verification code sent to",
   "did_not_receive_the_code": "কোড পাইনি",
   "resend": "আবার পাঠান",
   "empty_notifications": "খালি বিজ্ঞপ্তি!",
