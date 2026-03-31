@@ -31,7 +31,6 @@ return [
         'filter_statuses'  => 'All statuses',
         'filter_sites'     => 'All ' . strtolower(workcore_label('sites')),
         'search'           => 'Search ' . strtolower(workcore_label('service_jobs')),
-        'no_items'         => 'No ' . strtolower(workcore_label('checklists')),
         'select_site'      => 'Select ' . strtolower(workcore_label('site')),
         'select_customer'  => 'Select customer',
         'unassigned'       => 'Unassigned',
