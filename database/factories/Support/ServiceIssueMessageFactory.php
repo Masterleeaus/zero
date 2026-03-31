@@ -16,13 +16,30 @@ class ServiceIssueMessageFactory extends Factory
 
     public function definition(): array
     {
-        $issue = ServiceIssue::factory()->create();
-        $user = User::factory()->create(['company_id' => $issue->company_id]);
-
         return [
-            'service_issue_id' => $issue->id,
-            'company_id'       => $issue->company_id,
-            'user_id'          => $user->id,
+            'service_issue_id' => static fn () => ServiceIssue::factory()->create()->id,
+            'company_id'       => static function (array $attributes) {
+                if (isset($attributes['company_id'])) {
+                    return $attributes['company_id'];
+                }
+
+                if (isset($attributes['service_issue_id'])) {
+                    return ServiceIssue::find($attributes['service_issue_id'])?->company_id;
+                }
+
+                return null;
+            },
+            'user_id'          => static function (array $attributes) {
+                if (isset($attributes['user_id'])) {
+                    return $attributes['user_id'];
+                }
+
+                if (isset($attributes['company_id'])) {
+                    return User::factory()->create(['company_id' => $attributes['company_id']])->id;
+                }
+
+                return User::factory()->create()->id;
+            },
             'is_internal'      => false,
             'message'          => $this->faker->sentence(),
             'attachments'      => [],

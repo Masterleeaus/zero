@@ -40,6 +40,8 @@ class ServiceIssue extends Model
 
     public function notes(): HasMany
     {
-        return $this->messages()->where('is_internal', true);
+        return $this->hasMany(ServiceIssueMessage::class)
+            ->where('is_internal', true)
+            ->orderBy('created_at');
     }
 }

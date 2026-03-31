@@ -15,11 +15,19 @@ class ServiceIssueFactory extends Factory
 
     public function definition(): array
     {
-        $user = User::factory()->create();
-
         return [
-            'company_id'  => $user->company_id,
-            'user_id'     => $user->id,
+            'user_id'     => static fn () => User::factory()->create()->id,
+            'company_id'  => static function (array $attributes) {
+                if (isset($attributes['company_id'])) {
+                    return $attributes['company_id'];
+                }
+
+                if (isset($attributes['user_id'])) {
+                    return User::find($attributes['user_id'])?->company_id;
+                }
+
+                return User::factory()->create()->company_id;
+            },
             'subject'     => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
             'status'      => 'open',

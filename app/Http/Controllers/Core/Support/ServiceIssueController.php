@@ -23,9 +23,12 @@ class ServiceIssueController extends Controller
         $issues = ServiceIssue::query()
             ->when(
                 $user && ! $user->isAdmin(),
-                fn ($q) => $q->where(fn ($builder) => $builder
-                    ->where('assigned_to', $user->id)
-                    ->orWhere('user_id', $user->id))
+                function ($query) use ($user) {
+                    $query->where(static function ($builder) use ($user) {
+                        $builder->where('assigned_to', $user->id)
+                            ->orWhere('user_id', $user->id);
+                    });
+                }
             )
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->string('priority')))
@@ -118,9 +121,9 @@ class ServiceIssueController extends Controller
     protected function storeMessage(Request $request, ServiceIssue $issue, bool $internal): ServiceIssueMessage
     {
         $data = $request->validate([
-            'message'      => ['nullable', 'string'],
-            'attachments'  => ['nullable', 'array'],
-            'attachments.*'=> ['string'],
+            'message'       => ['nullable', 'string'],
+            'attachments'   => ['nullable', 'array'],
+            'attachments.*' => ['string'],
         ]);
 
         /** @var \App\Models\User|null $user */
