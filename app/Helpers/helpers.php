@@ -127,6 +127,9 @@ function formatCamelCase($input)
     return ucwords(str_replace('_', ' ', $input));
 }
 
+/**
+ * Resolve WorkCore-friendly labels using configured mappings.
+ */
 function workcore_label(string $key, ?string $default = null): string
 {
     $normalized = Str::of($key)
