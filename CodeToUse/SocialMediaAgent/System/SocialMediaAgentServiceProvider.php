@@ -91,7 +91,10 @@ class SocialMediaAgentServiceProvider extends ServiceProvider implements Extensi
 
     public function registerViews(): static
     {
-        $this->loadViewsFrom([resource_path('views/default/social-media-agent')], $this->registerKey());
+        $this->loadViewsFrom(
+            [resource_path('views/default/panel/user/business-suite/social-media-agent')],
+            $this->registerKey()
+        );
 
         return $this;
     }

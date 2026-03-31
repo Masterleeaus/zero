@@ -83,7 +83,10 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
 
     public function registerViews(): static
     {
-        $this->loadViewsFrom([resource_path('views/default/social-media')], 'social-media');
+        $this->loadViewsFrom(
+            [resource_path('views/default/panel/user/business-suite/social-media')],
+            'social-media'
+        );
 
         return $this;
     }
