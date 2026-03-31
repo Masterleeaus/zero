@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity', 'throttle:120,1'])
+Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.dashboard', '120,1')])
     ->prefix('dashboard')
     ->as('dashboard.')
     ->group(static function () {
