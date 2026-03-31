@@ -117,9 +117,9 @@ class BottomNavScreenState extends State<BottomNavScreen> {
           child: SafeArea(
             child: Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
               child: Row(children: [
-                _getBottomNavItem(0, Images.dashboard, 'dashboard'.tr),
-                _getBottomNavItem(1, Images.requests, 'requests'.tr),
-                _getBottomNavItem(2, Images.service, 'services'.tr),
+                _getBottomNavItem(0, Images.dashboard, 'today'.tr),
+                _getBottomNavItem(1, Images.requests, 'jobs'.tr),
+                _getBottomNavItem(2, Images.service, 'team'.tr),
                 _getBottomNavItem(3, Images.more, 'more'.tr),
               ]),
             ),

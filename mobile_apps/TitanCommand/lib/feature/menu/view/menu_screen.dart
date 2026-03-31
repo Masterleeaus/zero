@@ -11,18 +11,19 @@ class MenuScreen extends StatelessWidget {
 
 
     final List<MenuModel> menuList = [
-      MenuModel(icon: Images.profileIcon, title: 'profile'.tr, route: RouteHelper.getProfileRoute()),
-      MenuModel(icon: Images.mySubscriptions, title: 'mySubscription'.tr, route: RouteHelper.getMySubscriptionRoute()),
-      MenuModel(icon: Images.chatImage, title: 'chat'.tr, routeValidation: "chat",route: RouteHelper.getInboxScreenRoute()),
-      MenuModel(icon: Images.settings, title: 'settings'.tr, route: RouteHelper.getLanguageBottomSheet('menu')),
-      MenuModel(icon: Images.paymentInfoIcon, title: 'payment_information'.tr, route: RouteHelper.getPaymentInformationRoute()),
+      MenuModel(icon: Images.profileIcon, title: 'company_profile'.tr, route: RouteHelper.getProfileRoute()),
+      MenuModel(icon: Images.chatImage, title: 'messages'.tr, routeValidation: "chat", route: RouteHelper.getInboxScreenRoute()),
       MenuModel(icon: Images.notificationSetup, title: 'notification_channel'.tr, route: RouteHelper.getNotificationScreen()),
-      MenuModel(icon: Images.transaction, title: 'withdraw_list'.tr, route: RouteHelper.transactions),
-      MenuModel(icon: Images.reportOverview2, title: 'reports'.tr, routeValidation: "reports_&_analytics", route: RouteHelper.getReportingPageRoute('menu')),
-      MenuModel(icon: Images.menuAdvertisement, title: 'advertisements'.tr, routeValidation: "advertisement", route: RouteHelper.getAdvertisementListScreen(
-        count: Get.find<DashboardController>().additionalInfoCount?.advertisementCount ?? 0
-      )),
-      MenuModel(icon: Images.businessPlanIcon, title: 'business_plan'.tr, route: RouteHelper.getBusinessPlanScreen()),
+      MenuModel(icon: Images.mySubscriptions, title: 'service_plans'.tr, route: RouteHelper.getMySubscriptionRoute()),
+      MenuModel(icon: Images.settings, title: 'team_settings'.tr, route: RouteHelper.serviceManSetup),
+      MenuModel(icon: Images.transaction, title: 'payout_history'.tr, route: RouteHelper.transactions),
+      MenuModel(icon: Images.reportOverview2, title: 'issues'.tr, routeValidation: "reports_&_analytics", route: RouteHelper.getReportingPageRoute('menu')),
+      MenuModel(icon: Images.reviewIcon, title: 'quality'.tr, route: RouteHelper.getReportingPageRoute('quality')),
+      MenuModel(icon: Images.commissionIcon, title: 'ask_titan'.tr, route: RouteHelper.getHelpAndSupportScreen()),
+      MenuModel(icon: Images.messageIcon, title: 'voice_control'.tr, route: RouteHelper.getHelpAndSupportScreen()),
+      MenuModel(icon: Images.tutorialIcon, title: 'training'.tr, route: RouteHelper.getHelpAndSupportScreen()),
+      MenuModel(icon: Images.paymentInfoIcon, title: 'payment_information'.tr, route: RouteHelper.getPaymentInformationRoute()),
+      MenuModel(icon: Images.settings, title: 'settings'.tr, route: RouteHelper.getLanguageBottomSheet('menu')),
       MenuModel(icon: Images.helpIcon, title: 'help_&_support'.tr, route: RouteHelper.getHelpAndSupportScreen()),
 
       ...(Get.find<SplashController>()

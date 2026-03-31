@@ -24,7 +24,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: CustomAppBar(title: "withdraw_list".tr,onBackPressed: (){
+      appBar: CustomAppBar(title: 'payout_history'.tr,onBackPressed: (){
         if(widget.fromNotification == "fromNotification"){
           Get.offAllNamed(RouteHelper.getInitialRoute());
         }else{
