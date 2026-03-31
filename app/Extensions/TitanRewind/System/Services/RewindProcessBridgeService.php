@@ -47,7 +47,7 @@ class RewindProcessBridgeService
                 ->limit(20)
                 ->get();
             $signals = $signalRows->map(fn ($row) => [
-                'signal_id" => $row->id ?? null,
+                'signal_id' => $row->id ?? null,
                 'type' => $row->type ?? null,
                 'severity' => $row->severity ?? null,
                 'status' => $row->status ?? null,
