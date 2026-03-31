@@ -8,9 +8,9 @@
         <form method="post" action="{{ route('dashboard.work.timelogs.store') }}" class="space-y-4">
             @csrf
             <x-form.group>
-                <x-form.label for="service_job_id">{{ __('Service Job (optional)') }}</x-form.label>
+                <x-form.label for="service_job_id">{{ __('work.labels.service_job') }} ({{ __('optional') }})</x-form.label>
                 <x-form.select name="service_job_id" id="service_job_id">
-                    <option value="">{{ __('Select a job') }}</option>
+                    <option value="">{{ __('work.jobs.select_job') }}</option>
                     @foreach($jobs as $job)
                         <option value="{{ $job->id }}">{{ $job->title }}</option>
                     @endforeach

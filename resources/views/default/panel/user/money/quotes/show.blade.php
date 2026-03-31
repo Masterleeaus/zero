@@ -129,10 +129,10 @@
         </x-card>
 
         <x-card>
-            <div class="font-semibold mb-3">{{ __('Convert to Service Job') }}</div>
+            <div class="font-semibold mb-3">{{ __('money.quotes.convert_job') }}</div>
             <form method="post" action="{{ route('dashboard.money.quotes.convert-job', $quote) }}" class="grid md:grid-cols-3 gap-3">
                 @csrf
-                <x-select name="site_id" label="{{ __('Site') }}" required>
+                <x-select name="site_id" label="{{ __('money.quotes.site') }}" required>
                     @foreach($sites as $site)
                         <option value="{{ $site->id }}" @selected($quote->site_id == $site->id)>{{ $site->name }}</option>
                     @endforeach
@@ -140,7 +140,7 @@
                 <div class="md:col-span-3">
                     <x-button type="submit">
                         <x-tabler-briefcase class="size-4" />
-                        {{ __('Create Service Job') }}
+                        {{ __('money.quotes.create_job') }}
                     </x-button>
                 </div>
             </form>

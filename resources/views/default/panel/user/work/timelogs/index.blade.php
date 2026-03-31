@@ -15,7 +15,7 @@
             <x-table>
                 <x-slot:head>
                     <tr>
-                        <th>{{ __('Job') }}</th>
+                        <th>{{ __('work.labels.service_job') }}</th>
                         <th>{{ __('Started') }}</th>
                         <th>{{ __('Ended') }}</th>
                         <th>{{ __('Duration (min)') }}</th>
@@ -25,7 +25,7 @@
                 <x-slot:body>
                     @forelse($timelogs as $log)
                         <tr>
-                            <td>{{ $log->serviceJob?->title ?? __('Unassigned') }}</td>
+                            <td>{{ $log->serviceJob?->title ?? __('work.jobs.unassigned') }}</td>
                             <td>{{ $log->started_at?->format('Y-m-d H:i') }}</td>
                             <td>{{ $log->ended_at?->format('Y-m-d H:i') ?? __('Running') }}</td>
                             <td>{{ $log->duration_minutes ?? '—' }}</td>
