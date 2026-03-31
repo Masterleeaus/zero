@@ -32,14 +32,24 @@
             </div>
         </x-card>
 
+        @php
+            $tabs = [
+                'contacts' => __('Contacts'),
+                'notes' => __('Notes'),
+                'documents' => __('Documents'),
+                'deals' => __('Deals'),
+                'quotes' => __('Quotes'),
+                'invoices' => __('Invoices'),
+            ];
+        @endphp
         <x-card x-data="{ tab: 'contacts' }" class="p-0">
             <div class="border-b px-4 py-3 flex gap-3 flex-wrap">
-                @foreach(['contacts','notes','documents','deals','quotes','invoices'] as $key)
+                @foreach($tabs as $key => $label)
                     <button type="button"
                             class="px-3 py-2 rounded-md text-sm font-semibold"
                             :class="tab === '{{ $key }}' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'"
                             x-on:click="tab='{{ $key }}'">
-                        {{ __('crm.customers.' . $key) }}
+                        {{ $label }}
                     </button>
                 @endforeach
             </div>

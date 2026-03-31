@@ -79,78 +79,51 @@
 </div>
 
 @once
+    @php
+        $lineItemEditorScript = <<<'SCRIPT'
+<script>
+    window.lineItemEditor = function(seedItems, fieldName = 'items') {
+        return {
+            items: seedItems || [],
+            fieldName,
+            add() {
+                this.items.push({
+                    key: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'item-'+Date.now()+Math.random(),
+                    description: '',
+                    quantity: 1,
+                    unit_price: 0,
+                    tax_rate: 0,
+                    sort_order: this.items.length,
+                });
+            },
+            remove(index) {
+                this.items.splice(index, 1);
+                this.reindex();
+            },
+            moveUp(index) {
+                if (index === 0) return;
+                [this.items[index - 1], this.items[index]] = [this.items[index], this.items[index - 1]];
+                this.reindex();
+            },
+            moveDown(index) {
+                if (index >= this.items.length - 1) return;
+                [this.items[index + 1], this.items[index]] = [this.items[index], this.items[index + 1]];
+                this.reindex();
+            },
+            reindex() {
+                this.items = this.items.map((item, idx) => ({ ...item, sort_order: idx }));
+            },
+        };
+    };
+</script>
+SCRIPT;
+    @endphp
+
     @push('script')
-        <script>
-            window.lineItemEditor = function(seedItems, fieldName = 'items') {
-                return {
-                    items: seedItems || [],
-                    fieldName,
-                    add() {
-                        this.items.push({
-                            key: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'item-'+Date.now()+Math.random(),
-                            description: '',
-                            quantity: 1,
-                            unit_price: 0,
-                            tax_rate: 0,
-                            sort_order: this.items.length,
-                        });
-                    },
-                    remove(index) {
-                        this.items.splice(index, 1);
-                        this.reindex();
-                    },
-                    moveUp(index) {
-                        if (index === 0) return;
-                        [this.items[index - 1], this.items[index]] = [this.items[index], this.items[index - 1]];
-                        this.reindex();
-                    },
-                    moveDown(index) {
-                        if (index >= this.items.length - 1) return;
-                        [this.items[index + 1], this.items[index]] = [this.items[index], this.items[index + 1]];
-                        this.reindex();
-                    },
-                    reindex() {
-                        this.items = this.items.map((item, idx) => ({ ...item, sort_order: idx }));
-                    },
-                };
-            };
-        </script>
+        {!! $lineItemEditorScript !!}
     @endpush
+
     @push('scripts')
-        <script>
-            window.lineItemEditor = window.lineItemEditor || function(seedItems, fieldName = 'items') {
-                return {
-                    items: seedItems || [],
-                    fieldName,
-                    add() {
-                        this.items.push({
-                            key: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'item-'+Date.now()+Math.random(),
-                            description: '',
-                            quantity: 1,
-                            unit_price: 0,
-                            tax_rate: 0,
-                            sort_order: this.items.length,
-                        });
-                    },
-                    remove(index) {
-                        this.items.splice(index, 1);
-                        this.reindex();
-                    },
-                    moveUp(index) {
-                        if (index === 0) return;
-                        [this.items[index - 1], this.items[index]] = [this.items[index], this.items[index - 1]];
-                        this.reindex();
-                    },
-                    moveDown(index) {
-                        if (index >= this.items.length - 1) return;
-                        [this.items[index + 1], this.items[index]] = [this.items[index], this.items[index + 1]];
-                        this.reindex();
-                    },
-                    reindex() {
-                        this.items = this.items.map((item, idx) => ({ ...item, sort_order: idx }));
-                    },
-                };
-            };
-        </script>
+        {!! $lineItemEditorScript !!}
     @endpush
 @endonce
