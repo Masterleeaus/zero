@@ -19,9 +19,14 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     'customer_unavailable',
     'damage_found',
     'hazard_detected',
-    'extra_work_requested',
     'incomplete_previous_clean',
+    'extra_work_requested',
     'safety_risk',
+    'animal_on_site',
+    'biohazard_material',
+    'incorrect_supplies_provided',
+    'property_access_code_incorrect',
+    'service_scope_unclear',
   ];
 
   @override

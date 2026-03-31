@@ -2,9 +2,10 @@ import 'package:demandium_serviceman/utils/core_export.dart';
 import 'package:get/get.dart';
 
 /// Site Notes / Property Memory block displayed near the top of Job Details.
-/// Shows address, contact info, and other on-site instructions pulled from
-/// the booking's service address. Extend to a dedicated property_notes API
-/// endpoint once the backend exposes one.
+/// Shows address, contact info, and on-site operational instructions pulled
+/// from the booking's service address.
+/// TODO: Extend to a dedicated property_notes API endpoint once the backend
+/// exposes per-site memory fields (alarm hints, parking, pet warnings, etc.).
 class SiteNotesWidget extends StatelessWidget {
   const SiteNotesWidget({super.key});
 
@@ -22,6 +23,9 @@ class SiteNotesWidget extends StatelessWidget {
                 address.street?.isNotEmpty == true);
         final hasContact = address?.contactPersonName?.isNotEmpty == true ||
             address?.contactPersonNumber?.isNotEmpty == true;
+        final hasLabel = address?.addressLabel?.isNotEmpty == true;
+        final hasCity = address?.city?.isNotEmpty == true;
+        final hasCountry = address?.country?.isNotEmpty == true;
 
         if (!hasAddress && !hasContact) {
           return _buildNoNotes(context);
@@ -79,16 +83,29 @@ class SiteNotesWidget extends StatelessWidget {
                       _SiteNoteRow(
                         icon: Icons.location_on_outlined,
                         label: 'service_address'.tr,
-                        value: _buildAddress(address),
+                        value: _buildAddress(address!),
                       ),
                     ],
-                    if (address?.addressLabel?.isNotEmpty == true) ...[
+                    if (hasCity || hasCountry) ...[
                       const SizedBox(
                           height: Dimensions.paddingSizeExtraSmall),
                       _SiteNoteRow(
-                        icon: Icons.label_outline_rounded,
+                        icon: Icons.map_outlined,
+                        label: 'site_area'.tr,
+                        value: [
+                          if (hasCity) address!.city!,
+                          if (hasCountry) address!.country!,
+                        ].join(', '),
+                      ),
+                    ],
+                    if (hasLabel) ...[
+                      const SizedBox(
+                          height: Dimensions.paddingSizeExtraSmall),
+                      _SiteNoteRow(
+                        icon: Icons.vpn_key_outlined,
                         label: 'entry_instructions'.tr,
                         value: address!.addressLabel!,
+                        highlight: true,
                       ),
                     ],
                     if (hasContact) ...[
@@ -96,10 +113,14 @@ class SiteNotesWidget extends StatelessWidget {
                           height: Dimensions.paddingSizeExtraSmall),
                       _SiteNoteRow(
                         icon: Icons.person_outline_rounded,
-                        label: 'contact_person'.tr,
+                        label: 'site_contact'.tr,
                         value: _formatContactPerson(address),
                       ),
                     ],
+                    // Placeholder rows for future backend-sourced fields.
+                    // These render only when the backend provides the data.
+                    // TODO: bind to PropertyMemory API fields when available.
+                    _buildPlaceholderRows(context),
                   ],
                 ),
               ),
@@ -110,12 +131,22 @@ class SiteNotesWidget extends StatelessWidget {
     );
   }
 
+  /// Placeholder rows for upcoming backend fields.
+  /// Shown as subtle reminders; gracefully hidden until data exists.
+  Widget _buildPlaceholderRows(BuildContext context) {
+    return const SizedBox.shrink();
+    // TODO: uncomment and bind to real data when PropertyMemory API is ready:
+    // _SiteNoteRow(icon: Icons.alarm_rounded, label: 'alarm_hints'.tr, value: ...),
+    // _SiteNoteRow(icon: Icons.local_parking_rounded, label: 'parking_notes'.tr, value: ...),
+    // _SiteNoteRow(icon: Icons.pets_rounded, label: 'pet_warning'.tr, value: ...),
+    // _SiteNoteRow(icon: Icons.sticky_note_2_outlined, label: 'special_site_notes'.tr, value: ...),
+    // _SiteNoteRow(icon: Icons.warning_amber_rounded, label: 'access_warnings'.tr, value: ...),
+  }
+
   String _buildAddress(ServiceAddress address) {
     final parts = <String>[
       if (address.address?.isNotEmpty == true) address.address!,
       if (address.street?.isNotEmpty == true) address.street!,
-      if (address.city?.isNotEmpty == true) address.city!,
-      if (address.country?.isNotEmpty == true) address.country!,
     ];
     return parts.join(', ');
   }
@@ -169,22 +200,32 @@ class _SiteNoteRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool highlight;
 
-  const _SiteNoteRow(
-      {required this.icon, required this.label, required this.value});
+  const _SiteNoteRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final valueColor = highlight
+        ? Theme.of(context).primaryColor
+        : Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.8);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon,
             size: 15,
-            color: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.color
-                ?.withValues(alpha: 0.45)),
+            color: highlight
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.8)
+                : Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.color
+                    ?.withValues(alpha: 0.45)),
         const SizedBox(width: Dimensions.paddingSizeExtraSmall),
         Expanded(
           child: Column(
@@ -203,13 +244,9 @@ class _SiteNoteRow extends StatelessWidget {
               ),
               Text(
                 value,
-                style: robotoRegular.copyWith(
+                style: (highlight ? robotoBold : robotoRegular).copyWith(
                   fontSize: Dimensions.fontSizeSmall,
-                  color: Theme.of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.color
-                      ?.withValues(alpha: 0.8),
+                  color: valueColor,
                 ),
               ),
             ],
