@@ -1,5 +1,5 @@
 @extends('panel.layout.app')
-@section('title', $checklist->exists ? __('Edit Checklist Item') : __('New Checklist Item'))
+@section('title', $checklist->exists ? __('work.checklists.edit') : __('work.checklists.new'))
 
 @section('content')
     <div class="py-6">
@@ -13,9 +13,9 @@
 
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label class="form-label">{{ __('Service Job') }}</label>
+                    <label class="form-label">{{ __('work.labels.service_job') }}</label>
                     <x-select name="service_job_id" required>
-                        <option value="">{{ __('Select job') }}</option>
+                        <option value="">{{ __('work.jobs.select_job') }}</option>
                         @foreach($jobs as $job)
                             <option value="{{ $job->id }}" @selected(old('service_job_id', $jobId ?? $checklist->service_job_id) == $job->id)>
                                 {{ $job->title }}

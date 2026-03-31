@@ -1,16 +1,16 @@
 @extends('panel.layout.app')
-@section('title', __('Sites'))
+@section('title', __('work.sites.title'))
 @section('titlebar_actions')
     <x-button href="{{ route('dashboard.work.sites.create') }}">
         <x-tabler-plus class="size-4" />
-        {{ __('New Site') }}
+        {{ __('work.sites.new') }}
     </x-button>
 @endsection
 
 @section('content')
     <div class="py-6 space-y-4">
         <form method="get" class="grid md:grid-cols-4 gap-3">
-            <x-input name="q" value="{{ $search ?? '' }}" placeholder="{{ __('Search sites') }}" />
+            <x-input name="q" value="{{ $search ?? '' }}" placeholder="{{ __('work.sites.search') }}" />
             <x-select name="status">
                 <option value="">{{ __('All statuses') }}</option>
                 @foreach(['active', 'on-hold', 'completed', 'cancelled'] as $option)
@@ -31,10 +31,10 @@
         <x-table>
             <x-slot:head>
                 <tr>
-                    <th>{{ __('Name') }}</th>
-                    <th>{{ __('Reference') }}</th>
-                    <th>{{ __('Status') }}</th>
-                    <th>{{ __('Timeline') }}</th>
+                    <th>{{ __('work.sites.table_name') }}</th>
+                    <th>{{ __('work.sites.table_reference') }}</th>
+                    <th>{{ __('work.sites.table_status') }}</th>
+                    <th>{{ __('work.sites.timeline') }}</th>
                     <th class="text-end">{{ __('Action') }}</th>
                 </tr>
             </x-slot:head>
@@ -66,7 +66,7 @@
                 @empty
                     <tr>
                         <td colspan="5" class="text-center text-slate-500 py-6">
-                            {{ __('No sites yet') }}
+                            {{ __('work.sites.empty') }}
                         </td>
                     </tr>
                 @endforelse

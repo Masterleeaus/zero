@@ -776,20 +776,12 @@ class UserController extends Controller
         $items->appends($request->query());
 
         if ($folderID !== null) {
-            $team = $request->user()->getAttribute('team');
-            $myCreatedTeam = $request->user()->getAttribute('myCreatedTeam');
-
+            $teamId = auth()->user()?->team_id;
             $currfolder = Folders::query()
-                ->where(function (Builder $query) use ($team, $myCreatedTeam) {
+                ->where('company_id', tenant())
+                ->where(function (Builder $query) use ($teamId) {
                     $query->where('created_by', auth()->id())
-                        ->when($team || $myCreatedTeam, function ($q) use ($team, $myCreatedTeam) {
-                            if ($team && $team?->is_shared) {
-                                $q->orWhere('team_id', $team->id);
-                            }
-                            if ($myCreatedTeam) {
-                                $q->orWhere('team_id', $myCreatedTeam->id);
-                            }
-                        });
+                        ->when($teamId, fn (Builder $builder) => $builder->orWhere('team_id', $teamId));
                 })
                 ->findOrFail($folderID);
         } else {

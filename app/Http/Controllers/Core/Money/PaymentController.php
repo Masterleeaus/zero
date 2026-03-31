@@ -19,10 +19,12 @@ class PaymentController extends CoreController
         $this->authorize('viewAny', Payment::class);
 
         $payments = Payment::query()
-            ->with('invoice')
+            ->with(['invoice', 'invoice.customer'])
             ->latest('paid_at')
             ->latest()
-            ->paginate(15);
+            ->paginate(25)
+            ->paginate(15)
+            ->withQueryString();
 
         return view('default.panel.user.money.payments.index', compact('payments'));
     }

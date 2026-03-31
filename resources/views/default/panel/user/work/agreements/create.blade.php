@@ -22,9 +22,9 @@
             </x-form.group>
 
             <x-form.group>
-                <x-form.label for="site_id">{{ __('Site') }}</x-form.label>
+                <x-form.label for="site_id">{{ __('work.labels.site') }}</x-form.label>
                 <x-form.select name="site_id" id="site_id">
-                    <option value="">{{ __('Select site') }}</option>
+                    <option value="">{{ __('work.jobs.select_site') }}</option>
                     @foreach($sites as $site)
                         <option value="{{ $site->id }}">{{ $site->name }}</option>
                     @endforeach

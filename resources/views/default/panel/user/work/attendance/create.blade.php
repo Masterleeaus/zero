@@ -1,16 +1,16 @@
 @extends('panel.layout.app')
-@section('title', __('Check in'))
+@section('title', __('work.attendance.title'))
 
 @section('content')
     <div class="py-6 space-y-4">
-        <h2 class="text-lg font-semibold">{{ __('New check-in') }}</h2>
+        <h2 class="text-lg font-semibold">{{ __('work.attendance.create') }}</h2>
 
         <form method="post" action="{{ route('dashboard.work.attendance.store') }}" class="space-y-4">
             @csrf
             <x-form.group>
-                <x-form.label for="service_job_id">{{ __('Service Job (optional)') }}</x-form.label>
+                <x-form.label for="service_job_id">{{ __('work.labels.service_job') }} ({{ __('optional') }})</x-form.label>
                 <x-form.select name="service_job_id" id="service_job_id">
-                    <option value="">{{ __('Select a job') }}</option>
+                    <option value="">{{ __('work.jobs.select_job') }}</option>
                     @foreach($jobs as $job)
                         <option value="{{ $job->id }}">{{ $job->title }}</option>
                     @endforeach

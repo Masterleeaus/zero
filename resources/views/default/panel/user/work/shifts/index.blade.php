@@ -1,21 +1,21 @@
 @extends('panel.layout.app')
-@section('title', __('Shifts'))
+@section('title', __('work.shifts.title'))
 
 @section('content')
     <div class="py-6 space-y-4">
         <div class="flex justify-between items-center">
-            <h1 class="text-xl font-semibold">{{ __('Shifts') }}</h1>
-            <x-button href="{{ route('dashboard.work.shifts.create') }}">{{ __('New Shift') }}</x-button>
+            <h1 class="text-xl font-semibold">{{ __('work.shifts.title') }}</h1>
+            <x-button href="{{ route('dashboard.work.shifts.create') }}">{{ __('work.shifts.new') }}</x-button>
         </div>
         <x-table>
             <x-slot:head>
                 <tr>
                     <th>{{ __('User') }}</th>
-                    <th>{{ __('Service Job') }}</th>
-                    <th>{{ __('Start') }}</th>
-                    <th>{{ __('End') }}</th>
+                    <th>{{ __('work.shifts.service_job') }}</th>
+                    <th>{{ __('work.shifts.start') }}</th>
+                    <th>{{ __('work.shifts.end') }}</th>
                     <th>{{ __('Status') }}</th>
-                    <th class="text-end">{{ __('Actions') }}</th>
+                    <th class="text-end">{{ __('work.shifts.actions') }}</th>
                 </tr>
             </x-slot:head>
             <x-slot:body>
@@ -32,7 +32,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-slate-500">{{ __('No shifts found') }}</td>
+                        <td colspan="6" class="text-center text-slate-500">{{ __('work.shifts.empty') }}</td>
                     </tr>
                 @endforelse
             </x-slot:body>

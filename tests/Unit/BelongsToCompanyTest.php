@@ -93,6 +93,20 @@ class BelongsToCompanyTest extends TestCase
         $this->assertSame([9], $companyNine);
     }
 
+    public function test_legacy_trait_aliases_scoped_behaviour(): void
+    {
+        DB::table('samples')->insert([
+            ['name' => 'tenant-a', 'company_id' => 5],
+            ['name' => 'tenant-b', 'company_id' => 9],
+        ]);
+
+        $this->actingAsCompany(5);
+
+        $visible = LegacySampleModel::pluck('company_id')->all();
+
+        $this->assertSame([5], $visible);
+    }
+
     protected function actingAsCompany(int $companyId): void
     {
         $user = User::factory()->create([
@@ -109,6 +123,15 @@ class BelongsToCompanyTest extends TestCase
 class SampleModel extends Model
 {
     use BelongsToCompany;
+
+    protected $table = 'samples';
+
+    protected $guarded = [];
+}
+
+class LegacySampleModel extends Model
+{
+    use \App\Traits\BelongsToCompany;
 
     protected $table = 'samples';
 
