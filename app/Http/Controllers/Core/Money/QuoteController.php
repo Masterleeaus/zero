@@ -20,7 +20,7 @@ class QuoteController extends CoreController
     {
         $this->authorize('viewAny', Quote::class);
 
-        $query = Quote::query()->with('customer');
+        $query = Quote::query()->with(['customer', 'items']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
@@ -33,7 +33,7 @@ class QuoteController extends CoreController
             });
         }
 
-        $quotes = $query->latest('issue_date')->latest()->paginate(10)->withQueryString();
+        $quotes = $query->latest('issue_date')->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.money.quotes.index', [
             'quotes'  => $quotes,
