@@ -244,7 +244,6 @@
 			type="checkbox"
 			label="{{ __('Send a copy to my email address') }}"
 			name="sendMail"
-			type="checkbox"
 			switcher
 		/>
 
@@ -254,7 +253,6 @@
 			type="checkbox"
 			label="{{ __('Auto generate') }}"
 			name="auto_generate"
-			type="checkbox"
 			switcher
 		/>
 		<x-alert type="info mt-2">

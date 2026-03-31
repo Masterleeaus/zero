@@ -81,7 +81,7 @@ class AISocialMediaServiceProvider extends ServiceProvider implements UninstallE
 
     public function registerViews(): static
     {
-        $this->loadViewsFrom([resource_path('views/default/ai-social-media')], 'ai-social-media');
+        $this->loadViewsFrom([resource_path('views/default/panel/user/business-suite/ai-social-media')], 'ai-social-media');
 
         return $this;
     }

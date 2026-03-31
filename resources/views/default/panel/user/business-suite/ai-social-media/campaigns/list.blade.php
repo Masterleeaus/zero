@@ -10,7 +10,7 @@
                     data-bs-target="#add-cam-modal"
                     data-bs-toggle="modal"
                     type="button"
-                >{{ __('Add Compaign') }}</a>
+                >{{ __('Add Campaign') }}</a>
             </div>
             <div class="card">
                 <div

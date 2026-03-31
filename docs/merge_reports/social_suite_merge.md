@@ -2,7 +2,7 @@
 
 ## Files merged
 - Added `routes/core/social.routes.php` to register all SocialMedia, AiSocialMedia, and SocialMediaAgent web/API routes via the core route loader.
-- Copied module views into `resources/views/default/social-media`, `resources/views/default/ai-social-media`, and `resources/views/default/social-media-agent` to align with the themed view resolver.
+- Copied module views into `resources/views/default/social-media`, `resources/views/default/panel/user/business-suite/ai-social-media`, and `resources/views/default/social-media-agent` to align with the themed view resolver.
 - Enabled PSR-4 autoloading for `App\Extensions\*` from `CodeToUse/` via `composer.json` so extension classes are discoverable without duplicating core providers.
 
 ## Files adapted

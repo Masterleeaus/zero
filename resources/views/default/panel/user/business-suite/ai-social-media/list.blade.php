@@ -47,7 +47,7 @@
                 <tr>
                     <th>{{ __('Platform') }}</th>
                     <th>{{ __('Products/Services') }}</th>
-                    <th>{{ __('Campagin') }}</th>
+                    <th>{{ __('Campaign') }}</th>
                     <th>{{ __('Schedule Time') }}</th>
                     <th>{{ __('Period') }}</th>
                     <th>{{ __('Action') }}</th>
@@ -92,7 +92,7 @@
                                 @break
 
                                 @default
-                                    unknow
+                                    unknown
                             @endswitch
 
                         </td>

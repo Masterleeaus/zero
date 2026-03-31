@@ -101,7 +101,6 @@
         type="checkbox"
         label="{{ __('Send a copy to my email address') }}"
         name="sendMail"
-        type="checkbox"
         switcher
     />
 
