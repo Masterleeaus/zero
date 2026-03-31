@@ -127,6 +127,22 @@ function formatCamelCase($input)
     return ucwords(str_replace('_', ' ', $input));
 }
 
+function workcore_label(string $key, ?string $default = null): string
+{
+    $normalized = Str::snake(str_replace(['.', '-'], '_', $key));
+    $labels = config('workcore.labels', []);
+
+    if (array_key_exists($normalized, $labels)) {
+        return $labels[$normalized];
+    }
+
+    if (array_key_exists($key, $labels)) {
+        return $labels[$key];
+    }
+
+    return $default ?? Str::title(str_replace(['_', '-'], ' ', $key));
+}
+
 function checkCouponInRequest($code = null)
 {
     if ($code !== null) {
