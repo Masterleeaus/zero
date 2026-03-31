@@ -105,7 +105,7 @@ class InsightsController extends CoreController
 
         $attendanceOpen = Attendance::query()
             ->where('company_id', $companyId)
-            ->where('status', 'checked_in')
+            ->whereIn('status', ['open', 'checked_in'])
             ->count();
 
         $attendanceSummary = Attendance::statusSummary($companyId);
