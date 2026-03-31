@@ -132,7 +132,7 @@ function formatCamelCase($input)
  *
  * Dots and hyphens in the provided key are converted to underscores before
  * snake_casing so inputs like `service-job`, `service.job`, or `serviceJob`
- * resolve consistently to the same config label key.
+ * resolve consistently to the same config label key (canonical snake_case).
  *
  * @param  string      $key      Label lookup key.
  * @param  string|null $default  Optional fallback value.

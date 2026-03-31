@@ -12,7 +12,7 @@ class WorkCoreServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            config_path('workcore.php'),
+            __DIR__ . '/../../config/workcore.php',
             'workcore'
         );
     }
