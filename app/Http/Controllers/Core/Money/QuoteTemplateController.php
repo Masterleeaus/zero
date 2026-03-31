@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,17 @@ class QuoteTemplateController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Quote templates'),
-            __('Reusable quote templates from WorkCore.')
-        );
+        return view('default.panel.user.money.quote-templates.index', [
+            'templates' => WorkcoreDemoData::quoteTemplates(),
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Create quote template'),
-            __('Set up a reusable quote layout.')
-        );
+        return view('default.panel.user.money.quote-templates.form', [
+            'template' => null,
+            'items'    => WorkcoreDemoData::lineItemsSeed(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,18 +37,18 @@ class QuoteTemplateController extends CoreController
 
     public function show(string $template): View
     {
-        return $this->placeholder(
-            __('Quote template detail'),
-            __('Template :template detail view.', ['template' => $template])
-        );
+        return view('default.panel.user.money.quote-templates.show', [
+            'template' => WorkcoreDemoData::quoteTemplates()->firstWhere('name', $template)
+                ?? WorkcoreDemoData::quoteTemplates()->first(),
+        ]);
     }
 
     public function edit(string $template): View
     {
-        return $this->placeholder(
-            __('Edit quote template'),
-            __('Update template :template.', ['template' => $template])
-        );
+        return view('default.panel.user.money.quote-templates.form', [
+            'template' => WorkcoreDemoData::quoteTemplates()->firstWhere('name', $template),
+            'items'    => WorkcoreDemoData::lineItemsSeed(),
+        ]);
     }
 
     public function update(Request $request, string $template): RedirectResponse
@@ -75,4 +75,3 @@ class QuoteTemplateController extends CoreController
         ]);
     }
 }
-

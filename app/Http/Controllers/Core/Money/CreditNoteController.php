@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Money;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Support\WorkcoreDemoData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,21 @@ class CreditNoteController extends CoreController
 {
     public function index(): View
     {
-        return $this->placeholder(
-            __('Credit notes'),
-            __('List of credit notes synced from WorkCore.')
-        );
+        return view('default.panel.user.money.credit-notes.index', [
+            'creditNotes' => WorkcoreDemoData::creditNotes(),
+            'filters'     => [
+                'status' => request()->string('status')->toString() ?: '',
+            ],
+        ]);
     }
 
     public function create(): View
     {
-        return $this->placeholder(
-            __('Create credit note'),
-            __('Issue a credit note for an invoice.')
-        );
+        return view('default.panel.user.money.credit-notes.form', [
+            'creditNote' => null,
+            'items'      => WorkcoreDemoData::lineItemsSeed(),
+            'statuses'   => ['draft', 'issued', 'applied', 'void'],
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,18 +41,19 @@ class CreditNoteController extends CoreController
 
     public function show(string $creditNote): View
     {
-        return $this->placeholder(
-            __('Credit note detail'),
-            __('Details for credit note :note.', ['note' => $creditNote])
-        );
+        return view('default.panel.user.money.credit-notes.show', [
+            'creditNote' => WorkcoreDemoData::creditNotes()->firstWhere('number', $creditNote)
+                ?? WorkcoreDemoData::creditNotes()->first(),
+        ]);
     }
 
     public function edit(string $creditNote): View
     {
-        return $this->placeholder(
-            __('Edit credit note'),
-            __('Update credit note :note.', ['note' => $creditNote])
-        );
+        return view('default.panel.user.money.credit-notes.form', [
+            'creditNote' => WorkcoreDemoData::creditNotes()->firstWhere('number', $creditNote),
+            'items'      => WorkcoreDemoData::lineItemsSeed(),
+            'statuses'   => ['draft', 'issued', 'applied', 'void'],
+        ]);
     }
 
     public function update(Request $request, string $creditNote): RedirectResponse
@@ -75,4 +80,3 @@ class CreditNoteController extends CoreController
         ]);
     }
 }
-
