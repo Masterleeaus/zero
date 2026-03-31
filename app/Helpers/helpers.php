@@ -130,7 +130,7 @@ function formatCamelCase($input)
 function workcore_label(string $key, ?string $default = null): string
 {
     $normalized = Str::of($key)
-        ->replace(['.', '-'], ' ')
+        ->replace(['.', '-'], '_')
         ->snake()
         ->value();
     $labels = config('workcore.labels', []);
