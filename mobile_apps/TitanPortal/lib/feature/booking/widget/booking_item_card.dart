@@ -38,7 +38,7 @@ class BookingItemCard extends StatelessWidget {
               Row( mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Row(
                   children: [
-                    Text('${'booking'.tr}# ${bookingModel.readableId}', style: robotoBold.copyWith()),
+                    Text('${'service_no'.tr} ${bookingModel.readableId}', style: robotoBold.copyWith()),
                     if(bookingModel.isRepeatBooking == 1)Container(
                       decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.green),
                       padding: const EdgeInsets.all(2),

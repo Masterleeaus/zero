@@ -19,7 +19,7 @@ class BookingInfo extends StatelessWidget {
 
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start ,children: [
             Column( crossAxisAlignment: CrossAxisAlignment.start ,children: [
-              Text('${'booking'.tr} #${bookingDetails.readableId}',
+              Text('${'service_no'.tr} ${bookingDetails.readableId}',
                 style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge,
                     color: Theme.of(context).textTheme.bodyLarge!.color,decoration: TextDecoration.none),
               ),

@@ -252,7 +252,7 @@ class BookingTabBar extends StatelessWidget {
                   controller: tabController,
                   labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                   tabs: [
-                    Tab(child: Text('booking_details'.tr),),
+                    Tab(child: Text('service_details'.tr),),
                     Tab(child: Text('status'.tr),),
                   ],
                   onTap: (int? index) {

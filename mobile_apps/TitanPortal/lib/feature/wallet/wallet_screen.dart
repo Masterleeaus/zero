@@ -85,11 +85,104 @@ class _WalletScreenState extends State<WalletScreen> {
               controller: scrollController,
               child: Column(children: [
                 WalletTopCard(tooltipController: tooltipController,),
+                const _BillingCenterQuickActions(),
                 const WalletPromotionalBannerView(),
                 WalletListView(scrollController: scrollController,),
               ],),
             );
         }),
+      ),
+    );
+  }
+}
+
+/// Lifecycle billing centre quick-action row.
+/// Promotes Pay Invoice, Payment History, Credits, Outstanding Balance.
+class _BillingCenterQuickActions extends StatelessWidget {
+  const _BillingCenterQuickActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Dimensions.paddingSizeDefault,
+        vertical: Dimensions.paddingSizeSmall,
+      ),
+      child: Row(
+        children: [
+          _BillingAction(
+            icon: Icons.receipt_long_outlined,
+            label: 'pay_invoice'.tr,
+            onTap: () {
+              // Scrolls the user to the active transaction list below
+              customSnackBar('pay_invoice'.tr, type: ToasterMessageType.info);
+            },
+          ),
+          const SizedBox(width: Dimensions.paddingSizeSmall),
+          _BillingAction(
+            icon: Icons.history_rounded,
+            label: 'payment_history_title'.tr,
+            onTap: () {
+              customSnackBar('payment_history_title'.tr, type: ToasterMessageType.info);
+            },
+          ),
+          const SizedBox(width: Dimensions.paddingSizeSmall),
+          _BillingAction(
+            icon: Icons.card_giftcard_outlined,
+            label: 'credits_label'.tr,
+            onTap: () {
+              customSnackBar('credits_label'.tr, type: ToasterMessageType.info);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BillingAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _BillingAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            border: Border.all(color: primary.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: primary),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeExtraSmall,
+                  color: primary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

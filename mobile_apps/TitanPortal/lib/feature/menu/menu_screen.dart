@@ -24,16 +24,32 @@ class _MenuScreenState extends State<MenuScreen> {
     double ratio =  ResponsiveHelper.isTab(context) ? 1.1 : 1.2;
 
     final List<MenuModel> menuList = [
+      // ---- Lifecycle core actions ----
       MenuModel(icon: Images.profileIcon, title: 'profile'.tr, route: RouteHelper.getProfileRoute()),
       MenuModel(icon: Images.areaMenuIcon, title: 'my_properties'.tr, route: isLoggedIn ? RouteHelper.getAddressRoute('menu') : RouteHelper.getNotLoggedScreen(RouteHelper.address, "my_properties")),
-      MenuModel(icon: Images.bookingsIcon, title: configModel.content?.guestCheckout == 0 || isLoggedIn ? 'bookings'.tr : "track_booking".tr, route: !isLoggedIn && configModel.content?.guestCheckout == 1
-          ? RouteHelper.getTrackBookingRoute() : !isLoggedIn ? RouteHelper.getNotLoggedScreen("booking","my_bookings")
+      MenuModel(icon: Images.bookingsIcon, title: configModel.content?.guestCheckout == 0 || isLoggedIn ? 'my_services'.tr : "track_booking".tr, route: !isLoggedIn && configModel.content?.guestCheckout == 1
+          ? RouteHelper.getTrackBookingRoute() : !isLoggedIn ? RouteHelper.getNotLoggedScreen("booking","my_services")
           : RouteHelper.getBookingScreenRoute(true)
       ),
       MenuModel(icon: Images.favoriteProvider, title: 'preferred_cleaners'.tr, route: !isLoggedIn ? RouteHelper.getNotLoggedScreen(RouteHelper.favorite,"preferred_cleaners"): RouteHelper.getMyFavoriteScreen()),
       MenuModel(icon: Images.chatImage, title: 'messages'.tr, route: isLoggedIn ? RouteHelper.getInboxScreenRoute() : RouteHelper.getNotLoggedScreen(RouteHelper.chatInbox,"messages")),
-      MenuModel(icon: Images.helpIcon, title: 'report_issue'.tr, route: RouteHelper.getSupportRoute()),
+      MenuModel(icon: Images.helpIcon, title: 'report_issue'.tr, route: RouteHelper.getReportIssueRoute()),
+      MenuModel(icon: Images.starIcon, title: 'ask_titan'.tr, route: RouteHelper.getSupportRoute()),
 
+      if(configModel.content?.biddingStatus == 1)
+        MenuModel(icon: Images.customPostIcon, title: 'my_posts'.tr,
+            route: isLoggedIn ? RouteHelper.getMyPostScreen() : RouteHelper.getNotLoggedScreen(RouteHelper.myPost,"my_posts")
+        ),
+      if(configModel.content!.walletStatus != 0 && isLoggedIn)
+        MenuModel(icon: Images.walletMenu, title: 'payments'.tr, route: RouteHelper.getMyWalletScreen()),
+
+      // ---- Settings / account ----
+      MenuModel(icon: Images.translate, title: 'language'.tr, route: RouteHelper.getLanguageScreen('fromSettingsPage')),
+      MenuModel(icon: Images.settings, title: 'settings'.tr, route: RouteHelper.getSettingRoute()),
+      MenuModel(icon: Images.aboutUs, title: 'about_us'.tr, route: RouteHelper.getHtmlRoute('about_us')),
+      MenuModel(icon: Images.helpIcon, title: 'help_&_support'.tr, route: RouteHelper.getSupportRoute()),
+
+      // ---- Marketplace / promotional (demoted to end) ----
       MenuModel(icon: Images.offerMenu, title: 'offers'.tr, route: RouteHelper.getOffersRoute()),
       MenuModel(icon: Images.voucherIcon, title: 'vouchers'.tr, route: RouteHelper.getVoucherRoute(fromPage: 'menu')),
       if(configModel.content!.loyaltyPointStatus != 0 && isLoggedIn)
@@ -43,18 +59,7 @@ class _MenuScreenState extends State<MenuScreen> {
           title:'refer_and_earn'.tr, icon: Images.shareIcon, route: isLoggedIn ? RouteHelper.getReferAndEarnScreen() : RouteHelper.getNotLoggedScreen(RouteHelper.referAndEarn, "refer_and_earn"),
         ),
 
-      if(configModel.content?.biddingStatus == 1)
-        MenuModel(icon: Images.customPostIcon, title: 'my_posts'.tr,
-            route: isLoggedIn ? RouteHelper.getMyPostScreen() : RouteHelper.getNotLoggedScreen(RouteHelper.myPost,"my_posts")
-        ),
-      if(configModel.content!.walletStatus != 0 && isLoggedIn)
-        MenuModel(icon: Images.walletMenu, title: 'my_wallet'.tr, route: RouteHelper.getMyWalletScreen()),
-
-      MenuModel(icon: Images.translate, title: 'language'.tr, route: RouteHelper.getLanguageScreen('fromSettingsPage')),
-      MenuModel(icon: Images.settings, title: 'settings'.tr, route: RouteHelper.getSettingRoute()),
-      MenuModel(icon: Images.aboutUs, title: 'about_us'.tr, route: RouteHelper.getHtmlRoute('about_us')),
-      MenuModel(icon: Images.helpIcon, title: 'help_&_support'.tr, route: RouteHelper.getSupportRoute()),
-
+      // ---- Legal ----
       if(configModel.content?.providerSelfRegistration == 1)
         MenuModel(icon: Images.providerImage, title: 'become_a_provider'.tr, route: GetPlatform.isWeb ? '${AppConstants.baseUrl}/provider/auth/sign-up' : RouteHelper.getProviderWebView()),
       MenuModel(icon: Images.privacyPolicyIcon, title: 'privacy_policy'.tr, route: RouteHelper.getHtmlRoute('privacy-policy')),
