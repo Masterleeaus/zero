@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class ServiceIssueController extends Controller
 {
+    private const DIRECTION_AGENT = 'agent';
+    private const DIRECTION_USER = 'user';
+    private const STATUS_RESOLVED = 'resolved';
+
     public function __construct(private SupportLifecycleService $lifecycle) {}
 
     public function index(Request $request): JsonResponse
@@ -86,7 +90,7 @@ class ServiceIssueController extends Controller
 
         $issue->fill($data);
 
-        if (array_key_exists('status', $data) && $data['status'] === 'resolved') {
+        if (array_key_exists('status', $data) && $data['status'] === self::STATUS_RESOLVED) {
             $issue->resolved_at = now();
         }
 
@@ -107,7 +111,9 @@ class ServiceIssueController extends Controller
         $message = $this->storeMessage($request, $issue, false);
 
         $user = $request->user();
-        $direction = $user && method_exists($user, 'isAdmin') && $user->isAdmin() ? 'agent' : 'user';
+        $direction = $user && method_exists($user, 'isAdmin') && $user->isAdmin()
+            ? self::DIRECTION_AGENT
+            : self::DIRECTION_USER;
 
         $this->lifecycle->processReplies($issue, $direction);
 
