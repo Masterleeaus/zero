@@ -25,6 +25,54 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('app.dashb
             Route::delete('zones/{zone}', [\App\Http\Controllers\Core\Team\ZoneController::class, 'destroy'])
                 ->name('zones.destroy');
 
+            // Service area hierarchy: regions
+            Route::get('service-area-regions', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'index'])
+                ->name('service-area-regions.index');
+            Route::get('service-area-regions/create', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'create'])
+                ->name('service-area-regions.create');
+            Route::post('service-area-regions', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'store'])
+                ->name('service-area-regions.store');
+            Route::get('service-area-regions/{service_area_region}', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'show'])
+                ->name('service-area-regions.show');
+            Route::get('service-area-regions/{service_area_region}/edit', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'edit'])
+                ->name('service-area-regions.edit');
+            Route::put('service-area-regions/{service_area_region}', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'update'])
+                ->name('service-area-regions.update');
+            Route::delete('service-area-regions/{service_area_region}', [\App\Http\Controllers\Core\Team\ServiceAreaRegionController::class, 'destroy'])
+                ->name('service-area-regions.destroy');
+
+            // Service area hierarchy: districts
+            Route::get('service-area-districts', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'index'])
+                ->name('service-area-districts.index');
+            Route::get('service-area-districts/create', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'create'])
+                ->name('service-area-districts.create');
+            Route::post('service-area-districts', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'store'])
+                ->name('service-area-districts.store');
+            Route::get('service-area-districts/{service_area_district}', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'show'])
+                ->name('service-area-districts.show');
+            Route::get('service-area-districts/{service_area_district}/edit', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'edit'])
+                ->name('service-area-districts.edit');
+            Route::put('service-area-districts/{service_area_district}', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'update'])
+                ->name('service-area-districts.update');
+            Route::delete('service-area-districts/{service_area_district}', [\App\Http\Controllers\Core\Team\ServiceAreaDistrictController::class, 'destroy'])
+                ->name('service-area-districts.destroy');
+
+            // Service area hierarchy: branches
+            Route::get('service-area-branches', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'index'])
+                ->name('service-area-branches.index');
+            Route::get('service-area-branches/create', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'create'])
+                ->name('service-area-branches.create');
+            Route::post('service-area-branches', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'store'])
+                ->name('service-area-branches.store');
+            Route::get('service-area-branches/{service_area_branch}', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'show'])
+                ->name('service-area-branches.show');
+            Route::get('service-area-branches/{service_area_branch}/edit', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'edit'])
+                ->name('service-area-branches.edit');
+            Route::put('service-area-branches/{service_area_branch}', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'update'])
+                ->name('service-area-branches.update');
+            Route::delete('service-area-branches/{service_area_branch}', [\App\Http\Controllers\Core\Team\ServiceAreaBranchController::class, 'destroy'])
+                ->name('service-area-branches.destroy');
+
             Route::get('cleaners/{user}', [\App\Http\Controllers\Core\Team\CleanerProfileController::class, 'show'])
                 ->name('cleaners.show');
             Route::get('cleaners/{user}/edit', [\App\Http\Controllers\Core\Team\CleanerProfileController::class, 'edit'])
