@@ -6,6 +6,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,7 +40,7 @@ class Branch extends Model
         return $this->hasMany(Territory::class);
     }
 
-    public function scopeForSelect($query)
+    public function scopeForSelect(Builder $query): Builder
     {
         return $query->orderBy('name');
     }
