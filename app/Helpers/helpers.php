@@ -158,6 +158,13 @@ function workcore_label(string $key, ?string $default = null): string
     return $default ?? Str::title(str_replace(['_', '-'], ' ', $key));
 }
 
+function workcore_feature(string $key): bool
+{
+    $features = config('workcore.features', []);
+
+    return (bool) ($features[$key] ?? false);
+}
+
 function checkCouponInRequest($code = null)
 {
     if ($code !== null) {

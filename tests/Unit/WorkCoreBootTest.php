@@ -27,4 +27,13 @@ class WorkCoreBootTest extends TestCase
     {
         $this->assertSame('Unknown Key', workcore_label('unknown-key'));
     }
+
+    public function test_workcore_feature_uses_config_flags(): void
+    {
+        $this->assertTrue(workcore_feature('credit_notes'));
+
+        config(['workcore.features.credit_notes' => false]);
+
+        $this->assertFalse(workcore_feature('credit_notes'));
+    }
 }

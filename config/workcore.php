@@ -14,5 +14,6 @@ return [
         'knowledgebase' => false,
         'noticeboard'   => false,
         'teamchat'      => false,
+        'credit_notes'  => true,
     ],
 ];
