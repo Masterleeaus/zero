@@ -22,6 +22,7 @@ class PaymentController extends CoreController
             ->with(['invoice', 'invoice.customer'])
             ->latest('paid_at')
             ->latest()
+            ->paginate(25)
             ->paginate(15)
             ->withQueryString();
 

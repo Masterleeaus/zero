@@ -10,6 +10,7 @@ use App\Models\Crm\Enquiry;
 use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
 use App\Models\User;
+use App\Models\Crm\Enquiry;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

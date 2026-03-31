@@ -25,7 +25,7 @@ class CustomerController extends CoreController
             });
         }
 
-        $customers = $query->latest()->paginate(10)->withQueryString();
+        $customers = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.crm.customers.index', [
             'customers' => $customers,

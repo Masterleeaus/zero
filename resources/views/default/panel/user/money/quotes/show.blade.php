@@ -148,6 +148,15 @@
 
         <x-card>
             <div class="font-semibold mb-3">{{ __('Create Invoice from Quote') }}</div>
+            @if($quote->status === 'converted')
+                <p class="text-slate-500 text-sm mb-2">{{ __('This quote has been converted to an invoice.') }}</p>
+                @foreach($quote->invoices as $convertedInvoice)
+                    <x-button href="{{ route('dashboard.money.invoices.show', $convertedInvoice) }}" variant="ghost">
+                        <x-tabler-file-invoice class="size-4" />
+                        {{ __('View Invoice') }} {{ $convertedInvoice->invoice_number }}
+                    </x-button>
+                @endforeach
+            @elseif(in_array($quote->status, ['accepted', 'approved', 'sent']) && $quote->items->isNotEmpty())
             @if($quote->latestInvoice)
                 <x-button href="{{ route('dashboard.money.invoices.show', $quote->latestInvoice) }}">
                     <x-tabler-file-invoice class="size-4" />

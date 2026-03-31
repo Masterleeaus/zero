@@ -36,7 +36,7 @@ class ServiceJobController extends CoreController
             });
         }
 
-        $jobs = $query->latest()->paginate(10)->withQueryString();
+        $jobs = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.work.jobs.index', [
             'jobs'    => $jobs,

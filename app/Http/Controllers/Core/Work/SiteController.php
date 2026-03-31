@@ -28,7 +28,7 @@ class SiteController extends CoreController
             });
         }
 
-        $sites = $query->latest()->paginate(10)->withQueryString();
+        $sites = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.work.sites.index', [
             'sites'  => $sites,

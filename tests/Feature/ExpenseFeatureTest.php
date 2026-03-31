@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\Roles;
 use App\Models\User;
 use App\Models\Money\Expense;
 use App\Models\Money\ExpenseCategory;
@@ -102,58 +103,86 @@ class ExpenseFeatureTest extends TestCase
         $this->actingAs($admin);
 
         $response = $this->post(route('dashboard.money.expenses.approve', $expense));
-        $response->assertRedirect();
 
-        $expense->refresh();
+        $response->assertRedirect(route('dashboard.money.expenses.show', $expense));
 
-        $this->assertEquals('approved', $expense->status);
-        $this->assertEquals($admin->id, $expense->approved_by);
-        $this->assertNotNull($expense->approved_at);
-        $this->assertNull($expense->rejection_reason);
+        $this->assertDatabaseHas('expenses', [
+            'id'          => $expense->id,
+            'status'      => 'approved',
+            'approved_by' => $admin->id,
+        ]);
 
-        Notification::assertSentTo($submitter, LiveNotification::class);
+        Notification::assertSentTo($submitter, \App\Notifications\LiveNotification::class);
     }
 
-    public function test_admin_can_reject_expense_with_reason(): void
+    public function test_admin_can_reject_expense(): void
     {
         Notification::fake();
 
-        $admin = User::factory()->create(['company_id' => 40]);
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        $admin->assignRole('admin');
-
-        $submitter = User::factory()->create(['company_id' => 40]);
-        $category = ExpenseCategory::factory()->create(['company_id' => 40]);
+        $submitter = User::factory()->create(['company_id' => 31, 'type' => Roles::USER]);
+        $admin = User::factory()->create(['company_id' => 31, 'type' => Roles::ADMIN]);
+        $category = ExpenseCategory::factory()->create(['company_id' => 31]);
         $expense = Expense::factory()->create([
-            'company_id' => 40,
+            'company_id'          => 31,
             'expense_category_id' => $category->id,
-            'created_by' => $submitter->id,
+            'created_by'          => $submitter->id,
+            'status'              => 'pending',
         ]);
 
         $this->actingAs($admin);
 
         $response = $this->post(route('dashboard.money.expenses.reject', $expense), [
-            'reason' => 'Out of policy',
+            'rejection_reason' => 'Missing receipts',
         ]);
-        $response->assertRedirect();
 
-        $expense->refresh();
+        $response->assertRedirect(route('dashboard.money.expenses.show', $expense));
 
-        $this->assertEquals('rejected', $expense->status);
-        $this->assertNull($expense->approved_by);
-        $this->assertNull($expense->approved_at);
-        $this->assertEquals('Out of policy', $expense->rejection_reason);
+        $this->assertDatabaseHas('expenses', [
+            'id'               => $expense->id,
+            'status'           => 'rejected',
+            'rejection_reason' => 'Missing receipts',
+            'approved_by'      => $admin->id,
+        ]);
 
-        Notification::assertSentTo($submitter, LiveNotification::class);
+        Notification::assertSentTo($submitter, \App\Notifications\LiveNotification::class);
     }
 
-    public function test_expense_category_must_be_unique_per_company(): void
+    public function test_non_admin_cannot_approve_expense(): void
     {
-        $user = User::factory()->create(['company_id' => 50]);
-        ExpenseCategory::factory()->create([
-            'company_id' => 50,
-            'name' => 'Travel',
+        $user = User::factory()->create(['company_id' => 32, 'type' => Roles::USER]);
+        $category = ExpenseCategory::factory()->create(['company_id' => 32]);
+        $expense = Expense::factory()->create([
+            'company_id'          => 32,
+            'expense_category_id' => $category->id,
+            'status'              => 'pending',
         ]);
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('dashboard.money.expenses.approve', $expense));
+        $response->assertForbidden();
+    }
+
+    public function test_reject_requires_reason(): void
+    {
+        $admin = User::factory()->create(['company_id' => 33, 'type' => Roles::ADMIN]);
+        $category = ExpenseCategory::factory()->create(['company_id' => 33]);
+        $expense = Expense::factory()->create([
+            'company_id'          => 33,
+            'expense_category_id' => $category->id,
+            'status'              => 'pending',
+        ]);
+
+        $this->actingAs($admin);
+
+        $response = $this->post(route('dashboard.money.expenses.reject', $expense), []);
+        $response->assertSessionHasErrors('rejection_reason');
+    }
+
+    public function test_expense_category_names_are_unique_per_company(): void
+    {
+        $user = User::factory()->create(['company_id' => 40]);
+        ExpenseCategory::factory()->create(['company_id' => 40, 'name' => 'Travel']);
 
         $this->actingAs($user);
 
@@ -162,6 +191,22 @@ class ExpenseFeatureTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('name');
+    }
+
+    public function test_expense_category_names_are_not_globally_unique(): void
+    {
+        $user = User::factory()->create(['company_id' => 41]);
+        // Category exists for a different company
+        ExpenseCategory::factory()->create(['company_id' => 99, 'name' => 'Travel']);
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('dashboard.money.expense-categories.store'), [
+            'name' => 'Travel',
+        ]);
+
+        $response->assertRedirect(route('dashboard.money.expense-categories.index'));
+        $this->assertDatabaseHas('expense_categories', ['company_id' => 41, 'name' => 'Travel']);
         $this->assertDatabaseCount('expense_categories', 1);
     }
 

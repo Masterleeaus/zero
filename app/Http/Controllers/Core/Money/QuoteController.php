@@ -34,7 +34,7 @@ class QuoteController extends CoreController
             });
         }
 
-        $quotes = $query->latest('issue_date')->latest()->paginate(10)->withQueryString();
+        $quotes = $query->latest('issue_date')->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.money.quotes.index', [
             'quotes'  => $quotes,
@@ -164,8 +164,15 @@ class QuoteController extends CoreController
 
     public function convertToInvoice(Request $request, Quote $quote): RedirectResponse
     {
-        $this->authorize('convert', $quote);
+        $this->authorize('update', $quote);
 
+        if (! in_array($quote->status, ['accepted', 'approved', 'sent'], true)) {
+            return back()->withErrors(__('Quote must be accepted/approved or sent before invoicing.'));
+        }
+
+        $quote->loadMissing('items');
+
+        if ($quote->items->isEmpty()) {
         if (! in_array($quote->status, ['approved', 'sent'], true)) {
             return back()->withErrors(__('Quote must be approved or sent before invoicing.'));
         }
@@ -207,6 +214,17 @@ class QuoteController extends CoreController
                     'sort_order' => (int) ($item->sort_order ?? 0),
                 ]);
             }
+
+            $invoice->recomputeTotalsFromItems();
+            $invoice->refresh();
+            $invoice->update(['balance' => $invoice->total]);
+
+            if (! $invoice->invoice_number) {
+                $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);
+                $invoice->save();
+            }
+
+            $quote->update(['status' => 'converted']);
 
             $quote->update(['status' => Quote::STATUS_CONVERTED]);
 

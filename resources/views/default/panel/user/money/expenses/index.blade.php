@@ -29,6 +29,7 @@
                     <th>{{ __('Category') }}</th>
                     <th>{{ __('Status') }}</th>
                     <th>{{ __('Date') }}</th>
+                    <th>{{ __('Status') }}</th>
                     <th class="text-end">{{ __('Amount') }}</th>
                     <th class="text-end">{{ __('Actions') }}</th>
                 </tr>
@@ -36,7 +37,7 @@
             <x-slot:body>
                 @forelse($expenses as $expense)
                     <tr>
-                        <td>{{ $expense->title }}</td>
+                        <td><a href="{{ route('dashboard.money.expenses.show', $expense) }}" class="text-blue-600 hover:underline">{{ $expense->title }}</a></td>
                         <td>{{ $expense->category?->name ?? __('Uncategorised') }}</td>
                         <td>
                             @php
@@ -49,6 +50,15 @@
                             <x-badge variant="{{ $variant }}">{{ ucfirst($expense->status ?? '') }}</x-badge>
                         </td>
                         <td>{{ $expense->expense_date?->format('Y-m-d') }}</td>
+                        <td>
+                            @if($expense->status === 'approved')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">{{ __('Approved') }}</span>
+                            @elseif($expense->status === 'rejected')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">{{ __('Rejected') }}</span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Pending') }}</span>
+                            @endif
+                        </td>
                         <td class="text-end">{{ number_format($expense->amount, 2) }}</td>
                         <td class="text-end">
                             <x-button size="sm" variant="ghost" href="{{ route('dashboard.money.expenses.show', $expense) }}">{{ __('View') }}</x-button>
@@ -62,7 +72,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-slate-500">{{ __('No expenses found') }}</td>
+                        <td colspan="6" class="text-center text-slate-500">{{ __('No expenses found') }}</td>
                     </tr>
                 @endforelse
             </x-slot:body>
