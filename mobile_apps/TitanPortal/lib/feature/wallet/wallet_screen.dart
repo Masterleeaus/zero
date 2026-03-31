@@ -43,7 +43,7 @@ class _WalletScreenState extends State<WalletScreen> {
     return Scaffold(
       endDrawer : ResponsiveHelper.isDesktop(context) ? const MenuDrawer() : null,
 
-      appBar: CustomAppBar(title: 'my_wallet'.tr, actionWidget: InkWell(
+      appBar: CustomAppBar(title: 'payments_center'.tr, actionWidget: InkWell(
         onTap: () {
           showGeneralDialog(
             context: context, barrierDismissible: true, transitionDuration: const Duration(milliseconds: 500),

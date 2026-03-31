@@ -33,7 +33,7 @@ class   ServiceRequestSectionMenu extends SliverPersistentHeaderDelegate{
               children: [
 
                 const SizedBox(),
-                Text('my_bookings'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),),
+                Text('my_services'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),),
 
 
                 Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [

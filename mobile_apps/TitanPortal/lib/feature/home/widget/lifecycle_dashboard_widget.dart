@@ -1,9 +1,10 @@
 import 'package:demandium/utils/core_export.dart';
 import 'package:get/get.dart';
 
-/// Phase 3 — Lifecycle mission control dashboard widget
+/// Pass 2 — Lifecycle mission control dashboard widget.
 /// Displayed at the top of the Home screen for logged-in customers.
-/// Shows upcoming service summary and quick action buttons.
+/// Shows lifecycle status cards (upcoming service, payment, proof, support)
+/// and extended quick action chips.
 class LifecycleDashboardWidget extends StatelessWidget {
   const LifecycleDashboardWidget({super.key});
 
@@ -24,7 +25,9 @@ class LifecycleDashboardWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _QuickActionsRow(),
+                const _LifecycleStatusRow(),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+                const _QuickActionsRow(),
                 const SizedBox(height: Dimensions.paddingSizeSmall),
               ],
             ),
@@ -35,7 +38,148 @@ class LifecycleDashboardWidget extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Lifecycle status summary cards row
+// ---------------------------------------------------------------------------
+
+class _LifecycleStatusRow extends StatelessWidget {
+  const _LifecycleStatusRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ServiceBookingController>(builder: (ctrl) {
+      final BookingModel? nextService = _resolveNextService(ctrl);
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _LifecycleCard(
+              icon: Icons.cleaning_services_rounded,
+              title: 'upcoming_service_card'.tr,
+              subtitle: nextService != null
+                  ? nextService.readableId ?? nextService.id ?? ''
+                  : 'no_upcoming_service'.tr,
+              isEmpty: nextService == null,
+              onTap: () => Get.toNamed(RouteHelper.getBookingScreenRoute(true)),
+            ),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            _LifecycleCard(
+              icon: Icons.receipt_long_outlined,
+              title: 'outstanding_payment_label'.tr,
+              subtitle: 'no_outstanding_payment'.tr,
+              isEmpty: true,
+              onTap: () => Get.toNamed(RouteHelper.getMyWalletScreen()),
+            ),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            _LifecycleCard(
+              icon: Icons.verified_outlined,
+              title: 'recent_proof_label'.tr,
+              subtitle: 'no_recent_proof'.tr,
+              isEmpty: true,
+              onTap: () => Get.toNamed(RouteHelper.getBookingScreenRoute(true)),
+            ),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            _LifecycleCard(
+              icon: Icons.support_agent_outlined,
+              title: 'active_support_label'.tr,
+              subtitle: 'no_active_support'.tr,
+              isEmpty: true,
+              onTap: () => Get.toNamed(RouteHelper.getInboxScreenRoute()),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  BookingModel? _resolveNextService(ServiceBookingController ctrl) {
+    if (ctrl.bookingList == null || ctrl.bookingList!.isEmpty) return null;
+    try {
+      return ctrl.bookingList!.firstWhere(
+        (b) => b.bookingStatus == 'accepted' || b.bookingStatus == 'ongoing',
+        orElse: () => ctrl.bookingList!.first,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+class _LifecycleCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isEmpty;
+  final VoidCallback onTap;
+
+  const _LifecycleCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isEmpty,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+        decoration: BoxDecoration(
+          color: isEmpty
+              ? Theme.of(context).cardColor
+              : primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          border: Border.all(
+            color: isEmpty
+                ? Theme.of(context).dividerColor
+                : primary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18,
+              color: isEmpty ? Theme.of(context).hintColor : primary,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeExtraSmall,
+                color: isEmpty ? Theme.of(context).hintColor : primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeExtraSmall,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Quick actions chips row
+// ---------------------------------------------------------------------------
+
 class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -61,7 +205,7 @@ class _QuickActionsRow extends StatelessWidget {
               const SizedBox(width: Dimensions.paddingSizeSmall),
               _QuickActionChip(
                 icon: Icons.calendar_today_rounded,
-                label: 'my_bookings'.tr,
+                label: 'view_services'.tr,
                 onTap: () {
                   if (Get.find<AuthController>().isLoggedIn()) {
                     Get.toNamed(RouteHelper.getBookingScreenRoute(true));
@@ -73,6 +217,12 @@ class _QuickActionsRow extends StatelessWidget {
                 icon: Icons.payment_rounded,
                 label: 'pay_invoice'.tr,
                 onTap: () => Get.toNamed(RouteHelper.getMyWalletScreen()),
+              ),
+              const SizedBox(width: Dimensions.paddingSizeSmall),
+              _QuickActionChip(
+                icon: Icons.home_work_outlined,
+                label: 'manage_properties'.tr,
+                onTap: () => Get.toNamed(RouteHelper.getAddressRoute('menu')),
               ),
               const SizedBox(width: Dimensions.paddingSizeSmall),
               _QuickActionChip(

@@ -100,7 +100,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
       child: Scaffold(
         endDrawer:ResponsiveHelper.isDesktop(context) ? const MenuDrawer():null,
         appBar: CustomAppBar(
-          title: "booking_details".tr,
+          title: "service_details".tr,
           onBackPressed: () {
             if(widget.fromPage == 'fromNotification'){
               Get.offAllNamed(RouteHelper.getInitialRoute());
