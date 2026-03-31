@@ -14,7 +14,7 @@ class CustomerController extends CoreController
 {
     public function index(Request $request): View
     {
-        $query = Customer::query();
+        $query = Customer::query()->with('enquiries');
 
         if ($search = $request->string('q')->trim()->toString()) {
             $query->where(static function ($builder) use ($search) {

@@ -14,7 +14,7 @@ class SiteController extends CoreController
 {
     public function index(Request $request): View
     {
-        $query = Site::query();
+        $query = Site::query()->with('jobs');
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);

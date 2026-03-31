@@ -19,7 +19,7 @@ class ServiceJobController extends CoreController
 
     public function index(Request $request): View
     {
-        $query = ServiceJob::query()->with(['site', 'customer']);
+        $query = ServiceJob::query()->with(['site', 'customer', 'assignedUser', 'quote', 'agreement']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);

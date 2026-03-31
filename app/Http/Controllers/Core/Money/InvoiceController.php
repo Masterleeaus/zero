@@ -20,7 +20,7 @@ class InvoiceController extends CoreController
     {
         $this->authorize('viewAny', Invoice::class);
 
-        $query = Invoice::query()->with(['customer', 'quote']);
+        $query = Invoice::query()->with(['customer', 'quote', 'items', 'payments']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
