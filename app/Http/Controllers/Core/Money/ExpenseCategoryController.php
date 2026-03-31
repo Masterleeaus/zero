@@ -77,6 +77,8 @@ class ExpenseCategoryController extends CoreController
             'description' => ['nullable', 'string'],
         ]);
 
+        $expenseCategory->update($data);
+
         return redirect()->route('dashboard.money.expense-categories.index')
             ->with('message', __('Category updated'));
     }
