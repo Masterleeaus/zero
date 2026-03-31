@@ -34,4 +34,3 @@
         </x-table>
     </div>
 @endsection
-

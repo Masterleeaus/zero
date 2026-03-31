@@ -33,17 +33,14 @@
             </x-slot:head>
             <x-slot:body>
                 @foreach($creditNotes as $note)
-                    @if(empty($filters['status']) || $filters['status'] === $note['status'])
-                        <tr>
-                            <td class="font-semibold">{{ $note['number'] }}</td>
-                            <td>{{ $note['customer'] }}</td>
-                            <td><x-badge variant="info">{{ ucfirst($note['status']) }}</x-badge></td>
-                            <td class="text-end">${{ number_format($note['total'], 2) }}</td>
-                        </tr>
-                    @endif
+                    <tr>
+                        <td class="font-semibold">{{ $note['number'] }}</td>
+                        <td>{{ $note['customer'] }}</td>
+                        <td><x-badge variant="info">{{ ucfirst($note['status']) }}</x-badge></td>
+                        <td class="text-end">${{ number_format($note['total'], 2) }}</td>
+                    </tr>
                 @endforeach
             </x-slot:body>
         </x-table>
     </div>
 @endsection
-

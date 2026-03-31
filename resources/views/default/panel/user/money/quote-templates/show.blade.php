@@ -16,4 +16,3 @@
         </x-card>
     </div>
 @endsection
-

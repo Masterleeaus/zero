@@ -8,10 +8,6 @@
                 <h1 class="text-2xl font-semibold">{{ __('Pipeline') }}</h1>
             </div>
             <div class="flex gap-2">
-                <x-button href="{{ route('dashboard.crm.deals.kanban') }}" variant="ghost">
-                    <x-tabler-layout-board class="size-4" />
-                    {{ __('Board') }}
-                </x-button>
                 <x-button href="{{ route('dashboard.crm.deals.create') }}">
                     <x-tabler-plus class="size-4" />
                     {{ __('New Deal') }}
@@ -75,4 +71,3 @@
         </div>
     </div>
 @endsection
-

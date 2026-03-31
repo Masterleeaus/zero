@@ -28,4 +28,3 @@
         </x-card>
     </div>
 @endsection
-

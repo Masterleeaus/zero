@@ -14,10 +14,17 @@ class CreditNoteController extends CoreController
 {
     public function index(): View
     {
+        $status = request()->string('status')->toString();
+        $notes = WorkcoreDemoData::creditNotes();
+
+        if ($status) {
+            $notes = $notes->where('status', $status);
+        }
+
         return view('default.panel.user.money.credit-notes.index', [
-            'creditNotes' => WorkcoreDemoData::creditNotes(),
+            'creditNotes' => $notes,
             'filters'     => [
-                'status' => request()->string('status')->toString() ?: '',
+                'status' => $status ?: '',
             ],
         ]);
     }

@@ -19,7 +19,7 @@
                     <x-input name="currency" label="{{ __('Currency') }}" value="{{ $account['currency'] ?? 'USD' }}" />
                 </div>
                 <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-                    <input type="checkbox" class="form-checkbox" {{ ($account['default'] ?? false) ? 'checked' : '' }}>
+                    <input type="checkbox" name="default" class="form-checkbox" {{ ($account['default'] ?? false) ? 'checked' : '' }}>
                     {{ __('Set as default payout account') }}
                 </label>
 
@@ -36,4 +36,3 @@
         </x-card>
     </div>
 @endsection
-

@@ -10,7 +10,7 @@
     $seedItems = collect(old($name, $items))
         ->sortBy('sort_order')
         ->values()
-        ->map(static function ($item) {
+        ->map(function ($item) {
             return [
                 'key'         => $item['id'] ?? (string) Str::uuid(),
                 'description' => $item['description'] ?? '',
@@ -120,10 +120,6 @@ SCRIPT;
     @endphp
 
     @push('script')
-        {!! $lineItemEditorScript !!}
-    @endpush
-
-    @push('scripts')
         {!! $lineItemEditorScript !!}
     @endpush
 @endonce

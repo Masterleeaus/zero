@@ -15,7 +15,7 @@
                 <x-input name="name" label="{{ __('Name') }}" value="{{ $tax['name'] ?? '' }}" />
                 <x-input name="rate" type="number" step="0.01" label="{{ __('Rate (%)') }}" value="{{ $tax['rate'] ?? '' }}" />
                 <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-                    <input type="checkbox" class="form-checkbox" {{ ($tax['default'] ?? false) ? 'checked' : '' }}>
+                    <input type="checkbox" name="default" class="form-checkbox" {{ ($tax['default'] ?? false) ? 'checked' : '' }}>
                     {{ __('Make default tax') }}
                 </label>
 
@@ -32,4 +32,3 @@
         </x-card>
     </div>
 @endsection
-

@@ -37,4 +37,3 @@
         </x-card>
     </div>
 @endsection
-
