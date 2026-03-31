@@ -17,17 +17,31 @@
                 <tr>
                     <th>{{ __('Name') }}</th>
                     <th>{{ __('Code') }}</th>
+                    <th>{{ __('Type') }}</th>
+                    <th>{{ __('Branch') }}</th>
                     <th>{{ __('Sites') }}</th>
+                    <th></th>
                 </tr>
             </x-slot:head>
             <x-slot:body>
-                @foreach($zones as $zone)
+                @forelse($zones as $zone)
                     <tr>
-                        <td class="font-semibold">{{ $zone['name'] }}</td>
-                        <td>{{ $zone['code'] }}</td>
-                        <td>{{ $zone['sites'] }}</td>
+                        <td class="font-semibold">
+                            <a href="{{ route('dashboard.team.zones.show', $zone) }}" class="hover:underline">{{ $zone->name }}</a>
+                        </td>
+                        <td>{{ $zone->code ?? '—' }}</td>
+                        <td>{{ $zone->type ? ucfirst($zone->type) : '—' }}</td>
+                        <td>{{ $zone->branch?->name ?? '—' }}</td>
+                        <td>{{ $zone->sites_count }}</td>
+                        <td>
+                            <a href="{{ route('dashboard.team.zones.edit', $zone) }}" class="text-sm text-slate-500 hover:underline">{{ __('Edit') }}</a>
+                        </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center text-slate-400 py-6">{{ __('No zones yet.') }}</td>
+                    </tr>
+                @endforelse
             </x-slot:body>
         </x-table>
     </div>

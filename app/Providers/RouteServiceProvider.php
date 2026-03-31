@@ -13,6 +13,7 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
 use App\Models\Money\Payment;
 use App\Models\Work\Checklist;
+use App\Models\Work\ServiceArea;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -79,6 +80,22 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('case', static function (string|int $value) {
             return RewindCase::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('zone', static function (string|int $value) {
+            return ServiceArea::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_region', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaRegion::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_district', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaDistrict::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_branch', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaBranch::query()->whereKey($value)->firstOrFail();
         });
     }
 
