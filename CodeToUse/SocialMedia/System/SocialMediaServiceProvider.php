@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 
 class SocialMediaServiceProvider extends ServiceProvider implements UninstallExtensionServiceProviderInterface
 {
+
     public function register(): void
     {
         $this->registerConfig();
