@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Core\Money;
 
+use App\Actions\Notify;
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Money\Expense;
 use App\Models\Money\ExpenseCategory;
@@ -22,7 +23,7 @@ class ExpenseController extends CoreController
             ->with('category')
             ->betweenDates($request->get('start_date'), $request->get('end_date'))
             ->latest('expense_date')
-            ->paginate(20)
+            ->paginate(25)
             ->withQueryString();
 
         $categories = $this->categories($companyId);
@@ -54,6 +55,68 @@ class ExpenseController extends CoreController
 
         return redirect()->route('dashboard.money.expenses.index')
             ->with('message', __('Expense created'));
+    }
+
+    public function show(Request $request, Expense $expense): View
+    {
+        abort_if($expense->company_id !== $request->user()->company_id, 403);
+
+        $expense->load(['category', 'createdBy', 'approvedBy']);
+
+        return view('default.panel.user.money.expenses.show', compact('expense'));
+    }
+
+    public function approve(Request $request, Expense $expense): RedirectResponse
+    {
+        abort_if($expense->company_id !== $request->user()->company_id, 403);
+        abort_unless($request->user()->isAdmin(), 403);
+
+        $expense->update([
+            'status'      => 'approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+        ]);
+
+        if ($expense->created_by && $expense->created_by !== $request->user()->id) {
+            Notify::to(
+                $expense->created_by,
+                __('Expense Approved'),
+                __('Your expense ":title" has been approved.', ['title' => $expense->title]),
+                route('dashboard.money.expenses.show', $expense)
+            );
+        }
+
+        return redirect()->route('dashboard.money.expenses.show', $expense)
+            ->with('message', __('Expense approved'));
+    }
+
+    public function reject(Request $request, Expense $expense): RedirectResponse
+    {
+        abort_if($expense->company_id !== $request->user()->company_id, 403);
+        abort_unless($request->user()->isAdmin(), 403);
+
+        $data = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $expense->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $data['rejection_reason'],
+            'approved_by'      => $request->user()->id,
+            'approved_at'      => now(),
+        ]);
+
+        if ($expense->created_by && $expense->created_by !== $request->user()->id) {
+            Notify::to(
+                $expense->created_by,
+                __('Expense Rejected'),
+                __('Your expense ":title" has been rejected.', ['title' => $expense->title]),
+                route('dashboard.money.expenses.show', $expense)
+            );
+        }
+
+        return redirect()->route('dashboard.money.expenses.show', $expense)
+            ->with('message', __('Expense rejected'));
     }
 
     public function edit(Request $request, Expense $expense): View

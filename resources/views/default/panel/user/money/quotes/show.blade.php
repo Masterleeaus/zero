@@ -148,7 +148,15 @@
 
         <x-card>
             <div class="font-semibold mb-3">{{ __('Create Invoice from Quote') }}</div>
-            @if($quote->status === 'accepted')
+            @if($quote->status === 'converted')
+                <p class="text-slate-500 text-sm mb-2">{{ __('This quote has been converted to an invoice.') }}</p>
+                @foreach($quote->invoices as $convertedInvoice)
+                    <x-button href="{{ route('dashboard.money.invoices.show', $convertedInvoice) }}" variant="ghost">
+                        <x-tabler-file-invoice class="size-4" />
+                        {{ __('View Invoice') }} {{ $convertedInvoice->invoice_number }}
+                    </x-button>
+                @endforeach
+            @elseif(in_array($quote->status, ['accepted', 'approved', 'sent']) && $quote->items->isNotEmpty())
                 <form method="post" action="{{ route('dashboard.money.quotes.convert-invoice', $quote) }}">
                     @csrf
                     <x-button type="submit">
@@ -157,7 +165,7 @@
                     </x-button>
                 </form>
             @else
-                <p class="text-slate-500 text-sm">{{ __('Quote must be accepted before invoicing.') }}</p>
+                <p class="text-slate-500 text-sm">{{ __('Quote must be accepted/approved or sent with at least one line item before invoicing.') }}</p>
             @endif
         </x-card>
     </div>

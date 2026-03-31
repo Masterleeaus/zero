@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity'])
+const DASHBOARD_CRM_THROTTLE_LIMIT = 'throttle:120,1';
+
+Route::middleware(['auth', 'updateUserActivity', DASHBOARD_CRM_THROTTLE_LIMIT])
     ->prefix('dashboard')
     ->as('dashboard.')
     ->group(static function () {

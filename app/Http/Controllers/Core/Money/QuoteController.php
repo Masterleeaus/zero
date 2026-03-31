@@ -20,7 +20,7 @@ class QuoteController extends CoreController
     {
         $this->authorize('viewAny', Quote::class);
 
-        $query = Quote::query()->with('customer');
+        $query = Quote::query()->with(['customer', 'items']);
 
         if ($status = $request->string('status')->toString()) {
             $query->where('status', $status);
@@ -33,7 +33,7 @@ class QuoteController extends CoreController
             });
         }
 
-        $quotes = $query->latest('issue_date')->latest()->paginate(10)->withQueryString();
+        $quotes = $query->latest('issue_date')->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.money.quotes.index', [
             'quotes'  => $quotes,
@@ -127,7 +127,7 @@ class QuoteController extends CoreController
         $this->authorize('changeStatus', $quote);
 
         $request->validate([
-            'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'rejected', 'expired'])],
+            'status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'approved', 'rejected', 'expired', 'converted'])],
         ]);
 
         $previousStatus = $quote->status;
@@ -163,14 +163,19 @@ class QuoteController extends CoreController
 
     public function convertToInvoice(Request $request, Quote $quote): RedirectResponse
     {
-        $this->authorize('convert', $quote);
+        $this->authorize('update', $quote);
 
-        if ($quote->status !== 'accepted') {
-            return back()->withErrors(__('Quote must be accepted before invoicing.'));
+        if (! in_array($quote->status, ['accepted', 'approved', 'sent'], true)) {
+            return back()->withErrors(__('Quote must be accepted/approved or sent before invoicing.'));
+        }
+
+        $quote->loadMissing('items');
+
+        if ($quote->items->isEmpty()) {
+            return back()->withErrors(__('Quote must have at least one line item before invoicing.'));
         }
 
         $invoice = DB::transaction(function () use ($quote, $request) {
-            $quote->load('items');
             $invoice = \App\Models\Money\Invoice::create([
                 'company_id'     => $quote->company_id,
                 'created_by'     => $request->user()->id,
@@ -204,11 +209,14 @@ class QuoteController extends CoreController
 
             $invoice->recomputeTotalsFromItems();
             $invoice->refresh();
+            $invoice->update(['balance' => $invoice->total]);
 
             if (! $invoice->invoice_number) {
                 $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);
                 $invoice->save();
             }
+
+            $quote->update(['status' => 'converted']);
 
             event(new \App\Events\InvoiceIssued($invoice));
 
