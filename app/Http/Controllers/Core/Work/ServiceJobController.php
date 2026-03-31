@@ -242,6 +242,9 @@ class ServiceJobController extends CoreController
 
     private function territories()
     {
-        return Territory::query()->orderBy('name')->get(['id', 'name']);
+        return Territory::query()
+            ->when(auth()->check(), fn ($q) => $q->where('company_id', auth()->user()->company_id))
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }
