@@ -136,6 +136,7 @@ function formatCamelCase($input)
  *
  * @param  string      $key      Label lookup key.
  * @param  string|null $default  Optional fallback value.
+ * @return string                 Resolved label or fallback text.
  */
 function workcore_label(string $key, ?string $default = null): string
 {

@@ -7,8 +7,6 @@ return [
         'sites'        => 'Jobs',
         'service_jobs' => 'Jobs',
         'service_job'  => 'Job',
-        'service-job'  => 'Job',
-        'service job'  => 'Job',
         'checklists'   => 'Checklists',
     ],
 
