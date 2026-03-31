@@ -145,6 +145,7 @@
 	"autoload": {
 		"psr-4": {
 			"App\\": "app/",
+			"App\\Extensions\\": "CodeToUse/",
 			"Database\\Factories\\": "database/factories/",
 			"Database\\Seeders\\": "database/seeders/",
 			"Database\\Helpers\\": "database/helpers/"
