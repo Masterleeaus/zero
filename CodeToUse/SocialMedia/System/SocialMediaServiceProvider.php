@@ -13,7 +13,6 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
 {
     public function register(): void
     {
-
         $this->registerConfig();
     }
 
@@ -62,6 +61,7 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
     {
         $this->publishes([
             __DIR__ . '/../resources/assets' => public_path('vendor/social-media'),
+            __DIR__ . '/../resources/assets' => public_path('vendor/business-suite'),
         ], 'extension');
 
         return $this;
@@ -70,6 +70,7 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
     public function registerConfig(): static
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/social-media.php', 'social-media');
+        $this->mergeConfigFrom(__DIR__ . '/../config/social-media.php', 'business-suite');
 
         return $this;
     }
@@ -77,6 +78,7 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
     protected function registerTranslations(): static
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'social-media');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'business-suite');
 
         return $this;
     }
@@ -86,6 +88,10 @@ class SocialMediaServiceProvider extends ServiceProvider implements UninstallExt
         $this->loadViewsFrom(
             [resource_path('views/default/panel/user/business-suite/social-media')],
             'social-media'
+        );
+        $this->loadViewsFrom(
+            [resource_path('views/default/panel/user/business-suite/social-media')],
+            'business-suite'
         );
 
         return $this;

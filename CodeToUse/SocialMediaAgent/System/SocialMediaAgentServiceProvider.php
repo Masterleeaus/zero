@@ -77,6 +77,8 @@ class SocialMediaAgentServiceProvider extends ServiceProvider implements Extensi
         $this->publishes([
             __DIR__ . '/../resources/assets/images' => public_path('vendor/social-media-agent/images'),
             __DIR__ . '/../resources/assets/videos' => public_path('vendor/social-media-agent/videos'),
+            __DIR__ . '/../resources/assets/images' => public_path('vendor/business-agent/images'),
+            __DIR__ . '/../resources/assets/videos' => public_path('vendor/business-agent/videos'),
         ], 'extension');
 
         return $this;
@@ -85,6 +87,7 @@ class SocialMediaAgentServiceProvider extends ServiceProvider implements Extensi
     protected function registerTranslations(): static
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', $this->registerKey());
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'business-agent');
 
         return $this;
     }
@@ -94,6 +97,10 @@ class SocialMediaAgentServiceProvider extends ServiceProvider implements Extensi
         $this->loadViewsFrom(
             [resource_path('views/default/panel/user/business-suite/social-media-agent')],
             $this->registerKey()
+        );
+        $this->loadViewsFrom(
+            [resource_path('views/default/panel/user/business-suite/social-media-agent')],
+            'business-agent'
         );
 
         return $this;
