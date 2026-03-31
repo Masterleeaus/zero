@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Extensions\TitanRewind\System\Models\RewindCase;
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
@@ -74,6 +75,10 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('payment', static function (string|int $value) {
             return Payment::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('case', static function (string|int $value) {
+            return RewindCase::query()->whereKey($value)->firstOrFail();
         });
     }
 

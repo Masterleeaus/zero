@@ -231,4 +231,14 @@ Route::middleware('auth:api')->group(function () {
         Route::get('timeline/{processId}', [TitanSignalApiController::class, 'timeline'])->name('api.signals.timeline');
         Route::post('envelope', [TitanSignalApiController::class, 'envelope'])->name('api.signals.envelope');
     });
+
+    Route::prefix('titanrewind')->name('api.titanrewind.')->group(function () {
+        Route::get('/cases', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'index'])->name('cases.index');
+        Route::post('/cases/initiate', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'initiate'])->name('cases.initiate');
+        Route::get('/cases/candidates', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'candidates'])->name('cases.candidates');
+        Route::get('/cases/{case}/history', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'history'])->name('cases.history');
+        Route::get('/cases/{case}/replay', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'replay'])->name('cases.replay');
+        Route::get('/cases/{case}/snapshots', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'snapshots'])->name('cases.snapshots');
+        Route::post('/cases/{case}/promote-lifecycle', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'promoteLifecycle'])->name('cases.promoteLifecycle');
+    });
 });
