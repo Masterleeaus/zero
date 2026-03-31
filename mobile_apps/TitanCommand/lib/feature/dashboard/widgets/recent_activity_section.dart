@@ -29,7 +29,7 @@ class RecentActivitySection extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text("recent_booking_activities".tr,
+                  Text("recent_job_activity".tr,
                     style: robotoMedium.copyWith(
                       fontSize: Dimensions.fontSizeDefault,
                       fontWeight: FontWeight.w600,
@@ -60,8 +60,8 @@ class RecentActivitySection extends StatelessWidget {
                   tabAlignment: TabAlignment.start,
 
                   tabs:  [
-                    SizedBox(height: 35, child:Center(child: Text("normal_booking".tr, style: robotoMedium,)),),
-                    SizedBox(height: 35, child:  Center(child: Text("customised_booking".tr, style: robotoMedium,)),
+                    SizedBox(height: 35, child:Center(child: Text("standard_jobs".tr, style: robotoMedium,)),),
+                    SizedBox(height: 35, child:  Center(child: Text("custom_jobs".tr, style: robotoMedium,)),
                     ),
                   ],
                   onTap: (index){

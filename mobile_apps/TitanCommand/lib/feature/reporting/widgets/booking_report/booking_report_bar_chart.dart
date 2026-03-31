@@ -21,7 +21,7 @@ class BookingReportBarChart extends StatelessWidget {
                 children: [
                   Image.asset(Images.dashboardEarning,height: 15,width:15),
                   const SizedBox(width: Dimensions.paddingSizeSmall,),
-                  Text("booking_statistics".tr,
+                  Text("job_statistics".tr,
                     style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault,
                         color: Theme.of(context).textTheme.bodyLarge!.color!.withValues(alpha:0.8)),
                   ),

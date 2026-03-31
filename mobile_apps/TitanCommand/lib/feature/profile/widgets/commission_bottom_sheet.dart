@@ -22,11 +22,11 @@ class CommissionBottomSheet extends StatelessWidget {
         Image.asset(Images.commissionIcon,height: 80, width: 100,),
         const SizedBox(height: Dimensions.paddingSizeDefault),
 
-        Text("commission_information".tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge),),
+        Text("platform_fee_information".tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge),),
         const SizedBox(height: Dimensions.paddingSizeDefault),
 
         CostPercentageWidget(
-          title: "commission_percentage",
+          title: "platform_fee_percentage",
           amount: " ${commissionStatus == 1 ?
           userProfileController.providerModel!.content!.providerInfo!.commissionPercentage :
           Get.find<SplashController>().configModel.content!.defaultCommission}",

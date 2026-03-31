@@ -16,7 +16,7 @@ class _AddNewServicemanScreenState extends State<AddNewServicemanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: CustomAppBar(title: widget.isEditScreen! ? "edit_service_man".tr : "add_new_service_man".tr,),
+      appBar: CustomAppBar(title: widget.isEditScreen! ? "edit_cleaner".tr : "add_cleaner".tr,),
       body:  GetBuilder<ServicemanSetupController>(builder: (serviceManSetupController){
         return Column(
           children: [

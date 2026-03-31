@@ -1,5 +1,7 @@
 import 'package:demandium_provider/feature/dashboard/widgets/advertisement_section.dart';
 import 'package:demandium_provider/feature/dashboard/widgets/earning_statistics_widget.dart';
+import 'package:demandium_provider/feature/dashboard/widgets/live_ops_status_section.dart';
+import 'package:demandium_provider/feature/dashboard/widgets/quick_actions_section.dart';
 import 'package:demandium_provider/feature/nav/widgets/subscription_trail_end_widget.dart';
 import 'package:get/get.dart';
 import 'package:demandium_provider/util/core_export.dart';
@@ -35,7 +37,7 @@ class _DashBoardScreenState extends State<DashBoardScreen>{
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar:  MainAppBar(
           color: Theme.of(context).primaryColor,
-          title: AppConstants.appName,
+          title: 'mission_control'.tr,
           titleFontSize: Dimensions.fontSizeExtraLarge + 4,
         ),
         body: RefreshIndicator(
@@ -61,6 +63,12 @@ class _DashBoardScreenState extends State<DashBoardScreen>{
                 SizedBox(height: Dimensions.paddingSizeSmall),
 
                 // AdvertisementSection removed - operations command uses quality/training features in menu instead
+
+                const QuickActionsSection(),
+                SizedBox(height: Dimensions.paddingSizeSmall),
+
+                const LiveOpsStatusSection(),
+                SizedBox(height: Dimensions.paddingSizeSmall),
 
                 const EarningStatisticsWidget(),
                 SizedBox(height: Dimensions.paddingSizeSmall),

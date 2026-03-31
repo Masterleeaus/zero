@@ -106,7 +106,7 @@ class _BookingCardServiceDate extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '${'service_date'.tr} :',
+            '${'scheduled'.tr} :',
             style: robotoRegular.copyWith(
               fontSize: Dimensions.fontSizeDefault,
               color: Theme.of(context).hintColor,
@@ -147,7 +147,7 @@ class _BookingCardServiceLocation extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '${'service_location'.tr} :',
+            '${'site'.tr} :',
             style: robotoRegular.copyWith(
               fontSize: Dimensions.fontSizeDefault,
               color: Theme.of(context).hintColor,
@@ -177,8 +177,8 @@ class _BookingCardServiceLocation extends StatelessWidget {
                     const SizedBox(width: Dimensions.paddingSizeTini),
                     Text(
                       booking.serviceLocation == ServiceLocation.provider
-                          ? 'at_provider_location'.tr
-                          : 'at_customer_location'.tr,
+                          ? 'our_location'.tr
+                          : 'client_site'.tr,
                       style: robotoMedium.copyWith(
                         fontSize: Dimensions.fontSizeSmall,
                         color: Theme.of(context).primaryColor,
@@ -266,7 +266,7 @@ class _BookingCardHeader extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '${"booking".tr} # ',
+            '${"job".tr} # ',
             style: robotoMedium.copyWith(
               fontSize: Dimensions.fontSizeLarge,
               color: Theme.of(context).textTheme.bodySmall!.color!.withValues(alpha: 0.7),

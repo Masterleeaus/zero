@@ -73,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   (Get.find<UserProfileController>().providerModel?.content?.subscriptionInfo?.status == "commission_base") ?
                   GestureDetector(
                     onTap: () => showCustomBottomSheet(child: const CommissionBottomSheet()),
-                    child: ProfileCardItem(title: "commission", leadingIcon: Images.commission,isDarkItem: true,),
+                    child: ProfileCardItem(title: "platform_fee", leadingIcon: Images.commission,isDarkItem: true,),
                   ) : const SizedBox(),
 
                   GestureDetector(

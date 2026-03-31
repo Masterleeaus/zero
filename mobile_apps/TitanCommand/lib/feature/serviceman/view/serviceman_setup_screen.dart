@@ -10,7 +10,7 @@ class ServicemanSetupScreen extends StatelessWidget {
         initState: (_)=> Get.find<ServicemanSetupController>().getAllServicemanList(1,reload: true),
         builder: (servicemanSetUpController) {
         return Scaffold(
-          appBar: CustomAppBar(title: "service_man_setup".tr,),
+          appBar: CustomAppBar(title: "team_setup".tr,),
           body: GestureDetector(
             onTap: () => Get.find<ServicemanSetupController>().updateIndex(-1),
             child: CustomScrollView(
@@ -27,7 +27,7 @@ class ServicemanSetupScreen extends StatelessWidget {
                               Text(" ${servicemanSetUpController.totalServiceman} ",
                                 style: robotoBold.copyWith(color: Theme.of(context).primaryColor),
                               ),
-                              Text(servicemanSetUpController.totalServiceman>1?"service_men".tr:"service_man".tr,
+                              Text(servicemanSetUpController.totalServiceman>1?"cleaners".tr:"cleaner".tr,
                                 style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
                               ),
                             ]),

@@ -17,7 +17,7 @@ class MenuScreen extends StatelessWidget {
       MenuModel(icon: Images.mySubscriptions, title: 'service_plans'.tr, route: RouteHelper.getMySubscriptionRoute()),
       MenuModel(icon: Images.settings, title: 'team_settings'.tr, route: RouteHelper.serviceManSetup),
       MenuModel(icon: Images.transaction, title: 'payout_history'.tr, route: RouteHelper.transactions),
-      MenuModel(icon: Images.reportOverview2, title: 'issues'.tr, routeValidation: "reports_&_analytics", route: RouteHelper.getReportingPageRoute('menu')),
+      MenuModel(icon: Images.reportOverview2, title: 'reports_issues'.tr, routeValidation: "reports_&_analytics", route: RouteHelper.getReportingPageRoute('menu')),
       MenuModel(icon: Images.reviewIcon, title: 'quality'.tr, route: RouteHelper.getReportingPageRoute('quality')),
       MenuModel(icon: Images.commissionIcon, title: 'ask_titan'.tr, route: RouteHelper.getHelpAndSupportScreen()),
       MenuModel(icon: Images.messageIcon, title: 'voice_control'.tr, route: RouteHelper.getHelpAndSupportScreen()),

@@ -45,7 +45,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: CustomAppBar(
-          title: 'booking_details'.tr,
+          title: 'job_details'.tr,
           onBackPressed: (){
             if(widget.fromPage == 'fromNotification'){
               Get.offAllNamed(RouteHelper.getInitialRoute());
@@ -107,7 +107,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
                           }
                         },
                         tabs: [
-                          SizedBox(width: MediaQuery.of(context).size.width * 0.5,child: Tab(text: 'booking_details'.tr)),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.5,child: Tab(text: 'job_details'.tr)),
                           SizedBox(width: MediaQuery.of(context).size.width * 0.5, child: Tab(text: 'status'.tr)),
                         ],
                       ),

@@ -10,7 +10,7 @@ class ReportNavigationView extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: CustomAppBar(title: "issues".tr),
+      appBar: CustomAppBar(title: "operations_reports".tr),
       
       body:  Column(
         children: [
@@ -27,7 +27,7 @@ class ReportNavigationView extends StatelessWidget {
 
           ReportItem(
             icon: Images.reportOverview2,
-            title: 'business_report',
+            title: 'operations_report',
             onTap: (){
               Get.find<BusinessReportController>().resetValue();
               Get.to(()=> const BusinessReport());

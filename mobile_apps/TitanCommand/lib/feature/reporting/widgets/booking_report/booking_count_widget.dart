@@ -25,7 +25,7 @@ class BookingCountWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'booking'.tr,
+            'jobs'.tr,
             style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
           ),
           const SizedBox(height: Dimensions.paddingSizeSmall),

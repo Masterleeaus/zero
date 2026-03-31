@@ -14,7 +14,7 @@ class BookingReportListView extends StatelessWidget {
         SizedBox(height: Dimensions.paddingSizeDefault),
         bookingFilterData.isNotEmpty  ? Padding( padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeExtraSmall),
           child: Row(mainAxisAlignment:  MainAxisAlignment.spaceBetween, children: [
-            Text('booking_list'.tr,style: robotoMedium),
+            Text('job_list'.tr,style: robotoMedium),
             PopupMenuButton<String>(
               onSelected: (String value) async {
                 bookingReportController.setSelectedDropdownValue(value,type:'booking_status');
@@ -104,7 +104,7 @@ class BookingReportListItem extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text('booking_id'.tr,
+                          Text('job_id'.tr,
                             style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall),
                           ),
                           Text(" #${bookingFilterData.readableId.toString()}",
@@ -116,7 +116,7 @@ class BookingReportListItem extends StatelessWidget {
 
                       Row(
                         children: [
-                          Text('${'booking_date'.tr} : ',
+                          Text('${'job_date'.tr} : ',
                             style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeExtraSmall),
                           ),
                           Text(DateConverter.dateMonthYearLocalTime(DateTime.parse(bookingFilterData.createdAt!)),
@@ -135,7 +135,7 @@ class BookingReportListItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('customer'.tr,
+                        Text('client'.tr,
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall,
                             color: Theme.of(context).hintColor,

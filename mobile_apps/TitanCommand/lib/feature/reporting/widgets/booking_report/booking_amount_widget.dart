@@ -29,7 +29,7 @@ class BookingAmountWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'booking_amount'.tr,
+            'job_amount'.tr,
             style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
           ),
           SizedBox(height: Dimensions.paddingSizeSmall),

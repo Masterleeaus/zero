@@ -26,7 +26,7 @@ class ServiceManSection extends StatelessWidget {
                    children: [
                      Image.asset(Images.dashboardProfile,height: 15,width:15),
                      const SizedBox(width: Dimensions.paddingSizeSmall,),
-                     Text("service_man_list".tr,
+                     Text("team_on_shift".tr,
                        style: robotoMedium.copyWith(
                          fontSize: Dimensions.fontSizeDefault,
                          color: Theme.of(context).textTheme.bodyLarge!.color!.withValues(alpha:0.8),
@@ -40,7 +40,7 @@ class ServiceManSection extends StatelessWidget {
                      Get.toNamed(RouteHelper.serviceManSetup);
                    },
                     child: Text(
-                      dashboardController.dashboardServicemanList.isEmpty ? "add_new_service_man".tr:"view_all".tr,
+                      dashboardController.dashboardServicemanList.isEmpty ? "add_cleaner".tr:"view_all".tr,
                       style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault,decoration: TextDecoration.underline,
                         color: Theme.of(context).primaryColor,
                         decorationColor: Theme.of(context).primaryColor,

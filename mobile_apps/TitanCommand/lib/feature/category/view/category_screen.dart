@@ -46,7 +46,7 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Get.isDarkMode? Theme.of(context).colorScheme.surface : Theme.of(context).primaryColor.withValues(alpha:0.05),
-        appBar: MainAppBar(title: 'available_services',color:  Theme.of(context).primaryColor,),
+        appBar: MainAppBar(title: 'team'.tr,color:  Theme.of(context).primaryColor,),
 
         body: GetBuilder<ServiceCategoryController>( builder: (allServiceController) {
           if (allServiceController.serviceCategoryList == null) {

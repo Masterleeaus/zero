@@ -99,7 +99,7 @@ class _UpdateServiceLocationWidgetState extends State<UpdateServiceLocationWidge
                         padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeSmall),
                         child: Column(children: [
                           _RadioButtonWidget(
-                            title: "customer_location".tr,
+                            title: "client_site".tr,
                             subTitle: "provider_has_to_go_customer_place".tr,
                             isSelected: bookingEditController.selectedServiceLocationType == ServiceLocationType.customer,
                             onChanged: (bool value){
@@ -107,7 +107,7 @@ class _UpdateServiceLocationWidgetState extends State<UpdateServiceLocationWidge
                             },
                           ),
                           _RadioButtonWidget(
-                            title: "provider_location".tr,
+                            title: "our_location".tr,
                             subTitle: "customer_has_to_go_provider_place".tr,
                             isSelected: bookingEditController.selectedServiceLocationType == ServiceLocationType.provider,
                             onChanged: (bool value){
@@ -218,7 +218,7 @@ class _UpdateServiceLocationWidgetState extends State<UpdateServiceLocationWidge
                                       children: <TextSpan>[
 
                                         TextSpan(
-                                          text: " ${'customer_address'.tr} ",
+                                           text: " ${'site_address'.tr} ",
                                           style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault,  color: Theme.of(context).textTheme.bodySmall!.color),
                                         ),
                                       ],

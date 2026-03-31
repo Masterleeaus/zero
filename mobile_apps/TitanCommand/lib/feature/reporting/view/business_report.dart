@@ -9,7 +9,7 @@ class BusinessReport extends StatelessWidget {
 
     return GetBuilder<BusinessReportController>(builder: (businessReportController){
       return Scaffold(
-        appBar: ReportAppBarView(title: 'business_report'.tr, fromPage: 'report', isFiltered: businessReportController.isFiltered,),
+        appBar: ReportAppBarView(title: 'operations_report'.tr, fromPage: 'report', isFiltered: businessReportController.isFiltered,),
         body: DefaultTabController(
 
           length: 3,
