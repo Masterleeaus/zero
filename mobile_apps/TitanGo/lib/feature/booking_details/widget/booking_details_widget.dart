@@ -1,4 +1,7 @@
 import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/checklist_launcher_widget.dart';
+import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/escalation_widget.dart';
+import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/job_arrival_widget.dart';
+import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/proof_bundle_widget.dart';
 import 'package:demandium_serviceman/feature/booking_details/widget/job_detail/site_notes_widget.dart';
 import 'package:get/get.dart';
 import 'package:demandium_serviceman/utils/core_export.dart';
@@ -81,11 +84,19 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
 
                   BookingInformationView(bookingDetails: bookingDetails!, isSubBooking: widget.isSubBooking,),
 
+                  // Arrival / Access preflight – shown for active jobs
+                  if (bookingStatus == "accepted" || bookingStatus == "ongoing")
+                    const JobArrivalWidget(),
+
                   // Site Notes / Property Memory block
                   const SiteNotesWidget(),
 
-                  // Checklist launcher
-                  const ChecklistLauncherWidget(),
+                  // Checklist launcher with execution state
+                  ChecklistLauncherWidget(jobId: bookingDetails.id ?? ''),
+
+                  // Supervisor escalation quick-actions – shown for active jobs
+                  if (bookingStatus == "accepted" || bookingStatus == "ongoing")
+                    const EscalationWidget(),
 
                   BookingSummeryView(bookingDetails: bookingDetails),
 
@@ -93,113 +104,33 @@ class _BookingDetailsWidgetState extends State<BookingDetailsWidget> {
 
                   BookingDetailsCustomerInfo(bookingDetails: bookingDetails),
 
+                  // Proof bundle (before/after/issue/extra) replaces flat proof list
+                  if (bookingDetails.photoEvidenceFullPath != null &&
+                      bookingDetails.photoEvidenceFullPath!.isNotEmpty)
+                    ProofBundleWidget(
+                      photoEvidenceFullPath:
+                          bookingDetails.photoEvidenceFullPath!,
+                      showUploadButton: false,
+                      bookingId: bookingDetails.id ?? '',
+                      isSubBooking: widget.isSubBooking,
+                    ),
 
-                  bookingDetails.photoEvidenceFullPath != null &&  bookingDetails.photoEvidenceFullPath!.isNotEmpty ?
-                  Padding( padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                      const SizedBox(height: Dimensions.paddingSizeDefault,),
-                      Text('job_proof'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      Container(
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha:0.05),
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        ),
-                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                        child: ListView.builder(
-                          controller: bookingDetailsController.completedServiceImagesScrollController,
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount:  bookingDetails.photoEvidenceFullPath?.length,
-                          itemBuilder: (context, index) {
-                            return Hero(
-                              tag: bookingDetails.photoEvidenceFullPath?[index] ?? "",
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      Get.to(ImageDetailScreen(
-                                        imageList: bookingDetails.photoEvidenceFullPath ?? [],
-                                        index: index,
-                                        appbarTitle: 'job_proof'.tr,
-
-                                      ),
-                                      );
-                                    },
-                                    child: CustomImage(
-                                      image: bookingDetails.photoEvidenceFullPath?[index]??"",
-                                      height: 70, width: 120,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ]),
-                  ):
-                  const SizedBox(),
-
-                  Get.find<SplashController>().configModel?.content?.bookingImageVerification == 1 && showDeliveryConfirmImage && bookingDetails.bookingStatus != 'completed' ? Padding(
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('job_proof'.tr,  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      Container(
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha:0.05),
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        ),
-                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: bookingDetailsController.pickedPhotoEvidence.length+1,
-                          itemBuilder: (context, index) {
-                            XFile? file = index == bookingDetailsController.pickedPhotoEvidence.length ? null : bookingDetailsController.pickedPhotoEvidence[index];
-                            if(index < 5 && index == bookingDetailsController.pickedPhotoEvidence.length) {
-                              return InkWell(
-                                onTap: () {
-                                  Get.bottomSheet(CameraButtonSheet(bookingId: bookingDetails.id ?? "", isSubBooking: widget.isSubBooking,));
-                                },
-                                child: Container(
-                                  height: 60, width: 70, alignment: Alignment.center, decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  color: Theme.of(context).primaryColor.withValues(alpha:0.1),
-                                ),
-                                  child:  Icon(Icons.camera_alt_sharp, color: Theme.of(context).primaryColor, size: 32),
-                                ),
-                              );
-                            }
-                            return file != null ? Container(
-                              margin: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Stack(children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  child: GetPlatform.isWeb ? Image.network(
-                                    file.path, width: 120, height: 70, fit: BoxFit.cover,
-                                  ) : Image.file(
-                                    File(file.path), width: 120, height: 70, fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ]),
-                            ) : const SizedBox();
-                          },
-                        ),
-                      ),
-                    ]),
-                  ) : const SizedBox(),
+                  if (Get.find<SplashController>()
+                              .configModel
+                              ?.content
+                              ?.bookingImageVerification ==
+                          1 &&
+                      showDeliveryConfirmImage &&
+                      bookingDetails.bookingStatus != 'completed')
+                    ProofBundleWidget(
+                      photoEvidenceFullPath: bookingDetailsController
+                          .pickedPhotoEvidence
+                          .map((x) => x.path)
+                          .toList(),
+                      showUploadButton: true,
+                      bookingId: bookingDetails.id ?? '',
+                      isSubBooking: widget.isSubBooking,
+                    ),
 
                   const SizedBox(height:Dimensions.paddingSizeExtraLarge),
                 ],

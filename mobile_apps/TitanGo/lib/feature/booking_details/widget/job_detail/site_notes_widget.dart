@@ -200,22 +200,32 @@ class _SiteNoteRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool highlight;
 
-  const _SiteNoteRow(
-      {required this.icon, required this.label, required this.value});
+  const _SiteNoteRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final valueColor = highlight
+        ? Theme.of(context).primaryColor
+        : Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.8);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon,
             size: 15,
-            color: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.color
-                ?.withValues(alpha: 0.45)),
+            color: highlight
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.8)
+                : Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.color
+                    ?.withValues(alpha: 0.45)),
         const SizedBox(width: Dimensions.paddingSizeExtraSmall),
         Expanded(
           child: Column(
@@ -234,13 +244,9 @@ class _SiteNoteRow extends StatelessWidget {
               ),
               Text(
                 value,
-                style: robotoRegular.copyWith(
+                style: (highlight ? robotoBold : robotoRegular).copyWith(
                   fontSize: Dimensions.fontSizeSmall,
-                  color: Theme.of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.color
-                      ?.withValues(alpha: 0.8),
+                  color: valueColor,
                 ),
               ),
             ],
