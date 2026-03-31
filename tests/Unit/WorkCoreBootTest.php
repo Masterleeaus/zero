@@ -25,6 +25,6 @@ class WorkCoreBootTest extends TestCase
 
     public function test_workcore_label_falls_back_to_title_cased_key(): void
     {
-        $this->assertSame('Unknown', workcore_label('unknown-key', 'Unknown'));
+        $this->assertSame('Unknown Key', workcore_label('unknown-key'));
     }
 }
