@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobTemplate extends Model
 {
@@ -39,6 +40,17 @@ class JobTemplate extends Model
         return $this->belongsTo(Team::class);
     }
 
+    /**
+     * Activity definitions attached to this template.
+     *
+     * When a job is created from this template, these activities are
+     * copied as live JobActivity rows on the resulting ServiceJob.
+     */
+    public function templateActivities(): HasMany
+    {
+        return $this->hasMany(JobActivity::class, 'template_id')->orderBy('sequence');
+    }
+
     public function scopeForSelect(Builder $query): Builder
     {
         return $query->orderBy('name');
@@ -64,5 +76,29 @@ class JobTemplate extends Model
             'notes'              => $this->instructions,
             'scheduled_duration' => $this->duration,
         ], $overrides));
+    }
+
+    /**
+     * Copy this template's activity definitions onto a saved ServiceJob.
+     *
+     * Should be called after the ServiceJob is persisted so that the
+     * FK (service_job_id) can be set correctly.
+     *
+     * @param  ServiceJob  $job  The job that was just created from this template
+     */
+    public function copyActivitiesTo(ServiceJob $job): void
+    {
+        foreach ($this->templateActivities as $activity) {
+            JobActivity::create([
+                'company_id'     => $job->company_id,
+                'service_job_id' => $job->id,
+                'name'           => $activity->name,
+                'ref'            => $activity->ref,
+                'sequence'       => $activity->sequence,
+                'required'       => $activity->required,
+                'state'          => 'todo',
+                'completed'      => false,
+            ]);
+        }
     }
 }

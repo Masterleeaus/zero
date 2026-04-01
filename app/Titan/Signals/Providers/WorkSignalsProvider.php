@@ -49,6 +49,37 @@ final class WorkSignalsProvider implements SignalProviderInterface
             ]);
         }
 
+        // Module 4 — flag jobs blocked by incomplete required activities
+        $blockedByActivities = (int) DB::table('service_jobs as sj')
+            ->where('sj.company_id', $companyId)
+            ->whereIn('sj.status', ['scheduled', 'in_progress'])
+            ->whereExists(function ($q) {
+                $q->from('job_activities as ja')
+                    ->whereColumn('ja.service_job_id', 'sj.id')
+                    ->where('ja.required', true)
+                    ->where('ja.state', 'todo');
+            })
+            ->when($teamId, fn ($q) => $q->where('sj.team_id', $teamId))
+            ->count();
+
+        if ($blockedByActivities > 0) {
+            $signals[] = Signal::make([
+                'type'         => 'job.activities_pending',
+                'kind'         => 'activities_pending',
+                'severity'     => SignalSeverity::YELLOW,
+                'title'        => 'Jobs have pending required activities',
+                'body'         => "{$blockedByActivities} job(s) have required activities that must be completed.",
+                'company_id'   => $companyId,
+                'team_id'      => $teamId,
+                'user_id'      => $userId,
+                'payload'      => ['count' => $blockedByActivities],
+                'meta'         => ['count' => $blockedByActivities],
+                'source'       => 'job_activities',
+                'origin'       => 'database',
+                'source_engine' => $this->sourceEngine(),
+            ]);
+        }
+
         if ($signals === []) {
             $signals[] = Signal::make([
                 'type' => 'work.ok',

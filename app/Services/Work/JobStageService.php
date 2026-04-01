@@ -100,6 +100,13 @@ class JobStageService
                 ]),
             ]);
         }
+
+        // Block closure when required activities are still pending (Module 4)
+        if ($newStage->is_closed && ! $job->hasRequiredActivitiesDone()) {
+            throw ValidationException::withMessages([
+                'activities' => __('All required activities must be completed before closing this job.'),
+            ]);
+        }
     }
 
     /**

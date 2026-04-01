@@ -18,6 +18,9 @@ use App\Events\StripeWebhookEvent;
 use App\Events\TwoCheckoutWebhookEvent;
 use App\Events\UsersActivityEvent;
 use App\Events\Work\AgreementServiceConsumed;
+use App\Events\Work\ActivityCompleted;
+use App\Events\Work\ActivityCreated;
+use App\Events\Work\ActivityDismissed;
 use App\Events\Work\JobAssigned;
 use App\Events\Work\JobCompleted;
 use App\Events\Work\JobCompletedBillable;
@@ -124,6 +127,10 @@ class EventServiceProvider extends ServiceProvider
         JobCompletedBillable::class => [],
         AgreementServiceConsumed::class  => [],
         ServiceInvoiceGenerated::class   => [],
+        // Module 4 — fieldservice_activity lifecycle signals
+        ActivityCreated::class   => [],
+        ActivityCompleted::class => [],
+        ActivityDismissed::class => [],
     ];
 
     /**

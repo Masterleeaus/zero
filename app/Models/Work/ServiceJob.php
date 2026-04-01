@@ -160,6 +160,11 @@ class ServiceJob extends Model
         return $this->belongsTo(Invoice::class);
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(JobActivity::class, 'service_job_id');
+    }
+
     // ── Computed ─────────────────────────────────────────────────────────────
 
     public function getDurationAttribute(): float
@@ -236,6 +241,58 @@ class ServiceJob extends Model
         return $this->site_id !== null
             && $this->assigned_user_id !== null
             && $this->scheduled_date_start !== null;
+    }
+
+    /**
+     * Determine whether an invoice can be generated for this job.
+     *
+     * Returns false if the job is not billable, already invoiced, or not yet complete.
+     */
+    public function canGenerateInvoice(): bool
+    {
+        return $this->is_billable
+            && $this->invoice_id === null
+            && $this->status === 'completed';
+    }
+
+    /**
+     * Return a cost/revenue summary for this job.
+     *
+     * Revenue is based on the linked invoice total (or estimated from
+     * billable_rate × duration when not yet invoiced). Labour cost is
+     * approximated from duration; materials costs are left for the caller
+     * to extend via additional line items.
+     *
+     * @return array{duration_hours: float, billable_rate: float, estimated_revenue: float, invoiced_total: float|null, invoice_status: string|null}
+     */
+    public function revenueSummary(): array
+    {
+        $duration  = $this->duration;
+        $rate      = (float) ($this->billable_rate ?? 0);
+        $estimated = round($duration * $rate, 2);
+
+        $invoice = $this->invoice;
+
+        return [
+            'duration_hours'    => $duration,
+            'billable_rate'     => $rate,
+            'estimated_revenue' => $estimated,
+            'invoiced_total'    => $invoice ? (float) $invoice->total : null,
+            'invoice_status'    => $invoice?->status,
+        ];
+    }
+
+    /**
+     * Return whether all required activities on this job are done.
+     *
+     * If no activities exist, returns true (no blockage).
+     */
+    public function hasRequiredActivitiesDone(): bool
+    {
+        return ! $this->activities()
+            ->where('required', true)
+            ->where('state', 'todo')
+            ->exists();
     }
 
     // ── Scopes ───────────────────────────────────────────────────────────────
