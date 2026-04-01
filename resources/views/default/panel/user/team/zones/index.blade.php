@@ -3,12 +3,12 @@
     <div class="max-w-5xl mx-auto py-10 space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ __('Zones') }}</p>
-                <h1 class="text-2xl font-semibold">{{ __('Operational Regions') }}</h1>
+                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ __('Territories') }}</p>
+                <h1 class="text-2xl font-semibold">{{ __('Territories') }}</h1>
             </div>
             <x-button href="{{ route('dashboard.team.zones.create') }}">
                 <x-tabler-plus class="size-4" />
-                {{ __('Add Zone') }}
+                {{ __('Add Territory') }}
             </x-button>
         </div>
 
@@ -44,5 +44,7 @@
                 @endforelse
             </x-slot:body>
         </x-table>
+
+        {{ $territories->links() }}
     </div>
 @endsection

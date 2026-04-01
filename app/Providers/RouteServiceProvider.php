@@ -6,6 +6,13 @@ namespace App\Providers;
 
 use App\Extensions\TitanRewind\System\Models\RewindCase;
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
+use App\Models\Work\Territory;
+use App\Models\Work\Region;
+use App\Models\Work\District;
+use App\Models\Work\Branch;
+use App\Models\Work\JobStage;
+use App\Models\Work\JobType;
+use App\Models\Work\JobTemplate;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;

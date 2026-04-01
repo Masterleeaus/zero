@@ -44,7 +44,7 @@ class ZoneController extends CoreController
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function show(Territory $zone): View
     {
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],

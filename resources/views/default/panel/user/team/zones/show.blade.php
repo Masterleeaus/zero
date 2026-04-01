@@ -58,5 +58,27 @@
                 @endif
             </dl>
         </x-card>
+
+        @if($territory->sites->isNotEmpty())
+            <x-card>
+                <h2 class="font-semibold mb-3">{{ __('Sites') }}</h2>
+                <x-table>
+                    <x-slot:head>
+                        <tr>
+                            <th>{{ __('Name') }}</th>
+                            <th>{{ __('Status') }}</th>
+                        </tr>
+                    </x-slot:head>
+                    <x-slot:body>
+                        @foreach($territory->sites as $site)
+                            <tr>
+                                <td>{{ $site->name }}</td>
+                                <td>{{ ucfirst($site->status) }}</td>
+                            </tr>
+                        @endforeach
+                    </x-slot:body>
+                </x-table>
+            </x-card>
+        @endif
     </div>
 @endsection

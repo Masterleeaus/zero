@@ -3,9 +3,9 @@
     <div class="max-w-3xl mx-auto py-10 space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ __('Zone') }}</p>
+                <p class="text-sm text-slate-500 uppercase tracking-wide">{{ __('Territory') }}</p>
                 <h1 class="text-2xl font-semibold">
-                    {{ $zone ? __('Edit Zone') : __('Add Zone') }}
+                    {{ $territory->exists ? __('Edit Territory') : __('Add Territory') }}
                 </h1>
             </div>
         </div>
@@ -50,7 +50,7 @@
                 <div class="flex gap-3">
                     <x-button type="submit">
                         <x-tabler-check class="size-4" />
-                        {{ __('Save') }}
+                        {{ $territory->exists ? __('Update') : __('Create') }}
                     </x-button>
                     <x-button variant="ghost" href="{{ route('dashboard.team.zones.index') }}">
                         {{ __('Cancel') }}
