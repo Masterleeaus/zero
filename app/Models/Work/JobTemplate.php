@@ -43,4 +43,26 @@ class JobTemplate extends Model
     {
         return $query->orderBy('name');
     }
+
+    /**
+     * Instantiate a new ServiceJob from this template.
+     *
+     * Applies template defaults (duration, job type, team, notes) to
+     * the given attribute overrides and returns an unsaved ServiceJob
+     * instance. The caller must persist it.
+     *
+     * @param  array<string, mixed>  $overrides  Extra / override attributes
+     */
+    public function instantiateJob(array $overrides = []): ServiceJob
+    {
+        return new ServiceJob(array_merge([
+            'company_id'         => $this->company_id,
+            'template_id'        => $this->id,
+            'job_type_id'        => $this->job_type_id,
+            'team_id'            => $this->team_id,
+            'title'              => $this->name,
+            'notes'              => $this->instructions,
+            'scheduled_duration' => $this->duration,
+        ], $overrides));
+    }
 }
