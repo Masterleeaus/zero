@@ -14,5 +14,22 @@ class WorkCoreServiceProvider extends ServiceProvider
         });
         $this->mergeConfigFrom(base_path('config/workcore.php'), 'workcore');
         $this->mergeConfigFrom(base_path('config/verticals.php'), 'verticals');
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/workcore.php',
+            'workcore'
+        );
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
     }
 }

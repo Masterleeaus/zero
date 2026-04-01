@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity'])
+Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.dashboard', '120,1')])
     ->prefix('dashboard')
     ->as('dashboard.')
     ->group(static function () {
@@ -100,5 +100,53 @@ Route::middleware(['auth', 'updateUserActivity'])
                 ->name('agreements.show');
             Route::post('agreements/{agreement}/run', [\App\Http\Controllers\Core\Work\ServiceAgreementController::class, 'run'])
                 ->name('agreements.run');
+
+            // Job Stages
+            Route::get('job-stages', [\App\Http\Controllers\Core\Work\JobStageController::class, 'index'])
+                ->name('job-stages.index');
+            Route::get('job-stages/create', [\App\Http\Controllers\Core\Work\JobStageController::class, 'create'])
+                ->name('job-stages.create');
+            Route::post('job-stages', [\App\Http\Controllers\Core\Work\JobStageController::class, 'store'])
+                ->name('job-stages.store');
+            Route::get('job-stages/{jobStage}', [\App\Http\Controllers\Core\Work\JobStageController::class, 'show'])
+                ->name('job-stages.show');
+            Route::get('job-stages/{jobStage}/edit', [\App\Http\Controllers\Core\Work\JobStageController::class, 'edit'])
+                ->name('job-stages.edit');
+            Route::put('job-stages/{jobStage}', [\App\Http\Controllers\Core\Work\JobStageController::class, 'update'])
+                ->name('job-stages.update');
+            Route::delete('job-stages/{jobStage}', [\App\Http\Controllers\Core\Work\JobStageController::class, 'destroy'])
+                ->name('job-stages.destroy');
+
+            // Job Types
+            Route::get('job-types', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'index'])
+                ->name('job-types.index');
+            Route::get('job-types/create', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'create'])
+                ->name('job-types.create');
+            Route::post('job-types', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'store'])
+                ->name('job-types.store');
+            Route::get('job-types/{jobType}', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'show'])
+                ->name('job-types.show');
+            Route::get('job-types/{jobType}/edit', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'edit'])
+                ->name('job-types.edit');
+            Route::put('job-types/{jobType}', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'update'])
+                ->name('job-types.update');
+            Route::delete('job-types/{jobType}', [\App\Http\Controllers\Core\Work\JobTypeController::class, 'destroy'])
+                ->name('job-types.destroy');
+
+            // Job Templates
+            Route::get('job-templates', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'index'])
+                ->name('job-templates.index');
+            Route::get('job-templates/create', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'create'])
+                ->name('job-templates.create');
+            Route::post('job-templates', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'store'])
+                ->name('job-templates.store');
+            Route::get('job-templates/{jobTemplate}', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'show'])
+                ->name('job-templates.show');
+            Route::get('job-templates/{jobTemplate}/edit', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'edit'])
+                ->name('job-templates.edit');
+            Route::put('job-templates/{jobTemplate}', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'update'])
+                ->name('job-templates.update');
+            Route::delete('job-templates/{jobTemplate}', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'destroy'])
+                ->name('job-templates.destroy');
         });
     });

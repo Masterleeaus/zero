@@ -8,20 +8,41 @@ use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
+use App\Models\Money\Invoice;
 use App\Models\Money\QuoteItem;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quote extends Model
 {
     use HasFactory;
     use BelongsToCompany;
     use OwnedByUser;
+
+    public const STATUS_CONVERTED = 'converted';
+
+    /**
+     * Valid status values.
+     * - accepted: used when turning a quote into a service job
+     * - approved/sent: required before conversion to invoice
+     * - converted: marks quotes already invoiced
+     */
+    public const STATUSES = [
+        'draft',
+        'sent',
+        'accepted',
+        'rejected',
+        'expired',
+        'approved',
+        self::STATUS_CONVERTED,
+    ];
 
     protected $fillable = [
         'company_id',
@@ -70,6 +91,11 @@ class Quote extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function latestInvoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class)->latestOfMany();
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(QuoteItem::class);
@@ -100,5 +126,10 @@ class Quote extends Model
             'tax'      => $tax,
             'total'    => $subtotal + $tax,
         ]);
+    }
+
+    public function scopeAccepted(Builder $query): Builder
+    {
+        return $query->whereIn($query->qualifyColumn('status'), ['accepted', 'approved']);
     }
 }

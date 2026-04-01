@@ -12,4 +12,11 @@ return [
     'cleaner_utilisation'     => 'Cleaner Utilisation',
     'quote_conversion'        => 'Quote Conversion',
     'customer_lifetime_value' => 'Customer Lifetime Value',
+    'overview' => [
+        'title' => 'Insights Overview',
+        'service_jobs_by_status' => workcore_label('service_jobs') . ' by Status',
+    ],
+    'reports' => [
+        'title' => 'Reports',
+    ],
 ];

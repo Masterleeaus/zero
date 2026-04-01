@@ -13,4 +13,10 @@ return [
     'timesheet'         => 'Timesheet',
     'emergency_contact' => 'Emergency Contact',
     'hire_date'         => 'Hire Date',
+    'members' => [
+        'title' => 'Team Members',
+    ],
+    'invites' => [
+        'title' => 'Invite a Team Member',
+    ],
 ];

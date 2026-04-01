@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TitanSignalApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -213,5 +214,31 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('entity')->group(function () {
         Route::get('/list', 'App\Http\Controllers\Api\EntityController@getAllEntities'); // returns all entities with tokens
+    });
+
+    Route::prefix('signals')->group(static function () {
+        Route::post('ingest', [TitanSignalApiController::class, 'ingest'])->name('api.signals.ingest');
+        Route::post('publish', [TitanSignalApiController::class, 'publish'])->name('api.signals.publish');
+        Route::get('registry', [TitanSignalApiController::class, 'registry'])->name('api.signals.registry');
+        Route::post('processes/record', [TitanSignalApiController::class, 'recordProcess'])->name('api.signals.processes.record');
+        Route::post('processes/record-and-ingest', [TitanSignalApiController::class, 'recordAndIngest'])->name('api.signals.processes.record_and_ingest');
+        Route::get('processes/{processId}', [TitanSignalApiController::class, 'process'])->name('api.signals.processes.show');
+        Route::post('processes/{processId}/transition', [TitanSignalApiController::class, 'transitionProcess'])->name('api.signals.processes.transition');
+        Route::post('dispatch/pending', [TitanSignalApiController::class, 'dispatchPending'])->name('api.signals.dispatch.pending');
+        Route::get('approvals', [TitanSignalApiController::class, 'approvals'])->name('api.signals.approvals');
+        Route::post('approvals/{processId}', [TitanSignalApiController::class, 'approve'])->name('api.signals.approvals.decide');
+        Route::get('feed', [TitanSignalApiController::class, 'feed'])->name('api.signals.feed');
+        Route::get('timeline/{processId}', [TitanSignalApiController::class, 'timeline'])->name('api.signals.timeline');
+        Route::post('envelope', [TitanSignalApiController::class, 'envelope'])->name('api.signals.envelope');
+    });
+
+    Route::prefix('titanrewind')->name('api.titanrewind.')->group(function () {
+        Route::get('/cases', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'index'])->name('cases.index');
+        Route::post('/cases/initiate', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'initiate'])->name('cases.initiate');
+        Route::get('/cases/candidates', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'candidates'])->name('cases.candidates');
+        Route::get('/cases/{case}/history', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'history'])->name('cases.history');
+        Route::get('/cases/{case}/replay', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'replay'])->name('cases.replay');
+        Route::get('/cases/{case}/snapshots', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'snapshots'])->name('cases.snapshots');
+        Route::post('/cases/{case}/promote-lifecycle', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'promoteLifecycle'])->name('cases.promoteLifecycle');
     });
 });

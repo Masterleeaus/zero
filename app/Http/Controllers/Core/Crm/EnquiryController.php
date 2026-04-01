@@ -17,7 +17,7 @@ class EnquiryController extends CoreController
 {
     public function index(Request $request): View
     {
-        $query = Enquiry::query()->with('customer');
+        $query = Enquiry::query()->with(['customer', 'assignedUser']);
 
         if ($search = $request->string('q')->trim()->toString()) {
             $query->where(static function ($builder) use ($search) {
@@ -28,7 +28,7 @@ class EnquiryController extends CoreController
             });
         }
 
-        $enquiries = $query->latest()->paginate(10)->withQueryString();
+        $enquiries = $query->latest()->paginate(25)->withQueryString();
 
         return view('default.panel.user.crm.enquiries.index', [
             'enquiries' => $enquiries,

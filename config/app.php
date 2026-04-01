@@ -211,6 +211,9 @@ return [
         App\Providers\AwsServiceProvider::class,
         App\Domains\Entity\EntityServiceProvider::class,
         App\Domains\Engine\EngineServiceProvider::class,
+        App\Providers\WorkCoreServiceProvider::class,
+        App\Providers\TitanSignalsServiceProvider::class,
+        App\Extensions\TitanRewind\System\TitanRewindServiceProvider::class,
 
         /**
          * Laravel Json Localization Manager

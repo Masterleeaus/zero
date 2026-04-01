@@ -1,0 +1,1 @@
+Standardized implementation issue template.

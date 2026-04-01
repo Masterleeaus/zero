@@ -4,7 +4,15 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Extensions\TitanRewind\System\Models\RewindCase;
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
+use App\Models\Work\Territory;
+use App\Models\Work\Region;
+use App\Models\Work\District;
+use App\Models\Work\Branch;
+use App\Models\Work\JobStage;
+use App\Models\Work\JobType;
+use App\Models\Work\JobTemplate;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
@@ -12,6 +20,7 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
 use App\Models\Money\Payment;
 use App\Models\Work\Checklist;
+use App\Models\Work\ServiceArea;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -37,7 +46,10 @@ class RouteServiceProvider extends ServiceProvider
                 'web',  ViewSharedMiddleware::class, NewExtensionInstalled::class,
             ])->group(function () {
                 require base_path('routes/web.php');
-                $this->loadCoreRoutes();
+
+                Route::middleware(['auth', 'throttle:120,1'])->group(function () {
+                    $this->loadCoreRoutes();
+                });
             });
         });
 
@@ -71,6 +83,26 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('payment', static function (string|int $value) {
             return Payment::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('case', static function (string|int $value) {
+            return RewindCase::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('zone', static function (string|int $value) {
+            return ServiceArea::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_region', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaRegion::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_district', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaDistrict::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('service_area_branch', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaBranch::query()->whereKey($value)->firstOrFail();
         });
     }
 

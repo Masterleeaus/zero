@@ -1,0 +1,1 @@
+Canonical event envelope schema.

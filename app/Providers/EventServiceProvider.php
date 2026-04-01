@@ -17,6 +17,18 @@ use App\Events\StripeLifetimeEvent;
 use App\Events\StripeWebhookEvent;
 use App\Events\TwoCheckoutWebhookEvent;
 use App\Events\UsersActivityEvent;
+use App\Events\Work\AgreementServiceConsumed;
+use App\Events\Work\ActivityCompleted;
+use App\Events\Work\ActivityCreated;
+use App\Events\Work\ActivityDismissed;
+use App\Events\Work\JobAssigned;
+use App\Events\Work\JobCompleted;
+use App\Events\Work\JobCompletedBillable;
+use App\Events\Work\JobMarkedBillable;
+use App\Events\Work\JobReadyForInvoice;
+use App\Events\Work\JobStageChanged;
+use App\Events\Work\JobStarted;
+use App\Events\Work\ServiceInvoiceGenerated;
 use App\Events\YokassaWebhookEvent;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
@@ -33,6 +45,8 @@ use App\Listeners\StripeLifetimeListener;
 use App\Listeners\StripeWebhookListener;
 use App\Listeners\TwoCheckoutWebhookListener;
 use App\Listeners\UsersActivityListener;
+use App\Listeners\Work\JobCompletedListener;
+use App\Listeners\Work\JobStageChangedListener;
 use App\Listeners\YokassaWebhookListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -97,6 +111,26 @@ class EventServiceProvider extends ServiceProvider
         UsersActivityEvent::class => [
             UsersActivityListener::class,
         ],
+        // ── Work / Field Service events ───────────────────────────────────
+        JobStageChanged::class => [
+            JobStageChangedListener::class,
+        ],
+        JobCompleted::class => [
+            JobCompletedListener::class,
+        ],
+        // The following Work events are defined for downstream automation.
+        // Listeners can be added here as automation rules are wired up.
+        JobStarted::class           => [],
+        JobAssigned::class          => [],
+        JobMarkedBillable::class    => [],
+        JobReadyForInvoice::class   => [],
+        JobCompletedBillable::class => [],
+        AgreementServiceConsumed::class  => [],
+        ServiceInvoiceGenerated::class   => [],
+        // Module 4 — fieldservice_activity lifecycle signals
+        ActivityCreated::class   => [],
+        ActivityCompleted::class => [],
+        ActivityDismissed::class => [],
     ];
 
     /**

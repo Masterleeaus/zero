@@ -67,5 +67,8 @@ class Enquiry extends Model
             ->where('follow_up_at', '<=', now())
             ->where('follow_up_done', false)
             ->whereNotNull('follow_up_at');
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
