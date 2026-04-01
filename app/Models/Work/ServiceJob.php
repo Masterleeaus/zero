@@ -8,7 +8,11 @@ use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Deal;
 use App\Models\Crm\Enquiry;
+use App\Models\Equipment\Equipment;
+use App\Models\Equipment\EquipmentMovement;
+use App\Models\Equipment\InstalledEquipment;
 use App\Models\Money\Invoice;
+use App\Models\Premises\Premises;
 use App\Models\User;
 use App\Models\Team\Team;
 use Carbon\Carbon;
@@ -25,11 +29,41 @@ class ServiceJob extends Model
     use BelongsToCompany;
     use OwnedByUser;
 
+    // ── Service Outcome constants ────────────────────────────────────────────
+
+    public const OUTCOME_COMPLETED_SUCCESSFULLY        = 'completed_successfully';
+    public const OUTCOME_COMPLETED_WITH_FOLLOWUP       = 'completed_with_followup_required';
+    public const OUTCOME_COMPLETED_PARTIAL             = 'completed_partial';
+    public const OUTCOME_CANCELLED_CUSTOMER            = 'cancelled_customer_request';
+    public const OUTCOME_CANCELLED_INTERNAL            = 'cancelled_internal';
+    public const OUTCOME_NO_ACCESS                     = 'no_access';
+    public const OUTCOME_NO_SHOW                       = 'no_show';
+    public const OUTCOME_RESCHEDULE_REQUIRED           = 'reschedule_required';
+    public const OUTCOME_QUOTE_REQUIRED                = 'quote_required_after_visit';
+    public const OUTCOME_RETURN_VISIT_REQUIRED         = 'return_visit_required';
+    public const OUTCOME_AGREEMENT_REQUIRED            = 'agreement_required_after_visit';
+
+    /** All valid outcome values. */
+    public const OUTCOMES = [
+        self::OUTCOME_COMPLETED_SUCCESSFULLY,
+        self::OUTCOME_COMPLETED_WITH_FOLLOWUP,
+        self::OUTCOME_COMPLETED_PARTIAL,
+        self::OUTCOME_CANCELLED_CUSTOMER,
+        self::OUTCOME_CANCELLED_INTERNAL,
+        self::OUTCOME_NO_ACCESS,
+        self::OUTCOME_NO_SHOW,
+        self::OUTCOME_RESCHEDULE_REQUIRED,
+        self::OUTCOME_QUOTE_REQUIRED,
+        self::OUTCOME_RETURN_VISIT_REQUIRED,
+        self::OUTCOME_AGREEMENT_REQUIRED,
+    ];
+
     protected $fillable = [
         'company_id',
         'created_by',
         'team_id',
         'site_id',
+        'premises_id',
         'customer_id',
         'enquiry_id',
         'deal_id',
@@ -41,6 +75,7 @@ class ServiceJob extends Model
         'template_id',
         'title',
         'status',
+        'service_outcome',
         'priority',
         'sequence',
         'territory_id',
@@ -178,6 +213,119 @@ class ServiceJob extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(JobActivity::class, 'service_job_id');
+    }
+
+    public function premises(): BelongsTo
+    {
+        return $this->belongsTo(Premises::class, 'premises_id');
+    }
+
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(Equipment::class, 'service_job_id');
+    }
+
+    public function installedEquipment(): HasMany
+    {
+        return $this->hasMany(InstalledEquipment::class, 'service_job_id');
+    }
+
+    public function equipmentMovements(): HasMany
+    {
+        return $this->hasMany(EquipmentMovement::class, 'service_job_id');
+    }
+
+    // ── Outcome helpers ───────────────────────────────────────────────────────
+
+    /**
+     * Record a structured service outcome on this job.
+     *
+     * Does NOT change the `status` column — outcome augments lifecycle
+     * interpretation only.
+     */
+    public function recordOutcome(string $outcome): void
+    {
+        if (! in_array($outcome, self::OUTCOMES, true)) {
+            throw new \InvalidArgumentException("Invalid service_outcome: {$outcome}");
+        }
+
+        $this->update(['service_outcome' => $outcome]);
+    }
+
+    public function requiresFollowUp(): bool
+    {
+        return in_array($this->service_outcome, [
+            self::OUTCOME_COMPLETED_WITH_FOLLOWUP,
+            self::OUTCOME_RETURN_VISIT_REQUIRED,
+            self::OUTCOME_NO_ACCESS,
+            self::OUTCOME_NO_SHOW,
+            self::OUTCOME_RESCHEDULE_REQUIRED,
+        ], true);
+    }
+
+    public function requiresQuote(): bool
+    {
+        return $this->service_outcome === self::OUTCOME_QUOTE_REQUIRED;
+    }
+
+    public function requiresAgreement(): bool
+    {
+        return $this->service_outcome === self::OUTCOME_AGREEMENT_REQUIRED;
+    }
+
+    public function isSuccessfulCompletion(): bool
+    {
+        return $this->service_outcome === self::OUTCOME_COMPLETED_SUCCESSFULLY;
+    }
+
+    /**
+     * Derive CRM pipeline signal from the current service_outcome.
+     *
+     * Returns one of the crm_* event names or null when no signal applies.
+     */
+    public function crmSignal(): ?string
+    {
+        return match ($this->service_outcome) {
+            self::OUTCOME_COMPLETED_SUCCESSFULLY  => 'crm_service_completed',
+            self::OUTCOME_COMPLETED_WITH_FOLLOWUP => 'crm_followup_required',
+            self::OUTCOME_RETURN_VISIT_REQUIRED   => 'crm_return_visit_required',
+            self::OUTCOME_QUOTE_REQUIRED          => 'crm_quote_required',
+            self::OUTCOME_AGREEMENT_REQUIRED      => 'crm_agreement_candidate',
+            self::OUTCOME_NO_ACCESS,
+            self::OUTCOME_NO_SHOW                 => 'crm_return_visit_required',
+            default                               => null,
+        };
+    }
+
+    /**
+     * Detect post-service sales signals from the outcome and job context.
+     *
+     * Returns an array of signal names that should be emitted.
+     *
+     * @return list<string>
+     */
+    public function postServiceSalesSignals(): array
+    {
+        $signals = [];
+
+        if ($this->service_outcome === self::OUTCOME_QUOTE_REQUIRED) {
+            $signals[] = 'crm_upsell_detected';
+        }
+
+        if ($this->service_outcome === self::OUTCOME_AGREEMENT_REQUIRED) {
+            $signals[] = 'crm_agreement_candidate';
+            $signals[] = 'crm_recurring_candidate';
+        }
+
+        if ($this->service_outcome === self::OUTCOME_RETURN_VISIT_REQUIRED) {
+            $signals[] = 'crm_repair_detected';
+        }
+
+        if ($this->service_outcome === self::OUTCOME_COMPLETED_WITH_FOLLOWUP) {
+            $signals[] = 'crm_followup_required';
+        }
+
+        return $signals;
     }
 
     /**
