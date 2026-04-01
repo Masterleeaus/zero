@@ -22,6 +22,7 @@ class JobStage extends Model
         'stage_type',
         'is_closed',
         'is_default',
+        'is_invoiceable',
         'fold',
         'require_signature',
         'color',
@@ -31,6 +32,7 @@ class JobStage extends Model
     protected $casts = [
         'is_closed'         => 'boolean',
         'is_default'        => 'boolean',
+        'is_invoiceable'    => 'boolean',
         'fold'              => 'boolean',
         'require_signature' => 'boolean',
     ];
@@ -39,6 +41,7 @@ class JobStage extends Model
         'stage_type'        => 'order',
         'is_closed'         => false,
         'is_default'        => false,
+        'is_invoiceable'    => false,
         'fold'              => false,
         'require_signature' => false,
         'color'             => '#FFFFFF',
@@ -58,5 +61,10 @@ class JobStage extends Model
     public function scopeDefault(Builder $query): Builder
     {
         return $query->where('is_default', true);
+    }
+
+    public function scopeInvoiceable(Builder $query): Builder
+    {
+        return $query->where('is_invoiceable', true);
     }
 }

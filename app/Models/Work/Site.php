@@ -97,4 +97,19 @@ class Site extends Model
     {
         return $query->where('territory_id', $territoryId);
     }
+
+    /**
+     * Copy the site's default workers onto a ServiceJob.
+     *
+     * Syncs the site_workers pivot entries to the service_job_workers
+     * pivot so that new jobs inherit the site's regular workforce.
+     */
+    public function inheritWorkersToJob(ServiceJob $job): void
+    {
+        $workerIds = $this->workers()->pluck('users.id')->all();
+
+        if (! empty($workerIds)) {
+            $job->workers()->syncWithoutDetaching($workerIds);
+        }
+    }
 }
