@@ -73,6 +73,19 @@ class Enquiry extends Model
         return $this->hasMany(ServiceJob::class, 'enquiry_id');
     }
 
+    // ── CRM Timeline Service Visibility ──────────────────────────────────────
+
+    /**
+     * Most recently completed service job linked to this enquiry.
+     */
+    public function latestServiceJob(): ?ServiceJob
+    {
+        return $this->serviceJobs()
+            ->where('status', 'completed')
+            ->latest('date_end')
+            ->first();
+    }
+
     public function scopeDueFollowUps(Builder $query, int $companyId): Builder
     {
         return $query->where('company_id', $companyId)

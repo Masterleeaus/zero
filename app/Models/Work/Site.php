@@ -6,11 +6,14 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\Equipment\Equipment;
+use App\Models\Equipment\InstalledEquipment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Site extends Model
@@ -78,6 +81,16 @@ class Site extends Model
         return $this->belongsToMany(User::class, 'site_workers', 'site_id', 'user_id')
             ->withPivot('sequence')
             ->orderByPivot('sequence');
+    }
+
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(Equipment::class, 'site_id');
+    }
+
+    public function installedEquipment(): HasMany
+    {
+        return $this->hasMany(InstalledEquipment::class, 'site_id');
     }
 
     // ── Computed ─────────────────────────────────────────────────────────────
