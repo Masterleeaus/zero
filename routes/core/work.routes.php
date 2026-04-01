@@ -148,5 +148,27 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('job-templates.update');
             Route::delete('job-templates/{jobTemplate}', [\App\Http\Controllers\Core\Work\JobTemplateController::class, 'destroy'])
                 ->name('job-templates.destroy');
+
+            // Job Template Activities (module 4 — activity definitions on templates)
+            Route::post('job-templates/{jobTemplate}/activities', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'storeForTemplate'])
+                ->name('job-template-activities.store');
+            Route::delete('job-templates/{jobTemplate}/activities/{jobActivity}', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'destroyTemplateActivity'])
+                ->name('job-template-activities.destroy');
+
+            // Job Activities (module 4 — live activities on service jobs)
+            Route::post('service-jobs/{job}/activities', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'store'])
+                ->name('job-activities.store');
+            Route::post('service-jobs/{job}/activities/reorder', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'reorder'])
+                ->name('job-activities.reorder');
+            Route::post('service-jobs/{job}/activities/{jobActivity}/complete', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'complete'])
+                ->name('job-activities.complete');
+            Route::post('service-jobs/{job}/activities/{jobActivity}/dismiss', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'dismiss'])
+                ->name('job-activities.dismiss');
+            Route::post('service-jobs/{job}/activities/{jobActivity}/follow-up', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'scheduleFollowUp'])
+                ->name('job-activities.follow-up');
+            Route::put('service-jobs/{job}/activities/{jobActivity}', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'update'])
+                ->name('job-activities.update');
+            Route::delete('service-jobs/{job}/activities/{jobActivity}', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'destroy'])
+                ->name('job-activities.destroy');
         });
     });

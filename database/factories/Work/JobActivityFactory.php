@@ -25,6 +25,9 @@ class JobActivityFactory extends Factory
             'state'          => 'todo',
             'completed_by'   => null,
             'completed_on'   => null,
+            'assigned_to'    => null,
+            'team_id'        => null,
+            'follow_up_at'   => null,
         ];
     }
 
