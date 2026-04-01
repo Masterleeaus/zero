@@ -6,6 +6,13 @@ namespace App\Providers;
 
 use App\Extensions\TitanRewind\System\Models\RewindCase;
 use App\Domains\Marketplace\Http\Middleware\NewExtensionInstalled;
+use App\Models\Work\Territory;
+use App\Models\Work\Region;
+use App\Models\Work\District;
+use App\Models\Work\Branch;
+use App\Models\Work\JobStage;
+use App\Models\Work\JobType;
+use App\Models\Work\JobTemplate;
 use App\Http\Middleware\ViewSharedMiddleware;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
@@ -79,6 +86,34 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('case', static function (string|int $value) {
             return RewindCase::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('zone', static function (string|int $value) {
+            return Territory::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('region', static function (string|int $value) {
+            return Region::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('district', static function (string|int $value) {
+            return District::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('branch', static function (string|int $value) {
+            return Branch::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('jobStage', static function (string|int $value) {
+            return JobStage::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('jobType', static function (string|int $value) {
+            return JobType::query()->whereKey($value)->firstOrFail();
+        });
+
+        Route::bind('jobTemplate', static function (string|int $value) {
+            return JobTemplate::query()->whereKey($value)->firstOrFail();
         });
     }
 
