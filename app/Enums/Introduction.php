@@ -212,7 +212,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::DASHBOARD_TWO                           => __('Dashboard Two'),
             self::DASHBOARD_THREE                         => __('Dashboard Three'),
             self::DASHBOARD_CHATBOT_ICON                  => __('Dashboard Chatbot Icon'),
-            self::BUSINESS_SUITE                            => __('Business Suite'),
+            self::BUSINESS_SUITE                            => __('TitanBOS'),
             self::BLOGPILOT                               => __('Blog Pilot'),
             self::FASHION_STUDIO                          => __('AI Fashion Studio'),
             self::AI_REALTIME_VOICE_CHAT                  => __('Realtime Voice Chat'),
