@@ -53,6 +53,11 @@ class Site extends Model
         return $this->hasMany(ServiceJob::class);
     }
 
+    public function siteNotes(): HasMany
+    {
+        return $this->hasMany(SiteNote::class);
+    }
+
     public function territory(): BelongsTo
     {
         return $this->belongsTo(Territory::class);

@@ -7,6 +7,7 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\CreditNote;
 use App\Models\Money\InvoiceItem;
 use App\Models\Money\Payment;
 use App\Models\Work\ServiceJob;
@@ -79,6 +80,11 @@ class Invoice extends Model
     public function serviceJob(): HasOne
     {
         return $this->hasOne(ServiceJob::class, 'invoice_id');
+    }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(CreditNote::class);
     }
 
     public function recomputeBalance(): void
