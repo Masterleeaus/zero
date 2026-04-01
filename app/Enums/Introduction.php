@@ -46,7 +46,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case AI_EXT_CHATBOT_CANNED_RESPONSES = 'ext_chatbot_canned_response';
     case AI_EXT_CHAT_KNOWLEDGE_BASE_ARTICLES = 'ext_chat_knowledge_base_article';
     case AI_EXT_CHATBOT_CHATBOT_CUSTOMER_ARTICLE = 'ext_chatbot_chatbot_customer_article';
-    case AI_EXT_SOCIAL_MEDIA_DROPDOWN = 'ext_social_media_dropdown';
+    case AI_EXT_BUSINESS_SUITE_DROPDOWN = 'ext_business_suite_dropdown';
     case AI_EXT_BLOGPILOT_DROPDOWN = 'ext_blogpilot_dropdown';
     case AI_EXT_CHATBOT_CUSTOMER = 'ext_chat_chatbot_customer';
     case BRAND_VOICE = 'brand_voice';
@@ -106,7 +106,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case DASHBOARD_THREE = 'dashboard_three';
     case DASHBOARD_CHATBOT_ICON = 'dashboard_chatbot_icon';
 
-    case SOCIAL_MEDIA = 'social_media';
+    case BUSINESS_SUITE = 'business_suite';
     case BLOGPILOT = 'blogpilot';
     case FASHION_STUDIO = 'ai_fashion_studio';
     case AI_REALTIME_VOICE_CHAT = 'ai_realtime_voice_chat';
@@ -155,7 +155,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::AI_EXT_CHATBOT_CANNED_RESPONSES         => __('AI Bot Canned Responses'),
             self::AI_EXT_CHAT_KNOWLEDGE_BASE_ARTICLES     => __('AI Ext Chat Knowledge Base Articles'),
             self::AI_EXT_CHATBOT_CHATBOT_CUSTOMER_ARTICLE => __('AI Ext Chatbot Customer Articles'),
-            self::AI_EXT_SOCIAL_MEDIA_DROPDOWN            => __('AI Ext Social Media Dropdown'),
+            self::AI_EXT_BUSINESS_SUITE_DROPDOWN            => __('Business Suite'),
             self::AI_EXT_BLOGPILOT_DROPDOWN               => __('AI BlogPilot Dropdown'),
             self::AI_EXT_CHATBOT_CUSTOMER                 => __('AI Ext Chatbot Customer'),
             self::BRAND_VOICE                             => __('Brand Voice'),
@@ -212,7 +212,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::DASHBOARD_TWO                           => __('Dashboard Two'),
             self::DASHBOARD_THREE                         => __('Dashboard Three'),
             self::DASHBOARD_CHATBOT_ICON                  => __('Dashboard Chatbot Icon'),
-            self::SOCIAL_MEDIA                            => __('Social Media'),
+            self::BUSINESS_SUITE                            => __('TitanBOS'),
             self::BLOGPILOT                               => __('Blog Pilot'),
             self::FASHION_STUDIO                          => __('AI Fashion Studio'),
             self::AI_REALTIME_VOICE_CHAT                  => __('Realtime Voice Chat'),

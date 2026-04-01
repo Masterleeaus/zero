@@ -235,8 +235,8 @@ class StreamService
             return AIChatImageService::chatImageStream($chat_bot, $history, $main_message, $chatParams);
         }
 
-        if ($chat_type === 'socialMediaAgent' && MarketplaceHelper::isRegistered('social-media-agent')) {
-            return $this->openaiChatStream($chat_bot, $history, $main_message, $chat_type, $contain_images, tools: \App\Extensions\SocialMediaAgent\System\Services\Chat\SocialMediaAgentChatService::tools());
+        if ($chat_type === 'socialMediaAgent' && MarketplaceHelper::isRegistered('business-suite-agent')) {
+            return $this->openaiChatStream($chat_bot, $history, $main_message, $chat_type, $contain_images, tools: \App\Extensions\BusinessSuiteAgent\System\Services\Chat\BusinessSuiteAgentChatService::tools());
         }
 
         if ($fileChat) {
@@ -1270,7 +1270,7 @@ class StreamService
                                 if ($chat_type === 'chatPro') {
                                     $functionResponse = \App\Extensions\AIChatPro\System\Services\AiChatProService::callFunction($functionName, $argumentsString);
                                 } elseif ($chat_type === 'socialMediaAgent') {
-                                    $functionResponse = \App\Extensions\SocialMediaAgent\System\Services\Chat\SocialMediaAgentChatService::callFunction($functionName, $argumentsString);
+                                    $functionResponse = \App\Extensions\BusinessSuiteAgent\System\Services\Chat\BusinessSuiteAgentChatService::callFunction($functionName, $argumentsString);
                                 }
 
                                 $output .= $functionResponse;

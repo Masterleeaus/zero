@@ -70,7 +70,7 @@
                     @endif
                 </a>
                 <ul class="flex flex-wrap items-center gap-7 text-[14px] max-sm:justify-center">
-                    @foreach (\App\Models\SocialMediaAccounts::where('is_active', true)->get() as $social)
+                    @foreach (\App\Models\BusinessSuiteAccount::where('is_active', true)->get() as $social)
                         <li>
                             <a
                                 class="inline-flex items-center gap-2"

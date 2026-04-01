@@ -152,7 +152,8 @@
 		},
 		"files": [
 			"app/Helpers/helpers.php",
-			"app/Services/AdsenseService.php"
+			"app/Services/AdsenseService.php",
+			"app/Support/workcore_helpers.php"
 		]
 	},
 	"autoload-dev": {

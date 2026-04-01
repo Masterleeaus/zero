@@ -30,8 +30,8 @@ class FalAISettingController extends Controller
             'fal_ai_api_secret'              => 'required|string',
             'fal_ai_default_model'           => 'required|string',
             'enabled_flux_pro_kontext'       => 'nullable',
-            'social_media_image_model'       => 'nullable|string',
-            'social_media_agent_image_model' => 'nullable|string',
+            'business_suite_image_model'       => 'nullable|string',
+            'business_suite_agent_image_model' => 'nullable|string',
         ]);
 
         $data['enabled_flux_pro_kontext'] = $request->has('enabled_flux_pro_kontext');

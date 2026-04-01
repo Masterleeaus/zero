@@ -433,6 +433,6 @@
 	</div>
 
 	@includeIf('multi-model::partials.plans_option')
-	@includeIf('social-media-agent::admin.plan.social-media-agent-limits')
+	@includeIf('business-suite-agent::admin.plan.business-suite-agent-limits')
 	@includeIf('blogpilot::admin.plan.blogpilot-limits')
 </div>

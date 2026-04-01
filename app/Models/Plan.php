@@ -55,7 +55,7 @@ class Plan extends Model
         'description',
         'plan_ai_tools',
         'plan_features',
-        'social_media_agent_limits',
+        'business_suite_agent_limits',
         'blogpilot_limits',
         'reset_credits_on_renewal',
         'default_ai_model',
@@ -109,7 +109,7 @@ class Plan extends Model
         'user_api'                  => 'boolean',
         'chatbot_limit'             => 'integer',
         'chatbot_human_agent'       => 'boolean',
-        'social_media_agent_limits' => 'array',
+        'business_suite_agent_limits' => 'array',
         'blogpilot_limits'          => 'array',
     ];
 
@@ -286,7 +286,7 @@ class Plan extends Model
             'ai_article_wizard_generator' => 'ai_article_wizard',
             'ai_content_detect'           => 'ai_detector_extension',
             'ai_plagiarism'               => 'ai_plagiarism_extension',
-            'ai_social_media'             => 'ai_social_media_extension',
+            'ai_business_suite'             => 'ai_business_suite_extension',
         ];
 
         $key2 = $key;
@@ -372,7 +372,7 @@ class Plan extends Model
             'description'                   => '',
             'plan_ai_tools'                 => self::parsePlanAiTools(MenuService::planAiToolsMenu()),
             'plan_features'                 => self::parsePlanFeatures(MenuService::planFeatureMenu()),
-            'social_media_agent_limits'     => [
+            'business_suite_agent_limits'     => [
                 'agents'        => -1,
                 'monthly_posts' => -1,
             ],
