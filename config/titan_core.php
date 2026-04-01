@@ -62,7 +62,6 @@ return [
             'role' => 'omni_voice',
         ],
     ],
-,
     'nexus' => [
         'enabled_cores' => ['logi', 'creator', 'finance', 'micro', 'macro', 'entropy', 'equilibrium'],
         'authority_weights' => [
