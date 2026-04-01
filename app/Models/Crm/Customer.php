@@ -64,6 +64,26 @@ class Customer extends Model
         return $this->hasMany(ServiceJob::class, 'customer_id');
     }
 
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CustomerContact::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(CustomerNote::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CustomerDocument::class);
+    }
+
+    public function deals(): HasMany
+    {
+        return $this->hasMany(Deal::class);
+    }
+
     /**
      * Scope: billable completed jobs with no invoice yet.
      */

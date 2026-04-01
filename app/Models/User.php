@@ -8,8 +8,10 @@ use App\Helpers\Classes\Helper;
 use App\Models\Chatbot\Chatbot;
 use App\Models\Concerns\User\HasCredit;
 use App\Models\Integration\UserIntegration;
+use App\Models\Team\CleanerProfile;
 use App\Models\Team\Team;
 use App\Models\Team\TeamMember;
+use App\Models\Work\WeeklyTimesheet;
 use App\Traits\BelongsToCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -413,5 +415,15 @@ class User extends Authenticatable
     public function exportedVideos(): HasMany
     {
         return $this->hasMany(ExportedVideo::class);
+    }
+
+    public function cleanerProfile(): HasOne
+    {
+        return $this->hasOne(CleanerProfile::class);
+    }
+
+    public function weeklyTimesheets(): HasMany
+    {
+        return $this->hasMany(WeeklyTimesheet::class);
     }
 }
