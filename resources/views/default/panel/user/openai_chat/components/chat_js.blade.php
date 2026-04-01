@@ -54,10 +54,10 @@
             $template = 'chatpro';
         }
         if (
-            \App\Helpers\Classes\MarketplaceHelper::isRegistered('business-suite-agent') &&
-            (str_starts_with($currentPath, '/dashboard/user/business-suite/agent/chat') || !auth()->check())
+            \App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media-agent') &&
+            (str_starts_with($currentPath, '/dashboard/user/social-media/agent/chat') || !auth()->check())
         ) {
-            $template = 'business-suite-agent';
+            $template = 'social-media-agent';
         }
     @endphp
     <script>

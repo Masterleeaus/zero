@@ -30,10 +30,46 @@ The extensions must stop representing content publishing and start representing:
 - Extension views (if published): check under `resources/views/` for any
   `business-suite` or `social-media` subfolder paths
 - Host panel views: `resources/views/default/panel/user/business-suite/`
-- Routes: registered by extension package under `dashboard.user.business-suite.*`
+- Routes: registered by extension package under `dashboard.user.social-media.*`
+  (the extension still registers as `social-media` from the marketplace —
+  our MenuService keys and labels are renamed but route values stay as `social-media`)
 - Model: `app/Models/BusinessSuiteAccount.php` (table: `business_suite_accounts`)
 - Plan field: `business_suite_agent_limits` on `plans` table
 - Tests: `tests/Feature/BusinessSuite/`, `tests/Feature/BusinessSuiteAgent/`
+
+---
+
+## CRITICAL — Extension Compatibility Rule
+
+The social media extensions install from the MagicAI marketplace and register their
+own routes as `dashboard.user.social-media.*` and their own key as `social-media`.
+
+**To keep the extensions installable AND have TitanBOS branding, the rule is:**
+
+| What | Keep as | Do NOT change to |
+|---|---|---|
+| Menu entry PHP keys | `ext_business_suite_*` | stay |
+| Menu `'label'` strings | TitanBOS vocabulary | ✓ change |
+| Menu `'route'` values | `dashboard.user.social-media.*` | do NOT change to business-suite |
+| `Route::has(...)` checks | `dashboard.user.social-media.*` | do NOT change |
+| `MarketplaceHelper::isRegistered(...)` | `'social-media'` / `'social-media-agent'` | do NOT change |
+| Host views folder | `business-suite/` | ✓ keep |
+| Host views content/labels | TitanBOS vocabulary | ✓ change |
+
+**The installed extension provides routes + logic. The host code provides
+renamed menu entries + custom TitanBOS-branded wrapper views.**
+
+Example of correct MenuService entry after this task:
+```php
+'ext_business_suite_dropdown' => [
+    'key'              => 'ext_business_suite_dropdown',   // ← renamed key ✓
+    'route'            => 'dashboard.user.social-media.index', // ← keep extension route
+    'label'            => 'TitanBOS',                     // ← renamed label ✓
+    'active_condition' => ['dashboard.user.social-media.*'],   // ← keep extension routes
+    'show_condition'   => Route::has('dashboard.user.social-media.index')
+                          && MarketplaceHelper::isRegistered('social-media'), // ← keep
+],
+```
 
 ---
 
@@ -57,10 +93,16 @@ Tasks:
 
 **Goal:** Zero social-media vocabulary visible to end users.
 
-### MenuService label changes (`app/Services/Common/MenuService.php`)
+### MenuService changes (`app/Services/Common/MenuService.php`)
 
-Update ONLY `ext_business_suite_*` and `ext_business_suite_agent_*` entry labels.
+**Only change `'label'` strings and menu entry PHP array keys.**
+**DO NOT change `'route'`, `Route::has()`, or `MarketplaceHelper::isRegistered()` values.**
 Do NOT touch `marketing_bot_*`, `blogpilot_*`, `creative_suite`, or any other extension.
+
+Restore any `'route'` / `Route::has()` / `isRegistered()` values that were previously
+changed from `social-media` to `business-suite` — they must point back to:
+- routes: `dashboard.user.social-media.*`
+- isRegistered: `'social-media'` and `'social-media-agent'`
 
 | Menu key | Current label | New label |
 |---|---|---|
