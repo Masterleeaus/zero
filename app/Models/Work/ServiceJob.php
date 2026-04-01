@@ -165,6 +165,22 @@ class ServiceJob extends Model
         return $this->hasMany(JobActivity::class, 'service_job_id');
     }
 
+    /**
+     * Return activities for this job in timeline order (sequence ASC, created_at ASC).
+     *
+     * Eager-loads the completing user and assigned user for display purposes.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, JobActivity>
+     */
+    public function activityTimeline(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->activities()
+            ->with(['completedByUser', 'assignedUser', 'team'])
+            ->orderBy('sequence')
+            ->orderBy('created_at')
+            ->get();
+    }
+
     // ── Computed ─────────────────────────────────────────────────────────────
 
     public function getDurationAttribute(): float
@@ -241,6 +257,52 @@ class ServiceJob extends Model
         return $this->site_id !== null
             && $this->assigned_user_id !== null
             && $this->scheduled_date_start !== null;
+    }
+
+    /**
+     * Return the formatted schedule time range for kanban/card display.
+     *
+     * Module 5 (fieldservice_kanban_info) — mirrors Odoo's schedule_time_range
+     * computed field, adapted to host timezone and locale conventions.
+     *
+     * Format is controlled by config('workcore.schedule_time_range_format'):
+     *  - 'time_only'      → "15:30 - 17:00"  (default)
+     *  - 'date_and_time'  → "02/27/2025 15:30 - 17:00"  (or cross-day variant)
+     *
+     * Returns null when scheduled_date_start is not set.
+     */
+    public function getScheduleTimeRangeAttribute(): ?string
+    {
+        if (! $this->scheduled_date_start) {
+            return null;
+        }
+
+        $format = config('workcore.schedule_time_range_format', 'time_only');
+
+        $start = $this->scheduled_date_start;
+        $end   = $this->scheduled_date_end;
+
+        $timeFormat = 'H:i';
+        $dateFormat = 'd/m/Y';
+
+        if ($format === 'date_and_time') {
+            if ($end && $start->toDateString() === $end->toDateString()) {
+                return $start->format($dateFormat . ' ' . $timeFormat) . ' - ' . $end->format($timeFormat);
+            }
+
+            if ($end) {
+                return $start->format($dateFormat . ' ' . $timeFormat) . ' - ' . $end->format($dateFormat . ' ' . $timeFormat);
+            }
+
+            return $start->format($dateFormat . ' ' . $timeFormat);
+        }
+
+        // Default: time_only
+        if ($end) {
+            return $start->format($timeFormat) . ' - ' . $end->format($timeFormat);
+        }
+
+        return $start->format($timeFormat);
     }
 
     /**

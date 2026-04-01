@@ -90,4 +90,23 @@ class Customer extends Model
             ->orderBy('date_end')
             ->get();
     }
+
+    /**
+     * Query helper: returns all pending (todo) activities across all jobs for this customer.
+     *
+     * Ordered by follow_up_at ASC (nulls last), then sequence ASC.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\JobActivity>
+     */
+    public function pendingActivities(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\JobActivity::query()
+            ->where('company_id', $this->company_id)
+            ->where('state', 'todo')
+            ->forCustomer($this->id)
+            ->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+            ->orderBy('sequence')
+            ->with(['job'])
+            ->get();
+    }
 }
