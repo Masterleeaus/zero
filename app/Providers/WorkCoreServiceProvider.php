@@ -12,10 +12,6 @@ class WorkCoreServiceProvider extends ServiceProvider
         $this->app->singleton(VerticalLanguageResolver::class, function () {
             return new VerticalLanguageResolver();
         });
-    }
-
-    public function boot(): void
-    {
         $this->mergeConfigFrom(base_path('config/workcore.php'), 'workcore');
         $this->mergeConfigFrom(base_path('config/verticals.php'), 'verticals');
     }
