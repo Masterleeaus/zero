@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Site extends Model
@@ -24,8 +23,7 @@ class Site extends Model
         'company_id',
         'created_by',
         'team_id',
-        'territory_id',
-        'parent_id',
+        'service_area_id',
         'name',
         'reference',
         'address',
@@ -45,7 +43,10 @@ class Site extends Model
         'status' => 'active',
     ];
 
-    // ── Relationships ─────────────────────────────────────────────────────────
+    public function serviceArea(): BelongsTo
+    {
+        return $this->belongsTo(ServiceArea::class, 'service_area_id');
+    }
 
     public function jobs(): HasMany
     {

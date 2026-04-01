@@ -20,6 +20,7 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
 use App\Models\Money\Payment;
 use App\Models\Work\Checklist;
+use App\Models\Work\ServiceArea;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\Site;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -89,31 +90,19 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::bind('zone', static function (string|int $value) {
-            return Territory::query()->whereKey($value)->firstOrFail();
+            return ServiceArea::query()->whereKey($value)->firstOrFail();
         });
 
-        Route::bind('region', static function (string|int $value) {
-            return Region::query()->whereKey($value)->firstOrFail();
+        Route::bind('service_area_region', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaRegion::query()->whereKey($value)->firstOrFail();
         });
 
-        Route::bind('district', static function (string|int $value) {
-            return District::query()->whereKey($value)->firstOrFail();
+        Route::bind('service_area_district', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaDistrict::query()->whereKey($value)->firstOrFail();
         });
 
-        Route::bind('branch', static function (string|int $value) {
-            return Branch::query()->whereKey($value)->firstOrFail();
-        });
-
-        Route::bind('jobStage', static function (string|int $value) {
-            return JobStage::query()->whereKey($value)->firstOrFail();
-        });
-
-        Route::bind('jobType', static function (string|int $value) {
-            return JobType::query()->whereKey($value)->firstOrFail();
-        });
-
-        Route::bind('jobTemplate', static function (string|int $value) {
-            return JobTemplate::query()->whereKey($value)->firstOrFail();
+        Route::bind('service_area_branch', static function (string|int $value) {
+            return \App\Models\Work\ServiceAreaBranch::query()->whereKey($value)->firstOrFail();
         });
     }
 

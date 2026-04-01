@@ -16,32 +16,30 @@
             <x-slot:head>
                 <tr>
                     <th>{{ __('Name') }}</th>
+                    <th>{{ __('Code') }}</th>
                     <th>{{ __('Type') }}</th>
                     <th>{{ __('Branch') }}</th>
-                    <th>{{ __('ZIP Codes') }}</th>
+                    <th>{{ __('Sites') }}</th>
                     <th></th>
                 </tr>
             </x-slot:head>
             <x-slot:body>
-                @forelse($territories as $territory)
+                @forelse($zones as $zone)
                     <tr>
                         <td class="font-semibold">
-                            <a href="{{ route('dashboard.team.zones.show', $territory) }}" class="hover:underline">
-                                {{ $territory->name }}
-                            </a>
+                            <a href="{{ route('dashboard.team.zones.show', $zone) }}" class="hover:underline">{{ $zone->name }}</a>
                         </td>
-                        <td>{{ $territory->type ? ucfirst($territory->type) : '—' }}</td>
-                        <td>{{ $territory->branch?->name ?? '—' }}</td>
-                        <td class="text-slate-500 text-sm truncate max-w-xs">{{ $territory->zip_codes ? \Illuminate\Support\Str::limit($territory->zip_codes, 60) : '—' }}</td>
-                        <td class="text-right">
-                            <x-button variant="ghost" href="{{ route('dashboard.team.zones.edit', $territory) }}">
-                                {{ __('Edit') }}
-                            </x-button>
+                        <td>{{ $zone->code ?? '—' }}</td>
+                        <td>{{ $zone->type ? ucfirst($zone->type) : '—' }}</td>
+                        <td>{{ $zone->branch?->name ?? '—' }}</td>
+                        <td>{{ $zone->sites_count }}</td>
+                        <td>
+                            <a href="{{ route('dashboard.team.zones.edit', $zone) }}" class="text-sm text-slate-500 hover:underline">{{ __('Edit') }}</a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-slate-400 py-6">{{ __('No territories yet.') }}</td>
+                        <td colspan="6" class="text-center text-slate-400 py-6">{{ __('No zones yet.') }}</td>
                     </tr>
                 @endforelse
             </x-slot:body>
