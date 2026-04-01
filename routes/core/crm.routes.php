@@ -68,5 +68,7 @@ Route::middleware(['auth', 'updateUserActivity', DASHBOARD_CRM_THROTTLE_LIMIT])
                 ->name('enquiries.update');
             Route::post('enquiries/{enquiry}/convert-to-quote', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'convertToQuote'])
                 ->name('enquiries.convert-to-quote');
+            Route::post('enquiries/{enquiry}/convert-to-job', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'convertToServiceJob'])
+                ->name('enquiries.convert-to-job');
         });
     });

@@ -31,7 +31,7 @@ return [
         'credit_notes'     => true,
         'bank_accounts'    => true,
         'expenses'         => true,
-        'deals'            => false,  // future
+        'deals'            => true,   // module 6 — fieldservice_crm
         'follow_ups'       => true,
         'service_agreements' => true,
         'schedule_dispatch'  => true,

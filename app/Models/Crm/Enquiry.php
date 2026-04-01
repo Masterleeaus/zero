@@ -8,10 +8,12 @@ use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Money\Quote;
 use App\Models\User;
+use App\Models\Work\ServiceJob;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Enquiry extends Model
 {
@@ -61,14 +63,21 @@ class Enquiry extends Model
         return $this->belongsTo(Quote::class);
     }
 
+    /**
+     * Service jobs created from this enquiry (CRM lead).
+     *
+     * Module 6 (fieldservice_crm) — lead → service-job linkage.
+     */
+    public function serviceJobs(): HasMany
+    {
+        return $this->hasMany(ServiceJob::class, 'enquiry_id');
+    }
+
     public function scopeDueFollowUps(Builder $query, int $companyId): Builder
     {
         return $query->where('company_id', $companyId)
             ->where('follow_up_at', '<=', now())
             ->where('follow_up_done', false)
             ->whereNotNull('follow_up_at');
-    public function assignedUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
     }
 }

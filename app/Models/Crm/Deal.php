@@ -7,6 +7,7 @@ namespace App\Models\Crm;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\User;
+use App\Models\Work\ServiceJob;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,5 +55,15 @@ class Deal extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(DealNote::class);
+    }
+
+    /**
+     * Service jobs created from this deal (CRM opportunity).
+     *
+     * Module 6 (fieldservice_crm) — opportunity → service-job linkage.
+     */
+    public function serviceJobs(): HasMany
+    {
+        return $this->hasMany(ServiceJob::class, 'deal_id');
     }
 }
