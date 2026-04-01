@@ -7,12 +7,18 @@ use App\Domains\Entity\Models\Entity;
 use App\Http\Requests\Admin\Chatbot\UpdateEngineImagesRequest;
 use App\Models\Finance\AiChatModelPlan;
 use App\Models\Plan;
+use App\TitanCore\Zero\AI\TitanAIRouter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
 class AiChatbotModelController extends Controller
 {
+    public function __construct(
+        protected TitanAIRouter $router,
+    ) {
+    }
+
     public function index()
     {
         $enablesEngines = EngineEnum::whereHasEnabledModels();
@@ -29,6 +35,15 @@ class AiChatbotModelController extends Controller
             'selected_title.*' => 'required',
             'selected_plans.*' => 'sometimes',
             'no_plan_users.*'  => 'sometimes',
+        ]);
+
+        $this->router->execute([
+            'id' => 'chatbot-model-update-' . time(),
+            'signal_key' => 'titan.core.ai_model_update',
+            'stage' => 'suggestion',
+            'company_id' => $request->user()?->company_id,
+            'user_id' => $request->user()?->id,
+            'payload' => ['action' => 'update_ai_models'],
         ]);
 
         foreach ($data['selected_title'] as $key => $value) {
