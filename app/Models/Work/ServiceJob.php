@@ -6,9 +6,12 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\Crm\Deal;
+use App\Models\Crm\Enquiry;
 use App\Models\Money\Invoice;
 use App\Models\User;
 use App\Models\Team\Team;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +31,8 @@ class ServiceJob extends Model
         'team_id',
         'site_id',
         'customer_id',
+        'enquiry_id',
+        'deal_id',
         'quote_id',
         'agreement_id',
         'assigned_user_id',
@@ -98,6 +103,16 @@ class ServiceJob extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Crm\Customer::class);
+    }
+
+    public function enquiry(): BelongsTo
+    {
+        return $this->belongsTo(Enquiry::class);
+    }
+
+    public function deal(): BelongsTo
+    {
+        return $this->belongsTo(Deal::class);
     }
 
     public function quote(): BelongsTo
@@ -267,8 +282,9 @@ class ServiceJob extends Model
      *
      * Format is controlled by config('workcore.schedule_time_range_format'):
      *  - 'time_only'      → "15:30 - 17:00"  (default)
-     *  - 'date_and_time'  → "02/27/2025 15:30 - 17:00"  (or cross-day variant)
+     *  - 'date_and_time'  → "27/04/2025 15:30 - 17:00"  (or cross-day variant)
      *
+     * Dates are presented in the application timezone (config('app.timezone')).
      * Returns null when scheduled_date_start is not set.
      */
     public function getScheduleTimeRangeAttribute(): ?string
@@ -277,10 +293,11 @@ class ServiceJob extends Model
             return null;
         }
 
+        $tz     = config('app.timezone', 'UTC');
         $format = config('workcore.schedule_time_range_format', 'time_only');
 
-        $start = $this->scheduled_date_start;
-        $end   = $this->scheduled_date_end;
+        $start = $this->scheduled_date_start->copy()->setTimezone($tz);
+        $end   = $this->scheduled_date_end?->copy()->setTimezone($tz);
 
         $timeFormat = 'H:i';
         $dateFormat = 'd/m/Y';
@@ -303,6 +320,122 @@ class ServiceJob extends Model
         }
 
         return $start->format($timeFormat);
+    }
+
+    /**
+     * Return scheduled duration as a human-readable label, e.g. "2h 30m".
+     *
+     * Falls back to actual duration when the job has started/ended.
+     * Returns null when no duration is recorded.
+     *
+     * Module 5 (fieldservice_kanban_info) — kanban-friendly duration helper.
+     */
+    public function getScheduledDurationFormattedAttribute(): ?string
+    {
+        $hours = $this->duration;
+
+        if ($hours <= 0) {
+            return null;
+        }
+
+        $totalMinutes = (int) round($hours * 60);
+        $h            = intdiv($totalMinutes, 60);
+        $m            = $totalMinutes % 60;
+
+        if ($h > 0 && $m > 0) {
+            return "{$h}h {$m}m";
+        }
+
+        if ($h > 0) {
+            return "{$h}h";
+        }
+
+        return "{$m}m";
+    }
+
+    /**
+     * Return a contextual window label for the scheduled start date.
+     *
+     * Returns "Today", "Tomorrow", or a formatted date string.
+     * Useful for grouping jobs on the dispatch board and calendar view.
+     *
+     * Module 5 (fieldservice_kanban_info) — scheduled window helper.
+     */
+    public function getScheduledWindowLabelAttribute(): ?string
+    {
+        if (! $this->scheduled_date_start) {
+            return null;
+        }
+
+        $tz    = config('app.timezone', 'UTC');
+        $start = $this->scheduled_date_start->copy()->setTimezone($tz);
+        $today = Carbon::today($tz);
+
+        if ($start->isSameDay($today)) {
+            return 'Today';
+        }
+
+        if ($start->isSameDay($today->copy()->addDay())) {
+            return 'Tomorrow';
+        }
+
+        return $start->format('d/m/Y');
+    }
+
+    /**
+     * Return a compact array of card metadata for kanban/dispatch board rendering.
+     *
+     * Module 5 (fieldservice_kanban_info) — board card summary.
+     *
+     * @return array<string, mixed>
+     */
+    public function boardSummary(): array
+    {
+        return [
+            'id'               => $this->id,
+            'title'            => $this->title,
+            'status'           => $this->status,
+            'priority'         => $this->priority,
+            'schedule_range'   => $this->schedule_time_range,
+            'duration'         => $this->scheduled_duration_formatted,
+            'window_label'     => $this->scheduled_window_label,
+            'assignee'         => $this->assignedUser?->name,
+            'customer'         => $this->customer?->name,
+            'site'             => $this->site?->name,
+            'stage'            => $this->stage?->name,
+            'is_overdue'       => $this->scheduled_date_end && $this->scheduled_date_end->isPast()
+                                   && ! in_array($this->status, ['completed', 'cancelled'], true),
+            'needs_signature'  => $this->require_signature && $this->signed_on === null,
+            'is_dispatch_ready' => $this->isDispatchReady(),
+            'enquiry_id'       => $this->enquiry_id,
+            'deal_id'          => $this->deal_id,
+        ];
+    }
+
+    /**
+     * Return a calendar event array compatible with FullCalendar / generic calendar views.
+     *
+     * Module 5 (fieldservice_kanban_info) — calendar-view compatibility helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id'              => $this->id,
+            'title'           => $this->title,
+            'start'           => $this->scheduled_date_start?->toIso8601String(),
+            'end'             => $this->scheduled_date_end?->toIso8601String(),
+            'color'           => $this->stage?->color ?? '#3B82F6',
+            'extendedProps'   => [
+                'status'     => $this->status,
+                'priority'   => $this->priority,
+                'assignee'   => $this->assignedUser?->name,
+                'customer'   => $this->customer?->name,
+                'site'       => $this->site?->name,
+                'duration'   => $this->scheduled_duration_formatted,
+            ],
+        ];
     }
 
     /**
@@ -421,5 +554,76 @@ class ServiceJob extends Model
     public function scopeScheduledBetween(Builder $query, \DateTimeInterface $from, \DateTimeInterface $to): Builder
     {
         return $query->whereBetween('scheduled_date_start', [$from, $to]);
+    }
+
+    /**
+     * Scope: jobs scheduled on today's date (app timezone).
+     *
+     * Module 5 (fieldservice_kanban_info) — scheduled window helper scope.
+     */
+    public function scopeScheduledToday(Builder $query): Builder
+    {
+        $tz = config('app.timezone', 'UTC');
+
+        return $query->whereDate('scheduled_date_start', Carbon::today($tz)->toDateString());
+    }
+
+    /**
+     * Scope: jobs scheduled on tomorrow's date (app timezone).
+     *
+     * Module 5 (fieldservice_kanban_info) — scheduled window helper scope.
+     */
+    public function scopeScheduledTomorrow(Builder $query): Builder
+    {
+        $tz = config('app.timezone', 'UTC');
+
+        return $query->whereDate('scheduled_date_start', Carbon::tomorrow($tz)->toDateString());
+    }
+
+    /**
+     * Scope: jobs scheduled within the current calendar week (Mon–Sun, app timezone).
+     *
+     * Module 5 (fieldservice_kanban_info) — scheduled window helper scope.
+     */
+    public function scopeScheduledThisWeek(Builder $query): Builder
+    {
+        $tz    = config('app.timezone', 'UTC');
+        $start = Carbon::now($tz)->startOfWeek();
+        $end   = Carbon::now($tz)->endOfWeek();
+
+        return $query->whereBetween('scheduled_date_start', [$start, $end]);
+    }
+
+    /**
+     * Scope: primary dispatch board sort — priority desc, then scheduled_date_start asc.
+     *
+     * Priority order: urgent > high > normal > low.
+     *
+     * Module 5 (fieldservice_kanban_info) — dispatch board compatibility helper.
+     */
+    public function scopeSortedForDispatch(Builder $query): Builder
+    {
+        return $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low')")
+            ->orderBy('scheduled_date_start');
+    }
+
+    /**
+     * Scope: jobs linked to a specific enquiry (CRM lead).
+     *
+     * Module 6 (fieldservice_crm) — CRM linkage scope.
+     */
+    public function scopeForEnquiry(Builder $query, int $enquiryId): Builder
+    {
+        return $query->where('enquiry_id', $enquiryId);
+    }
+
+    /**
+     * Scope: jobs linked to a specific deal (CRM opportunity).
+     *
+     * Module 6 (fieldservice_crm) — CRM linkage scope.
+     */
+    public function scopeForDeal(Builder $query, int $dealId): Builder
+    {
+        return $query->where('deal_id', $dealId);
     }
 }

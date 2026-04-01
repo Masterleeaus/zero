@@ -8,6 +8,7 @@ use App\Http\Controllers\Core\CoreController;
 use App\Models\Crm\Customer;
 use App\Models\Crm\Enquiry;
 use App\Models\Money\Quote;
+use App\Services\Crm\CrmServiceJobService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -97,6 +98,24 @@ class EnquiryController extends CoreController
 
         return redirect()->route('dashboard.money.quotes.edit', $quote)
             ->with('status', __('Quote created from enquiry.'));
+    }
+
+    /**
+     * Create a ServiceJob from this enquiry (CRM lead → service conversion).
+     *
+     * Module 6 (fieldservice_crm) — enquiry → service-job conversion action.
+     */
+    public function convertToServiceJob(Enquiry $enquiry, CrmServiceJobService $service): RedirectResponse
+    {
+        $this->authorize('update', $enquiry);
+
+        $job = $service->createJobFromEnquiry($enquiry);
+
+        return redirect()->route('dashboard.work.service-jobs.show', $job)
+            ->with([
+                'type'    => 'success',
+                'message' => __('Service job created from enquiry.'),
+            ]);
     }
 
     /**
