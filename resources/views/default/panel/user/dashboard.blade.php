@@ -493,7 +493,7 @@
                     </x-card>
                 @endif
 
-                @if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media') || $app_is_demo)
+                @if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('business-suite') || $app_is_demo)
                     <x-card
                         class="group relative w-full cursor-pointer overflow-hidden transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-br before:from-gradient-from/20 before:to-gradient-via/20 before:opacity-0 before:transition-all hover:before:opacity-100"
                         class:body="flex flex-col justify-between max-sm:gap-5 gap-16 z-1"
@@ -522,7 +522,7 @@
                         </h4>
                         <a
                             class="absolute inset-0"
-                            href="{{ \App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media') ? route('dashboard.user.social-media.index') : '#' }}"
+                            href="{{ \App\Helpers\Classes\MarketplaceHelper::isRegistered('business-suite') ? route('dashboard.user.business-suite.index') : '#' }}"
                         ></a>
                     </x-card>
                 @endif
@@ -603,7 +603,7 @@
         {{-- end: add new --}}
 
         {{-- begin: social media posts --}}
-        @includeIf('social-media::theme.social-media-post-default-theme')
+        @includeIf('business-suite::theme.business-suite-post-default-theme')
         {{-- end: social media posts --}}
 
         {{-- begin: recently launched --}}

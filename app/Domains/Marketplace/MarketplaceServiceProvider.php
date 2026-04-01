@@ -37,7 +37,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-music'               => \App\Extensions\AiMusic\System\AiMusicServiceProvider::class,
         'ai-video-pro'           => \App\Extensions\AiVideoPro\System\AiVideoProServiceProvider::class,
         'seo-tool'               => \App\Extensions\SEOTool\System\SEOToolServiceProvider::class,
-        'ai-social-media'        => \App\Extensions\AISocialMedia\System\AISocialMediaServiceProvider::class,
+        'ai-business-suite'        => \App\Extensions\AIBusinessSuite\System\AIBusinessSuiteServiceProvider::class,
         'webchat'                => \App\Extensions\AIWebChat\System\AIWebChatServiceProvider::class,
         'onboarding'             => \App\Extensions\Onboarding\System\OnboardingServiceProvider::class,
         'flux-pro'               => \App\Extensions\FluxPro\System\FluxProServiceProvider::class,

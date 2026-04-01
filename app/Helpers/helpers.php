@@ -1861,8 +1861,8 @@ if (! function_exists('number_shorten')) {
     }
 }
 
-if (! function_exists('getSocialMediaIcon')) {
-    function getSocialMediaIcon(?string $socialMediaName)
+if (! function_exists('getBusinessSuiteIcon')) {
+    function getBusinessSuiteIcon(?string $socialMediaName)
     {
         $image = '';
 
@@ -2404,4 +2404,8 @@ if (! function_exists('getSelectedOrUploadedFile')) {
 
         return $full ? url($relative) : $relative;
     }
+}
+
+if (! function_exists('getSocialMediaIcon')) {
+    function getSocialMediaIcon(?string $name) { return getBusinessSuiteIcon($name); }
 }

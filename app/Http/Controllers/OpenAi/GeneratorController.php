@@ -7,8 +7,8 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
 use App\Extensions\AiChatProImageChat\System\Services\AIChatImageService;
-use App\Extensions\SocialMedia\System\Models\SocialMediaPostDailyMetric;
-use App\Extensions\SocialMediaAgent\System\Models\SocialMediaAgent;
+use App\Extensions\BusinessSuite\System\Models\BusinessSuitePostDailyMetric;
+use App\Extensions\BusinessSuiteAgent\System\Models\BusinessSuiteAgent;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\MarketplaceHelper;
@@ -331,7 +331,7 @@ class GeneratorController extends Controller
                 'content' => 'You are the AI Social Media Agent. Help with strategy, analysis, scheduling, and general questions conversationally. Only call the `generate_social_post` function when the user clearly asks you to draft, write, or generate a new social media post. For all other requests, answer normally and do not use any tool.',
             ];
 
-            $history = $this->appendSocialMediaAgentContext($history, $chatParams, $systemRole);
+            $history = $this->appendBusinessSuiteAgentContext($history, $chatParams, $systemRole);
         }
         $history = $this->addFileOrInstructionsToHistory($history, $category, $chat_id, $chatParams['prompt'], $systemRole);
         $history = $this->addPreviousMessagesToHistory($history, $chat, $chatParams['assistant']);
@@ -340,7 +340,7 @@ class GeneratorController extends Controller
         return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
     }
 
-    private function appendSocialMediaAgentContext(array $history, array $chatParams, string $systemRole): array
+    private function appendBusinessSuiteAgentContext(array $history, array $chatParams, string $systemRole): array
     {
         $agent = $this->resolveChatAgent($chatParams['agent_id'] ?? null);
 
@@ -350,14 +350,14 @@ class GeneratorController extends Controller
 
         $platforms = $agent->platforms();
 
-        if ($profile = $this->formatSocialMediaAgentProfile($agent, $platforms)) {
+        if ($profile = $this->formatBusinessSuiteAgentProfile($agent, $platforms)) {
             $history[] = [
                 'role'    => $systemRole,
                 'content' => $profile,
             ];
         }
 
-        if ($metrics = $this->buildSocialMediaAgentMetricsSummary($agent, $platforms)) {
+        if ($metrics = $this->buildBusinessSuiteAgentMetricsSummary($agent, $platforms)) {
             $history[] = [
                 'role'    => $systemRole,
                 'content' => $metrics,
@@ -367,7 +367,7 @@ class GeneratorController extends Controller
         return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
     }
 
-    private function resolveChatAgent(?int $agentId): ?SocialMediaAgent
+    private function resolveChatAgent(?int $agentId): ?BusinessSuiteAgent
     {
         $userId = Auth::id();
 
@@ -375,7 +375,7 @@ class GeneratorController extends Controller
             return null;
         }
 
-        $query = SocialMediaAgent::query()
+        $query = BusinessSuiteAgent::query()
             ->where('user_id', $userId)
             ->orderBy('id');
 
@@ -389,7 +389,7 @@ class GeneratorController extends Controller
         return $query->first();
     }
 
-    private function formatSocialMediaAgentProfile(SocialMediaAgent $agent, Collection $platforms): string
+    private function formatBusinessSuiteAgentProfile(BusinessSuiteAgent $agent, Collection $platforms): string
     {
         $platformNames = $platforms
             ->pluck('platform')
@@ -436,16 +436,16 @@ class GeneratorController extends Controller
         return implode("\n", $lines);
     }
 
-    private function buildSocialMediaAgentMetricsSummary(SocialMediaAgent $agent, Collection $platforms): ?string
+    private function buildBusinessSuiteAgentMetricsSummary(BusinessSuiteAgent $agent, Collection $platforms): ?string
     {
         $endDate = Carbon::now()->endOfDay();
         $startDate = $endDate->copy()->subDays(29)->startOfDay();
 
-        $records = SocialMediaPostDailyMetric::query()
+        $records = BusinessSuitePostDailyMetric::query()
             ->where('agent_id', $agent->id)
             ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->selectRaw('platform, social_media_platform_id, COUNT(DISTINCT social_media_post_id) as post_count, SUM(view_count) as views, SUM(like_count) as likes, SUM(comment_count) as comments, SUM(share_count) as shares')
-            ->groupBy('platform', 'social_media_platform_id')
+            ->selectRaw('platform, business_suite_platform_id, COUNT(DISTINCT business_suite_post_id) as post_count, SUM(view_count) as views, SUM(like_count) as likes, SUM(comment_count) as comments, SUM(share_count) as shares')
+            ->groupBy('platform', 'business_suite_platform_id')
             ->orderByDesc('views')
             ->get();
 
@@ -472,8 +472,8 @@ class GeneratorController extends Controller
 
         $platformLines = $records->map(function ($record) use ($platformLookup) {
             $platformName = $record->platform
-                ?? optional($platformLookup->get($record->social_media_platform_id))->platform
-                ?? ('Platform ' . ($record->social_media_platform_id ?? '?'));
+                ?? optional($platformLookup->get($record->business_suite_platform_id))->platform
+                ?? ('Platform ' . ($record->business_suite_platform_id ?? '?'));
 
             $engagementCount = (int) $record->likes + (int) $record->comments + (int) $record->shares;
             $rate = ($record->views ?? 0) > 0

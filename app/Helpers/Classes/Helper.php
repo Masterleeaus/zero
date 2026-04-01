@@ -621,7 +621,7 @@ class Helper
             ->where('created_at', '<', now()->subSeconds(30))
             ->where(function ($query) {
                 $query->whereNull('chat_type')
-                    ->orWhereNotIn('chat_type', ['chatpro-deep-research', 'chatpro-image', 'social-media-agent']);
+                    ->orWhereNotIn('chat_type', ['chatpro-deep-research', 'chatpro-image', 'business-suite-agent']);
             })
             ->get();
 

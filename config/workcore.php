@@ -1,27 +1,42 @@
 <?php
 
 return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | WorkCore Vertical
+    |--------------------------------------------------------------------------
+    | The active vertical deployment context. Controls vocabulary displayed
+    | throughout the UI. Options: 'cleaning', 'facilities', 'maintenance'
+    */
     'vertical' => env('WORKCORE_VERTICAL', 'cleaning'),
 
-    'labels' => [
-        'site'           => 'Job',
-        'sites'          => 'Jobs',
-        'service_job'    => 'Cleaning Checklist',
-        'service_jobs'   => 'Cleaning Checklists',
-        'checklist'      => 'Cleaning Checklist Item',
-        'checklists'     => 'Cleaning Checklist Items',
-        'attendance'     => 'Shift Log',
-        'shift'          => 'Availability',
-        'shifts'         => 'Availabilities',
-        'issues_support' => 'Service Requests',
-        'knowledge_base' => 'Playbooks',
-    ],
-
+    /*
+    |--------------------------------------------------------------------------
+    | WorkCore Feature Flags
+    |--------------------------------------------------------------------------
+    | Toggle features on/off per deployment. Disabling hides menu items and
+    | prevents access to routes for unbuilt or deferred features.
+    */
     'features' => [
-        'knowledgebase' => false,
-        'noticeboard'   => false,
-        'teamchat'      => false,
-        'credit_notes'  => true,
+        'crm'              => true,
+        'work'             => true,
+        'money'            => true,
+        'team'             => true,
+        'insights'         => true,
+        'support'          => true,
+        'knowledgebase'    => true,
+        'notices'          => true,
+        'teamchat'         => false,  // deferred — not yet tested
+        'credit_notes'     => true,
+        'bank_accounts'    => true,
+        'expenses'         => true,
+        'deals'            => false,  // future
+        'follow_ups'       => true,
+        'service_agreements' => true,
+        'schedule_dispatch'  => true,
+        'zones'            => true,
+        'timelogs'         => true,
     ],
 
     /*

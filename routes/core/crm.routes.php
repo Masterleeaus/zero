@@ -66,33 +66,7 @@ Route::middleware(['auth', 'updateUserActivity', DASHBOARD_CRM_THROTTLE_LIMIT])
                 ->name('enquiries.show');
             Route::put('enquiries/{enquiry}', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'update'])
                 ->name('enquiries.update');
-
-            Route::get('deals', [\App\Http\Controllers\Core\Crm\DealController::class, 'index'])
-                ->name('deals.index');
-            Route::get('deals/create', [\App\Http\Controllers\Core\Crm\DealController::class, 'create'])
-                ->name('deals.create');
-            Route::post('deals', [\App\Http\Controllers\Core\Crm\DealController::class, 'store'])
-                ->name('deals.store');
-            Route::get('deals/kanban', [\App\Http\Controllers\Core\Crm\DealController::class, 'kanban'])
-                ->name('deals.kanban');
-            Route::get('deals/{deal}', [\App\Http\Controllers\Core\Crm\DealController::class, 'show'])
-                ->name('deals.show');
-            Route::get('deals/{deal}/edit', [\App\Http\Controllers\Core\Crm\DealController::class, 'edit'])
-                ->name('deals.edit');
-            Route::put('deals/{deal}', [\App\Http\Controllers\Core\Crm\DealController::class, 'update'])
-                ->name('deals.update');
-            Route::delete('deals/{deal}', [\App\Http\Controllers\Core\Crm\DealController::class, 'destroy'])
-                ->name('deals.destroy');
-            Route::post('deals/{deal}/status', [\App\Http\Controllers\Core\Crm\DealController::class, 'updateStatus'])
-                ->name('deals.status');
-
-            Route::get('deals/{deal}/notes', [\App\Http\Controllers\Core\Crm\DealNoteController::class, 'index'])
-                ->name('deals.notes.index');
-            Route::post('deals/{deal}/notes', [\App\Http\Controllers\Core\Crm\DealNoteController::class, 'store'])
-                ->name('deals.notes.store');
-            Route::put('deals/{deal}/notes/{note}', [\App\Http\Controllers\Core\Crm\DealNoteController::class, 'update'])
-                ->name('deals.notes.update');
-            Route::delete('deals/{deal}/notes/{note}', [\App\Http\Controllers\Core\Crm\DealNoteController::class, 'destroy'])
-                ->name('deals.notes.destroy');
+            Route::post('enquiries/{enquiry}/convert-to-quote', [\App\Http\Controllers\Core\Crm\EnquiryController::class, 'convertToQuote'])
+                ->name('enquiries.convert-to-quote');
         });
     });

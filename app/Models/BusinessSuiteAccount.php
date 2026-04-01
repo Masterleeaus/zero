@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SocialMediaAccounts extends Model
+class BusinessSuiteAccount extends Model
 {
+    protected $table = 'business_suite_accounts';
+
     protected $fillable = [
         'title',
         'subtitle',

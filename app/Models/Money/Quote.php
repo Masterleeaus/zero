@@ -7,6 +7,7 @@ namespace App\Models\Money;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Crm\Enquiry;
 use App\Models\Money\Invoice;
 use App\Models\Money\QuoteItem;
 use App\Models\Work\ServiceJob;
@@ -47,6 +48,7 @@ class Quote extends Model
         'company_id',
         'created_by',
         'customer_id',
+        'enquiry_id',
         'site_id',
         'quote_number',
         'title',
@@ -77,6 +79,11 @@ class Quote extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function enquiry(): BelongsTo
+    {
+        return $this->belongsTo(Enquiry::class);
     }
 
     public function invoices(): HasMany

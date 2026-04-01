@@ -594,7 +594,7 @@ class InstallationHelper
                 ],
             ],
             [
-                'table' => 'social_media_accounts',
+                'table' => 'business_suite_accounts',
                 'sql'   => [
                     [
                         'condition' => true,

@@ -104,7 +104,7 @@
 				<x-model-select-list-with-change-alert :listLabel="'Default Flux Image Model'" :listId="'fal_ai_default_model'" currentModel="{{ $current_flux_model }}" :drivers="$fluxDrivers" />
 			</div>
 
-			@includeIf('social-media::setting.particles.ai-tools-settings')
+			@includeIf('business-suite::setting.particles.ai-tools-settings')
         </div>
 
 

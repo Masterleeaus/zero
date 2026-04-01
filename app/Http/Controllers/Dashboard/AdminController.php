@@ -41,7 +41,7 @@ use App\Models\Section\ComparisonSectionItems;
 use App\Models\Section\FeaturesMarquee;
 use App\Models\Section\FooterItem;
 use App\Models\Setting;
-use App\Models\SocialMediaAccounts;
+use App\Models\BusinessSuiteAccount;
 use App\Models\Testimonials;
 use App\Models\User;
 use App\Models\UserActivity;
@@ -1529,7 +1529,7 @@ class AdminController extends Controller
             $fSettings->hero_button_url = $request->hero_button_url;
             $fSettings->hero_button_type = $request->hero_button_type;
 
-            if (setting('front_theme') === 'social-media-front') {
+            if (setting('front_theme') === 'business-suite-front') {
                 $fSettings->no_credit_cart_required = $request->no_credit_cart_required;
                 $fSettings->faster_content_creation = $request->faster_content_creation;
                 $fSettings->over_5000_businesses = $request->over_5000_businesses;
@@ -1715,7 +1715,7 @@ class AdminController extends Controller
             $settings->plan_footer_text = $request->plan_footer_text;
             $settings->save();
 
-            if (setting('front_theme') === 'social-media-front') {
+            if (setting('front_theme') === 'business-suite-front') {
                 $find = \App\Models\Frontend\FrontendSetting::query()->first();
                 if ($find) {
                     $find->join_the_ranks = $request->join_the_ranks;
@@ -2168,18 +2168,17 @@ class AdminController extends Controller
         return back()->with(['message' => __('Item deleted succesfully'), 'type' => 'success']);
     }
 
-    // socialmedia, socialmediaSave
-    public function socialmedia(): View
+    public function businessAccounts(): View
     {
-        $socialmedia = SocialMediaAccounts::get();
+        $accounts = BusinessSuiteAccount::get();
 
-        return view('panel.admin.frontend.socialmedia', compact('socialmedia'));
+        return view('default.panel.admin.frontend.business-accounts', compact('accounts'));
     }
 
-    public function socialmediaSave(Request $request): RedirectResponse
+    public function businessAccountsSave(Request $request): RedirectResponse
     {
         if (Helper::appIsNotDemo()) {
-            $accounts = SocialMediaAccounts::get();
+            $accounts = BusinessSuiteAccount::get();
             foreach ($accounts as $account) {
                 $account->subtitle = $request->input('subtitle_' . $account->key);
                 $account->icon = $request->input('icon_' . $account->key);
@@ -2189,7 +2188,7 @@ class AdminController extends Controller
             }
         }
 
-        return back()->with(['message' => __('Social media accounts saved successfully.'), 'type' => 'success']);
+        return back()->with(['message' => __('Business accounts saved successfully.'), 'type' => 'success']);
     }
 
     public function deletionRequests(): View

@@ -264,14 +264,14 @@ class AIController extends Controller
         }
 
         // SOCIAL MEDIA POST TWEET
-        if ($post_type === 'social_media_post_tweet') {
+        if ($post_type === 'business_suite_post_tweet') {
             $title = $request->title;
 
             $prompt = "Write in 1st person tweet about $title. Maximum $maximum_length words. Creativity is $creativity between 0 and 1. Language is $language. Generate $number_of_results different tweets. Tone of voice must be $tone_of_voice";
         }
 
         // SOCIAL MEDIA POST BUSINESS
-        if ($post_type === 'social_media_post_business') {
+        if ($post_type === 'business_suite_post_business') {
             $company_name = $request->company_name;
             $provide = $request->provide;
             $description = $request->description;

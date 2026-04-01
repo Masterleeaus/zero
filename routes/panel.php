@@ -781,9 +781,9 @@ Route::middleware(['auth', 'updateUserActivity'])
                         Route::post('/action/save', [AdminController::class, 'frontendGeneratorlistCreateOrUpdateSave']);
                     });
 
-                    // socialmedia
-                    Route::get('/socialmedia', [AdminController::class, 'socialmedia'])->name('socialmedia');
-                    Route::post('/socialmedia', [AdminController::class, 'socialmediaSave'])->name('socialmedia.save');
+                    // business accounts (social links in frontend)
+                    Route::get('/business-accounts', [AdminController::class, 'businessAccounts'])->name('business-accounts');
+                    Route::post('/business-accounts', [AdminController::class, 'businessAccountsSave'])->name('business-accounts.save');
                 });
 
                 Route::resource('advertis', AdvertisController::class)->parameter('advertis', 'advertis');

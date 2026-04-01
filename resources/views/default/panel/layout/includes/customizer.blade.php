@@ -465,7 +465,7 @@
 
         <x-slot:modal>
             <div>
-                @if ($active_theme !== 'bolt' && $active_theme !== 'social-media' && $active_theme !== 'social-media-dashboard')
+                @if ($active_theme !== 'bolt' && $active_theme !== 'business-suite' && $active_theme !== 'business-suite-dashboard')
                     <x-forms.input
                         class:label="flex-row-reverse justify-between text-black/90"
                         class="border-black/10"

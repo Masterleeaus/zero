@@ -91,7 +91,7 @@
                     </x-alert>
                 </div>
 
-				@if(setting('front_theme') === 'social-media-front')
+				@if(setting('front_theme') === 'business-suite-front')
 					<div class="col-md-12">
 						<div class="mb-3">
 							<label class="form-label">

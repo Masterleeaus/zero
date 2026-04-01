@@ -1,12 +1,12 @@
 @extends('panel.layout.settings')
-@section('title', __('Social Media Settings'))
+@section('title', __('Business Accounts'))
 @section('titlebar_actions', '')
 
 @section('settings')
     <form
         class="flex flex-col gap-5"
         method="POST"
-        action="{{ route('dashboard.admin.frontend.socialmedia.save') }}"
+        action="{{ route('dashboard.admin.frontend.business-accounts.save') }}"
     >
         <div class="row mb-4">
             <div class="col-md-12">
@@ -16,7 +16,7 @@
                 >
 
                     <div class="menu-item relative rounded-lg border !bg-white shadow-[0_10px_10px_rgba(0,0,0,0.06)] dark:!bg-opacity-5">
-                        @foreach ($socialmedia as $account)
+                        @foreach ($accounts as $account)
                             <h4 class="accordion-title mb-0 flex cursor-pointer items-center justify-between !gap-1 !py-1 !pe-2 !ps-4">
                                 <span>{{ $account->title }}</span>
                                 <div class="accordion-controls flex items-center">
@@ -102,48 +102,5 @@
             accordionTitle.classList.toggle("active");
             accordionTitle.nextElementSibling.classList.toggle("hidden");
         });
-
-        $(document).ready(function() {
-            var loginCheckbox = document.getElementById('login_enabled');
-            var loginField = document.getElementById('loginField');
-            loginCheckbox.addEventListener('change', function() {
-                loginField.style.display = loginCheckbox.checked ? '' : 'none';
-            });
-        });
-
-        function authSettingsSave() {
-            "use strict";
-
-            document.getElementById("settings_button").disabled = true;
-            document.getElementById("settings_button").innerHTML = magicai_localize.please_wait;
-
-            var formData = new FormData();
-            formData.append('login_enabled', $("#login_enabled").is(":checked") ? 1 : 0);
-            // login_image
-            if ($('#login_image').val() != 'undefined') {
-                formData.append('login_image', $('#login_image').prop('files')[0]);
-            }
-            $.ajax({
-                type: "post",
-                url: "/dashboard/admin/frontend/auth-save",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(data) {
-                    toastr.success('Settings saved succesfully')
-                    document.getElementById("settings_button").disabled = false;
-                    document.getElementById("settings_button").innerHTML = "Save";
-                },
-                error: function(data) {
-                    var err = data.responseJSON.errors;
-                    $.each(err, function(index, value) {
-                        toastr.error(value);
-                    });
-                    document.getElementById("settings_button").disabled = false;
-                    document.getElementById("settings_button").innerHTML = "Save";
-                }
-            });
-            return false;
-        }
     </script>
 @endpush
