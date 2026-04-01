@@ -31,7 +31,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
       appBar: CustomAppBar(
         isBackButtonExist: widget.isFromMenu? true : false,
         onBackPressed: () => Get.back(),
-        title: "my_bookings".tr,
+        title: "my_services".tr,
         actionWidget: const FilterPopUpMenuWidget(),
       ),
       body: GetBuilder<ServiceBookingController>(

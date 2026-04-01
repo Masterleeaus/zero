@@ -18,7 +18,7 @@ class ProviderInfo extends StatelessWidget {
       child: Column( children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-          child: Text("provider_info".tr, style: robotoMedium.copyWith(
+          child: Text("assigned_cleaner_label".tr, style: robotoMedium.copyWith(
             fontSize: Dimensions.fontSizeDefault,
           )),
         ),

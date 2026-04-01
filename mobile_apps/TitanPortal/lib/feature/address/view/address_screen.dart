@@ -135,7 +135,7 @@ class _AddressScreenState extends State<AddressScreen> {
                             ): const SizedBox(),
                           ),
                         ) :
-                        SizedBox(height: Get.height*0.6,child: Center(child: NoDataScreen(text: 'no_address_found'.tr,type: NoDataType.address,))),
+                        SizedBox(height: Get.height*0.6,child: Center(child: NoDataScreen(text: widget.fromPage == 'checkout' ? 'no_address_found'.tr : 'add_first_property'.tr,type: NoDataType.address,))),
                       ],
                     ),
                   ));

@@ -100,7 +100,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
       child: Scaffold(
         endDrawer:ResponsiveHelper.isDesktop(context) ? const MenuDrawer():null,
         appBar: CustomAppBar(
-          title: "booking_details".tr,
+          title: "service_details".tr,
           onBackPressed: () {
             if(widget.fromPage == 'fromNotification'){
               Get.offAllNamed(RouteHelper.getInitialRoute());
@@ -252,7 +252,7 @@ class BookingTabBar extends StatelessWidget {
                   controller: tabController,
                   labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                   tabs: [
-                    Tab(child: Text('booking_details'.tr),),
+                    Tab(child: Text('service_details'.tr),),
                     Tab(child: Text('status'.tr),),
                   ],
                   onTap: (int? index) {
