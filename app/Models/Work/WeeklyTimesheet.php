@@ -50,7 +50,16 @@ class WeeklyTimesheet extends Model
 
     public function timelogs(): HasMany
     {
-        return $this->hasMany(Timelog::class, 'user_id', 'user_id')
+        // Base relationship: all timelogs for this user.
+        return $this->hasMany(Timelog::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Timelogs that fall within this timesheet's week range.
+     */
+    public function timelogsForWeek(): HasMany
+    {
+        return $this->timelogs()
             ->whereBetween('started_at', [$this->week_start, $this->week_end]);
     }
 }
