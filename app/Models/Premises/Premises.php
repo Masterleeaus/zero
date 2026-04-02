@@ -9,13 +9,17 @@ use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
 use App\Models\Equipment\Equipment;
 use App\Models\Equipment\InstalledEquipment;
+use App\Models\Facility\SiteAsset;
+use App\Models\Meter\Meter;
 use App\Models\Work\ServiceJob;
+use App\Models\Work\ServicePlan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -63,6 +67,9 @@ class Premises extends Model
         'service_window_start',
         'service_window_end',
         'customer_id',
+        'service_priority',
+        'maintenance_zone',
+        'access_level',
     ];
 
     protected $attributes = [
@@ -102,11 +109,61 @@ class Premises extends Model
         return $this->hasMany(Equipment::class, 'premises_id');
     }
 
+    public function siteAssets(): HasMany
+    {
+        return $this->hasMany(SiteAsset::class, 'premises_id');
+    }
+
+    public function meters(): HasMany
+    {
+        return $this->hasMany(Meter::class, 'premises_id');
+    }
+
+    public function servicePlans(): HasMany
+    {
+        return $this->hasMany(ServicePlan::class, 'premises_id');
+    }
+
+    public function hazardRecords(): HasMany
+    {
+        return $this->hasMany(Hazard::class, 'premises_id');
+    }
+
+    public function siteAccessProfile(): HasMany
+    {
+        return $this->hasMany(SiteAccessProfile::class, 'premises_id');
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(FacilityDocument::class, 'documentable');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    /**
+     * Stage G — Active hazards for this premises.
+     * Exposes structured hazard records (status = active).
+     */
+    public function activeHazards(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->hazardRecords()->where('status', 'active')->get();
+    }
+
+    /**
+     * Active site access profile (most recently created active profile).
+     */
+    public function activeSiteAccess(): ?SiteAccessProfile
+    {
+        return $this->siteAccessProfile()
+            ->where('is_active', true)
+            ->latest()
+            ->first();
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────

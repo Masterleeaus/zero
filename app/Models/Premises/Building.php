@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * Building within a Premises.
@@ -32,6 +33,9 @@ class Building extends Model
         'building_code',
         'status',
         'notes',
+        'maintenance_zone',
+        'year_built',
+        'floors_count',
     ];
 
     protected $attributes = [
@@ -48,5 +52,15 @@ class Building extends Model
     public function floors(): HasMany
     {
         return $this->hasMany(Floor::class, 'building_id');
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(FacilityDocument::class, 'documentable');
+    }
+
+    public function siteAssets(): HasMany
+    {
+        return $this->hasMany(\App\Models\Facility\SiteAsset::class, 'building_id');
     }
 }
