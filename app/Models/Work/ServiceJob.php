@@ -238,12 +238,21 @@ class ServiceJob extends Model
     public function inspectionInstances(): HasMany
     {
         return $this->hasMany(\App\Models\Inspection\InspectionInstance::class, 'service_job_id');
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(InspectionInstance::class, 'service_job_id');
     }
 
     public function checklistRuns(): HasMany
     {
         return $this->hasMany(ChecklistRun::class, 'runnable_id')
             ->where('runnable_type', self::class);
+        return $this->hasMany(ChecklistRun::class, 'service_job_id');
+    }
+
+    public function planVisit(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ServicePlanVisit::class, 'service_job_id');
     }
 
     // ── Outcome helpers ───────────────────────────────────────────────────────
@@ -811,5 +820,29 @@ class ServiceJob extends Model
     public function scopeForDeal(Builder $query, int $dealId): Builder
     {
         return $query->where('deal_id', $dealId);
+    }
+
+    /**
+     * Scope: jobs linked to a specific customer.
+     */
+    public function scopeForCustomer(Builder $query, int $customerId): Builder
+    {
+        return $query->where('customer_id', $customerId);
+    }
+
+    /**
+     * Scope: jobs linked to a specific premises.
+     */
+    public function scopeForPremises(Builder $query, int $premisesId): Builder
+    {
+        return $query->where('premises_id', $premisesId);
+    }
+
+    /**
+     * Scope: jobs linked to a specific service agreement.
+     */
+    public function scopeForAgreement(Builder $query, int $agreementId): Builder
+    {
+        return $query->where('agreement_id', $agreementId);
     }
 }

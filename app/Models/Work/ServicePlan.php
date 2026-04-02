@@ -25,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Frequency values: daily | weekly | fortnightly | monthly | quarterly | annual
  *
  * Source: ManagedPremises/Entities/PropertyServicePlan.php.
+ * ServicePlan — schedule definition attached to a ServiceAgreement.
+ *
+ * Sits between Agreement (entitlement) and ServicePlanVisit (occurrence):
+ *
+ *   Agreement → ServicePlan → ServicePlanVisit → ServiceJob
+ *
+ * Status: active | paused | completed | cancelled
+ * Frequency: daily | weekly | fortnightly | monthly | quarterly | annual | custom
  */
 class ServicePlan extends Model
 {
@@ -52,6 +60,14 @@ class ServicePlan extends Model
         'next_visit_due',
         'last_visit_completed',
         'is_active',
+        'agreement_id',
+        'premises_id',
+        'title',
+        'frequency',
+        'visits_per_cycle',
+        'start_date',
+        'end_date',
+        'status',
         'notes',
     ];
 
@@ -70,6 +86,15 @@ class ServicePlan extends Model
         'frequency' => 'monthly',
         'interval'  => 1,
         'is_active' => true,
+        'start_date'       => 'date',
+        'end_date'         => 'date',
+        'visits_per_cycle' => 'integer',
+    ];
+
+    protected $attributes = [
+        'status'           => 'active',
+        'frequency'        => 'monthly',
+        'visits_per_cycle' => 1,
     ];
 
     // ── Relationships ─────────────────────────────────────────────────────────
@@ -99,6 +124,14 @@ class ServicePlan extends Model
     {
         return $this->hasMany(ServicePlanChecklist::class, 'service_plan_id')
             ->orderBy('sort_order');
+    public function premises(): BelongsTo
+    {
+        return $this->belongsTo(Premises::class, 'premises_id');
+    }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(ServicePlanVisit::class, 'service_plan_id');
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
@@ -139,5 +172,6 @@ class ServicePlan extends Model
 
         $this->last_visit_completed = now()->toDateString();
         $this->save();
+        return $query->where('status', 'active');
     }
 }

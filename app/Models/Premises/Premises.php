@@ -13,6 +13,9 @@ use App\Models\Facility\SiteAsset;
 use App\Models\Meter\Meter;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlan;
+use App\Models\Work\InspectionInstance;
+use App\Models\Work\ServiceJob;
+use App\Models\Work\SiteAsset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -137,6 +140,9 @@ class Premises extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(FacilityDocument::class, 'documentable');
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(InspectionInstance::class, 'premises_id');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

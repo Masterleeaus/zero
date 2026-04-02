@@ -12,14 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * An individual planned visit within a ServicePlan.
+ * ServicePlanVisit — an individual scheduled occurrence within a ServicePlan.
  *
- * Can be converted into a ServiceJob via generateJob().
+ * When dispatched, the visit is linked to a ServiceJob that executes the work.
  *
- * Visit types: service | inspection | maintenance | key_handover
- * Status:      scheduled | confirmed | in_progress | completed | cancelled | no_access
+ *   ServicePlan → ServicePlanVisit → ServiceJob
  *
- * Source: ManagedPremises/Entities/PropertyVisit.php.
+ * Status: pending | scheduled | completed | skipped | cancelled
  */
 class ServicePlanVisit extends Model
 {
@@ -39,6 +38,8 @@ class ServicePlanVisit extends Model
         'assigned_to',
         'status',
         'completed_at',
+        'scheduled_date',
+        'status',
         'notes',
     ];
 
@@ -49,6 +50,11 @@ class ServicePlanVisit extends Model
 
     protected $attributes = [
         'status' => 'scheduled',
+        'scheduled_date' => 'date',
+    ];
+
+    protected $attributes = [
+        'status' => 'pending',
     ];
 
     // ── Relationships ─────────────────────────────────────────────────────────
@@ -107,5 +113,53 @@ class ServicePlanVisit extends Model
         $this->save();
 
         return $job;
+    }
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Dispatch this visit as a ServiceJob.
+     *
+     * Creates the job if not already linked, and marks this visit as scheduled.
+     */
+    public function dispatch(array $jobAttributes = []): ServiceJob
+    {
+        if ($this->service_job_id && $this->serviceJob) {
+            return $this->serviceJob;
+        }
+
+        $plan      = $this->plan;
+        $agreement = $plan?->agreement;
+
+        $data = array_merge([
+            'company_id'           => $this->company_id,
+            'customer_id'          => $agreement?->customer_id,
+            'premises_id'          => $plan?->premises_id ?? $agreement?->premises_id,
+            'agreement_id'         => $agreement?->id,
+            'title'                => $plan?->title ?? 'Scheduled visit',
+            'status'               => 'scheduled',
+            'scheduled_date_start' => $this->scheduled_date,
+        ], $jobAttributes);
+
+        $job = ServiceJob::create($data);
+
+        $this->update([
+            'service_job_id' => $job->id,
+            'status'         => 'scheduled',
+        ]);
+
+        return $job;
+    }
+
+    // ── Scopes ────────────────────────────────────────────────────────────────
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeUpcoming(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '>=', now()->toDateString());
     }
 }
