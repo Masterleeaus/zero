@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ServiceAgreement extends Model
 {
@@ -93,7 +94,7 @@ class ServiceAgreement extends Model
         return $this->hasMany(ServiceJob::class, 'agreement_id');
     }
 
-    public function servicePlan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function servicePlan(): HasOne
     {
         return $this->hasOne(ServicePlan::class, 'agreement_id');
     }
