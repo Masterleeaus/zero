@@ -9,7 +9,9 @@ use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
 use App\Models\Equipment\Equipment;
 use App\Models\Equipment\InstalledEquipment;
+use App\Models\Work\InspectionInstance;
 use App\Models\Work\ServiceJob;
+use App\Models\Work\SiteAsset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +102,16 @@ class Premises extends Model
     public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class, 'premises_id');
+    }
+
+    public function siteAssets(): HasMany
+    {
+        return $this->hasMany(SiteAsset::class, 'premises_id');
+    }
+
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(InspectionInstance::class, 'premises_id');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -21,7 +21,10 @@ use App\Events\Work\AgreementServiceConsumed;
 use App\Events\Work\ActivityCompleted;
 use App\Events\Work\ActivityCreated;
 use App\Events\Work\ActivityDismissed;
+use App\Events\Work\InspectionCompleted;
+use App\Events\Work\InspectionFailed;
 use App\Events\Work\JobAssigned;
+use App\Events\Work\JobCancelled;
 use App\Events\Work\JobCompleted;
 use App\Events\Work\JobCompletedBillable;
 use App\Events\Work\JobMarkedBillable;
@@ -29,6 +32,9 @@ use App\Events\Work\JobReadyForInvoice;
 use App\Events\Work\JobStageChanged;
 use App\Events\Work\JobStarted;
 use App\Events\Work\ServiceInvoiceGenerated;
+use App\Events\Equipment\EquipmentInstalled;
+use App\Events\Equipment\EquipmentRemoved;
+use App\Events\Equipment\EquipmentReplaced;
 use App\Events\YokassaWebhookEvent;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
@@ -121,6 +127,7 @@ class EventServiceProvider extends ServiceProvider
         // The following Work events are defined for downstream automation.
         // Listeners can be added here as automation rules are wired up.
         JobStarted::class           => [],
+        JobCancelled::class         => [],
         JobAssigned::class          => [],
         JobMarkedBillable::class    => [],
         JobReadyForInvoice::class   => [],
@@ -131,6 +138,13 @@ class EventServiceProvider extends ServiceProvider
         ActivityCreated::class   => [],
         ActivityCompleted::class => [],
         ActivityDismissed::class => [],
+        // Stage K — Inspection lifecycle signals
+        InspectionCompleted::class => [],
+        InspectionFailed::class    => [],
+        // Stage K — Equipment lifecycle signals
+        EquipmentInstalled::class => [],
+        EquipmentRemoved::class   => [],
+        EquipmentReplaced::class  => [],
     ];
 
     /**

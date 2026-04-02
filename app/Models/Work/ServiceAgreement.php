@@ -7,10 +7,12 @@ namespace App\Models\Work;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Crm\Customer;
 use App\Models\Money\Quote;
+use App\Models\Premises\Premises;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ServiceAgreement extends Model
 {
@@ -77,6 +79,11 @@ class ServiceAgreement extends Model
         return $this->belongsTo(Site::class);
     }
 
+    public function premises(): BelongsTo
+    {
+        return $this->belongsTo(Premises::class, 'premises_id');
+    }
+
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);
@@ -85,5 +92,15 @@ class ServiceAgreement extends Model
     public function jobs(): HasMany
     {
         return $this->hasMany(ServiceJob::class, 'agreement_id');
+    }
+
+    public function servicePlan(): HasOne
+    {
+        return $this->hasOne(ServicePlan::class, 'agreement_id');
+    }
+
+    public function servicePlans(): HasMany
+    {
+        return $this->hasMany(ServicePlan::class, 'agreement_id');
     }
 }
