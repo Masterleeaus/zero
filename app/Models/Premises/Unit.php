@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * Unit within a Floor.
@@ -36,6 +37,11 @@ class Unit extends Model
         'status',
         'area_sqm',
         'notes',
+        'unit_type',
+        'occupancy_status',
+        'access_level',
+        'service_priority',
+        'maintenance_zone',
     ];
 
     protected $casts = [
@@ -56,5 +62,44 @@ class Unit extends Model
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class, 'unit_id');
+    }
+
+    public function occupancies(): HasMany
+    {
+        return $this->hasMany(Occupancy::class, 'unit_id');
+    }
+
+    public function siteAssets(): HasMany
+    {
+        return $this->hasMany(\App\Models\Facility\SiteAsset::class, 'unit_id');
+    }
+
+    public function meters(): HasMany
+    {
+        return $this->hasMany(\App\Models\Meter\Meter::class, 'unit_id');
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(FacilityDocument::class, 'documentable');
+    }
+
+    public function hazards(): HasMany
+    {
+        return $this->hasMany(Hazard::class, 'unit_id');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    public function currentOccupancy(): ?Occupancy
+    {
+        return $this->occupancies()
+            ->where('status', 'active')
+            ->where(static function ($q) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->toDateString());
+            })
+            ->latest('start_date')
+            ->first();
     }
 }

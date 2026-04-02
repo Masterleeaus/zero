@@ -33,12 +33,23 @@ class ServicePlanVisit extends Model
         'created_by',
         'service_plan_id',
         'service_job_id',
+        'visit_type',
+        'scheduled_for',
+        'assigned_to',
+        'status',
+        'completed_at',
         'scheduled_date',
         'status',
         'notes',
     ];
 
     protected $casts = [
+        'scheduled_for' => 'datetime',
+        'completed_at'  => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status' => 'scheduled',
         'scheduled_date' => 'date',
     ];
 
@@ -58,6 +69,51 @@ class ServicePlanVisit extends Model
         return $this->belongsTo(ServiceJob::class, 'service_job_id');
     }
 
+    // ── Scopes ────────────────────────────────────────────────────────────────
+
+    public function scopeScheduled(Builder $query): Builder
+    {
+        return $query->where('status', 'scheduled');
+    }
+
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('status', 'completed');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    public function hasLinkedJob(): bool
+    {
+        return $this->service_job_id !== null;
+    }
+
+    /**
+     * Generate a ServiceJob from this planned visit.
+     *
+     * Pulls context from the parent ServicePlan (premises, customer, agreement).
+     */
+    public function generateJob(array $attributes = []): ServiceJob
+    {
+        $plan = $this->plan;
+
+        $data = array_merge([
+            'company_id'   => $this->company_id,
+            'customer_id'  => $plan->customer_id,
+            'premises_id'  => $plan->premises_id,
+            'agreement_id' => $plan->agreement_id,
+            'title'        => $attributes['title'] ?? ($plan->name . ' visit'),
+            'status'       => $attributes['status'] ?? 'scheduled',
+            'scheduled_at' => $this->scheduled_for,
+        ], $attributes);
+
+        $job = ServiceJob::create($data);
+
+        $this->service_job_id = $job->id;
+        $this->save();
+
+        return $job;
+    }
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**

@@ -6,6 +6,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\Crm\Customer;
 use App\Models\Premises\Premises;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * Recurring service configuration for a Premises / Customer.
+ *
+ * Position in the triangle:
+ *   Agreement   → defines entitlement / commercial terms
+ *   ServicePlan → defines visit schedule & template injections
+ *   ServiceJob  → executes work on each scheduled visit
+ *
+ * Frequency values: daily | weekly | fortnightly | monthly | quarterly | annual
+ *
+ * Source: ManagedPremises/Entities/PropertyServicePlan.php.
  * ServicePlan — schedule definition attached to a ServiceAgreement.
  *
  * Sits between Agreement (entitlement) and ServicePlanVisit (occurrence):
@@ -34,6 +45,21 @@ class ServicePlan extends Model
     protected $fillable = [
         'company_id',
         'created_by',
+        'premises_id',
+        'customer_id',
+        'agreement_id',
+        'name',
+        'service_type',
+        'frequency',
+        'interval',
+        'rrule',
+        'preferred_days',
+        'preferred_times',
+        'starts_on',
+        'ends_on',
+        'next_visit_due',
+        'last_visit_completed',
+        'is_active',
         'agreement_id',
         'premises_id',
         'title',
@@ -46,6 +72,20 @@ class ServicePlan extends Model
     ];
 
     protected $casts = [
+        'preferred_days'       => 'array',
+        'preferred_times'      => 'array',
+        'starts_on'            => 'date',
+        'ends_on'              => 'date',
+        'next_visit_due'       => 'date',
+        'last_visit_completed' => 'date',
+        'is_active'            => 'boolean',
+        'interval'             => 'integer',
+    ];
+
+    protected $attributes = [
+        'frequency' => 'monthly',
+        'interval'  => 1,
+        'is_active' => true,
         'start_date'       => 'date',
         'end_date'         => 'date',
         'visits_per_cycle' => 'integer',
@@ -59,11 +99,31 @@ class ServicePlan extends Model
 
     // ── Relationships ─────────────────────────────────────────────────────────
 
+    public function premises(): BelongsTo
+    {
+        return $this->belongsTo(Premises::class, 'premises_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
     public function agreement(): BelongsTo
     {
         return $this->belongsTo(ServiceAgreement::class, 'agreement_id');
     }
 
+    public function visits(): HasMany
+    {
+        return $this->hasMany(ServicePlanVisit::class, 'service_plan_id')
+            ->orderBy('scheduled_for');
+    }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(ServicePlanChecklist::class, 'service_plan_id')
+            ->orderBy('sort_order');
     public function premises(): BelongsTo
     {
         return $this->belongsTo(Premises::class, 'premises_id');
@@ -78,6 +138,40 @@ class ServicePlan extends Model
 
     public function scopeActive(Builder $query): Builder
     {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeDue(Builder $query): Builder
+    {
+        return $query->where('is_active', true)
+            ->where('next_visit_due', '<=', now()->toDateString());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Advance the next_visit_due date after a visit is completed.
+     */
+    public function advanceNextVisitDue(): void
+    {
+        if (! $this->next_visit_due) {
+            return;
+        }
+
+        $date = \Carbon\Carbon::parse($this->next_visit_due);
+
+        $this->next_visit_due = match ($this->frequency) {
+            'daily'       => $date->addDays($this->interval)->toDateString(),
+            'weekly'      => $date->addWeeks($this->interval)->toDateString(),
+            'fortnightly' => $date->addWeeks(2 * $this->interval)->toDateString(),
+            'monthly'     => $date->addMonthsNoOverflow($this->interval)->toDateString(),
+            'quarterly'   => $date->addMonthsNoOverflow(3 * $this->interval)->toDateString(),
+            'annual'      => $date->addYears($this->interval)->toDateString(),
+            default       => $date->addMonthsNoOverflow($this->interval)->toDateString(),
+        };
+
+        $this->last_visit_completed = now()->toDateString();
+        $this->save();
         return $query->where('status', 'active');
     }
 }

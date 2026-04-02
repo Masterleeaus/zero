@@ -235,6 +235,9 @@ class ServiceJob extends Model
         return $this->hasMany(EquipmentMovement::class, 'service_job_id');
     }
 
+    public function inspectionInstances(): HasMany
+    {
+        return $this->hasMany(\App\Models\Inspection\InspectionInstance::class, 'service_job_id');
     public function inspections(): HasMany
     {
         return $this->hasMany(InspectionInstance::class, 'service_job_id');
@@ -242,6 +245,8 @@ class ServiceJob extends Model
 
     public function checklistRuns(): HasMany
     {
+        return $this->hasMany(ChecklistRun::class, 'runnable_id')
+            ->where('runnable_type', self::class);
         return $this->hasMany(ChecklistRun::class, 'service_job_id');
     }
 
@@ -371,6 +376,33 @@ class ServiceJob extends Model
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Stage G — Active hazards for the premises associated with this job.
+     * Returns hazards scoped to premises_id when available.
+     */
+    public function siteHazards(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (! $this->premises_id) {
+            return collect();
+        }
+
+        return \App\Models\Premises\Hazard::where('premises_id', $this->premises_id)
+            ->where('status', 'active')
+            ->get();
+    }
+
+    /**
+     * Site access profile for this job's premises.
+     */
+    public function siteAccessProfile(): ?\App\Models\Premises\SiteAccessProfile
+    {
+        if (! $this->premises_id) {
+            return null;
+        }
+
+        return $this->premises?->activeSiteAccess();
+    }
 
     /**
      * Assign a technician as the primary assigned user.
