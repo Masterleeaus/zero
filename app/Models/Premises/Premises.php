@@ -11,11 +11,10 @@ use App\Models\Equipment\Equipment;
 use App\Models\Equipment\InstalledEquipment;
 use App\Models\Facility\SiteAsset;
 use App\Models\Meter\Meter;
-use App\Models\Work\ServiceJob;
-use App\Models\Work\ServicePlan;
 use App\Models\Work\InspectionInstance;
 use App\Models\Work\ServiceJob;
-use App\Models\Work\SiteAsset;
+use App\Models\Work\ServicePlan;
+use App\Models\Work\ServicePlanVisit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -140,9 +139,36 @@ class Premises extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(FacilityDocument::class, 'documentable');
+    }
+
     public function inspections(): HasMany
     {
         return $this->hasMany(InspectionInstance::class, 'premises_id');
+    }
+
+    public function serviceVisits(): HasManyThrough
+    {
+        return $this->hasManyThrough(ServicePlanVisit::class, ServicePlan::class, 'premises_id', 'service_plan_id');
+    }
+
+    /**
+     * All occupancies within units of this premises.
+     *
+     * Traverses the full Premises→Building→Floor→Unit→Occupancy hierarchy.
+     * Returns a QueryBuilder (not an Eloquent relation) because the four-level
+     * chain cannot be expressed as a single hasManyThrough.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Models\Premises\Occupancy>
+     */
+    public function occupancies(): \Illuminate\Database\Eloquent\Builder
+    {
+        $unitIds = \App\Models\Premises\Unit::query()
+            ->whereHas('floor', fn ($q) => $q->whereHas('building', fn ($b) => $b->where('premises_id', $this->id)))
+            ->pluck('id');
+
+        return \App\Models\Premises\Occupancy::query()
+            ->whereIn('unit_id', $unitIds)
+            ->where('company_id', $this->company_id);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -15,16 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Recurring service configuration for a Premises / Customer.
- *
- * Position in the triangle:
- *   Agreement   → defines entitlement / commercial terms
- *   ServicePlan → defines visit schedule & template injections
- *   ServiceJob  → executes work on each scheduled visit
- *
- * Frequency values: daily | weekly | fortnightly | monthly | quarterly | annual
- *
- * Source: ManagedPremises/Entities/PropertyServicePlan.php.
  * ServicePlan — schedule definition attached to a ServiceAgreement.
  *
  * Sits between Agreement (entitlement) and ServicePlanVisit (occurrence):
@@ -49,6 +39,7 @@ class ServicePlan extends Model
         'customer_id',
         'agreement_id',
         'name',
+        'title',
         'service_type',
         'frequency',
         'interval',
@@ -57,16 +48,12 @@ class ServicePlan extends Model
         'preferred_times',
         'starts_on',
         'ends_on',
+        'start_date',
+        'end_date',
         'next_visit_due',
         'last_visit_completed',
         'is_active',
-        'agreement_id',
-        'premises_id',
-        'title',
-        'frequency',
         'visits_per_cycle',
-        'start_date',
-        'end_date',
         'status',
         'notes',
     ];
@@ -76,24 +63,20 @@ class ServicePlan extends Model
         'preferred_times'      => 'array',
         'starts_on'            => 'date',
         'ends_on'              => 'date',
+        'start_date'           => 'date',
+        'end_date'             => 'date',
         'next_visit_due'       => 'date',
         'last_visit_completed' => 'date',
         'is_active'            => 'boolean',
         'interval'             => 'integer',
+        'visits_per_cycle'     => 'integer',
     ];
 
     protected $attributes = [
-        'frequency' => 'monthly',
-        'interval'  => 1,
-        'is_active' => true,
-        'start_date'       => 'date',
-        'end_date'         => 'date',
-        'visits_per_cycle' => 'integer',
-    ];
-
-    protected $attributes = [
-        'status'           => 'active',
         'frequency'        => 'monthly',
+        'interval'         => 1,
+        'is_active'        => true,
+        'status'           => 'active',
         'visits_per_cycle' => 1,
     ];
 
@@ -124,14 +107,6 @@ class ServicePlan extends Model
     {
         return $this->hasMany(ServicePlanChecklist::class, 'service_plan_id')
             ->orderBy('sort_order');
-    public function premises(): BelongsTo
-    {
-        return $this->belongsTo(Premises::class, 'premises_id');
-    }
-
-    public function visits(): HasMany
-    {
-        return $this->hasMany(ServicePlanVisit::class, 'service_plan_id');
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
@@ -172,6 +147,5 @@ class ServicePlan extends Model
 
         $this->last_visit_completed = now()->toDateString();
         $this->save();
-        return $query->where('status', 'active');
     }
 }

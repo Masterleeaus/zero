@@ -17,12 +17,13 @@ use App\Events\StripeLifetimeEvent;
 use App\Events\StripeWebhookEvent;
 use App\Events\TwoCheckoutWebhookEvent;
 use App\Events\UsersActivityEvent;
-use App\Events\Work\AgreementServiceConsumed;
 use App\Events\Work\ActivityCompleted;
 use App\Events\Work\ActivityCreated;
 use App\Events\Work\ActivityDismissed;
-use App\Events\Work\InspectionCompleted;
-use App\Events\Work\InspectionFailed;
+use App\Events\Work\AgreementServiceConsumed;
+use App\Events\Work\ChecklistRunCompleted;
+use App\Events\Work\InspectionCompleted as WorkInspectionCompleted;
+use App\Events\Work\InspectionFailed as WorkInspectionFailed;
 use App\Events\Work\JobAssigned;
 use App\Events\Work\JobCancelled;
 use App\Events\Work\JobCompleted;
@@ -32,9 +33,19 @@ use App\Events\Work\JobReadyForInvoice;
 use App\Events\Work\JobStageChanged;
 use App\Events\Work\JobStarted;
 use App\Events\Work\ServiceInvoiceGenerated;
+use App\Events\Work\ServicePlanVisitCompleted;
+use App\Events\Work\ServicePlanVisitDispatched;
+use App\Events\Work\ServicePlanVisitScheduled;
 use App\Events\Equipment\EquipmentInstalled;
 use App\Events\Equipment\EquipmentRemoved;
 use App\Events\Equipment\EquipmentReplaced;
+use App\Events\Inspection\InspectionCompleted;
+use App\Events\Inspection\InspectionFailed;
+use App\Events\Inspection\InspectionFollowupRequired;
+use App\Events\Inspection\InspectionScheduled;
+use App\Events\Inspection\InspectionStarted;
+use App\Events\Premises\HazardDetected;
+use App\Events\Premises\HazardResolved;
 use App\Events\YokassaWebhookEvent;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
@@ -126,25 +137,40 @@ class EventServiceProvider extends ServiceProvider
         ],
         // The following Work events are defined for downstream automation.
         // Listeners can be added here as automation rules are wired up.
-        JobStarted::class           => [],
-        JobCancelled::class         => [],
-        JobAssigned::class          => [],
-        JobMarkedBillable::class    => [],
-        JobReadyForInvoice::class   => [],
-        JobCompletedBillable::class => [],
-        AgreementServiceConsumed::class  => [],
-        ServiceInvoiceGenerated::class   => [],
+        JobStarted::class            => [],
+        JobCancelled::class          => [],
+        JobAssigned::class           => [],
+        JobMarkedBillable::class     => [],
+        JobReadyForInvoice::class    => [],
+        JobCompletedBillable::class  => [],
+        AgreementServiceConsumed::class => [],
+        ServiceInvoiceGenerated::class  => [],
         // Module 4 — fieldservice_activity lifecycle signals
         ActivityCreated::class   => [],
         ActivityCompleted::class => [],
         ActivityDismissed::class => [],
-        // Stage K — Inspection lifecycle signals
-        InspectionCompleted::class => [],
-        InspectionFailed::class    => [],
-        // Stage K — Equipment lifecycle signals
+        // Work-namespace inspection signals (from fieldservice layer)
+        WorkInspectionCompleted::class => [],
+        WorkInspectionFailed::class    => [],
+        // ── Inspection lifecycle signals (canonical Inspection namespace) ──
+        InspectionScheduled::class        => [],
+        InspectionStarted::class          => [],
+        InspectionCompleted::class        => [],
+        InspectionFailed::class           => [],
+        InspectionFollowupRequired::class => [],
+        // ── Equipment lifecycle signals ────────────────────────────────────
         EquipmentInstalled::class => [],
         EquipmentRemoved::class   => [],
         EquipmentReplaced::class  => [],
+        // ── ServicePlanVisit lifecycle signals ────────────────────────────
+        ServicePlanVisitScheduled::class  => [],
+        ServicePlanVisitDispatched::class => [],
+        ServicePlanVisitCompleted::class  => [],
+        // ── Checklist lifecycle signals ───────────────────────────────────
+        ChecklistRunCompleted::class => [],
+        // ── Hazard lifecycle signals ──────────────────────────────────────
+        HazardDetected::class => [],
+        HazardResolved::class => [],
     ];
 
     /**

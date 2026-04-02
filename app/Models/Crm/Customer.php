@@ -11,6 +11,8 @@ use App\Models\Money\Quote;
 use App\Models\Premises\Premises;
 use App\Models\User;
 use App\Models\Work\ServiceJob;
+use App\Models\Work\ServicePlan;
+use App\Models\Work\ServicePlanVisit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -302,5 +304,102 @@ class Customer extends Model
     public function activePremises(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->premises()->where('status', 'active')->get();
+    }
+
+    // ── Stage G — CRM Service Intelligence ───────────────────────────────────
+
+    /**
+     * Upcoming scheduled service visits across all premises for this customer.
+     *
+     * Returns ServicePlanVisit records that are pending or scheduled and not yet past.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, ServicePlanVisit>
+     */
+    public function upcomingServiceVisits(): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        return ServicePlanVisit::query()
+            ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds)
+                ->orWhere('customer_id', $this->id))
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where(function ($q) {
+                $q->where(function ($inner) {
+                    $inner->whereNotNull('scheduled_date')
+                          ->where('scheduled_date', '>=', now()->toDateString());
+                })->orWhere(function ($inner) {
+                    $inner->whereNotNull('scheduled_for')
+                          ->where('scheduled_for', '>=', now());
+                });
+            })
+            ->orderBy('scheduled_date')
+            ->orderBy('scheduled_for')
+            ->get();
+    }
+
+    /**
+     * Active hazards across all premises belonging to this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Premises\Hazard>
+     */
+    public function activeHazards(): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        return \App\Models\Premises\Hazard::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('status', 'active')
+            ->orderBy('severity')
+            ->get();
+    }
+
+    /**
+     * Service plan coverage summary for this customer.
+     *
+     * Returns a snapshot of active plans, upcoming visits, and overdue visits
+     * across all premises.
+     *
+     * @return array{
+     *     active_plans: int,
+     *     upcoming_visits: int,
+     *     overdue_visits: int,
+     *     premises_covered: int,
+     *     premises_without_plan: int
+     * }
+     */
+    public function servicePlanCoverageSummary(): array
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        $activePlans = ServicePlan::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('is_active', true)
+            ->count();
+
+        $upcomingVisits = ServicePlanVisit::query()
+            ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds))
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '>=', now()->toDateString())
+            ->count();
+
+        $overdueVisits = ServicePlanVisit::query()
+            ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds))
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '<', now()->toDateString())
+            ->count();
+
+        $premisesCovered = ServicePlan::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('is_active', true)
+            ->distinct('premises_id')
+            ->count('premises_id');
+
+        return [
+            'active_plans'           => $activePlans,
+            'upcoming_visits'        => $upcomingVisits,
+            'overdue_visits'         => $overdueVisits,
+            'premises_covered'       => $premisesCovered,
+            'premises_without_plan'  => max(0, $premisesIds->count() - $premisesCovered),
+        ];
     }
 }

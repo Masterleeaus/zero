@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Work;
 
+use App\Contracts\SchedulableEntity;
+use App\Events\Work\ServicePlanVisitDispatched;
+use App\Events\Work\ServicePlanVisitScheduled;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Status: pending | scheduled | completed | skipped | cancelled
  */
-class ServicePlanVisit extends Model
+class ServicePlanVisit extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -35,21 +38,16 @@ class ServicePlanVisit extends Model
         'service_job_id',
         'visit_type',
         'scheduled_for',
+        'scheduled_date',
         'assigned_to',
         'status',
         'completed_at',
-        'scheduled_date',
-        'status',
         'notes',
     ];
 
     protected $casts = [
-        'scheduled_for' => 'datetime',
-        'completed_at'  => 'datetime',
-    ];
-
-    protected $attributes = [
-        'status' => 'scheduled',
+        'scheduled_for'  => 'datetime',
+        'completed_at'   => 'datetime',
         'scheduled_date' => 'date',
     ];
 
@@ -71,6 +69,11 @@ class ServicePlanVisit extends Model
 
     // ── Scopes ────────────────────────────────────────────────────────────────
 
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 'pending');
+    }
+
     public function scopeScheduled(Builder $query): Builder
     {
         return $query->where('status', 'scheduled');
@@ -79,6 +82,12 @@ class ServicePlanVisit extends Model
     public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
+    }
+
+    public function scopeUpcoming(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '>=', now()->toDateString());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -92,6 +101,7 @@ class ServicePlanVisit extends Model
      * Generate a ServiceJob from this planned visit.
      *
      * Pulls context from the parent ServicePlan (premises, customer, agreement).
+     * Fires ServicePlanVisitScheduled event.
      */
     public function generateJob(array $attributes = []): ServiceJob
     {
@@ -112,14 +122,18 @@ class ServicePlanVisit extends Model
         $this->service_job_id = $job->id;
         $this->save();
 
+        ServicePlanVisitScheduled::dispatch($this);
+
         return $job;
     }
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**
      * Dispatch this visit as a ServiceJob.
      *
-     * Creates the job if not already linked, and marks this visit as scheduled.
+     * Creates the job if not already linked, marks this visit as scheduled,
+     * and fires ServicePlanVisitDispatched event.
+     *
+     * Ensures agreement_id, premises_id, customer_id, and company_id propagate.
      */
     public function dispatch(array $jobAttributes = []): ServiceJob
     {
@@ -132,12 +146,12 @@ class ServicePlanVisit extends Model
 
         $data = array_merge([
             'company_id'           => $this->company_id,
-            'customer_id'          => $agreement?->customer_id,
+            'customer_id'          => $plan?->customer_id ?? $agreement?->customer_id,
             'premises_id'          => $plan?->premises_id ?? $agreement?->premises_id,
-            'agreement_id'         => $agreement?->id,
-            'title'                => $plan?->title ?? 'Scheduled visit',
+            'agreement_id'         => $plan?->agreement_id ?? $agreement?->id,
+            'title'                => $plan?->name ?? $plan?->title ?? 'Scheduled visit',
             'status'               => 'scheduled',
-            'scheduled_date_start' => $this->scheduled_date,
+            'scheduled_date_start' => $this->scheduled_date ?? $this->scheduled_for?->toDateString(),
         ], $jobAttributes);
 
         $job = ServiceJob::create($data);
@@ -147,19 +161,46 @@ class ServicePlanVisit extends Model
             'status'         => 'scheduled',
         ]);
 
+        ServicePlanVisitDispatched::dispatch($this, $job);
+
         return $job;
     }
 
-    // ── Scopes ────────────────────────────────────────────────────────────────
+    // ── SchedulableEntity contract ────────────────────────────────────────────
 
-    public function scopePending(Builder $query): Builder
+    public function getScheduledStart(): ?string
     {
-        return $query->where('status', 'pending');
+        return $this->scheduled_for?->toIso8601String()
+            ?? ($this->scheduled_date ? \Carbon\Carbon::parse($this->scheduled_date)->toIso8601String() : null);
     }
 
-    public function scopeUpcoming(Builder $query): Builder
+    public function getScheduledEnd(): ?string
     {
-        return $query->whereIn('status', ['pending', 'scheduled'])
-            ->where('scheduled_date', '>=', now()->toDateString());
+        return null;
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_to;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'pending';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return null;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->plan?->name ?? 'Service Visit #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
     }
 }

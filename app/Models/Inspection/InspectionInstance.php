@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Inspection;
 
+use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Work\ServiceJob;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Status values: scheduled | in_progress | completed | failed | cancelled
  */
-class InspectionInstance extends Model
+class InspectionInstance extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -131,5 +132,42 @@ class InspectionInstance extends Model
     public function hasFailed(): bool
     {
         return $this->status === 'failed';
+    }
+
+    // ── SchedulableEntity contract ────────────────────────────────────────────
+
+    public function getScheduledStart(): ?string
+    {
+        return $this->scheduled_at?->toIso8601String();
+    }
+
+    public function getScheduledEnd(): ?string
+    {
+        return null;
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_to ?? $this->inspector_id;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'scheduled';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return null;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->title ?? 'Inspection #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
     }
 }
