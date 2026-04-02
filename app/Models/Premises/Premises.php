@@ -102,6 +102,16 @@ class Premises extends Model
         return $this->hasMany(Equipment::class, 'premises_id');
     }
 
+    public function siteAssets(): HasMany
+    {
+        return $this->hasMany(\App\Models\Work\SiteAsset::class, 'premises_id');
+    }
+
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(\App\Models\Work\InspectionInstance::class, 'premises_id');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isActive(): bool
