@@ -614,19 +614,77 @@ class ServiceJob extends Model implements SchedulableEntity
     public function toCalendarEvent(): array
     {
         return [
-            'id'              => $this->id,
-            'title'           => $this->title,
-            'start'           => $this->scheduled_date_start?->toIso8601String(),
-            'end'             => $this->scheduled_date_end?->toIso8601String(),
-            'color'           => $this->stage?->color ?? '#3B82F6',
-            'extendedProps'   => [
-                'status'     => $this->status,
-                'priority'   => $this->priority,
-                'assignee'   => $this->assignedUser?->name,
-                'customer'   => $this->customer?->name,
-                'site'       => $this->site?->name,
-                'duration'   => $this->scheduled_duration_formatted,
-            ],
+            'id'            => $this->id,
+            'title'         => $this->calendarTitle(),
+            'start'         => $this->scheduled_date_start?->toIso8601String(),
+            'end'           => $this->scheduled_date_end?->toIso8601String(),
+            'color'         => $this->calendarColor(),
+            'extendedProps' => $this->calendarMeta(),
+        ];
+    }
+
+    /**
+     * Human-readable calendar event title.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarTitle(): string
+    {
+        $base = $this->title ?? ('Job #' . $this->id);
+
+        if ($customer = $this->customer?->name) {
+            return $base . ' — ' . $customer;
+        }
+
+        return $base;
+    }
+
+    /**
+     * Calendar event colour — stage colour if set, otherwise priority-based fallback.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarColor(): string
+    {
+        if ($stageColor = $this->stage?->color) {
+            return $stageColor;
+        }
+
+        return match ($this->priority) {
+            'urgent' => '#ef4444',   // red-500
+            'high'   => '#f97316',   // orange-500
+            'normal' => '#3b82f6',   // blue-500
+            'low'    => '#6b7280',   // gray-500
+            default  => '#3b82f6',
+        };
+    }
+
+    /**
+     * Extended calendar metadata for FullCalendar extendedProps / rich tooltip rendering.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function calendarMeta(): array
+    {
+        return [
+            'type'         => 'service_job',
+            'status'       => $this->status,
+            'priority'     => $this->priority,
+            'assignee'     => $this->assignedUser?->name,
+            'assignee_id'  => $this->assigned_user_id,
+            'team'         => $this->team?->name,
+            'team_id'      => $this->team_id,
+            'customer'     => $this->customer?->name,
+            'customer_id'  => $this->customer_id,
+            'premises_id'  => $this->premises_id,
+            'site'         => $this->site?->name,
+            'duration'     => $this->scheduled_duration_formatted,
+            'is_billable'  => $this->is_billable,
+            'enquiry_id'   => $this->enquiry_id,
+            'deal_id'      => $this->deal_id,
+            'agreement_id' => $this->agreement_id,
         ];
     }
 

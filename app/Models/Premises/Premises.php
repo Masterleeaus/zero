@@ -212,6 +212,44 @@ class Premises extends Model
             ->first();
     }
 
+    /**
+     * Upcoming (not-yet-completed) inspections for this premises.
+     *
+     * Module 9 (fieldservice_calendar) — premises calendar surface helper.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\InspectionInstance>
+     */
+    public function upcomingInspections(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->inspections()
+            ->whereNotIn('status', ['completed', 'failed', 'cancelled'])
+            ->where(function ($q) {
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '>=', now());
+            })
+            ->orderBy('scheduled_at')
+            ->get();
+    }
+
+    /**
+     * Upcoming open service jobs for this premises.
+     *
+     * Module 9 (fieldservice_calendar) — premises calendar surface helper.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceJob>
+     */
+    public function upcomingServiceJobs(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->serviceJobs()
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->where(function ($q) {
+                $q->whereNull('scheduled_date_start')
+                  ->orWhere('scheduled_date_start', '>=', now());
+            })
+            ->orderBy('scheduled_date_start')
+            ->get();
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): Builder
