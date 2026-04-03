@@ -1,19 +1,17 @@
 /**
- * Titan Zero Service Worker — v2
+ * Titan Zero Service Worker — v3
  * Strategies:
  *   - Navigation requests : network-first → offline fallback
  *   - Same-origin GET     : stale-while-revalidate
  *   - Manifest / icons    : cache-first
  *   - Cross-origin / non-GET : network-only
  *
- * Phase 2 additions:
- *   - Background Sync API registration (graceful fallback)
- *   - Update-available notification to client
- *   - Safe cache version rotation
- *   - Skip-waiting via postMessage
+ * Phase 3 changes:
+ *   - Cache version bumped to v3
+ *   - Capability profile JS added to shell assets
  */
 
-const CACHE_VERSION = 'titan-zero-v2';
+const CACHE_VERSION = 'titan-zero-v3';
 const CACHE_NAME    = CACHE_VERSION;
 const OFFLINE_URL   = '/offline';
 const BG_SYNC_TAG   = 'titan-signal-sync';
