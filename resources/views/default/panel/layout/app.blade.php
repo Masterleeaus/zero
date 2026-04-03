@@ -283,6 +283,9 @@
 
 	@includeIf('demoextension::switcher')
     @includeIf('content-manager::media-modal')
+
+    {{-- Titan Zero PWA Runtime --}}
+    @includeIf('panel.layout.partials.pwa-runtime')
 </body>
 
 </html>
