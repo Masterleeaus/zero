@@ -25,6 +25,7 @@ class JobStage extends Model
         'is_invoiceable',
         'fold',
         'require_signature',
+        'portal_visible',
         'color',
         'description',
     ];
@@ -35,6 +36,7 @@ class JobStage extends Model
         'is_invoiceable'    => 'boolean',
         'fold'              => 'boolean',
         'require_signature' => 'boolean',
+        'portal_visible'    => 'boolean',
     ];
 
     protected $attributes = [
@@ -44,6 +46,7 @@ class JobStage extends Model
         'is_invoiceable'    => false,
         'fold'              => false,
         'require_signature' => false,
+        'portal_visible'    => true,
         'color'             => '#FFFFFF',
         'sequence'          => 1,
     ];
@@ -66,5 +69,10 @@ class JobStage extends Model
     public function scopeInvoiceable(Builder $query): Builder
     {
         return $query->where('is_invoiceable', true);
+    }
+
+    public function scopePortalVisible(Builder $query): Builder
+    {
+        return $query->where('portal_visible', true);
     }
 }

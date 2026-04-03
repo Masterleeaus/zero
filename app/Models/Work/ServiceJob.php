@@ -106,6 +106,9 @@ class ServiceJob extends Model implements SchedulableEntity
         'is_warranty_job',
         'warranty_claim_id',
         'covered_equipment_id',
+        // Module 21 — fieldservice_project linkage
+        'project_id',
+        'project_task_ref',
     ];
 
     protected $casts = [
@@ -1000,5 +1003,58 @@ class ServiceJob extends Model implements SchedulableEntity
     public function repairOrders(): HasMany
     {
         return $this->hasMany(RepairOrder::class, 'service_job_id');
+    }
+
+    // ── Project relationships (Module 21 — fieldservice_project) ─────────────
+
+    public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(FieldServiceProject::class, 'project_id');
+    }
+
+    // ── Portal scopes (Module 21 — fieldservice_portal) ───────────────────────
+
+    public function scopePortalVisible(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->whereHas('stage', fn ($q) => $q->where('portal_visible', true));
+    }
+
+    // ── Portal helpers ────────────────────────────────────────────────────────
+
+    public function toPortalCard(): array
+    {
+        return [
+            'id'               => $this->id,
+            'title'            => $this->title ?? 'Service Job #' . $this->id,
+            'status'           => $this->portalStatusLabel(),
+            'schedule'         => $this->portalScheduleLabel(),
+            'stage'            => $this->stage?->name,
+            'premises'         => $this->premises?->name,
+            'assigned_to'      => $this->assignedUser?->name,
+        ];
+    }
+
+    public function portalStatusLabel(): string
+    {
+        return match ($this->status) {
+            'draft'      => 'Pending',
+            'scheduled'  => 'Scheduled',
+            'in_progress', 'started' => 'In Progress',
+            'completed'  => 'Completed',
+            'cancelled'  => 'Cancelled',
+            'closed'     => 'Closed',
+            default      => ucfirst((string) $this->status),
+        };
+    }
+
+    public function portalScheduleLabel(): string
+    {
+        if ($this->scheduled_date_start) {
+            return \Illuminate\Support\Carbon::parse($this->scheduled_date_start)->format('d M Y');
+        }
+        if ($this->scheduled_at) {
+            return \Illuminate\Support\Carbon::parse($this->scheduled_at)->format('d M Y');
+        }
+        return 'To be confirmed';
     }
 }

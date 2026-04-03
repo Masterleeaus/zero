@@ -592,4 +592,116 @@ class Customer extends Model
             ->open()
             ->get();
     }
+
+    // ── Portal helpers (Module 21 — fieldservice_portal) ─────────────────────
+
+    /**
+     * Upcoming service plan visits for this customer's premises.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServicePlanVisit>
+     */
+    public function upcomingPortalVisits(int $limit = 10): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = Premises::query()
+            ->where('customer_id', $this->id)
+            ->pluck('id');
+
+        return \App\Models\Work\ServicePlanVisit::query()
+            ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds))
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where(function ($q) {
+                $q->whereNotNull('scheduled_date')
+                  ->where('scheduled_date', '>=', now()->toDateString())
+                  ->orWhereNotNull('scheduled_for')
+                  ->where('scheduled_for', '>=', now());
+            })
+            ->orderBy('scheduled_date')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Recent completed service jobs for this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceJob>
+     */
+    public function portalServiceHistory(int $limit = 20): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->serviceJobs()
+            ->whereHas('stage', fn ($q) => $q->where('portal_visible', true))
+            ->whereIn('status', ['completed', 'closed'])
+            ->latest('date_end')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * All invoices for this customer (portal-safe collection).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Money\Invoice>
+     */
+    public function portalInvoices(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->invoices()->orderByDesc('created_at')->get();
+    }
+
+    /**
+     * Quotes in accepted or sent state for portal display.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Money\Quote>
+     */
+    public function portalQuotes(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->quotes()
+            ->whereIn('status', ['sent', 'accepted', 'pending'])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * All installed equipment across customer premises for portal assets view.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function portalAssets(): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = Premises::query()
+            ->where('customer_id', $this->id)
+            ->pluck('id');
+
+        return \App\Models\Equipment\InstalledEquipment::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('company_id', $this->company_id)
+            ->get();
+    }
+
+    /**
+     * Active service agreements for this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceAgreement>
+     */
+    public function portalAgreements(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\ServiceAgreement::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('status', 'active')
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * Payments linked to this customer's invoices.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Money\Payment>
+     */
+    public function portalPayments(): \Illuminate\Database\Eloquent\Collection
+    {
+        $invoiceIds = $this->invoices()->pluck('id');
+
+        return \App\Models\Money\Payment::query()
+            ->whereIn('invoice_id', $invoiceIds)
+            ->orderByDesc('created_at')
+            ->get();
+    }
 }
