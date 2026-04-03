@@ -120,4 +120,51 @@ class ServiceAgreement extends Model
     {
         return $this->status === 'active';
     }
+
+    // ── fieldservice_sale_agreement helpers ───────────────────────────────────
+
+    /**
+     * The Quote that activated or originated this service agreement.
+     *
+     * Mirrors Odoo fieldservice_sale_agreement: agreement_id propagated from sale → fsm.order.
+     * Checks originating_quote_id first, then quote_id.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        if ($this->originating_quote_id) {
+            return \App\Models\Money\Quote::find($this->originating_quote_id);
+        }
+
+        return $this->quote;
+    }
+
+    /**
+     * Summary of service coverage sold through this agreement.
+     *
+     * @return array{
+     *     agreement_id: int,
+     *     status: string,
+     *     originating_quote_id: int|null,
+     *     total_jobs: int,
+     *     completed_jobs: int,
+     *     pending_jobs: int,
+     *     total_visits: int,
+     *     completed_visits: int
+     * }
+     */
+    public function saleCoverageSummary(): array
+    {
+        $jobs = $this->jobs();
+
+        return [
+            'agreement_id'        => $this->id,
+            'status'              => $this->status,
+            'originating_quote_id' => $this->originating_quote_id ?? $this->quote_id,
+            'total_jobs'          => (clone $jobs)->count(),
+            'completed_jobs'      => (clone $jobs)->where('status', 'completed')->count(),
+            'pending_jobs'        => (clone $jobs)->whereNotIn('status', ['completed', 'cancelled'])->count(),
+            'total_visits'        => $this->visits()->count(),
+            'completed_visits'    => $this->visits()->where('status', 'completed')->count(),
+        ];
+    }
 }

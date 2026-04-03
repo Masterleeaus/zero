@@ -592,4 +592,103 @@ class Customer extends Model
             ->open()
             ->get();
     }
+
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * Service jobs for this customer that originated from an accepted quote.
+     *
+     * A "sold" job is one with a quote_id that is in accepted/approved status.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, ServiceJob>
+     */
+    public function soldServiceJobs(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->serviceJobs()
+            ->whereNotNull('quote_id')
+            ->get();
+    }
+
+    /**
+     * Service agreements for this customer that were created via a quote/sale.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceAgreement>
+     */
+    public function soldAgreements(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\ServiceAgreement::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where(function ($q) {
+                $q->whereNotNull('quote_id')
+                  ->orWhereNotNull('originating_quote_id');
+            })
+            ->get();
+    }
+
+    /**
+     * Chronological timeline of quote-to-service transitions for this customer.
+     *
+     * Returns a merged view of:
+     *   - accepted/approved quotes
+     *   - service jobs linked to those quotes
+     *   - service agreements linked to those quotes
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function saleToServiceTimeline(): \Illuminate\Support\Collection
+    {
+        $entries = collect();
+
+        // Accepted quotes
+        $quotes = $this->quotes()
+            ->whereIn('status', ['accepted', 'approved', 'converted'])
+            ->orderByDesc('issue_date')
+            ->get();
+
+        foreach ($quotes as $quote) {
+            $entries->push([
+                'type'        => 'quote_accepted',
+                'entity_type' => Quote::class,
+                'entity_id'   => $quote->id,
+                'title'       => $quote->title ?? 'Quote #' . $quote->quote_number,
+                'status'      => $quote->status,
+                'date'        => $quote->issue_date?->toDateString(),
+                'payload'     => ['quote_number' => $quote->quote_number, 'total' => $quote->total],
+            ]);
+        }
+
+        // Service jobs linked to a quote
+        $soldJobs = $this->soldServiceJobs();
+        foreach ($soldJobs as $job) {
+            $entries->push([
+                'type'        => 'sale_converted_to_job',
+                'entity_type' => ServiceJob::class,
+                'entity_id'   => $job->id,
+                'title'       => $job->title,
+                'status'      => $job->status,
+                'date'        => $job->scheduled_at?->toDateString() ?? $job->created_at?->toDateString(),
+                'payload'     => ['quote_id' => $job->quote_id, 'sale_line_id' => $job->sale_line_id],
+            ]);
+        }
+
+        // Agreements from quotes
+        $soldAgreements = $this->soldAgreements();
+        foreach ($soldAgreements as $agreement) {
+            $entries->push([
+                'type'        => 'sale_agreement_activated',
+                'entity_type' => \App\Models\Work\ServiceAgreement::class,
+                'entity_id'   => $agreement->id,
+                'title'       => $agreement->title ?? 'Service Agreement #' . $agreement->id,
+                'status'      => $agreement->status,
+                'date'        => $agreement->created_at?->toDateString(),
+                'payload'     => [
+                    'quote_id'             => $agreement->quote_id,
+                    'originating_quote_id' => $agreement->originating_quote_id,
+                ],
+            ]);
+        }
+
+        return $entries->sortByDesc('date')->values();
+    }
 }
