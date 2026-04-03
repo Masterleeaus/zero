@@ -73,6 +73,19 @@ return [
 
         // ─── Titan Dedicated Queues ───────────────────────────────────
         // AI jobs (provider calls, completions, router decisions)
+        /*
+        |----------------------------------------------------------------------
+        | Titan Core Isolated Queues (Phase 6.7)
+        |----------------------------------------------------------------------
+        |
+        | Each Titan subsystem uses a dedicated queue to prevent cross-queue
+        | contamination and allow independent worker scaling.
+        |
+        | titan-ai       → AI completion requests (TitanAIRouter)
+        | titan-signals  → Signal dispatch callbacks
+        | titan-skills   → Zylos skill execution jobs
+        |
+        */
         'titan-ai' => [
             'driver'       => 'database',
             'table'        => 'jobs',
@@ -81,7 +94,6 @@ return [
             'after_commit' => false,
         ],
 
-        // Signal callbacks and dispatch events
         'titan-signals' => [
             'driver'       => 'database',
             'table'        => 'jobs',
@@ -96,6 +108,7 @@ return [
             'table'        => 'jobs',
             'queue'        => 'titan-skills',
             'retry_after'  => 180,
+            'retry_after'  => 300,
             'after_commit' => false,
         ],
 
