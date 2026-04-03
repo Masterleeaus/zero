@@ -117,18 +117,25 @@ class MoneyLifecycleTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('dashboard.money.quotes.convert-invoice', $quote))
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHasErrors();
 
-        $invoice = Invoice::where('quote_id', $quote->id)->firstOrFail();
-        $this->assertEquals('EUR', $invoice->currency);
+        $this->assertNull(Invoice::where('quote_id', $quote->id)->first());
     }
 
     public function test_quote_to_invoice_requires_items(): void
     {
         $user = User::factory()->create(['company_id' => 57]);
         $quote = Quote::factory()->create([
-            'company_id'  => 57,
-            'status'      => 'accepted',
+            'company_id' => 57,
+            'status'     => 'accepted',
+            'subtotal'   => 50,
+            'tax'        => 5,
+            'total'      => 55,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('dashboard.money.quotes.convert-invoice', $quote))
             ->assertRedirect()
             ->assertSessionHasErrors();
 

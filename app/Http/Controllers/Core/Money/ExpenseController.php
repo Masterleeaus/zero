@@ -70,15 +70,6 @@ class ExpenseController extends CoreController
             ->with('message', __('Expense created'));
     }
 
-    public function show(Request $request, Expense $expense): View
-    {
-        abort_if($expense->company_id !== $request->user()->company_id, 403);
-
-        $expense->load(['category', 'createdBy', 'approvedBy']);
-
-        return view('default.panel.user.money.expenses.show', compact('expense'));
-    }
-
     public function approve(Request $request, Expense $expense): RedirectResponse
     {
         abort_if($expense->company_id !== $request->user()->company_id, 403);
@@ -169,56 +160,6 @@ class ExpenseController extends CoreController
             ->where('company_id', $companyId)
             ->orderBy('name')
             ->get();
-    }
-
-    public function approve(Expense $expense): RedirectResponse
-    {
-        $this->authorize('update', $expense);
-
-        $expense->update([
-            'status'          => 'approved',
-            'approved_by'     => auth()->id(),
-            'approved_at'     => now(),
-            'rejection_reason'=> null,
-        ]);
-
-        $submitter = User::query()
-            ->where('company_id', $expense->company_id)
-            ->find($expense->created_by);
-        $submitter?->notify(new LiveNotification(
-            message: "Your expense '{$expense->title}' has been approved.",
-            link: route('dashboard.money.expenses.show', $expense),
-            title: 'Expense Approved'
-        ));
-
-        return back()->with('status', __('Expense approved.'));
-    }
-
-    public function reject(Request $request, Expense $expense): RedirectResponse
-    {
-        $this->authorize('update', $expense);
-
-        $validated = $request->validate([
-            'reason' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $expense->update([
-            'status'           => 'rejected',
-            'approved_by'      => null,
-            'approved_at'      => null,
-            'rejection_reason' => $validated['reason'] ?? null,
-        ]);
-
-        $submitter = User::query()
-            ->where('company_id', $expense->company_id)
-            ->find($expense->created_by);
-        $submitter?->notify(new LiveNotification(
-            message: "Your expense '{$expense->title}' was rejected.",
-            link: route('dashboard.money.expenses.show', $expense),
-            title: 'Expense Rejected'
-        ));
-
-        return back()->with('status', __('Expense rejected.'));
     }
 
     protected function validated(Request $request, int $companyId): array
