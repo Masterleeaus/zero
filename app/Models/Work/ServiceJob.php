@@ -12,6 +12,7 @@ use App\Models\Crm\Enquiry;
 use App\Models\Equipment\Equipment;
 use App\Models\Equipment\EquipmentMovement;
 use App\Models\Equipment\InstalledEquipment;
+use App\Models\Equipment\WarrantyClaim;
 use App\Models\Money\Invoice;
 use App\Models\Premises\Premises;
 use App\Models\User;
@@ -98,6 +99,10 @@ class ServiceJob extends Model implements SchedulableEntity
         'billable_rate',
         'invoice_id',
         'invoiced_at',
+        // Module 8 — warranty linkage
+        'is_warranty_job',
+        'warranty_claim_id',
+        'covered_equipment_id',
     ];
 
     protected $casts = [
@@ -110,6 +115,7 @@ class ServiceJob extends Model implements SchedulableEntity
         'invoiced_at'          => 'datetime',
         'require_signature'    => 'boolean',
         'is_billable'          => 'boolean',
+        'is_warranty_job'      => 'boolean',
         'scheduled_duration'   => 'float',
         'billable_rate'        => 'decimal:2',
         'sequence'             => 'integer',
@@ -121,6 +127,7 @@ class ServiceJob extends Model implements SchedulableEntity
         'sequence'           => 10,
         'require_signature'  => false,
         'is_billable'        => false,
+        'is_warranty_job'    => false,
         'scheduled_duration' => 0,
     ];
 
@@ -250,6 +257,16 @@ class ServiceJob extends Model implements SchedulableEntity
     public function planVisit(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ServicePlanVisit::class, 'service_job_id');
+    }
+
+    public function warrantyClaim(): BelongsTo
+    {
+        return $this->belongsTo(WarrantyClaim::class, 'warranty_claim_id');
+    }
+
+    public function coveredEquipment(): BelongsTo
+    {
+        return $this->belongsTo(InstalledEquipment::class, 'covered_equipment_id');
     }
 
     // ── Outcome helpers ───────────────────────────────────────────────────────
@@ -399,6 +416,20 @@ class ServiceJob extends Model implements SchedulableEntity
         }
 
         return $this->premises?->activeSiteAccess();
+    }
+
+    // ── Warranty helpers (Module 8) ───────────────────────────────────────────
+
+    /** Whether this job is classified as warranty work. */
+    public function isWarrantyWork(): bool
+    {
+        return (bool) $this->is_warranty_job;
+    }
+
+    /** Whether this job is linked to an active warranty claim. */
+    public function coveredByWarranty(): bool
+    {
+        return $this->is_warranty_job && $this->warranty_claim_id !== null;
     }
 
     /**
@@ -899,6 +930,12 @@ class ServiceJob extends Model implements SchedulableEntity
     public function scopeForAgreement(Builder $query, int $agreementId): Builder
     {
         return $query->where('agreement_id', $agreementId);
+    }
+
+    /** Scope: jobs flagged as warranty work. */
+    public function scopeWarrantyJobs(Builder $query): Builder
+    {
+        return $query->where('is_warranty_job', true);
     }
 
     // ── SchedulableEntity contract ────────────────────────────────────────────

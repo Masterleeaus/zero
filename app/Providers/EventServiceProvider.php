@@ -43,6 +43,13 @@ use App\Events\Work\ServicePlanVisitScheduled;
 use App\Events\Equipment\EquipmentInstalled;
 use App\Events\Equipment\EquipmentRemoved;
 use App\Events\Equipment\EquipmentReplaced;
+use App\Events\Equipment\EquipmentWarrantyActivated;
+use App\Events\Equipment\EquipmentWarrantyExpired;
+use App\Events\Equipment\EquipmentWarrantyExpiringSoon;
+use App\Events\Equipment\WarrantyClaimApproved;
+use App\Events\Equipment\WarrantyClaimCompleted;
+use App\Events\Equipment\WarrantyClaimCreated;
+use App\Events\Equipment\WarrantyClaimRejected;
 use App\Events\Inspection\InspectionCompleted;
 use App\Events\Inspection\InspectionFailed;
 use App\Events\Inspection\InspectionFollowupRequired;
@@ -51,6 +58,10 @@ use App\Events\Inspection\InspectionScheduled;
 use App\Events\Inspection\InspectionStarted;
 use App\Events\Premises\HazardDetected;
 use App\Events\Premises\HazardResolved;
+use App\Events\Crm\CrmWarrantyClaimOpened;
+use App\Events\Crm\CrmWarrantyClaimRejected;
+use App\Events\Crm\CrmWarrantyExpiring;
+use App\Events\Crm\CrmWarrantyReplacementOpportunity;
 use App\Events\YokassaWebhookEvent;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
@@ -69,6 +80,10 @@ use App\Listeners\StripeLifetimeListener;
 use App\Listeners\StripeWebhookListener;
 use App\Listeners\TwoCheckoutWebhookListener;
 use App\Listeners\UsersActivityListener;
+use App\Listeners\Equipment\EquipmentWarrantyExpiredListener;
+use App\Listeners\Equipment\EquipmentWarrantyExpiringSoonListener;
+use App\Listeners\Equipment\WarrantyClaimCreatedListener;
+use App\Listeners\Equipment\WarrantyClaimRejectedListener;
 use App\Listeners\Work\ChecklistRunCompletedListener;
 use App\Listeners\Work\JobCompletedListener;
 use App\Listeners\Work\JobStageChangedListener;
@@ -206,6 +221,27 @@ class EventServiceProvider extends ServiceProvider
         HazardResolved::class => [
             HazardResolvedListener::class,
         ],
+        // ── Equipment warranty lifecycle signals (Module 8) ───────────────
+        EquipmentWarrantyActivated::class => [],
+        EquipmentWarrantyExpiringSoon::class => [
+            EquipmentWarrantyExpiringSoonListener::class,
+        ],
+        EquipmentWarrantyExpired::class => [
+            EquipmentWarrantyExpiredListener::class,
+        ],
+        WarrantyClaimCreated::class => [
+            WarrantyClaimCreatedListener::class,
+        ],
+        WarrantyClaimApproved::class  => [],
+        WarrantyClaimRejected::class  => [
+            WarrantyClaimRejectedListener::class,
+        ],
+        WarrantyClaimCompleted::class => [],
+        // ── CRM warranty signals (Module 8) ──────────────────────────────
+        CrmWarrantyExpiring::class               => [],
+        CrmWarrantyClaimOpened::class            => [],
+        CrmWarrantyClaimRejected::class          => [],
+        CrmWarrantyReplacementOpportunity::class => [],
     ];
 
     /**

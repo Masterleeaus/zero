@@ -212,26 +212,43 @@ class Premises extends Model
             ->first();
     }
 
+    // ── Warranty helpers (Module 8) ───────────────────────────────────────────
+
     /**
-     * Upcoming (not-yet-completed) inspections for this premises.
+     * All installed equipment at this premises that have an active warranty.
      *
-     * Module 9 (fieldservice_calendar) — premises calendar surface helper.
+     * Matches rows where warranty_status is explicitly 'active', OR where
+     * warranty_status is not yet set but warranty_expiry is still in the future.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\InspectionInstance>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
      */
-    public function upcomingInspections(): \Illuminate\Database\Eloquent\Collection
+    public function warrantyAssets(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->inspections()
-            ->whereNotIn('status', ['completed', 'failed', 'cancelled'])
+        return $this->installedEquipment()
             ->where(function ($q) {
-                $q->whereNull('scheduled_at')
-                  ->orWhere('scheduled_at', '>=', now());
+                $q->where('warranty_status', \App\Models\Equipment\EquipmentWarranty::STATUS_ACTIVE)
+                  ->orWhere(function ($inner) {
+                      $inner->whereNull('warranty_status')
+                            ->whereNotNull('warranty_expiry')
+                            ->whereDate('warranty_expiry', '>', now()->toDateString());
+                  });
             })
-            ->orderBy('scheduled_at')
             ->get();
     }
 
     /**
+     * Installed equipment at this premises with warranties expiring within $days days.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function expiringWarrantyAssets(int $days = 30): \Illuminate\Database\Eloquent\Collection
+    {
+        $cutoff = now()->addDays($days)->toDateString();
+
+        return $this->installedEquipment()
+            ->whereNotNull('warranty_expiry')
+            ->whereDate('warranty_expiry', '>', now()->toDateString())
+            ->whereDate('warranty_expiry', '<=', $cutoff)
      * Upcoming open service jobs for this premises.
      *
      * Module 9 (fieldservice_calendar) — premises calendar surface helper.
