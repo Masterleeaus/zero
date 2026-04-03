@@ -40,7 +40,6 @@ return new class extends Migration
 
             $table->index(['company_id', 'type']);
             $table->index(['company_id', 'code']);
-            $table->unique(['company_id', 'code'], 'accounts_company_code_unique');
         });
 
         // ------------------------------------------------------------------ //

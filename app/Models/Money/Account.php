@@ -51,16 +51,10 @@ class Account extends Model
     // Relationships
     // -----------------------------------------------------------------------
 
-    /** Journal lines that debit this account. */
-    public function debitLines(): HasMany
+    /** All journal lines associated with this account. */
+    public function lines(): HasMany
     {
-        return $this->hasMany(JournalLine::class, 'debit_account_id');
-    }
-
-    /** Journal lines that credit this account. */
-    public function creditLines(): HasMany
-    {
-        return $this->hasMany(JournalLine::class, 'credit_account_id');
+        return $this->hasMany(JournalLine::class, 'account_id');
     }
 
     /** Child accounts (sub-accounts). */
@@ -82,8 +76,8 @@ class Account extends Model
     /** Compute the running balance for this account (debits - credits). */
     public function runningBalance(): float
     {
-        $debits  = (float) $this->debitLines()->sum('amount');
-        $credits = (float) $this->creditLines()->sum('amount');
+        $debits  = (float) $this->lines()->sum('debit');
+        $credits = (float) $this->lines()->sum('credit');
 
         return match ($this->type) {
             'asset', 'expense' => $debits - $credits,

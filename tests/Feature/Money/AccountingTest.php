@@ -355,7 +355,7 @@ class AccountingTest extends TestCase
         $service->createJournalEntry(90, 'Company A entry', now()->toDateString(), [
             ['account_id' => $accA->id, 'debit' => 100, 'credit' => 0],
             ['account_id' => $incA->id, 'debit' => 0, 'credit' => 100],
-        ]);
+        ], createdBy: $userA->id);
 
         $this->actingAs($userB);
         $this->get(route('dashboard.money.journal.index'))

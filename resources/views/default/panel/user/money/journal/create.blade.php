@@ -103,33 +103,76 @@
     </div>
 
     <script>
+        const accountOptions = @json(
+            $accounts->groupBy('type')->map(fn ($group, $type) => $group->map(fn ($account) => [
+                'id'    => $account->id,
+                'label' => ($account->code ? "[{$account->code}] " : '') . $account->name,
+                'type'  => $type,
+            ]))->toArray()
+        );
+
         let lineCount = {{ max(2, count(old('lines', [[],[]]))) }};
+
+        function buildAccountSelect(name) {
+            const select = document.createElement('select');
+            select.name = name;
+            select.className = 'form-select w-full';
+            const blank = document.createElement('option');
+            blank.value = '';
+            blank.textContent = '{{ __('Select account') }}';
+            select.appendChild(blank);
+            Object.entries(accountOptions).forEach(([type, accounts]) => {
+                const group = document.createElement('optgroup');
+                group.label = type.charAt(0).toUpperCase() + type.slice(1);
+                accounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.id;
+                    opt.textContent = acc.label;
+                    group.appendChild(opt);
+                });
+                select.appendChild(group);
+            });
+            return select;
+        }
 
         document.getElementById('add-line').addEventListener('click', function () {
             const i = lineCount++;
             const tbody = document.getElementById('lines-body');
             const row = document.createElement('tr');
             row.className = 'line-row';
-            row.innerHTML = `
-                <td>
-                    <select name="lines[${i}][account_id]" class="form-select w-full">
-                        <option value="">{{ __('Select account') }}</option>
-                        @foreach($accounts->groupBy('type') as $type => $group)
-                            <optgroup label="{{ ucfirst($type) }}">
-                                @foreach($group as $account)
-                                    <option value="{{ $account->id }}">{{ addslashes(($account->code ? "[{$account->code}] " : '') . $account->name) }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="text" name="lines[${i}][description]" class="form-input w-full" /></td>
-                <td><input type="number" step="0.01" min="0" name="lines[${i}][debit]" value="0.00" class="form-input w-full text-end" /></td>
-                <td><input type="number" step="0.01" min="0" name="lines[${i}][credit]" value="0.00" class="form-input w-full text-end" /></td>
-                <td><button type="button" class="text-red-500 text-sm remove-line">✕</button></td>
-            `;
+
+            const tdAccount = document.createElement('td');
+            tdAccount.appendChild(buildAccountSelect(`lines[${i}][account_id]`));
+
+            const tdDesc = document.createElement('td');
+            const descInput = document.createElement('input');
+            descInput.type = 'text';
+            descInput.name = `lines[${i}][description]`;
+            descInput.className = 'form-input w-full';
+            tdDesc.appendChild(descInput);
+
+            const tdDebit = document.createElement('td');
+            const debitInput = document.createElement('input');
+            debitInput.type = 'number'; debitInput.step = '0.01'; debitInput.min = '0';
+            debitInput.name = `lines[${i}][debit]`; debitInput.value = '0.00';
+            debitInput.className = 'form-input w-full text-end';
+            tdDebit.appendChild(debitInput);
+
+            const tdCredit = document.createElement('td');
+            const creditInput = document.createElement('input');
+            creditInput.type = 'number'; creditInput.step = '0.01'; creditInput.min = '0';
+            creditInput.name = `lines[${i}][credit]`; creditInput.value = '0.00';
+            creditInput.className = 'form-input w-full text-end';
+            tdCredit.appendChild(creditInput);
+
+            const tdRemove = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.className = 'text-red-500 text-sm remove-line'; btn.textContent = '✕';
+            tdRemove.appendChild(btn);
+
+            row.append(tdAccount, tdDesc, tdDebit, tdCredit, tdRemove);
             tbody.appendChild(row);
-            bindRemove(row.querySelector('.remove-line'));
+            bindRemove(btn);
         });
 
         function bindRemove(btn) {
