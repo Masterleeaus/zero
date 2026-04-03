@@ -46,7 +46,7 @@ class PortalController extends Controller
             ->where('customer_id', $customer->id)
             ->whereHas('stage', fn ($q) => $q->where('portal_visible', true))
             ->with(['stage', 'premises', 'assignedUser'])
-            ->latest('scheduled_start')
+            ->latest('scheduled_date_start')
             ->paginate(20);
 
         return view('default.panel.work.portal.jobs', compact('customer', 'jobs'));

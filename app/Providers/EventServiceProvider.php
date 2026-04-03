@@ -147,7 +147,7 @@ use App\Events\Work\PortalQuoteApproved;
 use App\Events\Work\PortalPaymentSubmitted;
 use App\Events\Work\PortalFeedbackSubmitted;
 use App\Events\Work\PortalMessageCreated;
-// ── Module 21 — fieldservice_project events ───────────────────────────────────
+// ── Module 22 — fieldservice_project events ───────────────────────────────────
 use App\Events\Work\FieldServiceProjectCreated;
 use App\Events\Work\FieldServiceProjectUpdated;
 use App\Events\Work\FieldServiceProjectJobLinked;
@@ -377,7 +377,7 @@ class EventServiceProvider extends ServiceProvider
         PortalPaymentSubmitted::class  => [],
         PortalFeedbackSubmitted::class => [],
         PortalMessageCreated::class    => [],
-        // ── Module 21 — fieldservice_project signals ──────────────────────────
+        // ── Module 22 — fieldservice_project signals ──────────────────────────
         FieldServiceProjectCreated::class => [
             FieldServiceProjectCreatedListener::class,
         ],

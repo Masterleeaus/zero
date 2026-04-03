@@ -1005,7 +1005,7 @@ class ServiceJob extends Model implements SchedulableEntity
         return $this->hasMany(RepairOrder::class, 'service_job_id');
     }
 
-    // ── Project relationships (Module 21 — fieldservice_project) ─────────────
+    // ── Project relationships (Module 22 — fieldservice_project) ─────────────
 
     public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
