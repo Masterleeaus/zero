@@ -134,14 +134,22 @@ class CapabilityRegistryService
     {
         $requirements = $jobType->skillRequirements()->with('skillDefinition')->get();
 
+        // Eager-load all relevant skills in a single query to avoid N+1.
+        $skillIds = $requirements->pluck('skill_definition_id')->unique()->values();
+
+        /** @var \Illuminate\Support\Collection<int, TechnicianSkill> $skillMap */
+        $skillMap = $user->technicianSkills()
+            ->whereIn('skill_definition_id', $skillIds)
+            ->get()
+            ->keyBy('skill_definition_id');
+
         $matched = [];
         $missing = [];
         $expired = [];
 
         foreach ($requirements as $req) {
-            $skill = $user->technicianSkills()
-                ->where('skill_definition_id', $req->skill_definition_id)
-                ->first();
+            /** @var TechnicianSkill|null $skill */
+            $skill = $skillMap->get($req->skill_definition_id);
 
             if ($skill === null) {
                 if ($req->is_mandatory) {
