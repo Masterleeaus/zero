@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Work;
 
+use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Deal;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ServiceJob extends Model
+class ServiceJob extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -235,9 +236,6 @@ class ServiceJob extends Model
         return $this->hasMany(EquipmentMovement::class, 'service_job_id');
     }
 
-    public function inspectionInstances(): HasMany
-    {
-        return $this->hasMany(\App\Models\Inspection\InspectionInstance::class, 'service_job_id');
     public function inspections(): HasMany
     {
         return $this->hasMany(InspectionInstance::class, 'service_job_id');
@@ -247,7 +245,6 @@ class ServiceJob extends Model
     {
         return $this->hasMany(ChecklistRun::class, 'runnable_id')
             ->where('runnable_type', self::class);
-        return $this->hasMany(ChecklistRun::class, 'service_job_id');
     }
 
     public function planVisit(): \Illuminate\Database\Eloquent\Relations\HasOne
@@ -844,5 +841,42 @@ class ServiceJob extends Model
     public function scopeForAgreement(Builder $query, int $agreementId): Builder
     {
         return $query->where('agreement_id', $agreementId);
+    }
+
+    // ── SchedulableEntity contract ────────────────────────────────────────────
+
+    public function getScheduledStart(): ?string
+    {
+        return $this->scheduled_date_start?->toIso8601String();
+    }
+
+    public function getScheduledEnd(): ?string
+    {
+        return $this->scheduled_date_end?->toIso8601String();
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_user_id;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'scheduled';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return $this->priority;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->title ?? 'Service Job #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
     }
 }

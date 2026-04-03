@@ -15,17 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * An execution of a ChecklistTemplate in a given context.
- *
- * Polymorphic context (runnable): service_job | inspection_instance | premises
- *
- * Status values: pending | in_progress | completed | skipped
-
-/**
  * ChecklistRun — an execution of a checklist template.
  *
- * Can be linked to a ServiceJob, an InspectionInstance, or a Premises directly.
- * Supports reuse of the same checklist template across different execution contexts.
+ * Polymorphic runnable context: ServiceJob | InspectionInstance | Premises | ServicePlanVisit
  *
  * Status: pending | in_progress | completed | failed
  */
@@ -46,29 +38,12 @@ class ChecklistRun extends Model
         'title',
         'status',
         'assigned_to',
-        'started_at',
-        'completed_at',
-        'notes',
-    ];
-
-    protected $casts = [
-        'started_at'   => 'datetime',
-        'completed_at' => 'datetime',
-    ];
-
-    protected $attributes = [
-        'status' => 'pending',
-        'service_job_id',
-        'inspection_instance_id',
-        'premises_id',
-        'checklist_id',
-        'title',
-        'status',
         'items_total',
         'items_completed',
         'items_failed',
         'started_at',
         'completed_at',
+        'notes',
     ];
 
     protected $casts = [
@@ -93,6 +68,11 @@ class ChecklistRun extends Model
         return $this->belongsTo(ChecklistTemplate::class, 'checklist_template_id');
     }
 
+    /**
+     * Polymorphic runnable target.
+     *
+     * Supported types: ServiceJob, InspectionInstance, Premises, ServicePlanVisit
+     */
     public function runnable(): MorphTo
     {
         return $this->morphTo();
@@ -115,11 +95,28 @@ class ChecklistRun extends Model
         return $query->where('status', 'pending');
     }
 
+    public function scopeForJob(Builder $query, int $jobId): Builder
+    {
+        return $query->where('runnable_type', ServiceJob::class)
+            ->where('runnable_id', $jobId);
+    }
+
+    public function scopeForInspection(Builder $query, int $inspectionId): Builder
+    {
+        return $query->where('runnable_type', InspectionInstance::class)
+            ->where('runnable_id', $inspectionId);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    public function hasFailed(): bool
+    {
+        return $this->items_failed > 0 || $this->status === 'failed';
     }
 
     public function passRate(): float
@@ -132,28 +129,7 @@ class ChecklistRun extends Model
         $passed = $this->responses()->where('result', 'pass')->count();
 
         return round(($passed / $total) * 100, 1);
-    public function serviceJob(): BelongsTo
-    {
-        return $this->belongsTo(ServiceJob::class, 'service_job_id');
     }
-
-    public function inspectionInstance(): BelongsTo
-    {
-        return $this->belongsTo(InspectionInstance::class, 'inspection_instance_id');
-    }
-
-    public function premises(): BelongsTo
-    {
-        return $this->belongsTo(Premises::class, 'premises_id');
-    }
-
-    /** Source checklist template (App\Models\Work\Checklist). */
-    public function checklist(): BelongsTo
-    {
-        return $this->belongsTo(Checklist::class, 'checklist_id');
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function completionPercentage(): int
     {
@@ -162,27 +138,5 @@ class ChecklistRun extends Model
         }
 
         return (int) round(($this->items_completed / $this->items_total) * 100);
-    }
-
-    public function hasFailed(): bool
-    {
-        return $this->items_failed > 0 || $this->status === 'failed';
-    }
-
-    // ── Scopes ────────────────────────────────────────────────────────────────
-
-    public function scopeForJob(Builder $query, int $jobId): Builder
-    {
-        return $query->where('service_job_id', $jobId);
-    }
-
-    public function scopeForInspection(Builder $query, int $inspectionId): Builder
-    {
-        return $query->where('inspection_instance_id', $inspectionId);
-    }
-
-    public function scopePending(Builder $query): Builder
-    {
-        return $query->where('status', 'pending');
     }
 }
