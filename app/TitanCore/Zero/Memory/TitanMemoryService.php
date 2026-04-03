@@ -3,14 +3,17 @@
 namespace App\TitanCore\Zero\Memory;
 
 use App\TitanCore\Contracts\MemoryContract;
-use App\TitanCore\Zero\Memory\Session\SessionHandoffManager;
-use Illuminate\Support\Facades\Cache;
 
 /**
- * TitanMemoryService — unified memory access layer.
+ * @deprecated Use App\Titan\Core\TitanMemoryService (canonical).
  *
- * Implements store / recall / snapshot / expire backed by Laravel Cache
- * with company_id tenancy enforcement and session-handoff support.
+ * This file is retained as a tombstone to prevent namespace drift.
+ * The canonical DB-backed, rewind-compatible memory runtime is:
+ *   App\Titan\Core\TitanMemoryService
+ *
+ * This lightweight cache-backed accessor is preserved only because MemoryManager
+ * needs a snapshot() helper. It must NOT be injected into MCP handlers, the AI
+ * router, or the admin panel.
  */
 class TitanMemoryService implements MemoryContract
 {
@@ -21,15 +24,13 @@ class TitanMemoryService implements MemoryContract
     }
 
     /**
-     * Build a cache key that is always scoped to company_id.
+     * Build a cache key scoped to company_id.
      */
     protected function cacheKey(string $key, ?int $companyId): string
     {
         if ($companyId === null) {
             if (app()->isProduction()) {
-                \Illuminate\Support\Facades\Log::warning('TitanMemoryService: company_id is null — using global scope. This should not happen in production.', [
-                    'key' => $key,
-                ]);
+                \Illuminate\Support\Facades\Log::warning('TitanMemoryService (cache): company_id is null — global scope used.', ['key' => $key]);
             }
             return "titan.memory.global.{$key}";
         }
@@ -40,8 +41,7 @@ class TitanMemoryService implements MemoryContract
     public function store(string $key, array $payload, ?int $companyId = null): void
     {
         $ttl = (int) config('titan_core.memory.ttl', 3600);
-
-        Cache::put($this->cacheKey($key, $companyId), array_merge($payload, [
+        \Illuminate\Support\Facades\Cache::put($this->cacheKey($key, $companyId), array_merge($payload, [
             'company_id' => $companyId,
             'stored_at'  => now()->toIso8601String(),
         ]), $ttl);
@@ -49,7 +49,7 @@ class TitanMemoryService implements MemoryContract
 
     public function recall(string $key, ?int $companyId = null): ?array
     {
-        return Cache::get($this->cacheKey($key, $companyId));
+        return \Illuminate\Support\Facades\Cache::get($this->cacheKey($key, $companyId));
     }
 
     public function snapshot(string $key): array
@@ -59,6 +59,6 @@ class TitanMemoryService implements MemoryContract
 
     public function expire(string $key, ?int $companyId = null): void
     {
-        Cache::forget($this->cacheKey($key, $companyId));
+        \Illuminate\Support\Facades\Cache::forget($this->cacheKey($key, $companyId));
     }
 }

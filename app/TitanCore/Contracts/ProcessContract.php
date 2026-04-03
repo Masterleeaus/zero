@@ -2,28 +2,13 @@
 
 namespace App\TitanCore\Contracts;
 
-interface ProcessContract
+/**
+ * @deprecated Use App\Titan\Core\Contracts\ProcessContract (canonical).
+ *
+ * This alias is retained so existing code referencing the TitanCore namespace
+ * continues to resolve without import updates. New code must use the canonical path.
+ */
+interface ProcessContract extends \App\Titan\Core\Contracts\ProcessContract
 {
-    /**
-     * Record a new process transition.
-     *
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
-     */
-    public function record(array $payload): array;
-
-    /**
-     * Transition a process to a new state.
-     *
-     * @param  array<string, mixed>  $metadata
-     * @return array<string, mixed>
-     */
-    public function transition(string $processId, string $state, array $metadata = []): array;
-
-    /**
-     * Return the allowed state-transition map.
-     *
-     * @return array<string, array<int, string>>
-     */
-    public function map(): array;
+    // Intentionally empty — the canonical interface carries all method signatures.
 }

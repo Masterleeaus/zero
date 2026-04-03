@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Titan\Core\Mcp\Tools\MemoryRecallTool;
+use App\Titan\Core\Mcp\Tools\MemoryStoreTool;
+use App\Titan\Core\TitanMemoryService;
+use App\Titan\Core\Vector\VectorMemoryAdapter;
 use App\TitanCore\Agents\AgentStudioManager;
-use App\TitanCore\Events\TitanCoreActivity;
 use App\TitanCore\MCP\McpCapabilityRegistry;
 use App\TitanCore\Omni\OmniManager;
 use App\TitanCore\Pulse\PulseManager;
@@ -33,30 +36,45 @@ use App\TitanCore\Zero\Knowledge\KnowledgeManager;
 use App\TitanCore\Zero\Knowledge\KnowledgeScopeResolver;
 use App\TitanCore\Zero\Memory\MemoryManager;
 use App\TitanCore\Zero\Memory\Session\SessionHandoffManager;
-use App\TitanCore\Zero\Memory\TitanMemoryService;
 use App\TitanCore\Zero\Process\ProcessBridge;
 use App\TitanCore\Zero\Rewind\RewindManager;
 use App\TitanCore\Zero\Signals\SignalBridge;
-use App\TitanCore\Zero\Skills\ZylosBridge;
 use App\TitanCore\Zero\Telemetry\TelemetryManager;
 use App\TitanCore\Zylos\ZylosBridge;
-use Illuminate\Support\Facades\Event;
-use App\Titan\Core\TitanMemoryService;
-use App\Titan\Core\Vector\VectorMemoryAdapter;
-use App\Titan\Core\Mcp\Tools\MemoryRecallTool;
-use App\Titan\Core\Mcp\Tools\MemoryStoreTool;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * TitanCoreServiceProvider — canonical service container bindings for Titan Core.
+ *
+ * Canonical singletons:
+ *   Memory runtime     → App\Titan\Core\TitanMemoryService (DB-backed, rewind-compatible)
+ *   Zylos bridge       → App\TitanCore\Zylos\ZylosBridge (dispatch + admin monitor)
+ *   AI router          → App\TitanCore\Zero\AI\TitanAIRouter
+ *   MCP tools          → App\Titan\Core\Mcp\Tools\*
+ *   ZeroCoreManager    → App\TitanCore\Zero\AI\ZeroCoreManager
+ *
+ * Deprecated paths (tombstones in place, not bound here):
+ *   App\TitanCore\Zero\Memory\TitanMemoryService  — superseded by App\Titan\Core\TitanMemoryService
+ *   App\TitanCore\Zero\Skills\ZylosBridge         — superseded by App\TitanCore\Zylos\ZylosBridge
+ */
 class TitanCoreServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // ── Config ───────────────────────────────────────────────────────────
         $this->mergeConfigFrom(base_path('config/titan_core.php'), 'titan_core');
         $this->mergeConfigFrom(base_path('config/titan_ai.php'), 'titan_ai');
         $this->mergeConfigFrom(base_path('config/titan_budgets.php'), 'titan_budgets');
-        $this->mergeConfigFrom(base_path('config/titan_process.php'), 'titan_process');
-        $this->mergeConfigFrom(base_path('config/titan_memory.php'), 'titan_memory');
 
+        // Optional legacy config files — skip gracefully if absent
+        if (file_exists(base_path('config/titan_process.php'))) {
+            $this->mergeConfigFrom(base_path('config/titan_process.php'), 'titan_process');
+        }
+        if (file_exists(base_path('config/titan_memory.php'))) {
+            $this->mergeConfigFrom(base_path('config/titan_memory.php'), 'titan_memory');
+        }
+
+        // ── Module registry ─────────────────────────────────────────────────
         $this->app->singleton(CoreModuleRegistry::class, function () {
             $registry = new CoreModuleRegistry();
             $registry->register(new CoreModuleDefinition('zero', 'Titan Zero Core', [], 10, ['surface' => 'governance']));
@@ -65,10 +83,10 @@ class TitanCoreServiceProvider extends ServiceProvider
             $registry->register(new CoreModuleDefinition('pulse', 'Titan Pulse', ['zero'], 40, ['surface' => 'automation']));
             $registry->register(new CoreModuleDefinition('omni', 'Titan Omni', ['zero', 'knowledge', 'memory'], 50, ['surface' => 'channels']));
             $registry->register(new CoreModuleDefinition('agents', 'Agent Studio', ['zero', 'pulse', 'omni'], 60, ['surface' => 'agents']));
-
             return $registry;
         });
 
+        // ── Runtime catalog ──────────────────────────────────────────────────
         $this->app->singleton(RuntimeCatalog::class, function () {
             $catalog = new RuntimeCatalog();
             $catalog->register(new RuntimeDefinition('null', 'Null Runtime', NullRuntimeAdapter::class, ['bootstrap']));
@@ -78,6 +96,7 @@ class TitanCoreServiceProvider extends ServiceProvider
             return $catalog;
         });
 
+        // ── Tool registry ────────────────────────────────────────────────────
         $this->app->singleton(ToolRegistry::class, function () {
             $registry = new ToolRegistry();
             $registry->register(new ToolDefinition('signal.record', 'Signal Record', ProcessBridge::class, ['zero', 'pulse']));
@@ -91,8 +110,22 @@ class TitanCoreServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        $this->app->singleton(CoreSourceCatalog::class);
-        $this->app->singleton(CoreManifest::class);
+        // ── Canonical Zylos bridge ────────────────────────────────────────────
+        $this->app->singleton(ZylosBridge::class, function ($app) {
+            return new ZylosBridge($app->make(\Illuminate\Http\Client\Factory::class));
+        });
+
+        // ── Canonical memory runtime ──────────────────────────────────────────
+        $this->app->singleton(VectorMemoryAdapter::class);
+        $this->app->singleton(TitanMemoryService::class);
+        $this->app->singleton(MemoryRecallTool::class);
+        $this->app->singleton(MemoryStoreTool::class);
+
+        // ── Supporting memory infrastructure ─────────────────────────────────
+        $this->app->singleton(SessionHandoffManager::class);
+        $this->app->singleton(MemoryManager::class);
+
+        // ── AI layer ─────────────────────────────────────────────────────────
         $this->app->singleton(RuntimeManager::class);
         $this->app->singleton(InstructionBuilder::class);
         $this->app->singleton(DecisionContextFactory::class);
@@ -104,29 +137,26 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(NexusCoordinator::class);
         $this->app->singleton(KnowledgeScopeResolver::class);
         $this->app->singleton(KnowledgeManager::class);
-        $this->app->singleton(SessionHandoffManager::class);
-        $this->app->singleton(MemoryManager::class);
-        $this->app->singleton(TitanMemoryService::class);
         $this->app->singleton(TelemetryManager::class);
         $this->app->singleton(TitanTokenBudget::class);
-        $this->app->singleton(ZylosBridge::class, function ($app) {
-            return new ZylosBridge($app->make(\Illuminate\Http\Client\Factory::class));
-        });
-        $this->app->singleton(McpCapabilityRegistry::class);
-        $this->app->singleton(VectorMemoryAdapter::class);
-        $this->app->singleton(TitanMemoryService::class);
-        $this->app->singleton(MemoryRecallTool::class);
-        $this->app->singleton(MemoryStoreTool::class);
         $this->app->singleton(ZeroCoreManager::class);
         $this->app->singleton(TitanAIRouter::class);
+
+        // ── Pipeline layer ───────────────────────────────────────────────────
         $this->app->singleton(SignalBridge::class);
         $this->app->singleton(ProcessBridge::class);
         $this->app->singleton(RewindManager::class);
         $this->app->singleton(PulseManager::class);
         $this->app->singleton(OmniManager::class);
         $this->app->singleton(AgentStudioManager::class);
+
+        // ── Registry / manifest / MCP ────────────────────────────────────────
+        $this->app->singleton(CoreSourceCatalog::class);
+        $this->app->singleton(CoreManifest::class);
+        $this->app->singleton(McpCapabilityRegistry::class);
+
+        // ── Kernel ───────────────────────────────────────────────────────────
         $this->app->singleton(CoreKernel::class);
-        $this->app->singleton(ZylosBridge::class);
     }
 
     public function boot(): void
