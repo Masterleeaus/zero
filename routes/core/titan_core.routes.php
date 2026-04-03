@@ -3,7 +3,7 @@
 use App\Http\Controllers\TitanCore\TitanCoreStatusController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity'])
+Route::middleware(['auth', 'updateUserActivity', 'throttle:120,1'])
     ->prefix('dashboard/user/business-suite/core')
     ->as('titan.core.')
     ->group(static function () {
