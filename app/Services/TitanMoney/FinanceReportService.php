@@ -188,6 +188,8 @@ class FinanceReportService
                     return;
                 }
 
+                // diffInDays(date, false) returns negative when $dueDate is in the past.
+                // Multiply by -1 to get a positive "days overdue" value for bucket comparison.
                 $days = (int) $today->diffInDays($dueDate, false) * -1;
 
                 if ($days <= 30) {

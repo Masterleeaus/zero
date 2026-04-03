@@ -7,7 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Finance Pass 2 — Payables + Payroll + Financial Assets + Job Costing
+ * Finance Pass 2 — Payables + Payroll + Financial Assets + Job Costing (Phases 3–7)
  *
  * Creates:
  *   - supplier_bills          (AP documents — bridges Inventory/Supplier)

@@ -16,13 +16,13 @@ use Illuminate\Support\Facades\Log;
  */
 class RunDepreciationCommand extends Command
 {
-    protected $signature   = 'money:depreciate {--company= : Restrict to a specific company_id} {--dry-run : Preview without writing}';
+    protected $signature   = 'money:depreciate {--company-id= : Restrict to a specific company_id} {--dry-run : Preview without writing}';
     protected $description = 'Apply monthly straight-line depreciation to all active financial assets.';
 
     public function handle(): int
     {
         $dryRun    = (bool) $this->option('dry-run');
-        $companyId = $this->option('company');
+        $companyId = $this->option('company-id');
 
         $query = FinancialAsset::active();
 

@@ -308,6 +308,9 @@ class AccountingService
      * Credit: Tax Payable          (type=liability)  [PAYG / tax]
      *
      * Safe to call multiple times — skips if already posted.
+     *
+     * @return JournalEntry|null Returns null if the entry was already posted,
+     *                           accounts are unavailable, or gross pay is zero.
      */
     public function postPayrollApproved(Payroll $payroll): ?JournalEntry
     {
