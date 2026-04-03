@@ -89,6 +89,8 @@ class TimesheetService
 
     /**
      * Sum Timelog duration_minutes for a user within a date range and return as hours.
+     * Filters by started_at only — timelogs spanning the week boundary are attributed
+     * to the week they started in, which matches the UI display convention.
      */
     public function calculateWeekHours(int $userId, string $weekStart, string $weekEnd): float
     {

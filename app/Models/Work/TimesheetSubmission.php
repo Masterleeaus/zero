@@ -61,8 +61,8 @@ class TimesheetSubmission extends Model
     {
         return $this->timelogs()
             ->whereBetween('started_at', [
-                $this->week_start->toDateString(),
-                $this->week_end->toDateString() . ' 23:59:59',
+                $this->week_start->startOfDay(),
+                $this->week_end->endOfDay(),
             ]);
     }
 }

@@ -43,7 +43,9 @@ class TimesheetSubmissionTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard.team.timesheets.index'));
 
         $response->assertOk();
-        $this->assertEquals(1, $response->viewData('timesheets')->count());
+        $timesheets = $response->viewData('timesheets');
+        $this->assertEquals(1, $timesheets->count());
+        $this->assertEquals(10, $timesheets->first()->company_id);
     }
 
     public function test_timesheet_submit_changes_status(): void
