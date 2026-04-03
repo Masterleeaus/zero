@@ -10,6 +10,8 @@ use App\Models\Money\Invoice;
 use App\Models\Money\JournalEntry;
 use App\Models\Money\JournalLine;
 use App\Models\Money\Payment;
+use App\Models\Money\SupplierBill;
+use App\Models\Money\SupplierPayment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
@@ -189,6 +191,110 @@ class AccountingService
             Log::error('AccountingService: postPaymentRecorded failed', [
                 'payment_id' => $payment->id,
                 'error'      => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Post a supplier-bill journal entry.
+     *
+     * Debit:  Operating Expenses   (type=expense)
+     * Credit: Accounts Payable     (type=liability)
+     *
+     * Safe to call multiple times — skips if already posted.
+     */
+    public function postSupplierBillRecorded(SupplierBill $bill): ?JournalEntry
+    {
+        if ($this->alreadyPosted(SupplierBill::class, $bill->id)) {
+            return null;
+        }
+
+        $companyId = $bill->company_id;
+        $expAcc    = $this->findOrCreateAccount($companyId, 'Operating Expenses', 'expense', '6000');
+        $payable   = $this->findOrCreateAccount($companyId, 'Accounts Payable', 'liability', '2000');
+
+        if (! $expAcc || ! $payable) {
+            Log::warning('AccountingService: cannot post supplier bill — accounts unavailable', [
+                'supplier_bill_id' => $bill->id,
+            ]);
+            return null;
+        }
+
+        $amount = (float) $bill->total;
+        $ref    = $bill->reference ?? ('BILL-' . $bill->id);
+
+        try {
+            return $this->createJournalEntry(
+                companyId:   $companyId,
+                description: 'Supplier bill recorded: ' . $ref,
+                entryDate:   $bill->bill_date?->toDateString() ?? now()->toDateString(),
+                lines: [
+                    ['account_id' => $expAcc->id, 'debit'  => $amount, 'credit' => 0,      'description' => 'Expense — ' . $ref],
+                    ['account_id' => $payable->id, 'debit'  => 0,       'credit' => $amount, 'description' => 'AP — ' . $ref],
+                ],
+                reference:   $ref,
+                currency:    $bill->currency ?? 'AUD',
+                sourceType:  SupplierBill::class,
+                sourceId:    $bill->id,
+                createdBy:   (int) $bill->created_by,
+            );
+        } catch (\Throwable $e) {
+            Log::error('AccountingService: postSupplierBillRecorded failed', [
+                'supplier_bill_id' => $bill->id,
+                'error'            => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Post a supplier-payment journal entry.
+     *
+     * Debit:  Accounts Payable   (type=liability)
+     * Credit: Bank / Cash        (type=asset)
+     *
+     * Safe to call multiple times — skips if already posted.
+     */
+    public function postSupplierPaymentRecorded(SupplierPayment $payment): ?JournalEntry
+    {
+        if ($this->alreadyPosted(SupplierPayment::class, $payment->id)) {
+            return null;
+        }
+
+        $companyId = $payment->company_id;
+        $payable   = $this->findOrCreateAccount($companyId, 'Accounts Payable', 'liability', '2000');
+        $bank      = $this->findOrCreateAccount($companyId, 'Bank', 'asset', '1000');
+
+        if (! $payable || ! $bank) {
+            Log::warning('AccountingService: cannot post supplier payment — accounts unavailable', [
+                'supplier_payment_id' => $payment->id,
+            ]);
+            return null;
+        }
+
+        $amount = (float) $payment->amount;
+        $ref    = $payment->reference ?? ('SPAY-' . $payment->id);
+
+        try {
+            return $this->createJournalEntry(
+                companyId:   $companyId,
+                description: 'Supplier payment: ' . $ref,
+                entryDate:   $payment->payment_date?->toDateString() ?? now()->toDateString(),
+                lines: [
+                    ['account_id' => $payable->id, 'debit'  => $amount, 'credit' => 0,      'description' => 'AP cleared — ' . $ref],
+                    ['account_id' => $bank->id,    'debit'  => 0,       'credit' => $amount, 'description' => 'Bank — ' . $ref],
+                ],
+                reference:   $ref,
+                currency:    'AUD',
+                sourceType:  SupplierPayment::class,
+                sourceId:    $payment->id,
+                createdBy:   (int) $payment->created_by,
+            );
+        } catch (\Throwable $e) {
+            Log::error('AccountingService: postSupplierPaymentRecorded failed', [
+                'supplier_payment_id' => $payment->id,
+                'error'               => $e->getMessage(),
             ]);
             return null;
         }
