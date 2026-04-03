@@ -3,6 +3,7 @@
 namespace App\TitanCore\Zero\AI;
 
 use App\TitanCore\Events\TitanCoreActivity;
+use App\Titan\Core\TitanMemoryService;
 use App\TitanCore\Zero\AI\Context\DecisionContextFactory;
 use App\TitanCore\Zero\AI\Context\InstructionBuilder;
 use App\TitanCore\Zero\Budget\TitanTokenBudget;
@@ -16,6 +17,7 @@ class TitanAIRouter
         protected InstructionBuilder $instructionBuilder,
         protected SignalBridge $signalBridge,
         protected TitanTokenBudget $budget,
+        protected TitanMemoryService $memoryService,
     ) {
     }
 
@@ -72,6 +74,34 @@ class TitanAIRouter
         if ($tokens > 0) {
             $this->budget->record($envelope, $tokens);
         }
+        $companyId = (int) ($envelope['company_id'] ?? 0);
+        $sessionId = (string) ($envelope['session_id'] ?? $envelope['id'] ?? 'global');
+
+        // Phase 3.8: Recall memory context before AI decision
+        $memoryContext = $companyId > 0
+            ? $this->memoryService->hydrateContext($envelope)
+            : ['memory' => [], 'knowledge' => [], 'scope' => 'global'];
+
+        $envelope['_memory_context'] = $memoryContext;
+
+        $result = $this->manager->decide($envelope);
+
+        // Phase 3.8: Store result memory after execution
+        if ($companyId > 0 && ! empty($envelope['input'])) {
+            $this->memoryService->store(
+                $companyId,
+                (int) ($envelope['user_id'] ?? 0),
+                $sessionId,
+                'ai_decision',
+                (string) json_encode([
+                    'input' => $envelope['input'] ?? null,
+                    'decision' => $result['decision'] ?? null,
+                    'requires_approval' => $result['decision']['requires_approval'] ?? false,
+                    'confidence' => $result['decision']['confidence'] ?? null,
+                ], JSON_UNESCAPED_UNICODE),
+                ['importance_score' => 0.7]
+            );
+        }
 
         $this->signalBridge->recordAndPublish(
             [
@@ -125,6 +155,9 @@ class TitanAIRouter
             'mcp_layer'                  => 'active',
             'budget_enforcement'         => true,
             'activity_telemetry'         => true,
+            'memory_injection' => true,
+            'memory_service' => 'TitanMemoryService',
+            'mcp_layer' => 'active',
         ];
     }
 
