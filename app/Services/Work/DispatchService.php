@@ -120,7 +120,10 @@ class DispatchService
 
     public function buildCandidatePool(ServiceJob $job): Collection
     {
-        return User::where('company_id', $job->company_id)->get();
+        // Scope to company; exclude super-admin accounts from field dispatch pool
+        return User::where('company_id', $job->company_id)
+            ->where('type', '!=', \App\Enums\Roles::SUPER_ADMIN)
+            ->get();
     }
 
     public function queueForDispatch(ServiceJob $job): DispatchQueue

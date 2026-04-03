@@ -43,7 +43,7 @@ class DispatchConstraintService
 
     public function evaluateSlaUrgency(ServiceJob $job): float
     {
-        if (isset($job->sla_deadline)) {
+        if (! is_null($job->sla_deadline)) {
             $hoursUntilDeadline = now()->diffInHours($job->sla_deadline, false);
 
             if ($hoursUntilDeadline <= 0) {
