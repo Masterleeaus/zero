@@ -76,12 +76,12 @@ class PurchaseOrderService
                     $allReceived = false;
                 }
 
-                if ($line->item_id) {
+                if ($line->item_id && ! empty($lineData['warehouse_id'])) {
                     $this->stockService->recordMovement([
                         'company_id'        => $po->company_id,
                         'created_by'        => $po->created_by,
                         'item_id'           => $line->item_id,
-                        'warehouse_id'      => $lineData['warehouse_id'] ?? $po->company_id,
+                        'warehouse_id'      => $lineData['warehouse_id'],
                         'purchase_order_id' => $po->id,
                         'type'              => 'in',
                         'qty_change'        => $qtyReceiving,

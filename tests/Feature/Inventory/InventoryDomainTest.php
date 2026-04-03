@@ -220,6 +220,44 @@ class InventoryDomainTest extends TestCase
         $this->assertEquals('received', $po->status);
     }
 
+    public function test_stock_service_adjust_stock(): void
+    {
+        $user = $this->makeUser();
+        $this->actingAs($user);
+
+        $item = InventoryItem::create([
+            'company_id'  => $this->companyId,
+            'created_by'  => $user->id,
+            'name'        => 'Adjustable Part',
+            'qty_on_hand' => 0,
+        ]);
+
+        $warehouse = Warehouse::create([
+            'company_id' => $this->companyId,
+            'created_by' => $user->id,
+            'name'       => 'Adjustment Warehouse',
+        ]);
+
+        $service = app(StockService::class);
+
+        $service->recordMovement([
+            'company_id'   => $this->companyId,
+            'created_by'   => $user->id,
+            'item_id'      => $item->id,
+            'warehouse_id' => $warehouse->id,
+            'type'         => 'in',
+            'qty_change'   => 40,
+        ]);
+
+        $movement = $service->adjustStock($item->id, $warehouse->id, 50, 'Stock count correction');
+
+        $this->assertEquals(10, $movement->qty_change);
+        $this->assertEquals('adjust', $movement->type);
+
+        $item->refresh();
+        $this->assertEquals(50, $item->qty_on_hand);
+    }
+
     public function test_company_scoping_isolates_inventory(): void
     {
         $userA = User::factory()->create(['company_id' => 101]);
