@@ -30,46 +30,47 @@ class RunDepreciationCommand extends Command
             $query->where('company_id', (int) $companyId);
         }
 
-        $assets = $query->get();
+        $assetCount = (clone $query)->count();
 
-        $this->info(sprintf('Processing %d active asset(s)…', $assets->count()));
+        $this->info(sprintf('Processing %d active asset(s)…', $assetCount));
 
         $processed = 0;
 
-        foreach ($assets as $asset) {
-            $charge = $asset->monthlyDepreciationCharge();
+        $query->chunkById(100, function ($assets) use ($dryRun, &$processed): void {
+            foreach ($assets as $asset) {
+                $charge = $asset->monthlyDepreciationCharge();
 
-            if ($charge <= 0) {
-                $this->line("  — {$asset->name}: no charge (rate = 0)");
-                continue;
+                if ($charge <= 0) {
+                    $this->line("  — {$asset->name}: no charge (rate = 0)");
+                    continue;
+                }
+
+                $before = (float) $asset->current_value;
+                $after  = max(0.0, $before - $charge);
+
+                $this->line(sprintf(
+                    '  → [%d] %s: %.2f → %.2f (charge: %.2f)',
+                    $asset->id,
+                    $asset->name,
+                    $before,
+                    $after,
+                    $charge
+                ));
+
+                if (! $dryRun) {
+                    $asset->applyDepreciation();
+                    Log::info('money.depreciation', [
+                        'asset_id'   => $asset->id,
+                        'company_id' => $asset->company_id,
+                        'before'     => $before,
+                        'after'      => $after,
+                        'charge'     => $charge,
+                    ]);
+                }
+
+                $processed++;
             }
-
-            $before = (float) $asset->current_value;
-            $after  = max(0.0, $before - $charge);
-
-            $this->line(sprintf(
-                '  → [%d] %s: %.2f → %.2f (charge: %.2f)',
-                $asset->id,
-                $asset->name,
-                $before,
-                $after,
-                $charge
-            ));
-
-            if (! $dryRun) {
-                $asset->applyDepreciation();
-                Log::info('money.depreciation', [
-                    'asset_id'   => $asset->id,
-                    'company_id' => $asset->company_id,
-                    'before'     => $before,
-                    'after'      => $after,
-                    'charge'     => $charge,
-                ]);
-            }
-
-            $processed++;
-        }
-
+        });
         $this->info(sprintf('Done. %d asset(s) %s.', $processed, $dryRun ? 'previewed' : 'depreciated'));
 
         return self::SUCCESS;
