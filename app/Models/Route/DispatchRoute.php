@@ -7,6 +7,7 @@ namespace App\Models\Route;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Team\Team;
 use App\Models\User;
+use App\Models\Vehicle\Vehicle;
 use App\Models\Work\ServiceArea;
 use App\Models\Work\Territory;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,6 +38,7 @@ class DispatchRoute extends Model
         'name',
         'assigned_user_id',
         'team_id',
+        'vehicle_id',
         'active_days_mask',
         'max_stops_per_day',
         'territory_id',
@@ -83,6 +85,11 @@ class DispatchRoute extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'team_id');
+    }
+
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
     public function territory(): BelongsTo

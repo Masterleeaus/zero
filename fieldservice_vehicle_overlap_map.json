@@ -1,0 +1,70 @@
+{
+  "module": "fieldservice_vehicle",
+  "source": "CodeToUse/FSM/Odoo/fieldservice_agent_bundle/modules/fieldservice_vehicle",
+  "zero_main_targets": {
+    "new_models": [
+      "App\\Models\\Vehicle\\Vehicle",
+      "App\\Models\\Vehicle\\VehicleAssignment",
+      "App\\Models\\Vehicle\\VehicleEquipment",
+      "App\\Models\\Vehicle\\VehicleLocationSnapshot"
+    ],
+    "extended_models": [
+      {
+        "model": "App\\Models\\Work\\ServiceJob",
+        "columns_added": ["assigned_vehicle_id", "required_vehicle_type"],
+        "helpers_added": ["assignedVehicle()", "vehicleCompatibilityStatus()", "vehicleStockAvailable()", "vehicleEquipmentAvailable()"]
+      },
+      {
+        "model": "App\\Models\\Work\\Shift",
+        "columns_added": ["vehicle_id"],
+        "relations_added": ["vehicle()"]
+      },
+      {
+        "model": "App\\Models\\Route\\DispatchRoute",
+        "columns_added": ["vehicle_id"],
+        "relations_added": ["vehicle()"]
+      }
+    ],
+    "new_services": ["App\\Services\\FSM\\VehicleService"],
+    "new_controller": "App\\Http\\Controllers\\Core\\Work\\VehicleController",
+    "new_routes": "routes/core/work.routes.php (dashboard.work.vehicles.*)",
+    "new_migration": "database/migrations/2026_04_03_500400_create_vehicle_domain_tables.php"
+  },
+  "overlaps_detected": {
+    "teams": {
+      "status": "bridged",
+      "note": "Vehicle.team_id → Team.id — no duplicate team logic created"
+    },
+    "dispatch": {
+      "status": "extended",
+      "note": "DispatchRoute.vehicle_id added; VehicleService.assignVehicleToRoute() wires vehicle to route"
+    },
+    "routes": {
+      "status": "extended",
+      "note": "dispatch_routes table extended with vehicle_id column"
+    },
+    "equipment": {
+      "status": "bridged",
+      "note": "VehicleEquipment.equipment_id → Equipment.id — reuses existing Equipment domain"
+    },
+    "service_jobs": {
+      "status": "extended",
+      "note": "service_jobs extended with assigned_vehicle_id + required_vehicle_type"
+    },
+    "scheduling": {
+      "status": "aware",
+      "note": "Shifts now carry vehicle_id for crew vehicle awareness during scheduling"
+    }
+  },
+  "odoo_concepts_ported": {
+    "fsm.vehicle": "App\\Models\\Vehicle\\Vehicle",
+    "fsm.vehicle.person_id (driver)": "Vehicle.assigned_driver_id → User",
+    "fsm.order.vehicle_id": "ServiceJob.assigned_vehicle_id"
+  },
+  "odoo_concepts_discarded": [
+    "Odoo ORM fields/api decorators",
+    "Odoo security groups (res_groups.xml)",
+    "Odoo menu items (menu.xml)",
+    "Odoo ir.model.access.csv"
+  ]
+}

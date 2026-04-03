@@ -30,6 +30,8 @@ use App\Models\FSM\FsmJobBlocker;
 use App\Models\FSM\FsmJobPriorityScore;
 use App\Models\FSM\FsmJobStatusMeta;
 use App\Models\Repair\RepairOrder;
+use App\Models\Vehicle\Vehicle;
+use App\Models\Vehicle\VehicleStock;
 
 class ServiceJob extends Model implements SchedulableEntity
 {
@@ -117,6 +119,9 @@ class ServiceJob extends Model implements SchedulableEntity
         'readiness_score',
         // fieldservice_sale — quote line linkage
         'sale_line_id',
+        // fieldservice_vehicle
+        'assigned_vehicle_id',
+        'required_vehicle_type',
     ];
 
     protected $casts = [
@@ -1217,6 +1222,9 @@ class ServiceJob extends Model implements SchedulableEntity
             'sla_breached'        => $this->sla_breached,
             'priority_score'      => $score?->total_score ?? 0,
             'score_breakdown'     => $score?->score_breakdown ?? [],
+        ];
+    }
+
     // ── fieldservice_sale helpers ─────────────────────────────────────────────
 
     /**
@@ -1248,5 +1256,69 @@ class ServiceJob extends Model implements SchedulableEntity
             'tracking'      => $item?->field_service_tracking,
             'description'   => $item?->description,
         ];
+    }
+
+    // ── fieldservice_vehicle helpers ──────────────────────────────────────────
+
+    /**
+     * The vehicle currently assigned to this job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Vehicle, self>
+     */
+    public function assignedVehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class, 'assigned_vehicle_id');
+    }
+
+    /**
+     * Whether the vehicle assigned to this job has the required capabilities.
+     *
+     * Returns true when no vehicle is assigned (no constraint) or when the
+     * assigned vehicle satisfies the required_vehicle_type capability string.
+     */
+    public function vehicleCompatibilityStatus(): bool
+    {
+        if (! $this->assigned_vehicle_id || ! $this->required_vehicle_type) {
+            return true;
+        }
+
+        $vehicle = $this->assignedVehicle;
+        if (! $vehicle) {
+            return false;
+        }
+
+        $required = array_filter(
+            array_map('trim', explode(',', $this->required_vehicle_type))
+        );
+
+        return $vehicle->hasCapabilities($required);
+    }
+
+    /**
+     * Whether the assigned vehicle has available stock (any reserved lines).
+     */
+    public function vehicleStockAvailable(): bool
+    {
+        if (! $this->assigned_vehicle_id) {
+            return true;
+        }
+
+        return VehicleStock::where('vehicle_id', $this->assigned_vehicle_id)
+            ->where('status', VehicleStock::STATUS_AVAILABLE)
+            ->exists();
+    }
+
+    /**
+     * Whether the assigned vehicle has equipment loaded.
+     */
+    public function vehicleEquipmentAvailable(): bool
+    {
+        if (! $this->assigned_vehicle_id) {
+            return true;
+        }
+
+        $vehicle = $this->assignedVehicle;
+
+        return $vehicle && $vehicle->vehicleEquipment()->exists();
     }
 }

@@ -184,5 +184,25 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('kanban.blockers.clear');
             Route::get('service-jobs/{job}/dispatch-priority', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'dispatchPriority'])
                 ->name('kanban.dispatch-priority');
+
+            // ── Modules 24+25: fieldservice_vehicle + fieldservice_vehicle_stock ─
+            Route::get('vehicles', [\App\Http\Controllers\Core\Work\VehicleController::class, 'index'])
+                ->name('vehicles.index');
+            Route::get('vehicles/create', [\App\Http\Controllers\Core\Work\VehicleController::class, 'create'])
+                ->name('vehicles.create');
+            Route::post('vehicles', [\App\Http\Controllers\Core\Work\VehicleController::class, 'store'])
+                ->name('vehicles.store');
+            Route::get('vehicles/{vehicle}', [\App\Http\Controllers\Core\Work\VehicleController::class, 'show'])
+                ->name('vehicles.show');
+            Route::get('vehicles/{vehicle}/edit', [\App\Http\Controllers\Core\Work\VehicleController::class, 'edit'])
+                ->name('vehicles.edit');
+            Route::put('vehicles/{vehicle}', [\App\Http\Controllers\Core\Work\VehicleController::class, 'update'])
+                ->name('vehicles.update');
+            Route::post('vehicles/{vehicle}/assign-job', [\App\Http\Controllers\Core\Work\VehicleController::class, 'assignJob'])
+                ->name('vehicles.assign-job');
+            Route::post('vehicles/{vehicle}/location-snapshot', [\App\Http\Controllers\Core\Work\VehicleController::class, 'recordLocation'])
+                ->name('vehicles.location-snapshot');
+            Route::get('vehicles/{vehicle}/compatibility/{job}', [\App\Http\Controllers\Core\Work\VehicleController::class, 'checkCompatibility'])
+                ->name('vehicles.compatibility');
         });
     });
