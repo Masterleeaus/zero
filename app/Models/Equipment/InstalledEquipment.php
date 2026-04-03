@@ -36,6 +36,11 @@ class InstalledEquipment extends Model
         'premises_id',
         'customer_id',
         'service_job_id',
+        'agreement_id',
+        'sale_quote_id',
+        'coverage_start_date',
+        'coverage_end_date',
+        'coverage_activated_at',
         'installed_at',
         'removed_at',
         'status',
@@ -59,6 +64,9 @@ class InstalledEquipment extends Model
         'warranty_expiry'        => 'date',
         'claimable_until'        => 'date',
         'extended_warranty_flag' => 'boolean',
+        'coverage_start_date'    => 'date',
+        'coverage_end_date'      => 'date',
+        'coverage_activated_at'  => 'datetime',
     ];
 
     protected $attributes = [
@@ -95,6 +103,61 @@ class InstalledEquipment extends Model
     public function warranties(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(EquipmentWarranty::class, 'installed_equipment_id');
+    }
+
+    // ── fieldservice_sale_agreement_equipment_stock helpers ──────────────────
+
+    /**
+     * The ServiceAgreement that covers this installed equipment unit.
+     *
+     * Mirrors Odoo fieldservice_sale_agreement_equipment_stock:
+     *   installed_equipment → service_agreement.
+     */
+    public function agreementCoverage(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Work\ServiceAgreement::class, 'agreement_id');
+    }
+
+    /**
+     * The Quote through which this equipment was sold / coverage was activated.
+     */
+    public function coverageOriginSale(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\Quote::class, 'sale_quote_id');
+    }
+
+    /**
+     * ServicePlanVisits scoped to this installed equipment unit.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function coverageVisits(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Work\ServicePlanVisit::class, 'installed_equipment_id');
+    }
+
+    /**
+     * Upcoming scheduled or pending visits for this equipment unit.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServicePlanVisit>
+     */
+    public function maintenanceSchedule(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->coverageVisits()
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->whereDate('scheduled_date', '>=', now()->toDateString())
+            ->orderBy('scheduled_date')
+            ->get();
+    }
+
+    /**
+     * Whether this equipment currently has active agreement coverage.
+     */
+    public function hasCoverageAgreement(): bool
+    {
+        return $this->agreement_id !== null
+            && $this->coverage_activated_at !== null
+            && ($this->coverage_end_date === null || $this->coverage_end_date->isFuture());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
