@@ -44,24 +44,32 @@ class EnvelopeBuilder
         $headline = $topSignals[0] ?? null;
 
         return [
-            'id' => $context['id'] ?? ('env-'.str_replace('.', '-', uniqid('', true))),
-            'company_id' => $context['company_id'] ?? null,
-            'team_id' => $context['team_id'] ?? null,
-            'actor_id' => $context['actor_id'] ?? $context['user_id'] ?? null,
-            'origin' => $context['origin'] ?? 'server',
-            'summary' => $context['summary'] ?? ('Signal envelope with '.count($signals).' signals'),
-            'headline' => $headline,
-            'signals' => $signals,
-            'top_signals' => $topSignals,
+            // --- Phase 6.3 required fields ---
+            'signal_uuid'      => $context['signal_uuid'] ?? ('suuid-'.str_replace('.', '-', uniqid('', true))),
+            'company_id'       => $context['company_id'] ?? null,
+            'origin'           => $context['origin'] ?? 'server',
+            'intent'           => $context['intent'] ?? 'signal.envelope',
+            'state'            => $context['state'] ?? 'new',
+            'approval_required' => $requiresApproval > 0,
+            'rewind_eligible'  => (bool) ($context['rewind_eligible'] ?? true),
+            'timestamp'        => $context['timestamp'] ?? now()->toIso8601String(),
+            // --- existing fields ---
+            'id'               => $context['id'] ?? ('env-'.str_replace('.', '-', uniqid('', true))),
+            'team_id'          => $context['team_id'] ?? null,
+            'actor_id'         => $context['actor_id'] ?? $context['user_id'] ?? null,
+            'summary'          => $context['summary'] ?? ('Signal envelope with '.count($signals).' signals'),
+            'headline'         => $headline,
+            'signals'          => $signals,
+            'top_signals'      => $topSignals,
             'meta' => array_merge([
-                'signal_count' => count($signals),
-                'severity_counts' => $severityCounts,
-                'status_counts' => $statusCounts,
+                'signal_count'           => count($signals),
+                'severity_counts'        => $severityCounts,
+                'status_counts'          => $statusCounts,
                 'requires_approval_count' => $requiresApproval,
-                'approval_queue' => $approvalQueue,
+                'approval_queue'         => $approvalQueue,
             ], $context['meta'] ?? []),
             'risk' => [
-                'priority' => $severityCounts['RED'] > 0 ? 'high' : ($severityCounts['AMBER'] > 0 ? 'medium' : 'low'),
+                'priority'          => $severityCounts['RED'] > 0 ? 'high' : ($severityCounts['AMBER'] > 0 ? 'medium' : 'low'),
                 'approval_pressure' => $requiresApproval > 0 ? 'elevated' : 'clear',
                 'top_priority_band' => data_get($headline, 'priority.band', 'low'),
             ],
@@ -69,7 +77,6 @@ class EnvelopeBuilder
                 'latest_signal_at' => $signals[0]['created_at'] ?? $signals[0]['timestamp'] ?? null,
                 'oldest_signal_at' => $signals[count($signals) - 1]['created_at'] ?? $signals[count($signals) - 1]['timestamp'] ?? null,
             ],
-            'timestamp' => $context['timestamp'] ?? now()->toIso8601String(),
         ];
     }
 }
