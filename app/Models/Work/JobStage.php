@@ -27,6 +27,10 @@ class JobStage extends Model
         'require_signature',
         'color',
         'description',
+        // Module 23 — fieldservice_kanban_info
+        'display_badge',
+        'badge_color',
+        'kanban_fold',
     ];
 
     protected $casts = [
@@ -35,6 +39,8 @@ class JobStage extends Model
         'is_invoiceable'    => 'boolean',
         'fold'              => 'boolean',
         'require_signature' => 'boolean',
+        // Module 23 — fieldservice_kanban_info
+        'kanban_fold'       => 'boolean',
     ];
 
     protected $attributes = [
@@ -46,6 +52,8 @@ class JobStage extends Model
         'require_signature' => false,
         'color'             => '#FFFFFF',
         'sequence'          => 1,
+        // Module 23 — fieldservice_kanban_info
+        'kanban_fold'       => false,
     ];
 
     public function serviceJobs(): HasMany

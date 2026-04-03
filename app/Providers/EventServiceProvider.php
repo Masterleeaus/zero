@@ -40,6 +40,10 @@ use App\Events\Work\ServicePlanVisitCompleted;
 use App\Events\Work\ServicePlanVisitDispatched;
 use App\Events\Work\ServicePlanVisitRescheduled;
 use App\Events\Work\ServicePlanVisitScheduled;
+// Module 23 — fieldservice_kanban_info signals
+use App\Events\Work\JobKanbanStateChanged;
+use App\Events\Work\JobBlockerAdded;
+use App\Events\Work\JobBlockerCleared;
 use App\Events\Equipment\EquipmentInstalled;
 use App\Events\Equipment\EquipmentRemoved;
 use App\Events\Equipment\EquipmentReplaced;
@@ -97,6 +101,7 @@ use App\Listeners\Equipment\WarrantyClaimCreatedListener;
 use App\Listeners\Equipment\WarrantyClaimRejectedListener;
 use App\Listeners\Work\ChecklistRunCompletedListener;
 use App\Listeners\Work\JobCompletedListener;
+use App\Listeners\Work\JobKanbanStateChangedListener;
 use App\Listeners\Work\JobStageChangedListener;
 use App\Listeners\Work\ServiceJobRescheduledListener;
 use App\Listeners\Work\ServiceJobScheduledListener;
@@ -366,6 +371,12 @@ class EventServiceProvider extends ServiceProvider
         RepairScheduled::class              => [],
         RepairRescheduled::class            => [],
         RepairDispatchAssigned::class       => [],
+        // ── Module 23 (fieldservice_kanban_info) — kanban intelligence signals ──
+        JobKanbanStateChanged::class => [
+            JobKanbanStateChangedListener::class,
+        ],
+        JobBlockerAdded::class   => [],
+        JobBlockerCleared::class => [],
         // ── fieldservice_sale + fieldservice_sale_agreement (Modules 3 + 3a) ──
         FieldServiceSaleCreated::class            => [],
         FieldServiceSaleApproved::class           => [
