@@ -79,14 +79,16 @@ class TitanPwaController extends Controller
             (int) $user->id,
         );
 
-        $accepted = collect($results)->where('status', 'accepted')->count();
-        $rejected = collect($results)->where('status', 'rejected')->count();
+        $resultCollection = collect($results);
 
         return response()->json([
-            'ok'       => true,
-            'accepted' => $accepted,
-            'rejected' => $rejected,
-            'results'  => $results,
+            'ok'          => true,
+            'accepted'    => $resultCollection->where('ingest_status', 'accepted')->count(),
+            'rejected'    => $resultCollection->where('ingest_status', 'rejected')->count(),
+            'duplicate'   => $resultCollection->where('ingest_status', 'duplicate')->count(),
+            'invalid_sig' => $resultCollection->where('ingest_status', 'invalid_sig')->count(),
+            'rate_limited' => $resultCollection->where('ingest_status', 'rate_limited')->count(),
+            'results'     => $results,
         ]);
     }
 

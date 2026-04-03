@@ -156,6 +156,60 @@ class SchedulingSurfaceProvider
             ->values();
     }
 
+    /**
+     * Return all scheduled events assigned to a specific team.
+     *
+     * Covers ServiceJob (has team_id) and ServicePlanVisit/InspectionInstance
+     * where the job linked to the visit belongs to that team.
+     *
+     * Module 9 (fieldservice_calendar) — team workload calendar surface.
+     *
+     * @return Collection<int, ScheduledEventDTO>
+     */
+    public function getEventsForTeam(int $teamId): Collection
+    {
+        $jobs = ServiceJob::query()
+            ->where('team_id', $teamId)
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->get()
+            ->map(fn (ServiceJob $e) => $this->normalise($e, $e->premises_id, $e->customer_id));
+
+        $visits = ServicePlanVisit::query()
+            ->whereHas('serviceJob', fn ($q) => $q->where('team_id', $teamId))
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->get()
+            ->map(fn (ServicePlanVisit $e) => $this->normalise(
+                $e,
+                $e->plan?->premises_id,
+                $e->plan?->customer_id,
+            ));
+
+        $inspections = InspectionInstance::query()
+            ->whereHas('serviceJob', fn ($q) => $q->where('team_id', $teamId))
+            ->whereNotIn('status', ['completed', 'failed', 'cancelled'])
+            ->get()
+            ->map(fn (InspectionInstance $e) => $this->normalise($e));
+
+        return collect()
+            ->merge($jobs)
+            ->merge($visits)
+            ->merge($inspections)
+            ->values();
+    }
+
+    /**
+     * Public wrapper around normalise() for use by external services and listeners.
+     *
+     * Module 9 (fieldservice_calendar) — public entity normalisation entry point.
+     */
+    public function normaliseEntity(
+        SchedulableEntity $entity,
+        ?int $premisesId = null,
+        ?int $customerId = null,
+    ): ScheduledEventDTO {
+        return $this->normalise($entity, $premisesId, $customerId);
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private function normalise(

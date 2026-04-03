@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+// Titan Core activity feed – admin only
+Broadcast::channel('titan.core.activity', function ($user) {
+    return $user?->is_admin ?? false;
+});

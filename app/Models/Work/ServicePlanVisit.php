@@ -166,6 +166,61 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         return $job;
     }
 
+    // ── Calendar helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Return a FullCalendar-compatible calendar event array.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id'            => $this->id,
+            'title'         => $this->calendarTitle(),
+            'start'         => $this->getScheduledStart(),
+            'end'           => null,
+            'color'         => '#22c55e',    // green-500 — visit colour
+            'extendedProps' => $this->calendarMeta(),
+        ];
+    }
+
+    /**
+     * Human-readable calendar event title for this visit.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarTitle(): string
+    {
+        $planName = $this->plan?->name ?? ('Visit #' . $this->id);
+
+        return '[Visit] ' . $planName;
+    }
+
+    /**
+     * Extended calendar metadata for tooltip / detail rendering.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function calendarMeta(): array
+    {
+        return [
+            'type'           => 'service_plan_visit',
+            'status'         => $this->status,
+            'visit_type'     => $this->visit_type,
+            'assignee_id'    => $this->assigned_to,
+            'plan_id'        => $this->service_plan_id,
+            'service_job_id' => $this->service_job_id,
+            'is_dispatched'  => $this->hasLinkedJob(),
+            'premises_id'    => $this->plan?->premises_id,
+            'customer_id'    => $this->plan?->customer_id,
+        ];
+    }
+
     // ── SchedulableEntity contract ────────────────────────────────────────────
 
     public function getScheduledStart(): ?string

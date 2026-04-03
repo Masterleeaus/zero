@@ -94,6 +94,20 @@ class BusinessSuiteCalendarAdapter
     }
 
     /**
+     * Get calendar events scoped to a team.
+     *
+     * Module 9 (fieldservice_calendar) — team workload calendar surface.
+     *
+     * @return Collection<int, CalendarEventDTO>
+     */
+    public function getCalendarEventsForTeam(int $teamId): Collection
+    {
+        return $this->surfaceProvider
+            ->getEventsForTeam($teamId)
+            ->map(fn (ScheduledEventDTO $dto) => $this->toCalendarEvent($dto));
+    }
+
+    /**
      * Push a single event to the Business Suite calendar store.
      *
      * Logs the push operation. Extend this method to persist to a

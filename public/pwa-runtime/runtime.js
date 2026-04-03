@@ -1,5 +1,12 @@
 /**
- * TitanRuntime - Main PWA runtime coordinator for Titan Zero
+ * TitanRuntime - Main PWA runtime coordinator for Titan Zero — v2
+ *
+ * Phase 2 improvements:
+ *   - Bootstrap contract loading and storage in IndexedDB
+ *   - Trust level / node_id persisted from handshake response
+ *   - SW update-available UI dispatch
+ *   - SW connection-restored handling
+ *   - Staged upload manager integration
  */
 import db from './db.js';
 import { TitanSignalQueue } from './signalQueue.js';
@@ -12,7 +19,9 @@ class TitanRuntime {
         this.syncEngine = null;
         this.nodeId = null;
         this.deviceLabel = null;
+        this.trustLevel = null;
         this._appVersion = document.documentElement.dataset.appVersion ?? '1.0.0';
+        this._contract = null;
     }
 
     async init() {
@@ -21,8 +30,24 @@ class TitanRuntime {
 
             this.nodeId = await this._loadOrGenerateNodeId();
 
+            // Load bootstrap contract from server
+            this._contract = await this._loadBootstrapContract();
+
             this.signalQueue = new TitanSignalQueue(this.db);
             this.syncEngine = new TitanSyncEngine(this.db, this.signalQueue);
+
+            // Apply contract-derived settings to sync engine
+            if (this._contract) {
+                if (this._contract.syncInterval) {
+                    this.syncEngine.syncInterval = this._contract.syncInterval;
+                }
+                if (this._contract.syncBatchLimit) {
+                    this.syncEngine._batchSize = Math.min(
+                        this._contract.syncBatchLimit,
+                        this.syncEngine._maxBatch
+                    );
+                }
+            }
 
             if (navigator.onLine) {
                 await this.handshake().catch((e) => {
@@ -32,8 +57,18 @@ class TitanRuntime {
 
             this.syncEngine.start();
 
+            // Listen for SW messages
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (!event.data) return;
+                    if (event.data.type === 'titan:sw-update-ready') {
+                        window.dispatchEvent(new CustomEvent('titan:sw-update-ready'));
+                    }
+                });
+            }
+
             window.dispatchEvent(new CustomEvent('titan:runtime-ready', {
-                detail: { nodeId: this.nodeId },
+                detail: { nodeId: this.nodeId, trustLevel: this.trustLevel },
             }));
         } catch (err) {
             console.error('[TitanRuntime] Init failed:', err);
@@ -63,9 +98,15 @@ class TitanRuntime {
         }
 
         const data = await response.json().catch(() => ({}));
+
         if (data.device_label) {
             this.deviceLabel = data.device_label;
         }
+        if (data.trust_level) {
+            this.trustLevel = data.trust_level;
+            await this.db.put('runtime_meta', { key: 'trust_level', value: data.trust_level });
+        }
+
         return data;
     }
 
@@ -80,6 +121,14 @@ class TitanRuntime {
         return this.nodeId;
     }
 
+    getTrustLevel() {
+        return this.trustLevel;
+    }
+
+    getContract() {
+        return this._contract;
+    }
+
     async status() {
         const syncStatus = this.syncEngine
             ? await this.syncEngine.getStatus()
@@ -89,10 +138,37 @@ class TitanRuntime {
 
         return {
             nodeId: this.nodeId,
+            trustLevel: this.trustLevel,
             deviceLabel: this.deviceLabel,
+            appVersion: this._appVersion,
             ...syncStatus,
             queueSize,
         };
+    }
+
+    // ─── Private ───────────────────────────────────────────────────────────────
+
+    async _loadBootstrapContract() {
+        try {
+            const cached = await this.db.get('bootstrap_meta', 'contract');
+            if (cached?.value) return cached.value;
+        } catch (e) {
+            // Fall through to fetch
+        }
+
+        try {
+            const res = await fetch('/pwa/bootstrap', {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' },
+            });
+            if (!res.ok) return null;
+            const contract = await res.json();
+            await this.db.put('bootstrap_meta', { key: 'contract', value: contract });
+            return contract;
+        } catch (e) {
+            console.warn('[TitanRuntime] Bootstrap contract load failed:', e.message);
+            return null;
+        }
     }
 
     async _loadOrGenerateNodeId() {

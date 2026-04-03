@@ -249,6 +249,21 @@ class Premises extends Model
             ->whereNotNull('warranty_expiry')
             ->whereDate('warranty_expiry', '>', now()->toDateString())
             ->whereDate('warranty_expiry', '<=', $cutoff)
+     * Upcoming open service jobs for this premises.
+     *
+     * Module 9 (fieldservice_calendar) — premises calendar surface helper.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceJob>
+     */
+    public function upcomingServiceJobs(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->serviceJobs()
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->where(function ($q) {
+                $q->whereNull('scheduled_date_start')
+                  ->orWhere('scheduled_date_start', '>=', now());
+            })
+            ->orderBy('scheduled_date_start')
             ->get();
     }
 

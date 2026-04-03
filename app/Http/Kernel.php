@@ -88,7 +88,11 @@ class Kernel extends HttpKernel
         'checkInstallation'         => \App\Http\Middleware\CheckInstallation::class,
         'custom'                    => \App\Http\Middleware\Custom::class,
         'updateUserActivity'        => \App\Http\Middleware\UpdateUserActivity::class,
+        'titan.tenancy'             => \App\Http\Middleware\TitanCore\EnforceTitanTenancy::class,
+        'titan.zylos.signature'     => \App\Http\Middleware\TitanCore\ValidateZylosSignature::class,
         'sentry.context'            => \App\Http\Middleware\SentryContextMiddleware::class,
         'surveyMiddleware'          => \App\Http\Middleware\SurveyMiddleware::class,
+        'titan.mcp.throttle'        => \App\Http\Middleware\Titan\McpRateLimitMiddleware::class,
+        'titan.ai.throttle'         => \App\Http\Middleware\Titan\TitanAIRateLimitMiddleware::class,
     ];
 }

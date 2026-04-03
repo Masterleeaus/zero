@@ -31,19 +31,27 @@
 
 {{-- Load PWA runtime modules (ES modules, deferred) --}}
 <script type="module">
-    import '/pwa-runtime/db.js';
-    import '/pwa-runtime/signalQueue.js';
-    import '/pwa-runtime/sync.js';
-    import { TitanRuntime } from '/pwa-runtime/runtime.js';
-    import { TitanPwaUI } from '/pwa-runtime/ui.js';
+    // Default exports — runtime.js and ui.js export a singleton instance as default
+    import TitanRuntime from '/pwa-runtime/runtime.js';
+    import TitanPwaUI from '/pwa-runtime/ui.js';
 
-    // Boot runtime after DOM ready
-    document.addEventListener('DOMContentLoaded', async function () {
+    // Expose on window for console access / Livewire interop
+    window.TitanRuntime = TitanRuntime;
+    window.TitanPwaUI  = TitanPwaUI;
+
+    // Boot runtime after DOM ready (guard: may fire after DOMContentLoaded in module context)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+
+    async function boot() {
         try {
             await TitanRuntime.init();
             TitanPwaUI.init();
         } catch (err) {
             console.warn('[TitanZero] PWA runtime boot error:', err);
         }
-    });
+    }
 </script>

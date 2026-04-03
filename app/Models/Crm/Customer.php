@@ -338,6 +338,33 @@ class Customer extends Model
     }
 
     /**
+     * Upcoming (not-yet-completed) inspections across all premises for this customer.
+     *
+     * Module 9 (fieldservice_calendar) — CRM calendar surface helper.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspection\InspectionInstance>
+     */
+    public function upcomingInspections(): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        return \App\Models\Inspection\InspectionInstance::query()
+            ->where(function ($q) use ($premisesIds) {
+                $q->where(function ($inner) use ($premisesIds) {
+                    $inner->where('scope_type', \App\Models\Premises\Premises::class)
+                          ->whereIn('scope_id', $premisesIds);
+                })->orWhereHas('serviceJob', fn ($j) => $j->where('customer_id', $this->id));
+            })
+            ->whereNotIn('status', ['completed', 'failed', 'cancelled'])
+            ->where(function ($q) {
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '>=', now());
+            })
+            ->orderBy('scheduled_at')
+            ->get();
+    }
+
+    /**
      * Active hazards across all premises belonging to this customer.
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Premises\Hazard>

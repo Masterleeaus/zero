@@ -33,8 +33,12 @@ use App\Events\Work\JobReadyForInvoice;
 use App\Events\Work\JobStageChanged;
 use App\Events\Work\JobStarted;
 use App\Events\Work\ServiceInvoiceGenerated;
+use App\Events\Work\ServiceJobRescheduled;
+use App\Events\Work\ServiceJobScheduled;
+use App\Events\Work\ServiceJobUnscheduled;
 use App\Events\Work\ServicePlanVisitCompleted;
 use App\Events\Work\ServicePlanVisitDispatched;
+use App\Events\Work\ServicePlanVisitRescheduled;
 use App\Events\Work\ServicePlanVisitScheduled;
 use App\Events\Equipment\EquipmentInstalled;
 use App\Events\Equipment\EquipmentRemoved;
@@ -49,6 +53,7 @@ use App\Events\Equipment\WarrantyClaimRejected;
 use App\Events\Inspection\InspectionCompleted;
 use App\Events\Inspection\InspectionFailed;
 use App\Events\Inspection\InspectionFollowupRequired;
+use App\Events\Inspection\InspectionRescheduled;
 use App\Events\Inspection\InspectionScheduled;
 use App\Events\Inspection\InspectionStarted;
 use App\Events\Premises\HazardDetected;
@@ -82,6 +87,8 @@ use App\Listeners\Equipment\WarrantyClaimRejectedListener;
 use App\Listeners\Work\ChecklistRunCompletedListener;
 use App\Listeners\Work\JobCompletedListener;
 use App\Listeners\Work\JobStageChangedListener;
+use App\Listeners\Work\ServiceJobRescheduledListener;
+use App\Listeners\Work\ServiceJobScheduledListener;
 use App\Listeners\Work\ServicePlanVisitCompletedListener;
 use App\Listeners\Work\ServicePlanVisitDispatchedListener;
 use App\Listeners\Work\ServicePlanVisitScheduledListener;
@@ -173,6 +180,16 @@ class EventServiceProvider extends ServiceProvider
         // Work-namespace inspection signals (from fieldservice layer)
         WorkInspectionCompleted::class => [],
         WorkInspectionFailed::class    => [],
+        // ── Module 9 (fieldservice_calendar) — calendar lifecycle signals ──
+        ServiceJobScheduled::class => [
+            ServiceJobScheduledListener::class,
+        ],
+        ServiceJobRescheduled::class => [
+            ServiceJobRescheduledListener::class,
+        ],
+        ServiceJobUnscheduled::class => [],
+        ServicePlanVisitRescheduled::class => [],
+        InspectionRescheduled::class       => [],
         // ── Inspection lifecycle signals (canonical Inspection namespace) ──
         InspectionScheduled::class        => [],
         InspectionStarted::class          => [],

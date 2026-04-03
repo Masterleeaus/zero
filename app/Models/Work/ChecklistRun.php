@@ -141,6 +141,61 @@ class ChecklistRun extends Model implements SchedulableEntity
         return (int) round(($this->items_completed / $this->items_total) * 100);
     }
 
+    // ── Calendar helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Return a FullCalendar-compatible calendar event array.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id'            => $this->id,
+            'title'         => $this->calendarTitle(),
+            'start'         => $this->getScheduledStart(),
+            'end'           => $this->getScheduledEnd(),
+            'color'         => '#a855f7',    // purple-500 — checklist colour
+            'extendedProps' => $this->calendarMeta(),
+        ];
+    }
+
+    /**
+     * Human-readable calendar event title.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarTitle(): string
+    {
+        $base = $this->title ?? ('Checklist #' . $this->id);
+
+        return '[Checklist] ' . $base;
+    }
+
+    /**
+     * Extended calendar metadata for tooltip / detail rendering.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function calendarMeta(): array
+    {
+        return [
+            'type'               => 'checklist_run',
+            'status'             => $this->status,
+            'assignee_id'        => $this->assigned_to,
+            'completion_pct'     => $this->completionPercentage(),
+            'items_total'        => $this->items_total,
+            'items_completed'    => $this->items_completed,
+            'items_failed'       => $this->items_failed,
+            'runnable_type'      => $this->runnable_type,
+            'runnable_id'        => $this->runnable_id,
+        ];
+    }
+
     // ── SchedulableEntity contract ────────────────────────────────────────────
 
     public function getScheduledStart(): ?string
