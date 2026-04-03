@@ -54,7 +54,15 @@ class TimesheetSubmission extends Model
 
     public function timelogs(): HasMany
     {
-        return $this->hasMany(Timelog::class, 'user_id', 'user_id')
-            ->whereBetween('started_at', [$this->week_start, $this->week_end]);
+        return $this->hasMany(Timelog::class, 'user_id', 'user_id');
+    }
+
+    public function timelogsForWeek(): HasMany
+    {
+        return $this->timelogs()
+            ->whereBetween('started_at', [
+                $this->week_start->toDateString(),
+                $this->week_end->toDateString() . ' 23:59:59',
+            ]);
     }
 }

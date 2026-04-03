@@ -61,8 +61,4 @@ class StaffProfile extends Model
         return $this->hasMany(self::class, 'manager_id', 'user_id');
     }
 
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Company::class);
-    }
 }

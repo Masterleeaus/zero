@@ -10,6 +10,7 @@ use App\Events\Work\TimesheetSubmitted;
 use App\Models\User;
 use App\Models\Work\Timelog;
 use App\Models\Work\WeeklyTimesheet;
+use Carbon\Carbon;
 
 class TimesheetService
 {
@@ -61,6 +62,7 @@ class TimesheetService
 
     /**
      * Reject a submitted timesheet.
+     * Notes are stored against a TimesheetSubmission record if one exists for the same week.
      */
     public function rejectTimesheet(WeeklyTimesheet $sheet, User $reviewer, string $notes = ''): bool
     {
@@ -71,6 +73,14 @@ class TimesheetService
         $sheet->update([
             'status' => 'rejected',
         ]);
+
+        if ($notes !== '') {
+            \App\Models\Work\TimesheetSubmission::query()
+                ->where('company_id', $sheet->company_id)
+                ->where('user_id', $sheet->user_id)
+                ->where('week_start', $sheet->week_start)
+                ->update(['review_notes' => $notes, 'reviewed_by' => $reviewer->id, 'reviewed_at' => now()]);
+        }
 
         TimesheetRejected::dispatch($sheet, $reviewer);
 
@@ -85,7 +95,10 @@ class TimesheetService
         $minutes = Timelog::query()
             ->withoutGlobalScope('company')
             ->where('user_id', $userId)
-            ->whereBetween('started_at', [$weekStart, $weekEnd . ' 23:59:59'])
+            ->whereBetween('started_at', [
+                Carbon::parse($weekStart)->startOfDay(),
+                Carbon::parse($weekEnd)->endOfDay(),
+            ])
             ->sum('duration_minutes');
 
         return round($minutes / 60, 2);
