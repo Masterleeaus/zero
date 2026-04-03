@@ -2,7 +2,7 @@
 
 namespace App\TitanCore\MCP\Handlers;
 
-use App\TitanCore\Zero\Skills\ZylosBridge;
+use App\TitanCore\Zylos\ZylosBridge;
 
 class SkillListHandler
 {

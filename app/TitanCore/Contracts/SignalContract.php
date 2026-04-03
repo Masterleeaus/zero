@@ -2,22 +2,13 @@
 
 namespace App\TitanCore\Contracts;
 
-interface SignalContract
+/**
+ * @deprecated Use App\Titan\Core\Contracts\SignalContract (canonical).
+ *
+ * This alias is retained so existing code referencing the TitanCore namespace
+ * continues to resolve without import updates. New code must use the canonical path.
+ */
+interface SignalContract extends \App\Titan\Core\Contracts\SignalContract
 {
-    /**
-     * Build and return a validated signal envelope.
-     *
-     * @param  array<string, mixed>  $context
-     * @return array<string, mixed>
-     */
-    public function envelope(array $context = []): array;
-
-    /**
-     * Publish a signal through the dispatch pipeline.
-     *
-     * @param  array<string, mixed>  $processPayload
-     * @param  array<string, mixed>  $signalPayload
-     * @return array<string, mixed>
-     */
-    public function recordAndPublish(array $processPayload, array $signalPayload = []): array;
+    // Intentionally empty — the canonical interface carries all method signatures.
 }
