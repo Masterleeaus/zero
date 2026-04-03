@@ -610,10 +610,13 @@ class Customer extends Model
             ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds))
             ->whereIn('status', ['pending', 'scheduled'])
             ->where(function ($q) {
-                $q->whereNotNull('scheduled_date')
-                  ->where('scheduled_date', '>=', now()->toDateString())
-                  ->orWhereNotNull('scheduled_for')
-                  ->where('scheduled_for', '>=', now());
+                $q->where(function ($inner) {
+                    $inner->whereNotNull('scheduled_date')
+                          ->where('scheduled_date', '>=', now()->toDateString());
+                })->orWhere(function ($inner) {
+                    $inner->whereNotNull('scheduled_for')
+                          ->where('scheduled_for', '>=', now());
+                });
             })
             ->orderBy('scheduled_date')
             ->limit($limit)

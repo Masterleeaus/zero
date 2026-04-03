@@ -1,5 +1,7 @@
 <?php
 
+// Loaded by RouteServiceProvider::loadCoreRoutes() under ['auth', 'throttle:120,1'] middleware.
+
 use App\Http\Controllers\Core\Work\FieldServiceProjectController;
 use Illuminate\Support\Facades\Route;
 
