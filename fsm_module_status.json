@@ -31,7 +31,8 @@
         "module_28": { "name": "fieldservice_distribution", "status": "pending" },
         "module_29": { "name": "fieldservice_change_management", "status": "pending" },
         "module_30": { "name": "fieldservice_quality", "status": "pending" },
-        "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" }
+        "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" },
+        "titan_edge_sync": { "name": "titan_edge_sync", "status": "installed", "installed_at": "2026-04-03" }
     },
     "next_module": "module_9",
     "updated_at": "2026-04-03"

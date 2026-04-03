@@ -187,6 +187,12 @@ use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
+// ── MODULE 05 — TitanEdgeSync events ─────────────────────────────────────────
+use App\Events\Sync\EdgeBatchSynced;
+use App\Events\Sync\EdgeConflictDetected;
+use App\Events\Sync\EdgeConflictResolved;
+use App\Events\Sync\EdgeSyncFailed;
+use App\Listeners\Sync\RecordSyncEventOnTrustLedger;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -448,6 +454,13 @@ class EventServiceProvider extends ServiceProvider
         ],
         JobDispatchFailed::class  => [],
         JobReDispatched::class    => [],
+        // ── MODULE 05 — TitanEdgeSync lifecycle signals ───────────────────
+        EdgeBatchSynced::class      => [
+            RecordSyncEventOnTrustLedger::class,
+        ],
+        EdgeConflictDetected::class => [],
+        EdgeConflictResolved::class => [],
+        EdgeSyncFailed::class       => [],
     ];
 
     /**
