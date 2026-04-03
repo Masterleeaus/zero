@@ -1,15 +1,15 @@
 /**
- * TitanDB - IndexedDB wrapper for Titan Zero PWA — v2
+ * TitanDB - IndexedDB wrapper for Titan Zero PWA — v3
  *
- * Phase 2 additions:
- *   - staged_uploads : offline photo/proof/note staging
- *   - bootstrap_meta : stored bootstrap contract from server
- *   - DB version bumped to 2
+ * Phase 3 additions:
+ *   - capability_profile : local device capability snapshot
+ *   - conflict_queue     : locally queued conflict/error events for operator visibility
+ *   - DB version bumped to 3
  */
 class TitanDB {
     constructor() {
         this.DB_NAME = 'titan-zero-db';
-        this.DB_VERSION = 2;
+        this.DB_VERSION = 3;
         this._db = null;
     }
 
@@ -66,6 +66,22 @@ class TitanDB {
                     // Bootstrap contract stored from server
                     if (!db.objectStoreNames.contains('bootstrap_meta')) {
                         db.createObjectStore('bootstrap_meta', { keyPath: 'key', autoIncrement: false });
+                    }
+                }
+
+                // ── Version 3 stores ─────────────────────────────────────────
+                if (oldVersion < 3) {
+                    // Device capability profile snapshot
+                    if (!db.objectStoreNames.contains('capability_profile')) {
+                        db.createObjectStore('capability_profile', { keyPath: 'key', autoIncrement: false });
+                    }
+
+                    // Local conflict queue — tracks invalid_sig / rejected / deferred events
+                    if (!db.objectStoreNames.contains('conflict_queue')) {
+                        const conflictStore = db.createObjectStore('conflict_queue', { keyPath: 'conflictId', autoIncrement: true });
+                        conflictStore.createIndex('conflict_type', 'conflict_type', { unique: false });
+                        conflictStore.createIndex('created_at', 'created_at', { unique: false });
+                        conflictStore.createIndex('resolved', 'resolved', { unique: false });
                     }
                 }
             };
@@ -155,3 +171,4 @@ if (typeof window !== 'undefined') {
 }
 
 export default instance;
+

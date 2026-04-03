@@ -8,6 +8,7 @@ use App\Contracts\SchedulableEntity;
 use App\Models\Inspection\InspectionInstance;
 use App\Models\Route\DispatchRoute;
 use App\Models\Route\DispatchRouteStop;
+use App\Models\Repair\RepairOrder;
 use App\Models\Work\ChecklistRun;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlanVisit;
@@ -39,6 +40,7 @@ class SchedulingSurfaceProvider
         ServicePlanVisit::class,
         InspectionInstance::class,
         ChecklistRun::class,
+        RepairOrder::class,
     ];
 
     /**
@@ -55,6 +57,7 @@ class SchedulingSurfaceProvider
             ->merge($this->visitsForRange($from, $to))
             ->merge($this->inspectionsForRange($from, $to))
             ->merge($this->checklistRunsForRange($from, $to))
+            ->merge($this->repairsForRange($from, $to))
             ->sortBy('scheduledStart')
             ->values();
     }
@@ -90,11 +93,18 @@ class SchedulingSurfaceProvider
             ->get()
             ->map(fn (ChecklistRun $e) => $this->normalise($e));
 
+        $repairs = RepairOrder::query()
+            ->where('assigned_user_id', $userId)
+            ->whereNotIn('repair_status', ['completed', 'verified', 'closed', 'cancelled'])
+            ->get()
+            ->map(fn (RepairOrder $e) => $this->normalise($e));
+
         return collect()
             ->merge($jobs)
             ->merge($visits)
             ->merge($inspections)
             ->merge($checklists)
+            ->merge($repairs)
             ->values();
     }
 
@@ -126,10 +136,17 @@ class SchedulingSurfaceProvider
             ->get()
             ->map(fn (InspectionInstance $e) => $this->normalise($e, $premisesId));
 
+        $repairs = RepairOrder::query()
+            ->where('premises_id', $premisesId)
+            ->whereNotIn('repair_status', ['completed', 'verified', 'closed', 'cancelled'])
+            ->get()
+            ->map(fn (RepairOrder $e) => $this->normalise($e, $premisesId));
+
         return collect()
             ->merge($jobs)
             ->merge($visits)
             ->merge($inspections)
+            ->merge($repairs)
             ->values();
     }
 
@@ -192,10 +209,21 @@ class SchedulingSurfaceProvider
             ->get()
             ->map(fn (InspectionInstance $e) => $this->normalise($e));
 
+        $repairs = RepairOrder::query()
+            ->where('assigned_team_id', $teamId)
+            ->whereNotIn('repair_status', ['completed', 'verified', 'closed', 'cancelled'])
+            ->get()
+            ->map(fn (RepairOrder $e) => $this->normalise(
+                $e,
+                $e->premises_id,
+                $e->customer_id,
+            ));
+
         return collect()
             ->merge($jobs)
             ->merge($visits)
             ->merge($inspections)
+            ->merge($repairs)
             ->values();
     }
 
@@ -369,5 +397,25 @@ class SchedulingSurfaceProvider
             })
             ->get()
             ->map(fn (ChecklistRun $e) => $this->normalise($e));
+    }
+
+    /**
+     * @return Collection<int, ScheduledEventDTO>
+     */
+    private function repairsForRange(Carbon $from, Carbon $to): Collection
+    {
+        return RepairOrder::query()
+            ->where(function ($q) use ($from, $to) {
+                $q->whereBetween('scheduled_at', [$from, $to])
+                  ->orWhere(function ($inner) use ($from, $to) {
+                      $inner->where('scheduled_at', '<=', $to)
+                            ->where(function ($end) use ($from) {
+                                $end->whereNull('completed_at')
+                                    ->orWhere('completed_at', '>=', $from);
+                            });
+                  });
+            })
+            ->get()
+            ->map(fn (RepairOrder $e) => $this->normalise($e, $e->premises_id, $e->customer_id));
     }
 }
