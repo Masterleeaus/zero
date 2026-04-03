@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Core\Work\DispatchController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.dashboard', '120,1')])
@@ -172,5 +173,13 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('job-activities.update');
             Route::delete('service-jobs/{job}/activities/{jobActivity}', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'destroy'])
                 ->name('job-activities.destroy');
+
+            // Dispatch (MODULE_01 — TitanDispatch)
+            Route::prefix('dispatch')->as('dispatch.')->group(function () {
+                Route::get('/', [DispatchController::class, 'index'])->name('index');
+                Route::post('/assign', [DispatchController::class, 'assign'])->name('assign');
+                Route::post('/auto', [DispatchController::class, 'autoDispatch'])->name('auto');
+                Route::get('/history', [DispatchController::class, 'history'])->name('history');
+            });
         });
     });

@@ -33,5 +33,10 @@
         "module_30": { "name": "fieldservice_analytics", "status": "pending" }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-03"
+    "updated_at": "2026-04-03",
+    "titan_dispatch": {
+        "name": "titan_dispatch",
+        "status": "installed",
+        "installed_at": "2026-04-03"
+    }
 }
