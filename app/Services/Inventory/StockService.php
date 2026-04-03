@@ -35,18 +35,28 @@ class StockService
         });
     }
 
-    public function adjustStock(int $itemId, int $warehouseId, int $targetQty, string $note): StockMovement
+    public function adjustStock(int $itemId, int $warehouseId, int $targetQty, string $note, ?int $companyId = null, ?int $createdBy = null): StockMovement
     {
         $current = $this->onHand($itemId, $warehouseId);
         $difference = $targetQty - $current;
 
-        return $this->recordMovement([
+        $data = [
             'item_id'      => $itemId,
             'warehouse_id' => $warehouseId,
             'type'         => 'adjust',
             'qty_change'   => $difference,
             'note'         => $note,
             'reference'    => 'ADJ-' . now()->format('YmdHis'),
-        ]);
+        ];
+
+        if ($companyId !== null) {
+            $data['company_id'] = $companyId;
+        }
+
+        if ($createdBy !== null) {
+            $data['created_by'] = $createdBy;
+        }
+
+        return $this->recordMovement($data);
     }
 }

@@ -194,13 +194,6 @@ return new class extends Migration
             });
         }
 
-        // Add purchase_order_id to stock_movements if missing
-        if (Schema::hasTable('stock_movements') && ! Schema::hasColumn('stock_movements', 'purchase_order_id')) {
-            Schema::table('stock_movements', function (Blueprint $table) {
-                $table->unsignedBigInteger('purchase_order_id')->nullable()->after('warehouse_id')->index();
-            });
-        }
-
         // Add inventory_item_id to equipment if table exists and column missing
         if (Schema::hasTable('equipment') && ! Schema::hasColumn('equipment', 'inventory_item_id')) {
             Schema::table('equipment', function (Blueprint $table) {
@@ -214,12 +207,6 @@ return new class extends Migration
         if (Schema::hasTable('equipment') && Schema::hasColumn('equipment', 'inventory_item_id')) {
             Schema::table('equipment', function (Blueprint $table) {
                 $table->dropColumn('inventory_item_id');
-            });
-        }
-
-        if (Schema::hasTable('stock_movements') && Schema::hasColumn('stock_movements', 'purchase_order_id')) {
-            Schema::table('stock_movements', function (Blueprint $table) {
-                $table->dropColumn('purchase_order_id');
             });
         }
 
