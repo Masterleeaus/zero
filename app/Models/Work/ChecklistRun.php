@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Work;
 
+use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Premises\Premises;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * Status: pending | in_progress | completed | failed
  */
-class ChecklistRun extends Model
+class ChecklistRun extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -138,5 +139,42 @@ class ChecklistRun extends Model
         }
 
         return (int) round(($this->items_completed / $this->items_total) * 100);
+    }
+
+    // ── SchedulableEntity contract ────────────────────────────────────────────
+
+    public function getScheduledStart(): ?string
+    {
+        return $this->started_at?->toIso8601String();
+    }
+
+    public function getScheduledEnd(): ?string
+    {
+        return $this->completed_at?->toIso8601String();
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_to;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'pending';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return null;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->title ?? 'Checklist Run #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
     }
 }

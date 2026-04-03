@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ServiceAgreement extends Model
@@ -102,5 +103,21 @@ class ServiceAgreement extends Model
     public function servicePlans(): HasMany
     {
         return $this->hasMany(ServicePlan::class, 'agreement_id');
+    }
+
+    /**
+     * All service plan visits linked to this agreement via its service plans.
+     */
+    public function visits(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(ServicePlanVisit::class, ServicePlan::class, 'agreement_id', 'service_plan_id');
+    }
+
+    /**
+     * Whether this agreement is currently active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }

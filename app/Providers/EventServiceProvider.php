@@ -57,13 +57,19 @@ use App\Listeners\PaypalLifetimeListener;
 use App\Listeners\PaypalWebhookListener;
 use App\Listeners\PaystackLifetimeListener;
 use App\Listeners\PaystackWebhookListener;
+use App\Listeners\Premises\HazardDetectedListener;
+use App\Listeners\Premises\HazardResolvedListener;
 use App\Listeners\QuoteAcceptedListener;
 use App\Listeners\StripeLifetimeListener;
 use App\Listeners\StripeWebhookListener;
 use App\Listeners\TwoCheckoutWebhookListener;
 use App\Listeners\UsersActivityListener;
+use App\Listeners\Work\ChecklistRunCompletedListener;
 use App\Listeners\Work\JobCompletedListener;
 use App\Listeners\Work\JobStageChangedListener;
+use App\Listeners\Work\ServicePlanVisitCompletedListener;
+use App\Listeners\Work\ServicePlanVisitDispatchedListener;
+use App\Listeners\Work\ServicePlanVisitScheduledListener;
 use App\Listeners\YokassaWebhookListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -163,14 +169,26 @@ class EventServiceProvider extends ServiceProvider
         EquipmentRemoved::class   => [],
         EquipmentReplaced::class  => [],
         // ── ServicePlanVisit lifecycle signals ────────────────────────────
-        ServicePlanVisitScheduled::class  => [],
-        ServicePlanVisitDispatched::class => [],
-        ServicePlanVisitCompleted::class  => [],
+        ServicePlanVisitScheduled::class  => [
+            ServicePlanVisitScheduledListener::class,
+        ],
+        ServicePlanVisitDispatched::class => [
+            ServicePlanVisitDispatchedListener::class,
+        ],
+        ServicePlanVisitCompleted::class  => [
+            ServicePlanVisitCompletedListener::class,
+        ],
         // ── Checklist lifecycle signals ───────────────────────────────────
-        ChecklistRunCompleted::class => [],
+        ChecklistRunCompleted::class => [
+            ChecklistRunCompletedListener::class,
+        ],
         // ── Hazard lifecycle signals ──────────────────────────────────────
-        HazardDetected::class => [],
-        HazardResolved::class => [],
+        HazardDetected::class => [
+            HazardDetectedListener::class,
+        ],
+        HazardResolved::class => [
+            HazardResolvedListener::class,
+        ],
     ];
 
     /**

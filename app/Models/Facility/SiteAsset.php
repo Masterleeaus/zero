@@ -148,4 +148,39 @@ class SiteAsset extends Model
         return $this->next_maintenance_due !== null
             && $this->next_maintenance_due->isPast();
     }
+
+    /**
+     * Whether the asset is currently under warranty.
+     */
+    public function activeWarranty(): bool
+    {
+        return $this->isUnderWarranty();
+    }
+
+    /**
+     * Ordered service history for this asset.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, AssetServiceEvent>
+     */
+    public function maintenanceHistory(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->serviceEvents()
+            ->whereIn('event_type', ['maintenance', 'service', 'repair'])
+            ->orderByDesc('event_date')
+            ->get();
+    }
+
+    /**
+     * Inspection history for this asset via InspectionInstance scope.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspection\InspectionInstance>
+     */
+    public function inspectionHistory(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Inspection\InspectionInstance::query()
+            ->where('scope_type', static::class)
+            ->where('scope_id', $this->id)
+            ->orderByDesc('scheduled_at')
+            ->get();
+    }
 }

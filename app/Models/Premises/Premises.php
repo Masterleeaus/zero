@@ -179,6 +179,20 @@ class Premises extends Model
     }
 
     /**
+     * Full chronological timeline of service events for this premises.
+     *
+     * Merges ServiceJobs, ServicePlanVisits, InspectionInstances, and Hazards.
+     * Ordered chronologically descending.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function timeline(): \Illuminate\Support\Collection
+    {
+        return app(\App\Services\Scheduling\CustomerTimelineAggregator::class)
+            ->forPremises($this);
+    }
+
+    /**
      * Stage G — Active hazards for this premises.
      * Exposes structured hazard records (status = active).
      */

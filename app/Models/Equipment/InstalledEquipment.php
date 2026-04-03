@@ -78,4 +78,53 @@ class InstalledEquipment extends Model
     {
         return $this->belongsTo(ServiceJob::class, 'service_job_id');
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Whether this installation is currently active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Service jobs performed at the same premises as this installation.
+     *
+     * Provides a maintenance history proxy until a dedicated service log is added.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, ServiceJob>
+     */
+    public function maintenanceHistory(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (! $this->premises_id) {
+            return collect();
+        }
+
+        return ServiceJob::query()
+            ->where('premises_id', $this->premises_id)
+            ->where('company_id', $this->company_id)
+            ->where('status', 'completed')
+            ->orderByDesc('date_end')
+            ->get();
+    }
+
+    /**
+     * Inspection instances scoped to this installed equipment's premises.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspection\InspectionInstance>
+     */
+    public function inspectionHistory(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (! $this->premises_id) {
+            return collect();
+        }
+
+        return \App\Models\Inspection\InspectionInstance::query()
+            ->where('scope_type', \App\Models\Premises\Premises::class)
+            ->where('scope_id', $this->premises_id)
+            ->orderByDesc('scheduled_at')
+            ->get();
+    }
 }
