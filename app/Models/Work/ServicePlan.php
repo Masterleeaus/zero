@@ -59,21 +59,33 @@ class ServicePlan extends Model
         'visits_per_cycle',
         'status',
         'notes',
+        // fieldservice_sale_recurring_agreement
+        'originated_from_sale',
+        'sale_recurring_type',
+        'commercial_visits_committed',
+        'commercial_start_date',
+        'commercial_end_date',
+        'sale_agreement_id',
     ];
 
     protected $casts = [
-        'preferred_days'       => 'array',
-        'preferred_times'      => 'array',
-        'starts_on'            => 'date',
-        'start_date'           => 'date',
-        'ends_on'              => 'date',
-        'start_date'           => 'date',
-        'end_date'             => 'date',
-        'next_visit_due'       => 'date',
-        'last_visit_completed' => 'date',
-        'is_active'            => 'boolean',
-        'interval'             => 'integer',
-        'visits_per_cycle'     => 'integer',
+        'preferred_days'              => 'array',
+        'preferred_times'             => 'array',
+        'starts_on'                   => 'date',
+        'start_date'                  => 'date',
+        'ends_on'                     => 'date',
+        'start_date'                  => 'date',
+        'end_date'                    => 'date',
+        'next_visit_due'              => 'date',
+        'last_visit_completed'        => 'date',
+        'is_active'                   => 'boolean',
+        'interval'                    => 'integer',
+        'visits_per_cycle'            => 'integer',
+        // fieldservice_sale_recurring_agreement
+        'originated_from_sale'        => 'boolean',
+        'commercial_visits_committed' => 'integer',
+        'commercial_start_date'       => 'date',
+        'commercial_end_date'         => 'date',
     ];
 
     protected $attributes = [
@@ -172,5 +184,51 @@ class ServicePlan extends Model
         }
 
         return $agreement->originatingSale();
+    }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * The ServiceAgreement that funded this recurring plan commercially.
+     *
+     * Checks sale_agreement_id first (explicit sale link), then agreement_id.
+     */
+    public function originatingSaleAgreement(): ?\App\Models\Work\ServiceAgreement
+    {
+        if ($this->sale_agreement_id) {
+            return \App\Models\Work\ServiceAgreement::find($this->sale_agreement_id);
+        }
+
+        return $this->agreement;
+    }
+
+    /**
+     * Summary of the commercial origin of this service plan.
+     *
+     * @return array{
+     *     plan_id: int,
+     *     originated_from_sale: bool,
+     *     sale_recurring_type: string|null,
+     *     commercial_visits_committed: int|null,
+     *     commercial_start_date: string|null,
+     *     commercial_end_date: string|null,
+     *     agreement_id: int|null,
+     *     originating_quote_id: int|null
+     * }
+     */
+    public function commercialOriginSummary(): array
+    {
+        $saleAgreement = $this->originatingSaleAgreement();
+
+        return [
+            'plan_id'                     => $this->id,
+            'originated_from_sale'        => (bool) $this->originated_from_sale,
+            'sale_recurring_type'         => $this->sale_recurring_type,
+            'commercial_visits_committed' => $this->commercial_visits_committed,
+            'commercial_start_date'       => $this->commercial_start_date?->toDateString(),
+            'commercial_end_date'         => $this->commercial_end_date?->toDateString(),
+            'agreement_id'                => $saleAgreement?->id,
+            'originating_quote_id'        => $saleAgreement?->originating_quote_id ?? $saleAgreement?->quote_id,
+        ];
     }
 }

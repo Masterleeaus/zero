@@ -30,8 +30,15 @@
         "module_27": { "name": "fieldservice_location_geolocalize", "status": "pending" },
         "module_28": { "name": "fieldservice_distribution", "status": "pending" },
         "module_29": { "name": "fieldservice_change_management", "status": "pending" },
-        "module_30": { "name": "fieldservice_quality", "status": "pending" }
+        "module_30": { "name": "fieldservice_quality", "status": "pending" },
+        "module_sale_recurring_agreement": {
+            "name": "fieldservice_sale_recurring_agreement",
+            "status": "merged",
+            "confirmed_at": "2026-04-03",
+            "notes": "Sale-backed recurring agreements: SaleRecurringAgreementService, migration 500400 (service_agreements/service_plans/service_plan_visits columns), 6 new events (SaleRecurringAgreementCreated/Updated/PlanGenerated/VisitProjected/VisitMaterialized/CoverageApplied). Canonical linkage helpers on Quote/ServiceAgreement/ServicePlan/ServicePlanVisit/Customer/Premises."
+        }
     },
     "next_module": "module_9",
     "updated_at": "2026-04-03"
 }
+
