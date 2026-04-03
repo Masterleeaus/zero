@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TimesheetSubmission extends Model
 {
@@ -52,17 +51,21 @@ class TimesheetSubmission extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
-    public function timelogs(): HasMany
+    /**
+     * Timelogs belonging to the same user that fall within this submission's week.
+     * Uses a constrained query rather than a relationship because Timelog has no
+     * timesheet_submission_id foreign key.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Timelog>
+     */
+    public function timelogsForWeek(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->hasMany(Timelog::class, 'user_id', 'user_id');
-    }
-
-    public function timelogsForWeek(): HasMany
-    {
-        return $this->timelogs()
+        return Timelog::query()
+            ->where('user_id', $this->user_id)
             ->whereBetween('started_at', [
                 $this->week_start->startOfDay(),
                 $this->week_end->endOfDay(),
-            ]);
+            ])
+            ->get();
     }
 }

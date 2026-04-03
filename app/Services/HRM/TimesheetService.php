@@ -9,6 +9,7 @@ use App\Events\Work\TimesheetRejected;
 use App\Events\Work\TimesheetSubmitted;
 use App\Models\User;
 use App\Models\Work\Timelog;
+use App\Models\Work\TimesheetSubmission;
 use App\Models\Work\WeeklyTimesheet;
 use Carbon\Carbon;
 
@@ -75,7 +76,7 @@ class TimesheetService
         ]);
 
         if ($notes !== '') {
-            \App\Models\Work\TimesheetSubmission::query()
+            TimesheetSubmission::query()
                 ->where('company_id', $sheet->company_id)
                 ->where('user_id', $sheet->user_id)
                 ->where('week_start', $sheet->week_start)

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('review_notes')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'user_id', 'week_start']);
+            $table->unique(['company_id', 'user_id', 'week_start'], 'unique_submission_per_week');
         });
     }
 

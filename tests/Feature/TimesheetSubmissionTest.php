@@ -18,26 +18,22 @@ class TimesheetSubmissionTest extends TestCase
         $user = User::factory()->create(['company_id' => 10]);
         $other = User::factory()->create(['company_id' => 11]);
 
-        WeeklyTimesheet::query()->withoutGlobalScope('company')->insert([
+        WeeklyTimesheet::query()->withoutGlobalScope('company')->create([
             'company_id'  => 10,
             'user_id'     => $user->id,
             'week_start'  => now()->startOfWeek()->toDateString(),
             'week_end'    => now()->endOfWeek()->toDateString(),
             'total_hours' => 40,
             'status'      => 'pending',
-            'created_at'  => now(),
-            'updated_at'  => now(),
         ]);
 
-        WeeklyTimesheet::query()->withoutGlobalScope('company')->insert([
+        WeeklyTimesheet::query()->withoutGlobalScope('company')->create([
             'company_id'  => 11,
             'user_id'     => $other->id,
             'week_start'  => now()->startOfWeek()->toDateString(),
             'week_end'    => now()->endOfWeek()->toDateString(),
             'total_hours' => 32,
             'status'      => 'pending',
-            'created_at'  => now(),
-            'updated_at'  => now(),
         ]);
 
         $response = $this->actingAs($user)->get(route('dashboard.team.timesheets.index'));
