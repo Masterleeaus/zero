@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Money\Account;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -22,9 +24,16 @@ class AccountController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $companyId = Auth::user()?->company_id;
+
         $validated = $request->validate([
             'name'           => 'required|string|max:255',
-            'code'           => 'nullable|string|max:20',
+            'code'           => [
+                'nullable',
+                'string',
+                'max:20',
+                \Illuminate\Validation\Rule::unique('accounts')->where(fn ($q) => $q->where('company_id', $companyId)->whereNotNull('code')),
+            ],
             'gl_type'        => 'required|in:asset,liability,equity,revenue,expense',
             'type'           => 'required|string|max:50',
             'parent_id'      => 'nullable|exists:accounts,id',

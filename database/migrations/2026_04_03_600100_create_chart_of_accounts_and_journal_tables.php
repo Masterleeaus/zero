@@ -29,7 +29,8 @@ return new class extends Migration
 
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('accounts')->onDelete('set null');
-            $table->unique(['company_id', 'code']);
+            // Note: code uniqueness is enforced per-company at the application layer
+            // (nullable codes cannot be reliably indexed as unique across databases)
         });
 
         // ── Journal Entries ───────────────────────────────────────────────────────

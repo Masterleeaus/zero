@@ -34,6 +34,10 @@ class JournalEntryController extends Controller
     {
         $companyId = Auth::user()?->company_id;
 
+        if ($companyId === null) {
+            return back()->with('error', __('No company associated with your account.'))->withInput();
+        }
+
         $request->validate([
             'date'                   => 'required|date',
             'reference'              => [

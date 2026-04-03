@@ -90,10 +90,9 @@ class AccountingService
             throw new \InvalidArgumentException('Journal entry is not balanced: debits do not equal credits.');
         }
 
-        if ($totalDebit == 0) {
+        if ((float) $totalDebit === 0.0) {
             throw new \InvalidArgumentException('Journal entry must have a non-zero value.');
         }
-
         return DB::transaction(function () use ($companyId, $reference, $date, $lines, $description, $createdBy) {
             $entry = JournalEntry::create([
                 'company_id'  => $companyId,
@@ -107,7 +106,7 @@ class AccountingService
                 $debit  = (float) ($line['debit'] ?? 0);
                 $credit = (float) ($line['credit'] ?? 0);
 
-                if ($debit <= 0 && $credit <= 0) {
+                if ($debit === 0.0 && $credit === 0.0) {
                     continue;
                 }
 
