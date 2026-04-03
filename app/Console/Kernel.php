@@ -45,6 +45,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('agreements:run-scheduled')->hourly();
 
         $schedule->command('enquiries:notify-followups')->dailyAt('08:00');
+
+        // PWA deferred replay — retry failed/deferred ingress items every 5 minutes
+        $schedule->command('pwa:replay-deferred')->everyFiveMinutes();
+
+        // PWA dead-letter prune — weekly cleanup of abandoned items
+        $schedule->command('pwa:replay-deferred --prune')->weekly();
     }
 
     // $schedule->command(RunHealthChecksCommand::class)->everyFiveMinutes();

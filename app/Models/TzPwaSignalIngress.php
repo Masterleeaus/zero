@@ -21,6 +21,12 @@ class TzPwaSignalIngress extends Model
         'signal_stage',
         'ingest_status',
         'failure_reason',
+        'retry_count',
+        'deferred_until',
+        'conflict_type',
+        'conflict_resolved_at',
+        'last_error_code',
+        'server_received_at',
         'consensus_score',
         'consensus_passed',
         'envelope',
@@ -30,13 +36,17 @@ class TzPwaSignalIngress extends Model
     ];
 
     protected $casts = [
-        'payload'          => 'array',
-        'envelope'         => 'array',
-        'meta'             => 'array',
-        'consensus_passed' => 'boolean',
-        'consensus_score'  => 'float',
-        'timestamp'        => 'datetime',
-        'processed_at'     => 'datetime',
+        'payload'               => 'array',
+        'envelope'              => 'array',
+        'meta'                  => 'array',
+        'consensus_passed'      => 'boolean',
+        'consensus_score'       => 'float',
+        'timestamp'             => 'datetime',
+        'processed_at'          => 'datetime',
+        'deferred_until'        => 'datetime',
+        'conflict_resolved_at'  => 'datetime',
+        'server_received_at'    => 'datetime',
+        'retry_count'           => 'integer',
     ];
 
     public function company(): BelongsTo

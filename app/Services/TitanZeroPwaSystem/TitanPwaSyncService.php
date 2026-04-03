@@ -99,6 +99,25 @@ class TitanPwaSyncService
                     'code'       => $sigCheck['code'],
                 ]);
 
+                // Store a rejected ingress record for conflict visibility
+                TzPwaSignalIngress::create([
+                    'node_id'           => $nodeId,
+                    'idempotency_key'   => $idempotencyKey,
+                    'company_id'        => $companyId,
+                    'user_id'           => $userId,
+                    'signal_key'        => $signal['signal_key'] ?? 'pwa.ingress',
+                    'payload'           => $signal['payload'] ?? [],
+                    'signature'         => $signal['signature'] ?? null,
+                    'timestamp'         => $signal['timestamp'] ?? now(),
+                    'signal_stage'      => 'failed',
+                    'ingest_status'     => 'invalid_sig',
+                    'failure_reason'    => $sigCheck['reason'],
+                    'last_error_code'   => $sigCheck['code'],
+                    'conflict_type'     => 'invalid_signature',
+                    'consensus_passed'  => false,
+                    'server_received_at' => now(),
+                ]);
+
                 $results[] = [
                     'signal_key'    => $signal['signal_key'] ?? null,
                     'status'        => 'invalid_sig',
@@ -112,6 +131,26 @@ class TitanPwaSyncService
             $validation = $this->consensus->validate($signal, $device);
 
             if (! $validation['passed']) {
+                // Store a rejected record for conflict visibility
+                TzPwaSignalIngress::create([
+                    'node_id'           => $nodeId,
+                    'idempotency_key'   => $idempotencyKey,
+                    'company_id'        => $companyId,
+                    'user_id'           => $userId,
+                    'signal_key'        => $signal['signal_key'] ?? 'pwa.ingress',
+                    'payload'           => $signal['payload'] ?? [],
+                    'signature'         => $signal['signature'] ?? null,
+                    'timestamp'         => $signal['timestamp'] ?? now(),
+                    'signal_stage'      => 'failed',
+                    'ingest_status'     => 'rejected',
+                    'failure_reason'    => $validation['reason'],
+                    'last_error_code'   => 'consensus_failed',
+                    'conflict_type'     => 'consensus_fail',
+                    'consensus_score'   => $validation['score'],
+                    'consensus_passed'  => false,
+                    'server_received_at' => now(),
+                ]);
+
                 $results[] = [
                     'signal_key'    => $signal['signal_key'] ?? null,
                     'status'        => 'rejected',
@@ -124,19 +163,20 @@ class TitanPwaSyncService
 
             // Store ingress record
             $ingress = TzPwaSignalIngress::create([
-                'node_id'          => $nodeId,
-                'idempotency_key'  => $idempotencyKey,
-                'company_id'       => $companyId,
-                'user_id'          => $userId,
-                'signal_key'       => $signal['signal_key'] ?? 'pwa.ingress',
-                'payload'          => $signal['payload'] ?? [],
-                'signature'        => $signal['signature'] ?? null,
-                'timestamp'        => $signal['timestamp'] ?? now(),
-                'signal_stage'     => $signal['signal_stage'] ?? 'pending',
-                'ingest_status'    => 'accepted',
-                'consensus_score'  => $validation['score'],
-                'consensus_passed' => true,
-                'meta'             => $signal['meta'] ?? [],
+                'node_id'           => $nodeId,
+                'idempotency_key'   => $idempotencyKey,
+                'company_id'        => $companyId,
+                'user_id'           => $userId,
+                'signal_key'        => $signal['signal_key'] ?? 'pwa.ingress',
+                'payload'           => $signal['payload'] ?? [],
+                'signature'         => $signal['signature'] ?? null,
+                'timestamp'         => $signal['timestamp'] ?? now(),
+                'signal_stage'      => 'pending',
+                'ingest_status'     => 'accepted',
+                'consensus_score'   => $validation['score'],
+                'consensus_passed'  => true,
+                'meta'              => $signal['meta'] ?? [],
+                'server_received_at' => now(),
             ]);
 
             // Build + store envelope
@@ -160,9 +200,12 @@ class TitanPwaSyncService
             ];
         }
 
-        // Refresh device last_seen_at
+        // Refresh device last_seen_at and last_sync_at
         if ($device) {
-            $device->update(['last_seen_at' => now()]);
+            $device->update([
+                'last_seen_at' => now(),
+                'last_sync_at' => now(),
+            ]);
         }
 
         return $results;
@@ -183,14 +226,17 @@ class TitanPwaSyncService
         $device = TzPwaDevice::updateOrCreate(
             ['node_id' => $nodeId, 'company_id' => $companyId],
             [
-                'user_id'      => $userId,
-                'platform'     => $deviceData['platform'] ?? 'unknown',
-                'app_version'  => $deviceData['app_version'] ?? null,
-                'device_label' => $deviceData['device_label'] ?? null,
-                'node_origin'  => $deviceData['node_origin'] ?? null,
-                'trust_level'  => $existing?->trust_level ?? 'provisional',
-                'last_seen_at' => now(),
-                'meta_json'    => array_merge(
+                'user_id'             => $userId,
+                'platform'            => $deviceData['platform'] ?? 'unknown',
+                'app_version'         => $deviceData['app_version'] ?? null,
+                'device_label'        => $deviceData['device_label'] ?? null,
+                'node_origin'         => $deviceData['node_origin'] ?? null,
+                'trust_level'         => $existing?->trust_level ?? 'provisional',
+                'runtime_version'     => $deviceData['runtime_version'] ?? null,
+                'capability_profile'  => $deviceData['capability_profile'] ?? null,
+                'capability_tier'     => $deviceData['capability_tier'] ?? null,
+                'last_seen_at'        => now(),
+                'meta_json'           => array_merge(
                     $deviceData['meta'] ?? [],
                     ['handshake_at' => now()->toIso8601String()]
                 ),
