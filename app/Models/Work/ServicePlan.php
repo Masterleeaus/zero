@@ -15,14 +15,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * ServicePlan — schedule definition attached to a ServiceAgreement.
+ * Recurring service configuration for a Premises / Customer.
  *
- * Sits between Agreement (entitlement) and ServicePlanVisit (occurrence):
+ * Position in the triangle:
+ *   Agreement   → defines entitlement / commercial terms
+ *   ServicePlan → defines visit schedule & template injections
+ *   ServiceJob  → executes work on each scheduled visit
  *
- *   Agreement → ServicePlan → ServicePlanVisit → ServiceJob
- *
- * Status: active | paused | completed | cancelled
- * Frequency: daily | weekly | fortnightly | monthly | quarterly | annual | custom
+ * Frequency values: daily | weekly | fortnightly | monthly | quarterly | annual
+ * Status values:    active | paused | completed | cancelled
  */
 class ServicePlan extends Model
 {
@@ -43,10 +44,12 @@ class ServicePlan extends Model
         'service_type',
         'frequency',
         'interval',
+        'visits_per_cycle',
         'rrule',
         'preferred_days',
         'preferred_times',
         'starts_on',
+        'start_date',
         'ends_on',
         'start_date',
         'end_date',
@@ -62,6 +65,7 @@ class ServicePlan extends Model
         'preferred_days'       => 'array',
         'preferred_times'      => 'array',
         'starts_on'            => 'date',
+        'start_date'           => 'date',
         'ends_on'              => 'date',
         'start_date'           => 'date',
         'end_date'             => 'date',
@@ -78,6 +82,8 @@ class ServicePlan extends Model
         'is_active'        => true,
         'status'           => 'active',
         'visits_per_cycle' => 1,
+        'is_active'        => true,
+        'status'           => 'active',
     ];
 
     // ── Relationships ─────────────────────────────────────────────────────────

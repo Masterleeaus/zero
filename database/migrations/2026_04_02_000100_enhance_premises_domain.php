@@ -77,15 +77,27 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('premises', static function (Blueprint $table) {
-            $table->dropColumn(['service_priority', 'maintenance_zone', 'access_level']);
+            foreach (['service_priority', 'maintenance_zone', 'access_level'] as $col) {
+                if (Schema::hasColumn('premises', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
         });
 
         Schema::table('buildings', static function (Blueprint $table) {
-            $table->dropColumn(['maintenance_zone', 'year_built', 'floors_count']);
+            foreach (['maintenance_zone', 'year_built', 'floors_count'] as $col) {
+                if (Schema::hasColumn('buildings', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
         });
 
         Schema::table('premise_units', static function (Blueprint $table) {
-            $table->dropColumn(['unit_type', 'occupancy_status', 'access_level', 'service_priority', 'maintenance_zone']);
+            foreach (['unit_type', 'occupancy_status', 'access_level', 'service_priority', 'maintenance_zone'] as $col) {
+                if (Schema::hasColumn('premise_units', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
         });
     }
 };

@@ -59,30 +59,23 @@ return new class extends Migration {
                 ->references('id')->on('checklist_templates')->onDelete('cascade');
         });
 
-        // ── Checklist Runs ────────────────────────────────────────────────────
-        Schema::create('checklist_runs', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-            $table->unsignedBigInteger('checklist_template_id')->nullable()->index();
-
-            // Polymorphic context: service_job | inspection_instance | premises
-            $table->string('runnable_type', 60)->nullable();
-            $table->unsignedBigInteger('runnable_id')->nullable();
-
-            $table->string('title')->nullable();
-            $table->string('status', 30)->default('pending')
-                ->comment('pending | in_progress | completed | skipped');
-
-            $table->unsignedBigInteger('assigned_to')->nullable()->index();
-            $table->timestamp('started_at')->nullable();
-            $table->timestamp('completed_at')->nullable();
-            $table->text('notes')->nullable();
-
-            $table->unsignedBigInteger('created_by')->nullable()->index();
-            $table->timestamps();
-
-            $table->index(['runnable_type', 'runnable_id'], 'cr_runnable');
-            $table->index(['company_id', 'status'], 'cr_company_status');
+        // ── Checklist Runs (extend existing table from Stage J) ───────────────
+        Schema::table('checklist_runs', static function (Blueprint $table) {
+            if (! Schema::hasColumn('checklist_runs', 'checklist_template_id')) {
+                $table->unsignedBigInteger('checklist_template_id')->nullable()->index()->after('company_id');
+            }
+            if (! Schema::hasColumn('checklist_runs', 'runnable_type')) {
+                $table->string('runnable_type', 60)->nullable()->after('checklist_template_id');
+            }
+            if (! Schema::hasColumn('checklist_runs', 'runnable_id')) {
+                $table->unsignedBigInteger('runnable_id')->nullable()->after('runnable_type');
+            }
+            if (! Schema::hasColumn('checklist_runs', 'assigned_to')) {
+                $table->unsignedBigInteger('assigned_to')->nullable()->index()->after('status');
+            }
+            if (! Schema::hasColumn('checklist_runs', 'notes')) {
+                $table->text('notes')->nullable()->after('assigned_to');
+            }
         });
 
         // ── Checklist Responses ───────────────────────────────────────────────
@@ -115,8 +108,16 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('checklist_responses');
-        Schema::dropIfExists('checklist_runs');
         Schema::dropIfExists('checklist_items');
         Schema::dropIfExists('checklist_templates');
+
+        // Remove extended columns from checklist_runs (do not drop the table itself)
+        Schema::table('checklist_runs', static function (Blueprint $table) {
+            foreach (['checklist_template_id', 'runnable_type', 'runnable_id', 'assigned_to', 'notes'] as $col) {
+                if (Schema::hasColumn('checklist_runs', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
+        });
     }
 };
