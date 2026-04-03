@@ -172,6 +172,11 @@ use App\Listeners\Repair\RepairTemplateAppliedListener;
 use App\Listeners\Work\FieldServiceProjectCreatedListener;
 use App\Listeners\Work\FieldServiceProjectCompletedListener;
 // ── fieldservice_sale + fieldservice_sale_agreement events ───────────────────
+use App\Events\Work\JobDispatched;
+use App\Events\Work\JobDispatchFailed;
+use App\Events\Work\JobReDispatched;
+use App\Listeners\Work\NotifyTechnicianOfAssignment;
+use App\Listeners\Work\RecordDispatchAuditTrail;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -436,6 +441,13 @@ class EventServiceProvider extends ServiceProvider
         ],
         FieldServiceAgreementSaleExtended::class  => [],
         SaleServiceCoverageApplied::class         => [],
+        // ── MODULE_01 TitanDispatch — dispatch lifecycle signals ──────────
+        JobDispatched::class => [
+            RecordDispatchAuditTrail::class,
+            NotifyTechnicianOfAssignment::class,
+        ],
+        JobDispatchFailed::class  => [],
+        JobReDispatched::class    => [],
     ];
 
     /**

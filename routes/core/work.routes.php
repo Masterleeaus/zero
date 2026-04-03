@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Core\Work\DispatchController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.dashboard', '120,1')])
@@ -204,5 +205,13 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('vehicles.location-snapshot');
             Route::get('vehicles/{vehicle}/compatibility/{job}', [\App\Http\Controllers\Core\Work\VehicleController::class, 'checkCompatibility'])
                 ->name('vehicles.compatibility');
+
+            // ── MODULE_01 — TitanDispatch ──────────────────────────────────────
+            Route::prefix('dispatch')->as('dispatch.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Work\DispatchController::class, 'index'])->name('index');
+                Route::post('/assign', [\App\Http\Controllers\Work\DispatchController::class, 'assign'])->name('assign');
+                Route::post('/auto', [\App\Http\Controllers\Work\DispatchController::class, 'autoDispatch'])->name('auto');
+                Route::get('/history', [\App\Http\Controllers\Work\DispatchController::class, 'history'])->name('history');
+            });
         });
     });
