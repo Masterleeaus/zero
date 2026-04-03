@@ -1,0 +1,780 @@
+{
+  "base_territory": {
+    "name": "Base Territory",
+    "summary": "This module allows you to define territories, branches, districts and regions to be used for Field Service operations or Sales.",
+    "version": "18.0.1.0.0",
+    "category": "Hidden",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "base"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/res_territory.xml",
+      "views/res_branch.xml",
+      "views/res_district.xml",
+      "views/res_region.xml",
+      "views/res_country.xml",
+      "views/menu.xml"
+    ],
+    "demo": [
+      "demo/base_territory_demo.xml"
+    ],
+    "application": true,
+    "license": "AGPL-3",
+    "development_status": "Production/Stable",
+    "maintainers": [
+      "max3903",
+      "brian10048"
+    ]
+  },
+  "fieldservice": {
+    "name": "Field Service",
+    "summary": "Manage Field Service Locations, Workers and Orders",
+    "version": "18.0.5.6.0",
+    "license": "AGPL-3",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "base_territory",
+      "base_geolocalize",
+      "resource",
+      "contacts"
+    ],
+    "data": [
+      "data/ir_sequence.xml",
+      "data/mail_message_subtype.xml",
+      "data/module_category.xml",
+      "data/fsm_stage.xml",
+      "data/fsm_team.xml",
+      "security/res_groups.xml",
+      "security/ir.model.access.csv",
+      "security/ir_rule.xml",
+      "report/fsm_order_report_template.xml",
+      "views/res_config_settings.xml",
+      "views/res_territory.xml",
+      "views/fsm_stage.xml",
+      "views/fsm_tag.xml",
+      "views/res_partner.xml",
+      "views/fsm_location.xml",
+      "views/fsm_location_person.xml",
+      "views/fsm_person.xml",
+      "wizard/fsm_order_sign_wizard.xml",
+      "views/fsm_order.xml",
+      "views/fsm_order_type.xml",
+      "views/fsm_category.xml",
+      "views/fsm_equipment.xml",
+      "views/fsm_template.xml",
+      "views/fsm_team.xml",
+      "views/menu.xml",
+      "wizard/fsm_wizard.xml"
+    ],
+    "demo": [
+      "demo/fsm_demo.xml",
+      "demo/fsm_equipment.xml",
+      "demo/fsm_location.xml",
+      "demo/fsm_person.xml"
+    ],
+    "application": true,
+    "development_status": "Production/Stable",
+    "maintainers": [
+      "max3903",
+      "brian10048"
+    ],
+    "assets": {
+      "web.assets_backend": [
+        "fieldservice/static/src/scss/team_dashboard.scss"
+      ]
+    }
+  },
+  "fieldservice_account": {
+    "name": "Field Service - Accounting",
+    "summary": "Track invoices linked to Field Service orders",
+    "version": "18.0.1.1.0",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "account"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/account_move.xml",
+      "views/fsm_order.xml",
+      "views/fsm_stage.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "osimallen",
+      "brian10048",
+      "bodedra"
+    ]
+  },
+  "fieldservice_activity": {
+    "name": "Field Service Activity",
+    "summary": "Field Service Activities are a set of actions\n     that need to be performed on a service order",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice"
+    ],
+    "data": [
+      "views/fsm_order.xml",
+      "views/fsm_template.xml",
+      "security/ir.model.access.csv"
+    ],
+    "development_status": "Beta",
+    "maintainers": [
+      "max3903",
+      "osi-scampbell"
+    ]
+  },
+  "fieldservice_agreement": {
+    "name": "Field Service - Agreements",
+    "summary": "Manage Field Service agreements and contracts",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "version": "18.0.2.0.1",
+    "depends": [
+      "fieldservice",
+      "agreement"
+    ],
+    "data": [
+      "views/fsm_order_view.xml",
+      "views/fsm_equipment_view.xml",
+      "views/agreement_view.xml",
+      "views/fsm_person.xml"
+    ],
+    "installable": true,
+    "development_status": "Beta",
+    "maintainers": [
+      "max3903",
+      "bodedra",
+      "smangukiya",
+      "osi-scampbell",
+      "patrickrwilson"
+    ]
+  },
+  "fieldservice_availability": {
+    "name": "Fieldservice Availability",
+    "version": "18.0.1.0.0",
+    "summary": "Provides models for defining blackout days, stress days, and delivery time ranges for FSM availability management.",
+    "category": "Field Service",
+    "website": "https://github.com/OCA/field-service",
+    "author": "APSL-Nagarro, Odoo Community Association (OCA)",
+    "maintainers": [
+      "ppyczko"
+    ],
+    "license": "AGPL-3",
+    "application": false,
+    "installable": true,
+    "depends": [
+      "fieldservice_route"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/fsm_blackout_day_templates.xml",
+      "views/fsm_delivery_time_range_templates.xml",
+      "views/fsm_stress_day_templates.xml",
+      "views/menu.xml"
+    ]
+  },
+  "fieldservice_calendar": {
+    "name": "Field Service - Calendar",
+    "summary": "Add calendar to FSM Orders",
+    "author": "Akretion, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "version": "18.0.1.0.0",
+    "depends": [
+      "calendar",
+      "fieldservice"
+    ],
+    "data": [
+      "views/fsm_order.xml",
+      "views/fsm_team.xml"
+    ],
+    "installable": true,
+    "development_status": "Beta",
+    "maintainers": [
+      "hparfr"
+    ]
+  },
+  "fieldservice_crm": {
+    "name": "Field Service - CRM",
+    "version": "18.0.1.0.0",
+    "summary": "Create Field Service orders from the CRM",
+    "category": "Field Service",
+    "author": "Patrick Wilson, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "crm"
+    ],
+    "data": [
+      "views/crm_lead.xml",
+      "views/fsm_location.xml",
+      "views/fsm_order.xml",
+      "security/ir.model.access.csv"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "patrickrwilson"
+    ],
+    "installable": true
+  },
+  "fieldservice_equipment_stock": {
+    "name": "Field Service - Stock Equipment",
+    "summary": "Integrate stock operations with your field service equipments",
+    "version": "18.0.1.0.1",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Brian McMaster, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice_stock"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/fsm_equipment.xml",
+      "views/product_template.xml",
+      "views/stock_picking_type.xml",
+      "views/stock_lot.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "brian10048",
+      "wolfhall",
+      "max3903",
+      "smangukiya"
+    ]
+  },
+  "fieldservice_equipment_warranty": {
+    "name": "Field Service Equipment Warranty",
+    "summary": "Field Service equipment warranty",
+    "category": "Field Service",
+    "version": "18.0.1.0.0",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "license": "AGPL-3",
+    "depends": [
+      "product_warranty",
+      "fieldservice_equipment_stock"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "data": [
+      "views/fsm_equipment.xml"
+    ],
+    "installable": true,
+    "maintainers": [
+      "imlopes"
+    ]
+  },
+  "fieldservice_kanban_info": {
+    "name": "Field Service - Kanban Info",
+    "version": "18.0.1.0.1",
+    "summary": "Display key service information on Field Service Kanban cards.",
+    "category": "Field Service",
+    "website": "https://github.com/OCA/field-service",
+    "author": "APSL-Nagarro, Odoo Community Association (OCA)",
+    "maintainers": [
+      "ppyczko"
+    ],
+    "license": "AGPL-3",
+    "application": false,
+    "installable": true,
+    "depends": [
+      "fieldservice"
+    ],
+    "data": [
+      "views/fsm_order.xml",
+      "views/res_config_settings_views.xml"
+    ]
+  },
+  "fieldservice_portal": {
+    "name": "Field Service - Portal",
+    "version": "18.0.1.0.0",
+    "summary": "\n    Bridge module between fieldservice and portal.\n    ",
+    "depends": [
+      "fieldservice",
+      "portal"
+    ],
+    "author": "PyTech SRL, Odoo Community Association (OCA)",
+    "maintainers": [
+      "aleuffre",
+      "renda-dev"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "data": [
+      "security/ir.model.access.csv",
+      "security/portal_security.xml",
+      "views/fsm_order_template.xml",
+      "views/portal_template.xml",
+      "views/fsm_stage.xml"
+    ],
+    "demo": [
+      "demo/fsm_location_demo.xml",
+      "demo/fsm_order_demo.xml"
+    ],
+    "assets": {
+      "web.assets_frontend": [
+        "fieldservice_portal/static/src/js/fsm_order_portal.esm.js"
+      ]
+    },
+    "installable": true,
+    "application": false
+  },
+  "fieldservice_project": {
+    "name": "Field Service - Project",
+    "summary": "Create field service orders from a project or project task",
+    "version": "18.0.1.0.1",
+    "license": "AGPL-3",
+    "author": "Pavlov Media, Odoo Community Association (OCA)",
+    "category": "Project",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "project"
+    ],
+    "data": [
+      "views/project_views.xml",
+      "views/project_task_views.xml",
+      "views/fsm_location_views.xml",
+      "views/fsm_order_views.xml",
+      "security/ir.model.access.csv",
+      "views/fsm_team.xml"
+    ],
+    "assets": {
+      "web.assets_backend": [
+        "/fieldservice_project/static/src/scss/project_column.scss"
+      ]
+    },
+    "installable": true
+  },
+  "fieldservice_recurring": {
+    "name": "Field Service Recurring Work Orders",
+    "summary": "Manage recurring Field Service orders",
+    "version": "18.0.1.2.0",
+    "category": "Field Service",
+    "author": "Brian McMaster, Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice"
+    ],
+    "data": [
+      "data/ir_sequence.xml",
+      "security/res_groups.xml",
+      "security/ir.model.access.csv",
+      "security/recurring_security.xml",
+      "views/fsm_frequency.xml",
+      "views/fsm_frequency_set.xml",
+      "views/fsm_order.xml",
+      "views/fsm_recurring_template.xml",
+      "views/fsm_recurring.xml",
+      "views/fsm_team.xml",
+      "data/recurring_cron.xml"
+    ],
+    "demo": [
+      "demo/frequency_demo.xml",
+      "demo/frequency_set_demo.xml",
+      "demo/recur_template_demo.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903",
+      "brian10048"
+    ]
+  },
+  "fieldservice_repair": {
+    "name": "Field Service - Repair",
+    "summary": "Integrate Field Service orders with MRP repair orders",
+    "version": "18.0.3.0.1",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "repair",
+      "fieldservice_equipment_stock"
+    ],
+    "data": [
+      "data/fsm_order_type.xml",
+      "views/fsm_order_view.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "smangukiya",
+      "max3903"
+    ],
+    "installable": true
+  },
+  "fieldservice_repair_order_template": {
+    "name": "Field Service - Repair Order Template",
+    "summary": "Use Repair Order Templates when creating a repair orders",
+    "version": "18.0.1.0.0",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "maintainers": [
+      "ivantodorovich"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "license": "AGPL-3",
+    "category": "Field Service",
+    "depends": [
+      "fieldservice_repair",
+      "repair_order_template"
+    ],
+    "data": [
+      "views/fsm_template.xml"
+    ]
+  },
+  "fieldservice_route": {
+    "name": "Field Service Route",
+    "summary": "Organize the routes of each day.",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice"
+    ],
+    "data": [
+      "data/ir_sequence.xml",
+      "data/fsm_route_day_data.xml",
+      "data/fsm_stage_data.xml",
+      "security/ir.model.access.csv",
+      "views/fsm_route_day.xml",
+      "views/fsm_route.xml",
+      "views/fsm_location.xml",
+      "views/fsm_route_dayroute.xml",
+      "views/fsm_order.xml",
+      "views/menu.xml"
+    ],
+    "development_status": "Beta",
+    "maintainers": [
+      "max3903"
+    ]
+  },
+  "fieldservice_route_availability": {
+    "name": "Field Service Route Availability",
+    "summary": "Restricts blackout days for Scheduled Start (ETA) orders with the same date.",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "website": "https://github.com/OCA/field-service",
+    "author": "APSL-Nagarro, Odoo Community Association (OCA)",
+    "maintainers": [
+      "peluko00"
+    ],
+    "license": "AGPL-3",
+    "application": false,
+    "installable": true,
+    "depends": [
+      "fieldservice_availability"
+    ],
+    "data": [
+      "views/fsm_route.xml",
+      "views/fsm_blackout_day_templates.xml"
+    ]
+  },
+  "fieldservice_sale": {
+    "name": "Field Service - Sales",
+    "version": "18.0.1.2.1",
+    "summary": "Sell field services.",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "sale_management",
+      "fieldservice_account"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "security/res_groups.xml",
+      "views/fsm_location.xml",
+      "views/fsm_order.xml",
+      "views/product_template.xml",
+      "views/sale_order.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903",
+      "brian10048"
+    ],
+    "installable": true
+  },
+  "fieldservice_sale_agreement": {
+    "name": "Field Service - Sale Agreements",
+    "summary": "Integrate Field Service with Sale Agreements",
+    "version": "18.0.1.0.0",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "maintainers": [
+      "ivantodorovich"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "license": "AGPL-3",
+    "category": "Field Service",
+    "depends": [
+      "fieldservice_agreement",
+      "fieldservice_sale",
+      "agreement_sale"
+    ],
+    "auto_install": true
+  },
+  "fieldservice_sale_agreement_equipment_stock": {
+    "name": "Field Service - Sale Agreements and Stock Equipment",
+    "summary": "Integrate Field Service with Sale Agreements and Stock Equipment",
+    "version": "18.0.1.0.0",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "maintainers": [
+      "ivantodorovich"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "license": "AGPL-3",
+    "category": "Field Service",
+    "depends": [
+      "agreement_sale",
+      "fieldservice_agreement",
+      "fieldservice_sale",
+      "fieldservice_equipment_stock",
+      "sale_stock"
+    ],
+    "auto_install": true
+  },
+  "fieldservice_sale_recurring": {
+    "name": "Field Service - Sales - Recurring",
+    "version": "18.0.1.1.0",
+    "summary": "Sell recurring field services.",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice_recurring",
+      "fieldservice_sale",
+      "fieldservice_account"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/fsm_recurring.xml",
+      "views/product_template.xml",
+      "views/sale_order.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903",
+      "brian10048"
+    ],
+    "installable": true,
+    "auto_install": true
+  },
+  "fieldservice_sale_recurring_agreement": {
+    "name": "Field Service Recurring Agreement",
+    "summary": "Field Service Recurring Agreement",
+    "category": "Field Service",
+    "version": "18.0.1.0.0",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "license": "AGPL-3",
+    "depends": [
+      "agreement_sale",
+      "fieldservice_agreement",
+      "fieldservice_sale_recurring"
+    ],
+    "website": "https://github.com/OCA/field-service",
+    "data": [
+      "views/fsm_recurring.xml"
+    ],
+    "installable": true,
+    "maintainer": "imlopes"
+  },
+  "fieldservice_sale_stock": {
+    "name": "Field Service - Sale Stock",
+    "version": "18.0.1.0.0",
+    "summary": "Sell stockable items linked to field service orders.",
+    "category": "Field Service",
+    "author": "Brian McMaster, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice_sale",
+      "fieldservice_stock"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903",
+      "brian10048"
+    ],
+    "installable": true,
+    "auto_install": true
+  },
+  "fieldservice_size": {
+    "name": "Field Service Sizes",
+    "summary": "Manage Sizes for Field Service Locations and Orders",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "author": "Brian McMaster, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "uom"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/fsm_size.xml",
+      "views/fsm_location.xml",
+      "views/fsm_order.xml",
+      "views/menu.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "brian10048"
+    ]
+  },
+  "fieldservice_skill": {
+    "name": "Field Service - Skills",
+    "summary": "Manage your Field Service workers skills",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "license": "AGPL-3",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "hr_skills",
+      "fieldservice"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "views/fsm_person.xml",
+      "views/fsm_category.xml",
+      "views/fsm_person_skill.xml",
+      "views/fsm_order.xml",
+      "views/hr_skill.xml",
+      "views/fsm_template.xml"
+    ],
+    "development_status": "Beta",
+    "maintainers": [
+      "osi-scampbell",
+      "max3903"
+    ],
+    "installable": true
+  },
+  "fieldservice_stage_server_action": {
+    "name": "Field Service - Stage Server Action",
+    "summary": "Execute server actions when reaching a Field Service stage",
+    "version": "18.0.1.1.0",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "base_automation"
+    ],
+    "data": [
+      "data/ir_server_action.xml",
+      "data/fsm_stage.xml",
+      "data/base_automation.xml",
+      "views/fsm_stage.xml"
+    ],
+    "installable": true,
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903",
+      "osi-scampbell"
+    ]
+  },
+  "fieldservice_stock": {
+    "name": "Field Service - Stock",
+    "summary": "Integrate the logistics operations with Field Service",
+    "version": "18.0.2.0.0",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Brian McMaster, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice",
+      "stock"
+    ],
+    "data": [
+      "security/ir.model.access.csv",
+      "data/fsm_stock_data.xml",
+      "views/res_territory.xml",
+      "views/fsm_location.xml",
+      "views/fsm_order.xml",
+      "views/stock.xml",
+      "views/stock_picking.xml"
+    ],
+    "pre_init_hook": "_pre_init_hook",
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "brian10048",
+      "wolfhall",
+      "max3903",
+      "smangukiya"
+    ]
+  },
+  "fieldservice_timesheet": {
+    "name": "Field Service - Timesheet",
+    "summary": "Timesheet on Field Service Orders",
+    "version": "18.0.1.0.0",
+    "license": "AGPL-3",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "category": "Project",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "hr_timesheet",
+      "fieldservice_project"
+    ],
+    "data": [
+      "views/fsm_order.xml",
+      "views/hr_timesheet.xml",
+      "report/report_timesheet_templates.xml"
+    ],
+    "installable": true
+  },
+  "fieldservice_vehicle": {
+    "name": "Field Service Vehicles",
+    "summary": "Manage Field Service vehicles and assign drivers",
+    "version": "18.0.1.0.0",
+    "category": "Field Service",
+    "author": "Open Source Integrators, Odoo Community Association (OCA)",
+    "website": "https://github.com/OCA/field-service",
+    "depends": [
+      "fieldservice"
+    ],
+    "data": [
+      "security/res_groups.xml",
+      "security/ir.model.access.csv",
+      "views/fsm_vehicle.xml",
+      "views/fsm_person.xml",
+      "views/fsm_order.xml",
+      "views/menu.xml"
+    ],
+    "license": "AGPL-3",
+    "development_status": "Beta",
+    "maintainers": [
+      "wolfhall",
+      "max3903"
+    ]
+  }
+}

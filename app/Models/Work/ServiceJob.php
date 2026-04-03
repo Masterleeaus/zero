@@ -115,6 +115,8 @@ class ServiceJob extends Model implements SchedulableEntity
         'sla_deadline',
         'sla_breached',
         'readiness_score',
+        // fieldservice_sale — quote line linkage
+        'sale_line_id',
     ];
 
     protected $casts = [
@@ -181,6 +183,16 @@ class ServiceJob extends Model implements SchedulableEntity
     public function quote(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Money\Quote::class);
+    }
+
+    /**
+     * The specific quote line (item) that generated this job.
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_line_id → sale.order.line.
+     */
+    public function quoteItem(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
     }
 
     public function assignedUser(): BelongsTo
@@ -1205,6 +1217,36 @@ class ServiceJob extends Model implements SchedulableEntity
             'sla_breached'        => $this->sla_breached,
             'priority_score'      => $score?->total_score ?? 0,
             'score_breakdown'     => $score?->score_breakdown ?? [],
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * The originating Quote for this job (via quote_id or sale_line_id → quote).
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_id.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        if ($this->quote_id) {
+            return $this->quote;
+        }
+
+        return $this->quoteItem?->quote ?? null;
+    }
+
+    /**
+     * Context summary for the sale line that generated this job.
+     *
+     * @return array{quote_id: int|null, quote_item_id: int|null, tracking: string|null, description: string|null}
+     */
+    public function saleLineContext(): array
+    {
+        $item = $this->quoteItem;
+
+        return [
+            'quote_id'      => $this->quote_id ?? $item?->quote_id,
+            'quote_item_id' => $this->sale_line_id,
+            'tracking'      => $item?->field_service_tracking,
+            'description'   => $item?->description,
         ];
     }
 }

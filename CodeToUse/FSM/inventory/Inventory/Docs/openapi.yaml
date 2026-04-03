@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: Inventory Module API
+  version: 0.3.0
+servers:
+  - url: https://your-app.example
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Item:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sku: { type: string, nullable: true }
+        qty: { type: integer }
+        category: { type: string, nullable: true }
+        unit_price: { type: number, format: float }
+        tenant_id: { type: integer, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+    Warehouse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        code: { type: string, nullable: true }
+        location: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+    StockMovement:
+      type: object
+      properties:
+        id: { type: integer }
+        item_id: { type: integer }
+        warehouse_id: { type: integer, nullable: true }
+        type: { type: string, enum: [in, out, adjust] }
+        qty_change: { type: integer }
+        note: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Stocktake:
+      type: object
+      properties:
+        id: { type: integer }
+        ref: { type: string, nullable: true }
+        warehouse_id: { type: integer, nullable: true }
+        status: { type: string, enum: [draft, final] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+paths:
+  /api/inventory/items:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List items
+      responses: { '200': { description: OK } }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create item
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: '#/components/schemas/Item' } }
+      responses: { '201': { description: Created } }
+  /api/inventory/items/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Show item
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+    put:
+      security: [{ bearerAuth: [] }]
+      summary: Update item
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: '#/components/schemas/Item' } }
+      responses: { '200': { description: OK } }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete item
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+  /api/inventory/warehouses:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List warehouses
+      responses: { '200': { description: OK } }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create warehouse
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: '#/components/schemas/Warehouse' } }
+      responses: { '201': { description: Created } }
+  /api/inventory/warehouses/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Show warehouse
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+    put:
+      security: [{ bearerAuth: [] }]
+      summary: Update warehouse
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: '#/components/schemas/Warehouse' } }
+      responses: { '200': { description: OK } }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete warehouse
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+  /api/inventory/stock/{itemId}/on-hand:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: On-hand quantity for an item
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: warehouse_id
+          schema: { type: integer }
+      responses: { '200': { description: OK } }
+  /api/inventory/stock/move:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Record a stock movement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id: { type: integer }
+                warehouse_id: { type: integer, nullable: true }
+                type: { type: string, enum: [in, out, adjust] }
+                qty: { type: integer, minimum: 1 }
+                note: { type: string, nullable: true }
+      responses: { '201': { description: Created } }
+
+
+  /api/inventory/movements:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List stock movements
+      responses: { '200': { description: OK } }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create stock movement (direct)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id: { type: integer }
+                warehouse_id: { type: integer, nullable: true }
+                type: { type: string, enum: [in, out, adjust] }
+                qty_change: { type: integer }
+                note: { type: string, nullable: true }
+      responses: { '201': { description: Created } }
+  /api/inventory/stocktakes:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List stocktakes
+      responses: { '200': { description: OK } }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create stocktake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                warehouse_id: { type: integer, nullable: true }
+                ref: { type: string, nullable: true }
+      responses: { '201': { description: Created } }
+  /api/inventory/stocktakes/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Show stocktake with lines
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+  /api/inventory/stocktakes/{id}/finalize:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Finalize stocktake
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses: { '200': { description: OK } }

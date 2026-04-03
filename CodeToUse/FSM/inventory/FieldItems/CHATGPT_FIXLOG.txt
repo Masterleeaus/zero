@@ -1,0 +1,5 @@
+Changes:
+- provider_fixed: Providers/ItemsViewComposerServiceProvider.php
+- main_provider_patched: Providers/FieldItemsServiceProvider.php
+- module_json_providers: module.json
+- routes_stub_removed: routes/web.php

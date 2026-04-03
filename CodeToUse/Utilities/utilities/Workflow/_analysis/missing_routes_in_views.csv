@@ -1,0 +1,6 @@
+view,referenced_route
+Resources/views/index.blade.php,workflow.create
+Resources/views/index.blade.php,workflow.create
+Resources/views/edit.blade.php,workflow.index
+Resources/views/create.blade.php,workflow.index
+Resources/views/sections/sidebar.blade.php,workflow.index

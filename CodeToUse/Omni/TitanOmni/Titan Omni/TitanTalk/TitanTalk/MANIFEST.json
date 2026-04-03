@@ -1,0 +1,16 @@
+{
+  "source": "/mnt/data/aiconnect_rename_work",
+  "deleted_verification_files": [],
+  "patched_files_count": 7,
+  "patched_files_preview": [
+    "AIConnect/leadpilot_ai.php",
+    "AIConnect/controllers/leadpilot_ai.php",
+    "AIConnect/views/tabs/vapi_ai.php",
+    "AIConnect/views/tabs/bland_ai.php",
+    "AIConnect/views/tables/call_logs_relations.php",
+    "AIConnect/views/tables/call_logs.php",
+    "AIConnect/helpers/ai_lead_manager_helper.php"
+  ],
+  "renamed_files": [],
+  "file_count": 212
+}

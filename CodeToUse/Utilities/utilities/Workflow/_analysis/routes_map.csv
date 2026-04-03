@@ -1,0 +1,3 @@
+file,http_method,path,route_name,controller,action,handler_raw
+Routes/web.php,GET,/,index,WorkflowController,index,"[WorkflowController::class,'index']"
+Routes/api.php,GET,/ping,,,,function(

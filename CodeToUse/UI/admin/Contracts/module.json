@@ -1,0 +1,17 @@
+{
+  "name": "Contracts",
+  "alias": "contracts",
+  "description": "Contract Management with e-sign, versions, audit trail",
+  "keywords": [
+    "contracts",
+    "esign",
+    "legal",
+    "documents"
+  ],
+  "priority": 0,
+  "providers": [
+    "Modules\\Contracts\\Providers\\ContractsServiceProvider",
+    "Modules\\Contracts\\Providers\\RouteServiceProvider"
+  ],
+  "files": []
+}

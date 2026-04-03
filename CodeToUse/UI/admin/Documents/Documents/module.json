@@ -1,0 +1,16 @@
+{
+    "name": "Documents",
+    "alias": "documents",
+    "version": "1.3.0",
+    "active": 1,
+    "providers": [
+        "Modules\\Documents\\Providers\\DocumentsServiceProvider",
+        "Modules\\Documents\\Providers\\AuthServiceProvider",
+        "Modules\\Documents\\Providers\\RouteServiceProvider"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Documents\\": ""
+        }
+    }
+}

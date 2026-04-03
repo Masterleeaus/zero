@@ -1,0 +1,231 @@
+# Model to table map
+
+Table values are direct from `$table` when declared. Blank means Laravel default or inherited naming.
+
+- `app/Models/AcceptQuote.php` -> `(implicit)`
+- `app/Models/Appreciation.php` -> `(implicit)`
+- `app/Models/Attendance.php` -> `(implicit)`
+- `app/Models/AttendanceRegularisation.php` -> `attendance_regularisations`
+- `app/Models/AttendanceSetting.php` -> `(implicit)`
+- `app/Models/AutomateShift.php` -> `automate_shifts`
+- `app/Models/Award.php` -> `(implicit)`
+- `app/Models/AwardIcon.php` -> `(implicit)`
+- `app/Models/BankAccount.php` -> `(implicit)`
+- `app/Models/BankTransaction.php` -> `(implicit)`
+- `app/Models/BaseModel.php` -> `(implicit)`
+- `app/Models/CustomerCategory.php` -> `customer_categories`
+- `app/Models/CustomerContact.php` -> `(implicit)`
+- `app/Models/CustomerDetails.php` -> `customer_details`
+- `app/Models/CustomerDocument.php` -> `customer_docs`
+- `app/Models/CustomerNote.php` -> `(implicit)`
+- `app/Models/CustomerSubCategory.php` -> `customer_sub_categories`
+- `app/Models/CustomerUserNote.php` -> `customer_user_notes`
+- `app/Models/Company.php` -> `companies`
+- `app/Models/CompanyAddress.php` -> `(implicit)`
+- `app/Models/Service Agreement.php` -> `(implicit)`
+- `app/Models/ContractDiscussion.php` -> `(implicit)`
+- `app/Models/ContractFile.php` -> `(implicit)`
+- `app/Models/ContractRenew.php` -> `(implicit)`
+- `app/Models/ContractSign.php` -> `(implicit)`
+- `app/Models/ContractTemplate.php` -> `(implicit)`
+- `app/Models/ContractType.php` -> `(implicit)`
+- `app/Models/Country.php` -> `(implicit)`
+- `app/Models/CreditNoteItem.php` -> `(implicit)`
+- `app/Models/CreditNoteItemImage.php` -> `(implicit)`
+- `app/Models/CreditNotes.php` -> `(implicit)`
+- `app/Models/Currency.php` -> `(implicit)`
+- `app/Models/CurrencyFormatSetting.php` -> `(implicit)`
+- `app/Models/CustomField.php` -> `(implicit)`
+- `app/Models/CustomFieldGroup.php` -> `(implicit)`
+- `app/Models/CustomLinkSetting.php` -> `(implicit)`
+- `app/Models/CustomModulePermission.php` -> `(implicit)`
+- `app/Models/DashboardWidget.php` -> `(implicit)`
+- `app/Models/DatabaseBackup.php` -> `database_backups`
+- `app/Models/Deal.php` -> `(implicit)`
+- `app/Models/DealFile.php` -> `(implicit)`
+- `app/Models/DealFollowUp.php` -> `lead_follow_up`
+- `app/Models/DealHistory.php` -> `(implicit)`
+- `app/Models/DealNote.php` -> `(implicit)`
+- `app/Models/Role.php` -> `(implicit)`
+- `app/Models/Discussion.php` -> `(implicit)`
+- `app/Models/DiscussionCategory.php` -> `(implicit)`
+- `app/Models/DiscussionFile.php` -> `(implicit)`
+- `app/Models/DiscussionReply.php` -> `(implicit)`
+- `app/Models/EmailNotificationSetting.php` -> `(implicit)`
+- `app/Models/EmergencyContact.php` -> `(implicit)`
+- `app/Models/CleanerActivity.php` -> `cleaner_activity`
+- `app/Models/CleanerDetails.php` -> `cleaner_details`
+- `app/Models/CleanerDocument.php` -> `cleaner_docs`
+- `app/Models/CleanerDocumentExpiry.php` -> `cleaner_document_expiries`
+- `app/Models/CleanerLeaveQuota.php` -> `(implicit)`
+- `app/Models/CleanerLeaveQuotaHistory.php` -> `(implicit)`
+- `app/Models/CleanerShift.php` -> `(implicit)`
+- `app/Models/CleanerShiftChangeRequest.php` -> `(implicit)`
+- `app/Models/CleanerShiftSchedule.php` -> `(implicit)`
+- `app/Models/CleanerSkill.php` -> `cleaner_skills`
+- `app/Models/CleanerTeam.php` -> `(implicit)`
+- `app/Models/Quote.php` -> `(implicit)`
+- `app/Models/QuoteItem.php` -> `(implicit)`
+- `app/Models/QuoteItemImage.php` -> `(implicit)`
+- `app/Models/QuoteRequest.php` -> `(implicit)`
+- `app/Models/QuoteTemplate.php` -> `quote_templates`
+- `app/Models/QuoteTemplateItem.php` -> `quote_template_items`
+- `app/Models/QuoteTemplateItemImage.php` -> `(implicit)`
+- `app/Models/Event.php` -> `(implicit)`
+- `app/Models/EventAttendee.php` -> `(implicit)`
+- `app/Models/EventFile.php` -> `(implicit)`
+- `app/Models/Expense.php` -> `(implicit)`
+- `app/Models/ExpenseRecurring.php` -> `expenses_recurring`
+- `app/Models/ExpensesCategory.php` -> `expenses_category`
+- `app/Models/ExpensesCategoryRole.php` -> `expenses_category_roles`
+- `app/Models/FileStorage.php` -> `file_storage`
+- `app/Models/Flag.php` -> `(implicit)`
+- `app/Models/GanttLink.php` -> `(implicit)`
+- `app/Models/GdprSetting.php` -> `(implicit)`
+- `app/Models/GoogleCalendarModule.php` -> `google_calendar_modules`
+- `app/Models/Holiday.php` -> `(implicit)`
+- `app/Models/Invoice.php` -> `(implicit)`
+- `app/Models/InvoiceFiles.php` -> `invoice_files`
+- `app/Models/InvoiceItemImage.php` -> `(implicit)`
+- `app/Models/InvoiceItems.php` -> `(implicit)`
+- `app/Models/InvoicePaymentDetail.php` -> `invoice_payment_details`
+- `app/Models/InvoiceSetting.php` -> `(implicit)`
+- `app/Models/Issue.php` -> `(implicit)`
+- `app/Models/KnowledgeBase.php` -> `(implicit)`
+- `app/Models/KnowledgeBaseCategory.php` -> `knowledge_categories`
+- `app/Models/KnowledgeBaseFile.php` -> `(implicit)`
+- `app/Models/Enquiry.php` -> `(implicit)`
+- `app/Models/LeadAgent.php` -> `lead_agents`
+- `app/Models/LeadCategory.php` -> `lead_category`
+- `app/Models/LeadCustomForm.php` -> `(implicit)`
+- `app/Models/LeadNote.php` -> `(implicit)`
+- `app/Models/LeadPipeline.php` -> `(implicit)`
+- `app/Models/LeadPipelineStages.php` -> `(implicit)`
+- `app/Models/LeadService / Extra.php` -> `lead_services / extras`
+- `app/Models/LeadSetting.php` -> `lead_setting`
+- `app/Models/LeadSource.php` -> `lead_sources`
+- `app/Models/LeadStatus.php` -> `lead_status`
+- `app/Models/LeadUserNote.php` -> `lead_user_notes`
+- `app/Models/Leave.php` -> `(implicit)`
+- `app/Models/LeaveFile.php` -> `(implicit)`
+- `app/Models/LeaveSetting.php` -> `(implicit)`
+- `app/Models/LeaveType.php` -> `(implicit)`
+- `app/Models/LogTimeFor.php` -> `log_time_for`
+- `app/Models/MentionUser.php` -> `mention_users`
+- `app/Models/Menu.php` -> `(implicit)`
+- `app/Models/MessageSetting.php` -> `(implicit)`
+- `app/Models/Module.php` -> `(implicit)`
+- `app/Models/ModuleSetting.php` -> `(implicit)`
+- `app/Models/Notice.php` -> `(implicit)`
+- `app/Models/NoticeBoardUser.php` -> `(implicit)`
+- `app/Models/NoticeFile.php` -> `(implicit)`
+- `app/Models/NoticeView.php` -> `(implicit)`
+- `app/Models/Notification.php` -> `(implicit)`
+- `app/Models/OfflinePaymentMethod.php` -> `offline_payment_methods`
+- `app/Models/Order.php` -> `(implicit)`
+- `app/Models/OrderCart.php` -> `(implicit)`
+- `app/Models/OrderItemImage.php` -> `(implicit)`
+- `app/Models/OrderItems.php` -> `(implicit)`
+- `app/Models/Passport.php` -> `passport_details`
+- `app/Models/Payment.php` -> `(implicit)`
+- `app/Models/PaymentGatewayCredentials.php` -> `(implicit)`
+- `app/Models/Pinned.php` -> `pinned`
+- `app/Models/PipelineStage.php` -> `pipeline_stages`
+- `app/Models/Service / Extra.php` -> `services / extras`
+- `app/Models/Service / ExtraCategory.php` -> `service / extra_category`
+- `app/Models/Service / ExtraFiles.php` -> `service / extra_files`
+- `app/Models/Service / ExtraSubCategory.php` -> `service / extra_sub_category`
+- `app/Models/Site.php` -> `(implicit)`
+- `app/Models/SiteActivity.php` -> `site_activity`
+- `app/Models/SiteCategory.php` -> `site_category`
+- `app/Models/SiteZone.php` -> `site_zones`
+- `app/Models/SiteFile.php` -> `(implicit)`
+- `app/Models/SiteLabel.php` -> `(implicit)`
+- `app/Models/SiteLabelList.php` -> `site_label_list`
+- `app/Models/SiteMember.php` -> `site_members`
+- `app/Models/SiteMilestone.php` -> `(implicit)`
+- `app/Models/SiteNote.php` -> `(implicit)`
+- `app/Models/SiteRating.php` -> `(implicit)`
+- `app/Models/SiteSetting.php` -> `(implicit)`
+- `app/Models/SiteStatusSetting.php` -> `(implicit)`
+- `app/Models/SiteSubCategory.php` -> `site_sub_categories`
+- `app/Models/SiteTemplate.php` -> `(implicit)`
+- `app/Models/SiteTemplateMember.php` -> `(implicit)`
+- `app/Models/SiteTemplateMilestone.php` -> `site_template_milestone`
+- `app/Models/SiteTemplateSubService Job.php` -> `(implicit)`
+- `app/Models/SiteTemplateService Job.php` -> `(implicit)`
+- `app/Models/SiteTemplateService JobUser.php` -> `(implicit)`
+- `app/Models/SiteTimeLog.php` -> `(implicit)`
+- `app/Models/SiteTimeLogBreak.php` -> `(implicit)`
+- `app/Models/SiteUserNote.php` -> `site_user_notes`
+- `app/Models/Promotion.php` -> `(implicit)`
+- `app/Models/Proposal.php` -> `proposals`
+- `app/Models/ProposalItem.php` -> `(implicit)`
+- `app/Models/ProposalItemImage.php` -> `(implicit)`
+- `app/Models/ProposalSign.php` -> `(implicit)`
+- `app/Models/ProposalTemplate.php` -> `proposal_templates`
+- `app/Models/ProposalTemplateItem.php` -> `(implicit)`
+- `app/Models/ProposalTemplateItemImage.php` -> `(implicit)`
+- `app/Models/PurposeConsent.php` -> `purpose_consent`
+- `app/Models/PurposeConsentLead.php` -> `purpose_consent_leads`
+- `app/Models/PurposeConsentUser.php` -> `purpose_consent_users`
+- `app/Models/Qrcodes.php` -> `qrcode`
+- `app/Models/QuickBooksSetting.php` -> `(implicit)`
+- `app/Models/RecurringInvoice.php` -> `invoice_recurring`
+- `app/Models/RecurringInvoiceItemImage.php` -> `invoice_recurring_item_images`
+- `app/Models/RecurringInvoiceItems.php` -> `invoice_recurring_items`
+- `app/Models/RemovalRequest.php` -> `(implicit)`
+- `app/Models/RemovalRequestLead.php` -> `removal_requests_lead`
+- `app/Models/RotationAutomateLog.php` -> `rotation_automate_log`
+- `app/Models/Session.php` -> `(implicit)`
+- `app/Models/ShiftRotation.php` -> `cleaner_shift_rotations`
+- `app/Models/ShiftRotationSequence.php` -> `shift_rotation_sequences`
+- `app/Models/Skill.php` -> `skills`
+- `app/Models/SlackSetting.php` -> `(implicit)`
+- `app/Models/Social.php` -> `(implicit)`
+- `app/Models/StickyNote.php` -> `sticky_notes`
+- `app/Models/SubService Job.php` -> `(implicit)`
+- `app/Models/SubService JobFile.php` -> `(implicit)`
+- `app/Models/Service Job.php` -> `(implicit)`
+- `app/Models/Service JobCategory.php` -> `service job_category`
+- `app/Models/Service JobComment.php` -> `(implicit)`
+- `app/Models/Service JobCommentEmoji.php` -> `(implicit)`
+- `app/Models/Service JobFile.php` -> `(implicit)`
+- `app/Models/Service JobHistory.php` -> `service job_history`
+- `app/Models/Service JobLabel.php` -> `(implicit)`
+- `app/Models/Service JobLabelList.php` -> `service job_label_list`
+- `app/Models/Service JobNote.php` -> `(implicit)`
+- `app/Models/Service JobSetting.php` -> `(implicit)`
+- `app/Models/Service JobTag.php` -> `(implicit)`
+- `app/Models/Service JobTagList.php` -> `service job_tag_list`
+- `app/Models/Service JobUser.php` -> `service job_users`
+- `app/Models/Service JobboardColumn.php` -> `(implicit)`
+- `app/Models/Tax.php` -> `(implicit)`
+- `app/Models/Team.php` -> `(implicit)`
+- `app/Models/Issue / Support.php` -> `(implicit)`
+- `app/Models/Issue / SupportActivity.php` -> `(implicit)`
+- `app/Models/Issue / SupportAgentGroups.php` -> `(implicit)`
+- `app/Models/Issue / SupportChannel.php` -> `(implicit)`
+- `app/Models/Issue / SupportCustomForm.php` -> `(implicit)`
+- `app/Models/Issue / SupportEmailSetting.php` -> `(implicit)`
+- `app/Models/Issue / SupportFile.php` -> `(implicit)`
+- `app/Models/Issue / SupportGroup.php` -> `(implicit)`
+- `app/Models/Issue / SupportReply.php` -> `(implicit)`
+- `app/Models/Issue / SupportReplyTemplate.php` -> `(implicit)`
+- `app/Models/Issue / SupportReplyUser.php` -> `issue / support_reply_users`
+- `app/Models/Issue / SupportSettingForAgents.php` -> `issue / support_settings_for_agents`
+- `app/Models/Issue / SupportTag.php` -> `(implicit)`
+- `app/Models/Issue / SupportTagList.php` -> `issue / support_tag_list`
+- `app/Models/Issue / SupportType.php` -> `(implicit)`
+- `app/Models/TranslateSetting.php` -> `(implicit)`
+- `app/Models/UnitType.php` -> `unit_types`
+- `app/Models/UniversalSearch.php` -> `universal_search`
+- `app/Models/UserActivity.php` -> `(implicit)`
+- `app/Models/UserChat.php` -> `users_chat`
+- `app/Models/UserInvitation.php` -> `(implicit)`
+- `app/Models/UserLeadboardSetting.php` -> `(implicit)`
+- `app/Models/UserService JobboardSetting.php` -> `(implicit)`
+- `app/Models/UserchatFile.php` -> `users_chat_files`
+- `app/Models/VisaDetail.php` -> `passport`
+- `app/Models/WeeklyTimesheet.php` -> `(implicit)`
+- `app/Models/WeeklyTimesheetEntries.php` -> `(implicit)`

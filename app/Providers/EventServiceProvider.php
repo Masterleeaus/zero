@@ -150,6 +150,17 @@ use App\Listeners\Repair\RepairOrderCompletedListener;
 use App\Listeners\Repair\RepairWarrantyDetectedListener;
 use App\Listeners\Repair\RepairDiagnosisRecordedListener;
 use App\Listeners\Repair\RepairTemplateAppliedListener;
+// ── fieldservice_sale + fieldservice_sale_agreement events ───────────────────
+use App\Events\Work\FieldServiceSaleCreated;
+use App\Events\Work\FieldServiceSaleApproved;
+use App\Events\Work\FieldServiceSaleConvertedToJob;
+use App\Events\Work\FieldServiceSaleConvertedToPlan;
+use App\Events\Work\FieldServiceAgreementSaleCreated;
+use App\Events\Work\FieldServiceAgreementSaleActivated;
+use App\Events\Work\FieldServiceAgreementSaleExtended;
+use App\Events\Work\SaleServiceCoverageApplied;
+use App\Listeners\Work\FieldServiceSaleApprovedListener;
+use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -366,6 +377,19 @@ class EventServiceProvider extends ServiceProvider
         ],
         JobBlockerAdded::class   => [],
         JobBlockerCleared::class => [],
+        // ── fieldservice_sale + fieldservice_sale_agreement (Modules 3 + 3a) ──
+        FieldServiceSaleCreated::class            => [],
+        FieldServiceSaleApproved::class           => [
+            FieldServiceSaleApprovedListener::class,
+        ],
+        FieldServiceSaleConvertedToJob::class     => [],
+        FieldServiceSaleConvertedToPlan::class    => [],
+        FieldServiceAgreementSaleCreated::class   => [],
+        FieldServiceAgreementSaleActivated::class => [
+            FieldServiceAgreementSaleActivatedListener::class,
+        ],
+        FieldServiceAgreementSaleExtended::class  => [],
+        SaleServiceCoverageApplied::class         => [],
     ];
 
     /**

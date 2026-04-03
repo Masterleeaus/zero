@@ -1,0 +1,46 @@
+# Seeder strategy
+
+- Removed source seeders/factories/schema dump from pre-merge package.
+- Reason: host app should own bootstrap/demo/reference data; only feature schema and code should cross the merge boundary.
+- If any seeder contains irreplaceable domain defaults, re-create those defaults later as idempotent host-side install SQL or dedicated extension seed scripts.
+
+- removed seeders: 39
+  - `AppreciationSeeder.php`
+  - `AttendanceTableSeeder.php`
+  - `BankAccountSeeder.php`
+  - `ContractTableSeeder.php`
+  - `ContractTypeTableSeeder.php`
+  - `CoreDatabaseSeeder.php`
+  - `CoreSuperAdminDatabaseSeeder.php`
+  - `CountriesTableSeeder.php`
+  - `DatabaseSeeder.php`
+  - `ZoneTableSeeder.php`
+  - `EmailSettingSeeder.php`
+  - `CleanerPermissionSeeder.php`
+  - `QuoteSeeder.php`
+  - `EventTableSeeder.php`
+  - `ExpenseSeeder.php`
+  - `FrontSeeder.php`
+  - `GlobalCurrencyFormatSetting.php`
+  - `LeadSeeder.php`
+  - `LeadsTableSeeder.php`
+  - `LeaveSeeder.php`
+  - `MessageSeeder.php`
+  - `ModulePermissionSeeder.php`
+  - `NonSaasToSaasSeeder.php`
+  - `NoticesTableSeeder.php`
+  - `OrganisationSettingsTableSeeder.php`
+  - `PackageTableSeeder.php`
+  - `Service / ExtraTableSeeder.php`
+  - `SiteAdminRoleSeeder.php`
+  - `SiteCategorySeeder.php`
+  - `SiteSeeder.php`
+  - `RoleSeeder.php`
+  - `ShiftSeeder.php`
+  - `SmtpSettingsSeeder.php`
+  - `SuperAdminRoleTableSeeder.php`
+  - `SuperAdminUsersTableSeeder.php`
+  - `TaxTableSeeder.php`
+  - `Issue / SupportSeeder.php`
+  - `Issue / SupportSettingSeeder.php`
+  - `UsersTableSeeder.php`

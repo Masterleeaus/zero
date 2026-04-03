@@ -1,0 +1,21 @@
+{
+  "name": "TitanHello",
+  "alias": "titanhello",
+  "description": "Titan Hello \u2013 phone calling (inbound/outbound) + call inbox for WorkSuite. AI via Titan Zero only.",
+  "keywords": [],
+  "active": 1,
+  "order": 0,
+  "providers": [
+    "Modules\\TitanHello\\Providers\\TitanHelloServiceProvider",
+    "Modules\\TitanHello\\Providers\\RouteServiceProvider",
+    "Modules\\TitanHello\\Providers\\AuthServiceProvider",
+    "Modules\\TitanHello\\Providers\\EventServiceProvider",
+    "Modules\\TitanHello\\Providers\\ConfigServiceProvider",
+    "Modules\\TitanHello\\Providers\\ViewServiceProvider",
+    "Modules\\TitanHello\\Providers\\MenuServiceProvider"
+  ],
+  "aliases": {},
+  "files": [],
+  "requires": [],
+  "version": "1.0.5"
+}

@@ -1,0 +1,80 @@
+{
+  "module": "Timesheet",
+  "version": "pass3",
+  "events": [
+    {
+      "key": "timesheet.created",
+      "class": "Modules\\Timesheet\\Events\\CreateTimesheet",
+      "payload": [
+        "timesheet_id",
+        "company_id",
+        "user_id",
+        "date",
+        "hours",
+        "minutes",
+        "work_order_id",
+        "project_id",
+        "task_id",
+        "cost_total"
+      ]
+    },
+    {
+      "key": "timesheet.updated",
+      "class": "Modules\\Timesheet\\Events\\UpdateTimesheet",
+      "payload": [
+        "timesheet_id",
+        "company_id",
+        "user_id"
+      ]
+    },
+    {
+      "key": "timesheet.deleted",
+      "class": "Modules\\Timesheet\\Events\\DestroyTimesheet",
+      "payload": [
+        "timesheet_id",
+        "company_id"
+      ]
+    },
+    {
+      "key": "timesheet.timer.started",
+      "class": "Modules\\Timesheet\\Events\\TimerStarted",
+      "payload": [
+        "timer_id",
+        "company_id",
+        "user_id"
+      ]
+    },
+    {
+      "key": "timesheet.timer.stopped",
+      "class": "Modules\\Timesheet\\Events\\TimerStopped",
+      "payload": [
+        "timer_id",
+        "company_id",
+        "user_id",
+        "minutes"
+      ]
+    },
+    {
+      "key": "timesheet.submitted",
+      "class": "Modules\\Timesheet\\Events\\TimesheetSubmitted",
+      "payload": [
+        "submission_id",
+        "company_id",
+        "user_id",
+        "week_start",
+        "week_end"
+      ]
+    },
+    {
+      "key": "timesheet.reviewed",
+      "class": "Modules\\Timesheet\\Events\\TimesheetReviewed",
+      "payload": [
+        "submission_id",
+        "company_id",
+        "reviewed_by",
+        "status",
+        "notes"
+      ]
+    }
+  ]
+}

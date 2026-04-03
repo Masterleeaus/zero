@@ -1,0 +1,6 @@
+{
+    "name": "Elevenlabs Voice Chat",
+    "type": "extension",
+    "version": "1.3.0",
+    "description": "ElevenLabs voice runtime for Titan conversational channels."
+}

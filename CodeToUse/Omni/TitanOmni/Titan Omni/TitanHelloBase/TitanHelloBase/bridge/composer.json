@@ -1,0 +1,9 @@
+{
+  "name": "titan/hello-bridge",
+  "description": "Titan Hello Twilio Media Streams WebSocket bridge (Workerman)",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "workerman/workerman": "^4.1"
+  }
+}

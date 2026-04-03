@@ -1,0 +1,51 @@
+<?php
+
+return array(
+    'wp' => [
+        'add'      => 'Add Work Permit',
+        'edit'     => 'Edit Work Permit',
+        'show'     => 'Show Work Permit',
+        'validate' => 'Validate Work Permit',
+    ],
+    'menu' =>
+    array(
+        'date'       => 'Date',
+        'kartuIdentitas'  => 'Identity Card',
+        'noKartu'         => 'Identity ID',
+        'resident'         => 'Owner',
+        'penanggungJawab'      => 'Responsible By',
+        'noHP'         => 'Mobile Phone',
+        'keterangan'          => 'Notes',
+        'statusAproval'    => 'Approval Status',
+        'statusAprovalBm'          => 'Aproval BM',
+        'statusValidasi'        => 'Validate Status',
+        'unit'         => 'Unit',
+        'contactPerson' => 'Contact Person',
+        'supplier'      => 'Supplier',
+        'suppliers'     => 'Suppliers',
+        'fax'           => 'FAX',
+        'kodePos'       => 'Postal Code',
+        'alamat'        => 'Address',
+        'contactPerson' => 'Contact Person',
+        'phoneCP'       => 'Phone Contact Person',
+        'validate'      => 'Validate',
+        'submittedBy' => 'Submitted By',
+        'goodsInOutValidation' => 'Goods In Out Validation',
+        'remark'    => 'Remark',
+        'remarkBySecurity' => 'Remark By Security',
+        'showGoodsInOutValidation' => 'Goods In Out Validation',
+        'delivererName' => 'Deliverer Name',
+        'created' => 'Created At',
+        'notes' => 'Notes',
+        'companyName' => 'Company Name',
+        'companyAddress' => 'Company Address',
+        'projectManager' => 'Project Manager',
+        'siteCoordinator' => 'Site Coordinator',
+        'workType' => 'Work Type',
+        'scopeOfWork' => 'Scope Of Work',
+        'dateStart'     => 'Start Date',
+        'dateEnd'       => 'End Date',
+        'workDescription' => 'Work Description'
+    ),
+
+);
