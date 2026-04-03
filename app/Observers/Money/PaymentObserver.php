@@ -19,13 +19,15 @@ use App\Models\Money\Payment;
  */
 class PaymentObserver
 {
+    public function __construct(
+        private readonly \App\Services\TitanMoney\AccountingService $accounting,
+    ) {}
+
     /**
-     * Handle the Payment "created" event.
-     *
-     * @todo Phase 7 — wire AccountingService::postJournalEntry() here.
+     * Handle the Payment "created" event — post bank receipt / AR clearance entry.
      */
     public function created(Payment $payment): void
     {
-        // Phase 7: post debit Bank + credit A/R journal entry via AccountingService
+        $this->accounting->postPaymentRecorded($payment);
     }
 }

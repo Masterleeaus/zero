@@ -189,10 +189,12 @@ class AppServiceProvider extends ServiceProvider
         Ad::observe(AdObserver::class);
         User::observe(UserObserver::class);
 
-        // Finance auto-posting hooks (Phase 7 — stubs registered, logic wired in Phase 7)
+        // Finance auto-posting hooks (Phase 7 — fully wired)
         \App\Models\Money\Invoice::observe(\App\Observers\Money\InvoiceObserver::class);
         \App\Models\Money\Payment::observe(\App\Observers\Money\PaymentObserver::class);
         \App\Models\Money\Expense::observe(\App\Observers\Money\ExpenseObserver::class);
+        \App\Models\Money\SupplierBill::observe(\App\Observers\Money\SupplierBillObserver::class);
+        \App\Models\Money\Payroll::observe(\App\Observers\Money\PayrollObserver::class);
     }
 
     private function bootBladeDirectives(): void

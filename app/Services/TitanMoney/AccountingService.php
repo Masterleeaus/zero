@@ -10,6 +10,8 @@ use App\Models\Money\Invoice;
 use App\Models\Money\JournalEntry;
 use App\Models\Money\JournalLine;
 use App\Models\Money\Payment;
+use App\Models\Money\Payroll;
+use App\Models\Money\SupplierBill;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
@@ -240,6 +242,124 @@ class AccountingService
         } catch (\Throwable $e) {
             Log::error('AccountingService: postExpenseApproved failed', [
                 'expense_id' => $expense->id,
+                'error'      => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Post a supplier bill approved journal entry.
+     *
+     * Debit:  Operating Expenses   (type=expense)
+     * Credit: Accounts Payable     (type=liability)
+     *
+     * Safe to call multiple times — skips if already posted.
+     */
+    public function postSupplierBillApproved(SupplierBill $bill): ?JournalEntry
+    {
+        if ($this->alreadyPosted(SupplierBill::class, $bill->id)) {
+            return null;
+        }
+
+        $companyId = $bill->company_id;
+        $expAcc    = $this->findOrCreateAccount($companyId, 'Operating Expenses', 'expense', '6000');
+        $payable   = $this->findOrCreateAccount($companyId, 'Accounts Payable', 'liability', '2000');
+
+        if (! $expAcc || ! $payable) {
+            Log::warning('AccountingService: cannot post supplier bill — accounts unavailable', [
+                'bill_id' => $bill->id,
+            ]);
+            return null;
+        }
+
+        $amount = (float) $bill->total_amount;
+        $ref    = $bill->bill_number ?? ('BILL-' . $bill->id);
+
+        try {
+            return $this->createJournalEntry(
+                companyId:   $companyId,
+                description: 'Supplier bill approved: ' . $ref,
+                entryDate:   $bill->bill_date?->toDateString() ?? now()->toDateString(),
+                lines: [
+                    ['account_id' => $expAcc->id,  'debit'  => $amount, 'credit' => 0,      'description' => 'Supplier expense — ' . $ref],
+                    ['account_id' => $payable->id, 'debit'  => 0,       'credit' => $amount, 'description' => 'AP — ' . $ref],
+                ],
+                reference:   $ref,
+                currency:    $bill->currency ?? 'AUD',
+                sourceType:  SupplierBill::class,
+                sourceId:    $bill->id,
+                createdBy:   (int) $bill->created_by,
+            );
+        } catch (\Throwable $e) {
+            Log::error('AccountingService: postSupplierBillApproved failed', [
+                'bill_id' => $bill->id,
+                'error'   => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Post a payroll approved journal entry.
+     *
+     * Debit:  Wages Expense        (type=expense)
+     * Credit: Bank Account         (type=asset)      [net pay]
+     * Credit: Tax Payable          (type=liability)  [PAYG / tax]
+     *
+     * Safe to call multiple times — skips if already posted.
+     */
+    public function postPayrollApproved(Payroll $payroll): ?JournalEntry
+    {
+        if ($this->alreadyPosted(Payroll::class, $payroll->id)) {
+            return null;
+        }
+
+        $companyId = $payroll->company_id;
+        $wages     = $this->findOrCreateAccount($companyId, 'Wages Expense', 'expense', '6100');
+        $bank      = $this->findOrCreateAccount($companyId, 'Bank', 'asset', '1000');
+        $taxPayable = $this->findOrCreateAccount($companyId, 'PAYG Tax Payable', 'liability', '2100');
+
+        if (! $wages || ! $bank || ! $taxPayable) {
+            Log::warning('AccountingService: cannot post payroll — accounts unavailable', [
+                'payroll_id' => $payroll->id,
+            ]);
+            return null;
+        }
+
+        $gross = (float) $payroll->total_gross;
+        $tax   = (float) $payroll->total_tax;
+        $net   = (float) $payroll->total_net;
+        $ref   = $payroll->reference ?? ('PAY-' . $payroll->id);
+
+        if ($gross <= 0) {
+            return null;
+        }
+
+        try {
+            $lines = [
+                ['account_id' => $wages->id,      'debit'  => $gross, 'credit' => 0,    'description' => 'Wages — ' . $ref],
+                ['account_id' => $bank->id,        'debit'  => 0,      'credit' => $net, 'description' => 'Net pay — ' . $ref],
+            ];
+
+            if ($tax > 0) {
+                $lines[] = ['account_id' => $taxPayable->id, 'debit' => 0, 'credit' => $tax, 'description' => 'PAYG tax — ' . $ref];
+            }
+
+            return $this->createJournalEntry(
+                companyId:   $companyId,
+                description: 'Payroll approved: ' . $ref,
+                entryDate:   $payroll->pay_date?->toDateString() ?? now()->toDateString(),
+                lines:       $lines,
+                reference:   $ref,
+                currency:    $payroll->currency ?? 'AUD',
+                sourceType:  Payroll::class,
+                sourceId:    $payroll->id,
+                createdBy:   (int) $payroll->created_by,
+            );
+        } catch (\Throwable $e) {
+            Log::error('AccountingService: postPayrollApproved failed', [
+                'payroll_id' => $payroll->id,
                 'error'      => $e->getMessage(),
             ]);
             return null;

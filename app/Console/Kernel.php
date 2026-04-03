@@ -51,6 +51,9 @@ class Kernel extends ConsoleKernel
 
         // PWA dead-letter prune — weekly cleanup of abandoned items
         $schedule->command('pwa:replay-deferred --prune')->weekly();
+
+        // Finance — monthly asset depreciation (runs on the 1st of each month at 02:00)
+        $schedule->command('money:depreciate')->monthlyOn(1, '02:00');
     }
 
     // $schedule->command(RunHealthChecksCommand::class)->everyFiveMinutes();

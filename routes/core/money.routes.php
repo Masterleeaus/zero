@@ -175,5 +175,63 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('journal.store');
             Route::get('journal/{journalEntry}', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'show'])
                 ->name('journal.show');
+
+            // ── Supplier Bills (Accounts Payable) ──────────────────────────────
+            Route::get('supplier-bills', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'index'])
+                ->name('supplier-bills.index');
+            Route::get('supplier-bills/create', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'create'])
+                ->name('supplier-bills.create');
+            Route::post('supplier-bills', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'store'])
+                ->name('supplier-bills.store');
+            Route::get('supplier-bills/{supplierBill}', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'show'])
+                ->name('supplier-bills.show');
+            Route::post('supplier-bills/{supplierBill}/approve', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'approve'])
+                ->name('supplier-bills.approve');
+            Route::post('supplier-bills/{supplierBill}/payment', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'recordPayment'])
+                ->name('supplier-bills.payment');
+
+            // ── Payroll ────────────────────────────────────────────────────────
+            Route::get('payroll', [\App\Http\Controllers\Core\Money\PayrollController::class, 'index'])
+                ->name('payroll.index');
+            Route::get('payroll/create', [\App\Http\Controllers\Core\Money\PayrollController::class, 'create'])
+                ->name('payroll.create');
+            Route::post('payroll', [\App\Http\Controllers\Core\Money\PayrollController::class, 'store'])
+                ->name('payroll.store');
+            Route::get('payroll/{payroll}', [\App\Http\Controllers\Core\Money\PayrollController::class, 'show'])
+                ->name('payroll.show');
+            Route::post('payroll/{payroll}/line', [\App\Http\Controllers\Core\Money\PayrollController::class, 'addLine'])
+                ->name('payroll.add-line');
+            Route::post('payroll/{payroll}/approve', [\App\Http\Controllers\Core\Money\PayrollController::class, 'approve'])
+                ->name('payroll.approve');
+
+            // ── Financial Assets ───────────────────────────────────────────────
+            Route::get('financial-assets', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'index'])
+                ->name('financial-assets.index');
+            Route::get('financial-assets/create', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'create'])
+                ->name('financial-assets.create');
+            Route::post('financial-assets', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'store'])
+                ->name('financial-assets.store');
+            Route::get('financial-assets/{financialAsset}', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'show'])
+                ->name('financial-assets.show');
+            Route::get('financial-assets/{financialAsset}/edit', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'edit'])
+                ->name('financial-assets.edit');
+            Route::put('financial-assets/{financialAsset}', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'update'])
+                ->name('financial-assets.update');
+            Route::post('financial-assets/{financialAsset}/dispose', [\App\Http\Controllers\Core\Money\FinancialAssetController::class, 'dispose'])
+                ->name('financial-assets.dispose');
+
+            // ── Finance Reports ────────────────────────────────────────────────
+            Route::get('reports/profit-and-loss', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'profitAndLoss'])
+                ->name('reports.profit-and-loss');
+            Route::get('reports/balance-sheet', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'balanceSheet'])
+                ->name('reports.balance-sheet');
+            Route::get('reports/cash-flow', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'cashFlow'])
+                ->name('reports.cash-flow');
+            Route::get('reports/aged-receivables', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'agedReceivables'])
+                ->name('reports.aged-receivables');
+            Route::get('reports/aged-payables', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'agedPayables'])
+                ->name('reports.aged-payables');
+            Route::get('reports/job-profitability', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'jobProfitability'])
+                ->name('reports.job-profitability');
         });
     });
