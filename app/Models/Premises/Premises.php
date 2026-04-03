@@ -15,6 +15,7 @@ use App\Models\Work\InspectionInstance;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlan;
 use App\Models\Work\ServicePlanVisit;
+use App\Models\Work\FieldServiceProject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -124,6 +125,11 @@ class Premises extends Model
     public function servicePlans(): HasMany
     {
         return $this->hasMany(ServicePlan::class, 'premises_id');
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(FieldServiceProject::class, 'premises_id');
     }
 
     public function hazardRecords(): HasMany
@@ -354,6 +360,55 @@ class Premises extends Model
             'normal' => $open->where('priority', 'normal')->count(),
             'low'    => $open->where('priority', 'low')->count(),
             'total'  => $open->count(),
+        ];
+    }
+
+    // ── Portal helpers (Module 21 — fieldservice_portal) ─────────────────────
+
+    /**
+     * Upcoming service jobs and plan visits for this premises ordered by date.
+     *
+     * @return \Illuminate\Support\Collection<int, mixed>
+     */
+    public function upcomingPortalEvents(int $limit = 10): \Illuminate\Support\Collection
+    {
+        $jobs = $this->serviceJobs()
+            ->whereHas('stage', fn ($q) => $q->where('portal_visible', true))
+            ->whereNotIn('status', ['completed', 'closed', 'cancelled'])
+            ->whereNotNull('scheduled_date_start')
+            ->where('scheduled_date_start', '>=', now()->toDateString())
+            ->orderBy('scheduled_date_start')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($j) => array_merge($j->toPortalCard(), ['event_type' => 'job']));
+
+        $visits = $this->serviceVisits()
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->whereNotNull('scheduled_date')
+            ->where('scheduled_date', '>=', now()->toDateString())
+            ->orderBy('scheduled_date')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($v) => array_merge($v->toPortalCard(), ['event_type' => 'visit']));
+
+        return $jobs->concat($visits)->sortBy('schedule')->take($limit)->values();
+    }
+
+    /**
+     * Summary of portal-relevant service data for this premises.
+     *
+     * @return array<string, mixed>
+     */
+    public function portalServiceSummary(): array
+    {
+        return [
+            'premises_id'      => $this->id,
+            'name'             => $this->name,
+            'open_jobs'        => $this->serviceJobs()->whereNotIn('status', ['completed', 'closed', 'cancelled'])->count(),
+            'completed_jobs'   => $this->serviceJobs()->whereIn('status', ['completed', 'closed'])->count(),
+            'active_projects'  => $this->projects()->where('status', 'active')->count(),
+            'active_plans'     => $this->servicePlans()->where('status', 'active')->count(),
+            'installed_assets' => $this->installedEquipment()->count(),
         ];
     }
 }

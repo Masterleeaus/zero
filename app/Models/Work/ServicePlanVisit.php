@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 /**
  * ServicePlanVisit — an individual scheduled occurrence within a ServicePlan.
  *
@@ -36,6 +35,7 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         'created_by',
         'service_plan_id',
         'service_job_id',
+        'project_id',
         'visit_type',
         'scheduled_for',
         'scheduled_date',
@@ -65,6 +65,11 @@ class ServicePlanVisit extends Model implements SchedulableEntity
     public function serviceJob(): BelongsTo
     {
         return $this->belongsTo(ServiceJob::class, 'service_job_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(FieldServiceProject::class, 'project_id');
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
@@ -257,5 +262,40 @@ class ServicePlanVisit extends Model implements SchedulableEntity
     public function getSchedulableType(): string
     {
         return static::class;
+    }
+
+    // ── Portal helpers (Module 21 — fieldservice_portal) ─────────────────────
+
+    public function toPortalCard(): array
+    {
+        return [
+            'id'       => $this->id,
+            'title'    => $this->getSchedulableTitle(),
+            'status'   => $this->portalStatusLabel(),
+            'schedule' => $this->portalScheduleLabel(),
+            'type'     => $this->visit_type ?? 'service',
+        ];
+    }
+
+    public function portalStatusLabel(): string
+    {
+        return match ($this->status) {
+            'pending'    => 'Upcoming',
+            'scheduled'  => 'Scheduled',
+            'completed'  => 'Completed',
+            'cancelled'  => 'Cancelled',
+            default      => ucfirst((string) $this->status),
+        };
+    }
+
+    public function portalScheduleLabel(): string
+    {
+        if ($this->scheduled_date) {
+            return \Illuminate\Support\Carbon::parse($this->scheduled_date)->format('d M Y');
+        }
+        if ($this->scheduled_for) {
+            return \Illuminate\Support\Carbon::parse($this->scheduled_for)->format('d M Y');
+        }
+        return 'To be confirmed';
     }
 }

@@ -25,6 +25,7 @@ class JobStage extends Model
         'is_invoiceable',
         'fold',
         'require_signature',
+        'portal_visible',
         'color',
         'description',
         // Module 23 — fieldservice_kanban_info
@@ -39,6 +40,7 @@ class JobStage extends Model
         'is_invoiceable'    => 'boolean',
         'fold'              => 'boolean',
         'require_signature' => 'boolean',
+        'portal_visible'    => 'boolean',
         // Module 23 — fieldservice_kanban_info
         'kanban_fold'       => 'boolean',
     ];
@@ -50,6 +52,7 @@ class JobStage extends Model
         'is_invoiceable'    => false,
         'fold'              => false,
         'require_signature' => false,
+        'portal_visible'    => true,
         'color'             => '#FFFFFF',
         'sequence'          => 1,
         // Module 23 — fieldservice_kanban_info
@@ -74,5 +77,10 @@ class JobStage extends Model
     public function scopeInvoiceable(Builder $query): Builder
     {
         return $query->where('is_invoiceable', true);
+    }
+
+    public function scopePortalVisible(Builder $query): Builder
+    {
+        return $query->where('portal_visible', true);
     }
 }

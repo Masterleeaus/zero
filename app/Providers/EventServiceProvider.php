@@ -145,11 +145,26 @@ use App\Events\Repair\RepairClaimOffsetApplied;
 use App\Events\Repair\RepairScheduled;
 use App\Events\Repair\RepairRescheduled;
 use App\Events\Repair\RepairDispatchAssigned;
+// ── Module 21 — fieldservice_portal events ────────────────────────────────────
+use App\Events\Work\PortalBookingRequested;
+use App\Events\Work\PortalVisitConfirmed;
+use App\Events\Work\PortalQuoteApproved;
+use App\Events\Work\PortalPaymentSubmitted;
+use App\Events\Work\PortalFeedbackSubmitted;
+use App\Events\Work\PortalMessageCreated;
+// ── Module 22 — fieldservice_project events ───────────────────────────────────
+use App\Events\Work\FieldServiceProjectCreated;
+use App\Events\Work\FieldServiceProjectUpdated;
+use App\Events\Work\FieldServiceProjectJobLinked;
+use App\Events\Work\FieldServiceProjectVisitLinked;
+use App\Events\Work\FieldServiceProjectCompleted;
 use App\Listeners\Repair\RepairOrderCreatedListener;
 use App\Listeners\Repair\RepairOrderCompletedListener;
 use App\Listeners\Repair\RepairWarrantyDetectedListener;
 use App\Listeners\Repair\RepairDiagnosisRecordedListener;
 use App\Listeners\Repair\RepairTemplateAppliedListener;
+use App\Listeners\Work\FieldServiceProjectCreatedListener;
+use App\Listeners\Work\FieldServiceProjectCompletedListener;
 // ── fieldservice_sale + fieldservice_sale_agreement events ───────────────────
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
@@ -371,6 +386,23 @@ class EventServiceProvider extends ServiceProvider
         RepairScheduled::class              => [],
         RepairRescheduled::class            => [],
         RepairDispatchAssigned::class       => [],
+        // ── Module 21 — fieldservice_portal signals ───────────────────────────
+        PortalBookingRequested::class  => [],
+        PortalVisitConfirmed::class    => [],
+        PortalQuoteApproved::class     => [],
+        PortalPaymentSubmitted::class  => [],
+        PortalFeedbackSubmitted::class => [],
+        PortalMessageCreated::class    => [],
+        // ── Module 22 — fieldservice_project signals ──────────────────────────
+        FieldServiceProjectCreated::class => [
+            FieldServiceProjectCreatedListener::class,
+        ],
+        FieldServiceProjectUpdated::class     => [],
+        FieldServiceProjectJobLinked::class   => [],
+        FieldServiceProjectVisitLinked::class => [],
+        FieldServiceProjectCompleted::class   => [
+            FieldServiceProjectCompletedListener::class,
+        ],
         // ── Module 23 (fieldservice_kanban_info) — kanban intelligence signals ──
         JobKanbanStateChanged::class => [
             JobKanbanStateChangedListener::class,

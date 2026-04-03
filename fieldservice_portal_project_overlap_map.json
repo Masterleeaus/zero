@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-04-03",
+  "modules": ["fieldservice_portal", "fieldservice_project"],
+  "overlap_analysis": {
+    "Customer": { "status": "already_linked", "notes": "Customer is CRM anchor; portal scopes to customer_id; project links via ServiceJob" },
+    "Enquiry": { "status": "already_linked", "notes": "ServiceJob.enquiry_id already exists" },
+    "Deal": { "status": "already_linked", "notes": "ServiceJob.deal_id already exists" },
+    "Quote": { "status": "already_linked", "notes": "Customer.quotes() exists; portal surfaces quotes" },
+    "Invoice": { "status": "already_linked", "notes": "Customer.invoices() exists; portal surfaces invoices" },
+    "Payment": { "status": "partially_linked", "notes": "Payment model exists; portal needs customer-scoped helper" },
+    "ServiceAgreement": { "status": "already_linked", "notes": "ServiceJob.agreement_id exists; portal surfaces active agreements" },
+    "ServicePlan": { "status": "already_linked", "notes": "Premises.servicePlans() exists" },
+    "ServicePlanVisit": { "status": "partially_linked", "notes": "Needs project_id linkage for fieldservice_project" },
+    "ServiceJob": { "status": "partially_linked", "notes": "Needs portal_visible scope via stage, and project_id field" },
+    "InspectionInstance": { "status": "already_linked", "notes": "ServiceJob has inspections(); portal shows via job" },
+    "ChecklistRun": { "status": "already_linked", "notes": "ServiceJob has checklistRuns()" },
+    "Premises": { "status": "already_linked", "notes": "ServiceJob.premises_id exists; portal surfaces via customer premises" },
+    "Building": { "status": "already_linked", "notes": "Premises.buildings() exists" },
+    "Unit": { "status": "already_linked", "notes": "Building.units() via hierarchy" },
+    "Team": { "status": "partially_linked", "notes": "ServiceJob.team_id exists; project can have default team" },
+    "User": { "status": "already_linked", "notes": "ServiceJob.assigned_user_id exists" },
+    "Equipment": { "status": "already_linked", "notes": "ServiceJob.equipment() exists" },
+    "InstalledEquipment": { "status": "already_linked", "notes": "Premises.installedEquipment() exists; portal surfaces" },
+    "SiteAsset": { "status": "already_linked", "notes": "Premises.siteAssets() exists" },
+    "EquipmentWarranty": { "status": "already_linked", "notes": "Customer.activeWarrantyAssets() exists" },
+    "WarrantyClaim": { "status": "already_linked", "notes": "ServiceJob.warrantyClaim exists" },
+    "RepairOrder": { "status": "partially_linked", "notes": "RepairOrder exists; project can group repair orders" },
+    "JobStage": { "status": "missing_field", "notes": "Needs portal_visible boolean field added" },
+    "FieldServiceProject": { "status": "missing_entity", "notes": "New model needed: groups ServiceJobs/Visits under a project context" }
+  }
+}
