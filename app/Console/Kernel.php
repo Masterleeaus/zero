@@ -43,6 +43,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:test-command')->everyMinute();
 
         $schedule->command('agreements:run-scheduled')->hourly();
+
+        $schedule->command('enquiries:notify-followups')->dailyAt('08:00');
     }
 
     // $schedule->command(RunHealthChecksCommand::class)->everyFiveMinutes();
