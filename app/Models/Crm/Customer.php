@@ -402,4 +402,118 @@ class Customer extends Model
             'premises_without_plan'  => max(0, $premisesIds->count() - $premisesCovered),
         ];
     }
+
+    /**
+     * Alias for servicePlanCoverageSummary() — standard CRM API name.
+     *
+     * @return array{
+     *     active_plans: int,
+     *     upcoming_visits: int,
+     *     overdue_visits: int,
+     *     premises_covered: int,
+     *     premises_without_plan: int
+     * }
+     */
+    public function serviceCoverageSummary(): array
+    {
+        return $this->servicePlanCoverageSummary();
+    }
+
+    /**
+     * Full chronological timeline of service events for this customer.
+     *
+     * Merges ServiceJobs, ServicePlanVisits, InspectionInstances, and Hazards.
+     * Ordered chronologically descending.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function timeline(): \Illuminate\Support\Collection
+    {
+        return app(\App\Services\Scheduling\CustomerTimelineAggregator::class)
+            ->forCustomer($this);
+    }
+
+    /**
+     * Inventory of all site assets across all premises for this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Facility\SiteAsset>
+     */
+    public function assetInventory(): \Illuminate\Database\Eloquent\Collection
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        return \App\Models\Facility\SiteAsset::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('status', 'active')
+            ->orderBy('label')
+            ->get();
+    }
+
+    /**
+     * Risk profile snapshot for this customer.
+     *
+     * Aggregates hazard counts, severity distribution, and open inspection findings
+     * across all premises.
+     *
+     * @return array{
+     *     active_hazards: int,
+     *     critical_hazards: int,
+     *     high_hazards: int,
+     *     medium_hazards: int,
+     *     low_hazards: int,
+     *     failed_inspections: int,
+     *     open_followups: int,
+     *     risk_level: string
+     * }
+     */
+    public function riskProfile(): array
+    {
+        $premisesIds = $this->premises()->pluck('id');
+
+        $baseHazards = \App\Models\Premises\Hazard::query()
+            ->whereIn('premises_id', $premisesIds)
+            ->where('status', 'active');
+
+        $critical = (clone $baseHazards)->where('severity', 'critical')->count();
+        $high     = (clone $baseHazards)->where('severity', 'high')->count();
+        $medium   = (clone $baseHazards)->where('severity', 'medium')->count();
+        $low      = (clone $baseHazards)->where('severity', 'low')->count();
+        $total    = $critical + $high + $medium + $low;
+
+        $failedInspections = \App\Models\Inspection\InspectionInstance::query()
+            ->where(function ($q) use ($premisesIds) {
+                $q->where('scope_type', \App\Models\Premises\Premises::class)
+                  ->whereIn('scope_id', $premisesIds);
+            })
+            ->where('status', 'failed')
+            ->count();
+
+        $openFollowups = \App\Models\Inspection\InspectionInstance::query()
+            ->where(function ($q) use ($premisesIds) {
+                $q->where('scope_type', \App\Models\Premises\Premises::class)
+                  ->whereIn('scope_id', $premisesIds);
+            })
+            ->where('followup_required', true)
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->count();
+
+        $riskLevel = match (true) {
+            $critical > 0              => 'critical',
+            $high > 2                  => 'high',
+            $high > 0 || $medium > 3   => 'medium',
+            $total > 0                 => 'low',
+            default                    => 'none',
+        };
+
+        return [
+            'active_hazards'    => $total,
+            'critical_hazards'  => $critical,
+            'high_hazards'      => $high,
+            'medium_hazards'    => $medium,
+            'low_hazards'       => $low,
+            'failed_inspections' => $failedInspections,
+            'open_followups'    => $openFollowups,
+            'risk_level'        => $riskLevel,
+        ];
+    }
 }
