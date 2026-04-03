@@ -50,7 +50,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('social-media-demo-data', DemoDataController::class)->name('demo-data');
 
     Route::any('social-media/webhook/instagram', [SocialInstagramController::class, 'webhook'])
-        ->name('social-media.oauth.webhook.facebook')
+        ->name('social-media.oauth.webhook.instagram')
         ->withoutMiddleware('auth');
     Route::any('social-media/webhook/facebook', [FacebookController::class, 'webhook'])
         ->name('social-media.oauth.webhook.facebook')
