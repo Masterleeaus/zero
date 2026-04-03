@@ -50,6 +50,13 @@ class ProcessRecorder
             'originating_node' => $process['originating_node'],
         ], $process['signal_id'], $process['user_id']);
 
+        // Time graph integration — dispatched async to avoid hot-path latency
+        try {
+            \App\Jobs\TimeGraph\RecordSignalToTimeGraph::dispatch($processId, $payload);
+        } catch (\Throwable $e) {
+            // Non-critical — never disrupt the signal hot path
+        }
+
         return [
             'status' => 'recorded',
             'process_id' => $processId,
