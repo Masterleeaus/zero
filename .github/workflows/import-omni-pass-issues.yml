@@ -1,0 +1,19 @@
+name: Import OMNI PASS Issues
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Import OMNI PASS Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/import-omni-pass-issues.js
