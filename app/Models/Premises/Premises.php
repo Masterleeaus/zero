@@ -212,6 +212,46 @@ class Premises extends Model
             ->first();
     }
 
+    // ── Warranty helpers (Module 8) ───────────────────────────────────────────
+
+    /**
+     * All installed equipment at this premises that have an active warranty.
+     *
+     * Matches rows where warranty_status is explicitly 'active', OR where
+     * warranty_status is not yet set but warranty_expiry is still in the future.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function warrantyAssets(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->installedEquipment()
+            ->where(function ($q) {
+                $q->where('warranty_status', \App\Models\Equipment\EquipmentWarranty::STATUS_ACTIVE)
+                  ->orWhere(function ($inner) {
+                      $inner->whereNull('warranty_status')
+                            ->whereNotNull('warranty_expiry')
+                            ->whereDate('warranty_expiry', '>', now()->toDateString());
+                  });
+            })
+            ->get();
+    }
+
+    /**
+     * Installed equipment at this premises with warranties expiring within $days days.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function expiringWarrantyAssets(int $days = 30): \Illuminate\Database\Eloquent\Collection
+    {
+        $cutoff = now()->addDays($days)->toDateString();
+
+        return $this->installedEquipment()
+            ->whereNotNull('warranty_expiry')
+            ->whereDate('warranty_expiry', '>', now()->toDateString())
+            ->whereDate('warranty_expiry', '<=', $cutoff)
+            ->get();
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): Builder

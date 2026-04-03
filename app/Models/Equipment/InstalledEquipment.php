@@ -41,11 +41,24 @@ class InstalledEquipment extends Model
         'status',
         'location_description',
         'notes',
+        'warranty_start_date',
+        'warranty_expiry',
+        'warranty_provider',
+        'warranty_reference',
+        'coverage_type',
+        'coverage_notes',
+        'claimable_until',
+        'extended_warranty_flag',
+        'warranty_status',
     ];
 
     protected $casts = [
-        'installed_at' => 'date',
-        'removed_at'   => 'date',
+        'installed_at'           => 'date',
+        'removed_at'             => 'date',
+        'warranty_start_date'    => 'date',
+        'warranty_expiry'        => 'date',
+        'claimable_until'        => 'date',
+        'extended_warranty_flag' => 'boolean',
     ];
 
     protected $attributes = [
@@ -79,6 +92,11 @@ class InstalledEquipment extends Model
         return $this->belongsTo(ServiceJob::class, 'service_job_id');
     }
 
+    public function warranties(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EquipmentWarranty::class, 'installed_equipment_id');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**
@@ -87,6 +105,48 @@ class InstalledEquipment extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    /**
+     * First active EquipmentWarranty record for this installation.
+     *
+     * If multiple active warranties exist (e.g. vendor + extended), the most
+     * recently created one is returned. Use `warranties()->active()->get()` to
+     * retrieve all active records.
+     */
+    public function activeWarranty(): ?EquipmentWarranty
+    {
+        return $this->warranties()->active()->first();
+    }
+
+    /** Whether any active warranty record exists. */
+    public function hasWarranty(): bool
+    {
+        return $this->warranties()->active()->exists();
+    }
+
+    /** Whether the inline warranty_expiry has elapsed. */
+    public function warrantyExpired(): bool
+    {
+        return $this->warranty_expiry !== null && $this->warranty_expiry->isPast();
+    }
+
+    /** Whether the warranty expires within the given number of days. */
+    public function warrantyExpiresSoon(int $days = 30): bool
+    {
+        return $this->warranty_expiry !== null
+            && $this->warranty_expiry->isFuture()
+            && $this->warranty_expiry->diffInDays(now()) <= $days;
+    }
+
+    /** Whether a warranty claim can be submitted. */
+    public function eligibleForClaim(): bool
+    {
+        if ($this->claimable_until) {
+            return $this->claimable_until->isFuture();
+        }
+
+        return $this->warranty_expiry !== null && $this->warranty_expiry->isFuture();
     }
 
     /**

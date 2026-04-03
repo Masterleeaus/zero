@@ -516,4 +516,53 @@ class Customer extends Model
             'risk_level'        => $riskLevel,
         ];
     }
+
+    // ── Warranty helpers (Module 8) ───────────────────────────────────────────
+
+    /**
+     * All installed equipment for this customer that have an active warranty.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function activeWarrantyAssets(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Equipment\InstalledEquipment::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->whereNotNull('warranty_expiry')
+            ->whereDate('warranty_expiry', '>', now()->toDateString())
+            ->get();
+    }
+
+    /**
+     * Installed equipment for this customer with warranties expiring within $days days.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function expiringWarrantyAssets(int $days = 30): \Illuminate\Database\Eloquent\Collection
+    {
+        $cutoff = now()->addDays($days)->toDateString();
+
+        return \App\Models\Equipment\InstalledEquipment::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->whereNotNull('warranty_expiry')
+            ->whereDate('warranty_expiry', '>', now()->toDateString())
+            ->whereDate('warranty_expiry', '<=', $cutoff)
+            ->get();
+    }
+
+    /**
+     * Open warranty claims for this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\WarrantyClaim>
+     */
+    public function openWarrantyClaims(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Equipment\WarrantyClaim::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->open()
+            ->get();
+    }
 }
