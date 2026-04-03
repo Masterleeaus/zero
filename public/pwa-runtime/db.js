@@ -1,10 +1,15 @@
 /**
- * TitanDB - IndexedDB wrapper for Titan Zero PWA
+ * TitanDB - IndexedDB wrapper for Titan Zero PWA — v2
+ *
+ * Phase 2 additions:
+ *   - staged_uploads : offline photo/proof/note staging
+ *   - bootstrap_meta : stored bootstrap contract from server
+ *   - DB version bumped to 2
  */
 class TitanDB {
     constructor() {
         this.DB_NAME = 'titan-zero-db';
-        this.DB_VERSION = 1;
+        this.DB_VERSION = 2;
         this._db = null;
     }
 
@@ -16,32 +21,52 @@ class TitanDB {
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+                const oldVersion = event.oldVersion;
 
-                if (!db.objectStoreNames.contains('jobs')) {
-                    db.createObjectStore('jobs', { keyPath: 'id', autoIncrement: false });
+                // ── Version 1 stores (created fresh or on upgrade from 0) ────
+                if (oldVersion < 1) {
+                    if (!db.objectStoreNames.contains('jobs')) {
+                        db.createObjectStore('jobs', { keyPath: 'id', autoIncrement: false });
+                    }
+
+                    if (!db.objectStoreNames.contains('customers')) {
+                        db.createObjectStore('customers', { keyPath: 'id', autoIncrement: false });
+                    }
+
+                    if (!db.objectStoreNames.contains('invoices')) {
+                        db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: false });
+                    }
+
+                    if (!db.objectStoreNames.contains('signals_local')) {
+                        const signalsStore = db.createObjectStore('signals_local', { keyPath: 'localId', autoIncrement: true });
+                        signalsStore.createIndex('signal_key', 'signal_key', { unique: false });
+                    }
+
+                    if (!db.objectStoreNames.contains('sync_queue')) {
+                        const syncStore = db.createObjectStore('sync_queue', { keyPath: 'queueId', autoIncrement: true });
+                        syncStore.createIndex('status', 'status', { unique: false });
+                        syncStore.createIndex('created_at', 'created_at', { unique: false });
+                    }
+
+                    if (!db.objectStoreNames.contains('runtime_meta')) {
+                        db.createObjectStore('runtime_meta', { keyPath: 'key', autoIncrement: false });
+                    }
                 }
 
-                if (!db.objectStoreNames.contains('customers')) {
-                    db.createObjectStore('customers', { keyPath: 'id', autoIncrement: false });
-                }
+                // ── Version 2 stores ─────────────────────────────────────────
+                if (oldVersion < 2) {
+                    // Staged uploads: offline photo/proof/note/document staging
+                    if (!db.objectStoreNames.contains('staged_uploads')) {
+                        const uploadStore = db.createObjectStore('staged_uploads', { keyPath: 'stageId', autoIncrement: true });
+                        uploadStore.createIndex('type', 'type', { unique: false });
+                        uploadStore.createIndex('status', 'status', { unique: false });
+                        uploadStore.createIndex('job_id', 'job_id', { unique: false });
+                    }
 
-                if (!db.objectStoreNames.contains('invoices')) {
-                    db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: false });
-                }
-
-                if (!db.objectStoreNames.contains('signals_local')) {
-                    const signalsStore = db.createObjectStore('signals_local', { keyPath: 'localId', autoIncrement: true });
-                    signalsStore.createIndex('signal_key', 'signal_key', { unique: false });
-                }
-
-                if (!db.objectStoreNames.contains('sync_queue')) {
-                    const syncStore = db.createObjectStore('sync_queue', { keyPath: 'queueId', autoIncrement: true });
-                    syncStore.createIndex('status', 'status', { unique: false });
-                    syncStore.createIndex('created_at', 'created_at', { unique: false });
-                }
-
-                if (!db.objectStoreNames.contains('runtime_meta')) {
-                    db.createObjectStore('runtime_meta', { keyPath: 'key', autoIncrement: false });
+                    // Bootstrap contract stored from server
+                    if (!db.objectStoreNames.contains('bootstrap_meta')) {
+                        db.createObjectStore('bootstrap_meta', { keyPath: 'key', autoIncrement: false });
+                    }
                 }
             };
 

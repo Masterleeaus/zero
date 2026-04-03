@@ -11,6 +11,7 @@ class TzPwaSignalIngress extends Model
 
     protected $fillable = [
         'node_id',
+        'idempotency_key',
         'company_id',
         'user_id',
         'signal_key',
@@ -18,19 +19,24 @@ class TzPwaSignalIngress extends Model
         'signature',
         'timestamp',
         'signal_stage',
+        'ingest_status',
+        'failure_reason',
         'consensus_score',
         'consensus_passed',
         'envelope',
         'meta',
+        'processed_at',
+        'promoted_to_event_id',
     ];
 
     protected $casts = [
-        'payload' => 'array',
-        'envelope' => 'array',
-        'meta' => 'array',
+        'payload'          => 'array',
+        'envelope'         => 'array',
+        'meta'             => 'array',
         'consensus_passed' => 'boolean',
-        'consensus_score' => 'float',
-        'timestamp' => 'datetime',
+        'consensus_score'  => 'float',
+        'timestamp'        => 'datetime',
+        'processed_at'     => 'datetime',
     ];
 
     public function company(): BelongsTo

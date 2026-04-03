@@ -1,14 +1,22 @@
 /**
- * Titan Zero Service Worker — v1
+ * Titan Zero Service Worker — v2
  * Strategies:
  *   - Navigation requests : network-first → offline fallback
  *   - Same-origin GET     : stale-while-revalidate
  *   - Manifest / icons    : cache-first
  *   - Cross-origin / non-GET : network-only
+ *
+ * Phase 2 additions:
+ *   - Background Sync API registration (graceful fallback)
+ *   - Update-available notification to client
+ *   - Safe cache version rotation
+ *   - Skip-waiting via postMessage
  */
 
-const CACHE_NAME   = 'titan-zero-v1';
-const OFFLINE_URL  = '/offline';
+const CACHE_VERSION = 'titan-zero-v2';
+const CACHE_NAME    = CACHE_VERSION;
+const OFFLINE_URL   = '/offline';
+const BG_SYNC_TAG   = 'titan-signal-sync';
 
 // Core shell assets — only stable URLs that won't change with Vite hashes
 const SHELL_ASSETS = [
@@ -36,23 +44,61 @@ self.addEventListener('install', (event) => {
 // ── Activate ───────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
+    Promise.all([
+      // Evict all caches not matching current version
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
+        )
+      ),
+      self.clients.claim(),
+    ])
   );
-  self.clients.claim();
 });
 
 // ── Message ────────────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+  if (!event.data) return;
+
+  switch (event.data.type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+
+    case 'TRIGGER_SYNC':
+      // Client requested an immediate sync trigger
+      if ('SyncManager' in self) {
+        event.waitUntil(
+          self.registration.sync.register(BG_SYNC_TAG).catch(() => {
+            // Background sync not available — notify client to fallback
+            notifyClients({ type: 'SYNC_FALLBACK' });
+          })
+        );
+      } else {
+        notifyClients({ type: 'SYNC_FALLBACK' });
+      }
+      break;
+
+    default:
+      break;
   }
 });
+
+// ── Background Sync ────────────────────────────────────────────────────────
+self.addEventListener('sync', (event) => {
+  if (event.tag === BG_SYNC_TAG) {
+    event.waitUntil(
+      notifyClients({ type: 'BG_SYNC_TRIGGERED', tag: BG_SYNC_TAG })
+    );
+  }
+});
+
+// ── Online/connection change (via fetch success heuristic) ─────────────────
+// Browsers don't fire a 'connection' event in SW, but after a successful
+// navigation fetch we broadcast an online-restore hint to the runtime.
+let _wasOffline = false;
 
 // ── Fetch ──────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
@@ -89,12 +135,16 @@ self.addEventListener('fetch', (event) => {
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, response.clone());
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response('Asset unavailable offline', { status: 503 });
   }
-  return response;
 }
 
 async function networkFirstWithOfflineFallback(request) {
@@ -104,13 +154,21 @@ async function networkFirstWithOfflineFallback(request) {
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
+
+      // Restore after offline
+      if (_wasOffline) {
+        _wasOffline = false;
+        notifyClients({ type: 'CONNECTION_RESTORED' });
+      }
     }
     return response;
   } catch {
+    _wasOffline = true;
     const cached = await caches.match(request);
     if (cached) return cached;
     // Return the pre-cached offline page
-    return caches.match(OFFLINE_URL);
+    const offlinePage = await caches.match(OFFLINE_URL);
+    return offlinePage || new Response('Offline', { status: 503 });
   }
 }
 
@@ -124,4 +182,11 @@ async function staleWhileRevalidate(request) {
   }).catch(() => null);
 
   return cached || networkFetch;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+async function notifyClients(message) {
+  const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  clients.forEach((client) => client.postMessage(message));
 }
