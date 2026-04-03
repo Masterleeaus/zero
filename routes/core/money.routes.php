@@ -175,5 +175,53 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('journal.store');
             Route::get('journal/{journalEntry}', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'show'])
                 ->name('journal.show');
+
+            // ── Suppliers (AP registry) ────────────────────────────────────────
+            Route::get('suppliers', [\App\Http\Controllers\Core\Money\SupplierController::class, 'index'])
+                ->name('suppliers.index');
+            Route::get('suppliers/create', [\App\Http\Controllers\Core\Money\SupplierController::class, 'create'])
+                ->name('suppliers.create');
+            Route::post('suppliers', [\App\Http\Controllers\Core\Money\SupplierController::class, 'store'])
+                ->name('suppliers.store');
+            Route::get('suppliers/{supplier}', [\App\Http\Controllers\Core\Money\SupplierController::class, 'show'])
+                ->name('suppliers.show');
+            Route::get('suppliers/{supplier}/edit', [\App\Http\Controllers\Core\Money\SupplierController::class, 'edit'])
+                ->name('suppliers.edit');
+            Route::put('suppliers/{supplier}', [\App\Http\Controllers\Core\Money\SupplierController::class, 'update'])
+                ->name('suppliers.update');
+            Route::delete('suppliers/{supplier}', [\App\Http\Controllers\Core\Money\SupplierController::class, 'destroy'])
+                ->name('suppliers.destroy');
+
+            // ── Purchase Orders (AP context) ───────────────────────────────────
+            Route::get('purchase-orders', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'index'])
+                ->name('purchase-orders.index');
+            Route::get('purchase-orders/create', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'create'])
+                ->name('purchase-orders.create');
+            Route::post('purchase-orders', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'store'])
+                ->name('purchase-orders.store');
+            Route::get('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'show'])
+                ->name('purchase-orders.show');
+            Route::get('purchase-orders/{purchaseOrder}/edit', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'edit'])
+                ->name('purchase-orders.edit');
+            Route::put('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'update'])
+                ->name('purchase-orders.update');
+            Route::delete('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Core\Money\PurchaseOrderController::class, 'destroy'])
+                ->name('purchase-orders.destroy');
+
+            // ── Supplier Bills (Accounts Payable) ──────────────────────────────
+            Route::get('supplier-bills', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'index'])
+                ->name('supplier-bills.index');
+            Route::get('supplier-bills/create', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'create'])
+                ->name('supplier-bills.create');
+            Route::post('supplier-bills', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'store'])
+                ->name('supplier-bills.store');
+            Route::get('supplier-bills/{supplierBill}', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'show'])
+                ->name('supplier-bills.show');
+            Route::get('supplier-bills/{supplierBill}/edit', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'edit'])
+                ->name('supplier-bills.edit');
+            Route::put('supplier-bills/{supplierBill}', [\App\Http\Controllers\Core\Money\SupplierBillController::class, 'update'])
+                ->name('supplier-bills.update');
+            Route::post('supplier-bills/{supplierBill}/payments', [\App\Http\Controllers\Core\Money\SupplierPaymentController::class, 'store'])
+                ->name('supplier-payments.store');
         });
     });

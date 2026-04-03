@@ -2,21 +2,27 @@
 
 namespace App\Providers;
 
+use App\Models\Inventory\PurchaseOrder;
+use App\Models\Inventory\Supplier;
 use App\Models\Money\Account;
-use App\Models\Money\Invoice;
 use App\Models\Money\Expense;
+use App\Models\Money\Invoice;
 use App\Models\Money\JournalEntry;
 use App\Models\Money\Payment;
 use App\Models\Money\Quote;
-use App\Models\Money\Account;
-use App\Models\Money\JournalEntry;
+use App\Models\Money\SupplierBill;
+use App\Models\Money\SupplierPayment;
 use App\Models\UserSupport;
 use App\Policies\AccountPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\JournalEntryPolicy;
 use App\Policies\PaymentPolicy;
+use App\Policies\PurchaseOrderPolicy;
 use App\Policies\QuotePolicy;
+use App\Policies\SupplierBillPolicy;
+use App\Policies\SupplierPaymentPolicy;
+use App\Policies\SupplierPolicy;
 use App\Policies\UserSupportPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Laravel\Passport\Passport;
@@ -29,13 +35,17 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Quote::class        => QuotePolicy::class,
-        Invoice::class      => InvoicePolicy::class,
-        Payment::class      => PaymentPolicy::class,
-        UserSupport::class  => UserSupportPolicy::class,
-        Expense::class      => ExpensePolicy::class,
-        Account::class      => AccountPolicy::class,
-        JournalEntry::class => JournalEntryPolicy::class,
+        Quote::class          => QuotePolicy::class,
+        Invoice::class        => InvoicePolicy::class,
+        Payment::class        => PaymentPolicy::class,
+        UserSupport::class    => UserSupportPolicy::class,
+        Expense::class        => ExpensePolicy::class,
+        Account::class        => AccountPolicy::class,
+        JournalEntry::class   => JournalEntryPolicy::class,
+        Supplier::class       => SupplierPolicy::class,
+        PurchaseOrder::class  => PurchaseOrderPolicy::class,
+        SupplierBill::class   => SupplierBillPolicy::class,
+        SupplierPayment::class => SupplierPaymentPolicy::class,
     ];
 
     /**
@@ -47,3 +57,4 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
     }
 }
+
