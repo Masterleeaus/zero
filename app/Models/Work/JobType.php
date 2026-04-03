@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Team\SkillRequirement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,5 +34,10 @@ class JobType extends Model
     public function scopeForSelect(Builder $query): Builder
     {
         return $query->orderBy('name');
+    }
+
+    public function skillRequirements(): HasMany
+    {
+        return $this->hasMany(SkillRequirement::class);
     }
 }

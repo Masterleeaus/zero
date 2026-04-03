@@ -8,9 +8,13 @@ use App\Helpers\Classes\Helper;
 use App\Models\Chatbot\Chatbot;
 use App\Models\Concerns\User\HasCredit;
 use App\Models\Integration\UserIntegration;
+use App\Models\Team\AvailabilityOverride;
+use App\Models\Team\AvailabilityWindow;
+use App\Models\Team\Certification;
 use App\Models\Team\CleanerProfile;
 use App\Models\Team\Team;
 use App\Models\Team\TeamMember;
+use App\Models\Team\TechnicianSkill;
 use App\Models\Work\WeeklyTimesheet;
 use App\Traits\BelongsToCompany;
 use Carbon\Carbon;
@@ -425,5 +429,27 @@ class User extends Authenticatable
     public function weeklyTimesheets(): HasMany
     {
         return $this->hasMany(WeeklyTimesheet::class);
+    }
+
+    // ── Capability Registry ──────────────────────────────────────────────────
+
+    public function technicianSkills(): HasMany
+    {
+        return $this->hasMany(TechnicianSkill::class);
+    }
+
+    public function certifications(): HasMany
+    {
+        return $this->hasMany(Certification::class)->withoutGlobalScope('company');
+    }
+
+    public function availabilityWindows(): HasMany
+    {
+        return $this->hasMany(AvailabilityWindow::class);
+    }
+
+    public function availabilityOverrides(): HasMany
+    {
+        return $this->hasMany(AvailabilityOverride::class);
     }
 }

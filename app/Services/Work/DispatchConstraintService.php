@@ -6,10 +6,15 @@ use App\Models\Work\DispatchConstraint;
 use App\Models\Work\ServiceJob;
 use App\Models\Premises\Premises;
 use App\Models\User;
+use App\Services\Team\CapabilityRegistryService;
 use Illuminate\Support\Collection;
 
 class DispatchConstraintService
 {
+    public function __construct(
+        private readonly ?CapabilityRegistryService $capabilityRegistry = null,
+    ) {}
+
     public function loadConstraints(int $companyId): Collection
     {
         return DispatchConstraint::forCompany($companyId)->active()->get();
@@ -21,6 +26,20 @@ class DispatchConstraintService
             return 1.0;
         }
 
+        // Use the CapabilityRegistry when available for precise skill matching.
+        if ($this->capabilityRegistry !== null && $job->jobType !== null) {
+            $result = $this->capabilityRegistry->matchJobRequirements($tech, $job->jobType);
+
+            if (! empty($result['missing']) || ! empty($result['expired'])) {
+                return 0.0;
+            }
+
+            if (! empty($result['matched'])) {
+                return 1.0;
+            }
+        }
+
+        // Legacy fallback.
         if (method_exists($tech, 'skills') && $tech->skills()->where('name', optional($job->jobType)->name)->exists()) {
             return 1.0;
         }
