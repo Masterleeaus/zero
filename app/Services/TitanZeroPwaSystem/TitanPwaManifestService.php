@@ -3,10 +3,13 @@
 namespace App\Services\TitanZeroPwaSystem;
 
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
 
 class TitanPwaManifestService
 {
+    public function __construct(
+        private readonly PwaRuntimeContractService $contractService,
+    ) {}
+
     /**
      * Return the full PWA web app manifest as an array.
      */
@@ -44,62 +47,10 @@ class TitanPwaManifestService
 
     /**
      * Return the client-side bootstrap config injected into the PWA shell.
+     * Delegates to PwaRuntimeContractService for the rich contract.
      */
-    public function bootstrapConfig(): array
+    public function bootstrapConfig(?int $userId = null, ?int $companyId = null): array
     {
-        $serverTime = now();
-
-        return [
-            // Identity
-            'csrfToken'         => csrf_token(),
-            'appVersion'        => Config::get('app.version', Config::get('pwa.version', '1.0.0')),
-
-            // Endpoints
-            'apiBase'               => '/pwa',
-            'syncEndpoint'          => '/pwa/signals/ingest',
-            'statusEndpoint'        => '/pwa/sync/status',
-            'handshakeEndpoint'     => '/pwa/handshake',
-            'diagnosticsEndpoint'   => '/pwa/diagnostics',
-
-            // Sync policy
-            'syncInterval'      => Config::get('pwa.sync_interval', 30000),
-            'syncBatchLimit'    => Config::get('pwa.batch_limit', 50),
-            'syncRetryLimit'    => Config::get('pwa.retry_limit', 3),
-            'syncRetryBackoff'  => Config::get('pwa.retry_backoff', [1000, 5000, 15000]),
-
-            // Trust & node identity
-            'trustLevel'        => null, // populated client-side after handshake
-            'nodeId'            => null, // populated client-side from IndexedDB
-
-            // Time synchronisation
-            'serverTimeUtc'     => $serverTime->toIso8601String(),
-            'serverTimeMs'      => (int) ($serverTime->getPreciseTimestamp(3)),
-
-            // Offline capabilities
-            'offlineFeaturesEnabled' => Config::get('pwa.offline_features', true),
-            'queueCapacity'          => Config::get('pwa.queue_capacity', 500),
-            'stagingEnabled'         => Config::get('pwa.staging_enabled', true),
-
-            // Feature flags
-            'features' => $this->resolveFeatureFlags(),
-
-            // Asset version for cache-busting
-            'runtimeVersion' => Config::get('pwa.runtime_version', '2'),
-        ];
-    }
-
-    private function resolveFeatureFlags(): array
-    {
-        return Config::get('pwa.features', [
-            'offline_sync'          => true,
-            'background_sync'       => true,
-            'push_notifications'    => false,
-            'signal_ingestion'      => true,
-            'photo_staging'         => true,
-            'note_staging'          => true,
-            'proof_staging'         => true,
-            'idempotency'           => true,
-            'signature_validation'  => true,
-        ]);
+        return $this->contractService->build($userId, $companyId);
     }
 }

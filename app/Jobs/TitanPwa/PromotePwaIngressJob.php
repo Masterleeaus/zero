@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -96,6 +97,11 @@ class PromotePwaIngressJob implements ShouldQueue
                 ]),
             ]);
 
+            // Update device last_success_at
+            \App\Models\TzPwaDevice::where('node_id', $ingress->node_id)
+                ->where('company_id', $ingress->company_id)
+                ->update(['last_success_at' => now()]);
+
             Log::info('[PromotePwaIngressJob] Ingress promoted', [
                 'ingress_id' => $ingress->id,
                 'signal_id'  => $signalId,
@@ -122,8 +128,10 @@ class PromotePwaIngressJob implements ShouldQueue
         ]);
 
         TzPwaSignalIngress::where('id', $this->ingressId)->update([
-            'signal_stage'   => 'failed',
-            'failure_reason' => substr($e->getMessage(), 0, 500),
+            'signal_stage'    => 'failed',
+            'failure_reason'  => substr($e->getMessage(), 0, 500),
+            'last_error_code' => 'promotion_failed',
+            'retry_count'     => \Illuminate\Support\Facades\DB::raw('retry_count + 1'),
         ]);
     }
 }

@@ -5,7 +5,11 @@ namespace App\Providers;
 use App\Services\TitanCoreConsensus\EquilibriumResolver;
 use App\Services\TitanCoreConsensus\TriCoreConsensus;
 use App\Services\TitanZeroPwaSystem\NodeTrustService;
+use App\Services\TitanZeroPwaSystem\PwaDeferredReplayService;
 use App\Services\TitanZeroPwaSystem\PwaNodeFingerprint;
+use App\Services\TitanZeroPwaSystem\PwaQueueHealthService;
+use App\Services\TitanZeroPwaSystem\PwaRuntimeContractService;
+use App\Services\TitanZeroPwaSystem\PwaStagingService;
 use App\Services\TitanZeroPwaSystem\SignalEnvelopeBuilder;
 use App\Services\TitanZeroPwaSystem\SignalSignatureValidator;
 use App\Services\TitanZeroPwaSystem\TitanPwaManifestService;
@@ -17,7 +21,17 @@ class TitanPwaServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(TitanPwaManifestService::class);
+        // Pass 3 services
+        $this->app->singleton(PwaRuntimeContractService::class);
+        $this->app->singleton(PwaDeferredReplayService::class);
+        $this->app->singleton(PwaQueueHealthService::class);
+        $this->app->singleton(PwaStagingService::class);
+
+        $this->app->singleton(TitanPwaManifestService::class, function ($app) {
+            return new TitanPwaManifestService(
+                $app->make(PwaRuntimeContractService::class)
+            );
+        });
 
         $this->app->singleton(SignalEnvelopeBuilder::class, function ($app) {
             return new SignalEnvelopeBuilder(
