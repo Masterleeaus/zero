@@ -10,6 +10,7 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Quote;
 use App\Models\Premises\Premises;
 use App\Models\User;
+use App\Models\Work\ServiceAgreement;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlan;
 use App\Models\Work\ServicePlanVisit;
@@ -616,7 +617,7 @@ class Customer extends Model
      */
     public function soldAgreements(): \Illuminate\Database\Eloquent\Collection
     {
-        return \App\Models\Work\ServiceAgreement::query()
+        return ServiceAgreement::query()
             ->where('customer_id', $this->id)
             ->where('company_id', $this->company_id)
             ->where(function ($q) {
@@ -677,7 +678,7 @@ class Customer extends Model
         foreach ($soldAgreements as $agreement) {
             $entries->push([
                 'type'        => 'sale_agreement_activated',
-                'entity_type' => \App\Models\Work\ServiceAgreement::class,
+                'entity_type' => ServiceAgreement::class,
                 'entity_id'   => $agreement->id,
                 'title'       => $agreement->title ?? 'Service Agreement #' . $agreement->id,
                 'status'      => $agreement->status,

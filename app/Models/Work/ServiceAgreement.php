@@ -154,17 +154,15 @@ class ServiceAgreement extends Model
      */
     public function saleCoverageSummary(): array
     {
-        $jobs = $this->jobs();
-
         return [
-            'agreement_id'        => $this->id,
-            'status'              => $this->status,
+            'agreement_id'         => $this->id,
+            'status'               => $this->status,
             'originating_quote_id' => $this->originating_quote_id ?? $this->quote_id,
-            'total_jobs'          => (clone $jobs)->count(),
-            'completed_jobs'      => (clone $jobs)->where('status', 'completed')->count(),
-            'pending_jobs'        => (clone $jobs)->whereNotIn('status', ['completed', 'cancelled'])->count(),
-            'total_visits'        => $this->visits()->count(),
-            'completed_visits'    => $this->visits()->where('status', 'completed')->count(),
+            'total_jobs'           => $this->jobs()->count(),
+            'completed_jobs'       => $this->jobs()->where('status', 'completed')->count(),
+            'pending_jobs'         => $this->jobs()->whereNotIn('status', ['completed', 'cancelled'])->count(),
+            'total_visits'         => $this->visits()->count(),
+            'completed_visits'     => $this->visits()->where('status', 'completed')->count(),
         ];
     }
 }

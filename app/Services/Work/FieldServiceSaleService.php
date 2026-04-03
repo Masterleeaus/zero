@@ -106,13 +106,6 @@ class FieldServiceSaleService
                 if (! $existingByQuote) {
                     $job = $this->createJobFromQuote($quote, null, $saleLevelLines->first());
                     $created->push($job);
-
-                    // Link all sale-level lines to this single job
-                    foreach ($saleLevelLines as $line) {
-                        if (! $line->sale_line_id) {
-                            $line->update(['sale_line_id' => null]); // placeholder; actual FK is on job
-                        }
-                    }
                 }
             }
 
