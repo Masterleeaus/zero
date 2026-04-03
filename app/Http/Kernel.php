@@ -94,5 +94,9 @@ class Kernel extends HttpKernel
         'surveyMiddleware'          => \App\Http\Middleware\SurveyMiddleware::class,
         'titan.mcp.throttle'        => \App\Http\Middleware\Titan\McpRateLimitMiddleware::class,
         'titan.ai.throttle'         => \App\Http\Middleware\Titan\TitanAIRateLimitMiddleware::class,
+        'security.blacklist_ip'     => \App\Http\Middleware\Security\BlackListIpMiddleware::class,
+        'security.blacklist_email'  => \App\Http\Middleware\Security\BlackListEmailMiddleware::class,
+        'security.login_expiry'     => \App\Http\Middleware\Security\LoginExpiryMiddleware::class,
+        'security.cyber'            => \App\Http\Middleware\Security\CyberSecurityMiddleware::class,
     ];
 }
