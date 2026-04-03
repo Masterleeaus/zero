@@ -8,11 +8,11 @@ Route::prefix('webhooks')
     ->group(function () {
         Route::match(['get', 'post'], '/{gateway}', [PaymentProcessController::class, 'handleWebhook']);
 
-        Route::any('stripe/{subscription}/success', [PaymentProcessController::class, 'stripeSuccess'])->name('stripe.success');
-        Route::any('stripe/{subscription}/cancel', [PaymentProcessController::class, 'stripeCancel'])->name('stripe.cancel');
+        Route::any('stripe/{subscription}/success', [PaymentProcessController::class, 'stripeSuccess'])->name('stripe.subscription.success');
+        Route::any('stripe/{subscription}/cancel', [PaymentProcessController::class, 'stripeCancel'])->name('stripe.subscription.cancel');
 
-        Route::any('stripe/{plan}/{user}/success/prepaid', [PaymentProcessController::class, 'prepaidStripeSuccess'])->name('stripe.success');
-        Route::any('stripe/cancel/prepaid', [PaymentProcessController::class, 'stripeCancel'])->name('stripe.cancel');
+        Route::any('stripe/{plan}/{user}/success/prepaid', [PaymentProcessController::class, 'prepaidStripeSuccess'])->name('stripe.prepaid.success');
+        Route::any('stripe/cancel/prepaid', [PaymentProcessController::class, 'stripeCancel'])->name('stripe.prepaid.cancel');
     });
 Route::prefix('webhook')
     ->name('webhook.')
