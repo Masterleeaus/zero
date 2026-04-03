@@ -118,6 +118,13 @@ use App\Listeners\Route\RouteAssignedListener;
 use App\Listeners\Route\RouteCapacityExceededListener;
 use App\Listeners\Route\RouteStopCompletedListener;
 use App\Listeners\YokassaWebhookListener;
+// ── MODULE 03 TrustWorkLedger ──────────────────────────────────────────────
+use App\Events\Trust\ChainSealed;
+use App\Events\Trust\ChainTamperingDetected;
+use App\Events\Trust\LedgerEntryRecorded;
+use App\Listeners\Trust\RecordInspectionCompletedOnLedger;
+use App\Listeners\Trust\RecordInspectionFailedOnLedger;
+use App\Listeners\Trust\RecordJobCompletionOnLedger;
 // ── Repair domain events (Modules 9 + 10) ────────────────────────────────────
 use App\Events\Repair\RepairOrderCreated;
 use App\Events\Repair\RepairOrderCompleted;
@@ -264,6 +271,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         JobCompleted::class => [
             JobCompletedListener::class,
+            RecordJobCompletionOnLedger::class,
         ],
         // The following Work events are defined for downstream automation.
         // Listeners can be added here as automation rules are wired up.
@@ -295,8 +303,12 @@ class EventServiceProvider extends ServiceProvider
         // ── Inspection lifecycle signals (canonical Inspection namespace) ──
         InspectionScheduled::class        => [],
         InspectionStarted::class          => [],
-        InspectionCompleted::class        => [],
-        InspectionFailed::class           => [],
+        InspectionCompleted::class        => [
+            RecordInspectionCompletedOnLedger::class,
+        ],
+        InspectionFailed::class           => [
+            RecordInspectionFailedOnLedger::class,
+        ],
         InspectionFollowupRequired::class => [],
         // ── Equipment lifecycle signals ────────────────────────────────────
         EquipmentInstalled::class => [],
@@ -448,6 +460,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         JobDispatchFailed::class  => [],
         JobReDispatched::class    => [],
+        // ── MODULE 03 TrustWorkLedger — trust signals ──────────────────────
+        LedgerEntryRecorded::class    => [],
+        ChainTamperingDetected::class => [],
+        ChainSealed::class            => [],
     ];
 
     /**
