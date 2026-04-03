@@ -279,43 +279,43 @@ class EdgeSyncService
     /**
      * Return server-side changes since the device's last sync cursor.
      *
-     * The cursor is the last edge_sync_queue.id processed by the device.
-     * Returns recently modified jobs, checklist runs, and inspection instances
-     * that belong to the same company, scoped by the cursor.
+     * The delta is scoped by `last_sync_at` — entities updated after the
+     * device's last synchronisation time are returned. Using timestamps
+     * avoids comparing IDs across independent table sequences.
      *
      * @return array<string, mixed>
      */
     public function getDeltaForDevice(EdgeDeviceSession $session): array
     {
-        $cursor    = $session->sync_cursor;
+        $since     = $session->last_sync_at;
         $companyId = $session->company_id;
 
         $jobs = \App\Models\Work\ServiceJob::withoutGlobalScopes()
             ->where('company_id', $companyId)
-            ->where('id', '>', $cursor)
-            ->orderBy('id')
+            ->when($since, fn ($q) => $q->where('updated_at', '>', $since))
+            ->orderBy('updated_at')
             ->limit(200)
             ->get(['id', 'title', 'status', 'updated_at'])
             ->toArray();
 
         $checklistRuns = \App\Models\Work\ChecklistRun::withoutGlobalScopes()
             ->where('company_id', $companyId)
-            ->where('id', '>', $cursor)
-            ->orderBy('id')
+            ->when($since, fn ($q) => $q->where('updated_at', '>', $since))
+            ->orderBy('updated_at')
             ->limit(200)
             ->get(['id', 'title', 'status', 'updated_at'])
             ->toArray();
 
         $inspectionInstances = \App\Models\Inspection\InspectionInstance::withoutGlobalScopes()
             ->where('company_id', $companyId)
-            ->where('id', '>', $cursor)
-            ->orderBy('id')
+            ->when($since, fn ($q) => $q->where('updated_at', '>', $since))
+            ->orderBy('updated_at')
             ->limit(200)
             ->get(['id', 'title', 'status', 'updated_at'])
             ->toArray();
 
         return [
-            'cursor'               => $cursor,
+            'since'                => $since?->toIso8601String(),
             'jobs'                 => $jobs,
             'checklist_runs'       => $checklistRuns,
             'inspection_instances' => $inspectionInstances,

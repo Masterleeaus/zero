@@ -166,7 +166,7 @@ class EdgeSyncControllerTest extends TestCase
         $this->actingAs($user, 'api')
             ->getJson('/api/sync/pull?device_id=dev-pull-test')
             ->assertOk()
-            ->assertJsonStructure(['cursor', 'jobs', 'checklist_runs', 'inspection_instances']);
+            ->assertJsonStructure(['since', 'jobs', 'checklist_runs', 'inspection_instances']);
     }
 
     public function test_pull_returns_404_for_unknown_device(): void
@@ -276,5 +276,6 @@ class EdgeSyncControllerTest extends TestCase
         $this->getJson('/api/sync/pull')->assertUnauthorized();
         $this->postJson('/api/sync/acknowledge')->assertUnauthorized();
         $this->getJson('/api/sync/conflicts')->assertUnauthorized();
+        $this->postJson('/api/sync/conflicts/1/resolve')->assertUnauthorized();
     }
 }

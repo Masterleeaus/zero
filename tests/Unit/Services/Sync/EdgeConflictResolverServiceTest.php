@@ -41,7 +41,6 @@ it('autoResolve resolves checklist_response conflicts with merge strategy', func
     $item->shouldReceive('getAttribute')->with('operation_type')->andReturn('checklist_response');
     $item->shouldReceive('getAttribute')->with('payload')->andReturn([]);
     $item->shouldReceive('markSynced')->once();
-    $item->shouldReceive('saveQuietly')->andReturn(true);
 
     $conflict = Mockery::mock(EdgeSyncConflict::class)->makePartial();
     $conflict->shouldReceive('getAttribute')->with('server_state')->andReturn([]);
@@ -51,6 +50,7 @@ it('autoResolve resolves checklist_response conflicts with merge strategy', func
 
     Log::shouldReceive('info')->with('edge_sync.conflict_merge', Mockery::any());
 
+    // The processor receives a transient clone, not the original item.
     $this->processor->shouldReceive('applyChecklistResponse')->once();
 
     $result = $this->service->autoResolve($conflict);

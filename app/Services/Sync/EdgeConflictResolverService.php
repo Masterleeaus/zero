@@ -97,7 +97,7 @@ class EdgeConflictResolverService
         Log::info('edge_sync.conflict_merge', ['conflict_id' => $conflict->id]);
 
         // Shallow-merge: client payload fields are applied only where server
-        // state does not have a more recent value.
+        // state does not have a non-null value for that field.
         $serverState  = $conflict->server_state ?? [];
         $clientState  = $conflict->client_state ?? [];
         $mergedFields = [];
@@ -112,11 +112,14 @@ class EdgeConflictResolverService
         }
 
         if (! empty($mergedFields)) {
-            // Temporarily patch the item payload with only merged fields.
-            $item->payload = array_merge($item->payload ?? [], $mergedFields);
-            $item->saveQuietly();
+            // Build a merged payload without mutating the original persisted record.
+            $mergedPayload = array_merge($item->payload ?? [], $mergedFields);
 
-            $this->dispatchPayload($item);
+            // Dispatch processor with a transient clone carrying the merged payload.
+            $transient          = clone $item;
+            $transient->payload = $mergedPayload;
+
+            $this->dispatchPayload($transient);
         }
     }
 
