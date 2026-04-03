@@ -34,6 +34,7 @@ use App\TitanCore\Zero\Process\ProcessBridge;
 use App\TitanCore\Zero\Rewind\RewindManager;
 use App\TitanCore\Zero\Signals\SignalBridge;
 use App\TitanCore\Zero\Telemetry\TelemetryManager;
+use App\TitanCore\Zylos\ZylosBridge;
 use Illuminate\Support\ServiceProvider;
 
 class TitanCoreServiceProvider extends ServiceProvider
@@ -41,6 +42,8 @@ class TitanCoreServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(base_path('config/titan_core.php'), 'titan_core');
+        $this->mergeConfigFrom(base_path('config/titan_ai.php'), 'titan_ai');
+        $this->mergeConfigFrom(base_path('config/titan_budgets.php'), 'titan_budgets');
 
         $this->app->singleton(CoreModuleRegistry::class, function () {
             $registry = new CoreModuleRegistry();
@@ -99,6 +102,7 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(OmniManager::class);
         $this->app->singleton(AgentStudioManager::class);
         $this->app->singleton(CoreKernel::class);
+        $this->app->singleton(ZylosBridge::class);
     }
 
     public function boot(): void

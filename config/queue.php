@@ -71,6 +71,34 @@ return [
             'after_commit' => false,
         ],
 
+        // ─── Titan Dedicated Queues ───────────────────────────────────
+        // AI jobs (provider calls, completions, router decisions)
+        'titan-ai' => [
+            'driver'       => 'database',
+            'table'        => 'jobs',
+            'queue'        => 'titan-ai',
+            'retry_after'  => 120,
+            'after_commit' => false,
+        ],
+
+        // Signal callbacks and dispatch events
+        'titan-signals' => [
+            'driver'       => 'database',
+            'table'        => 'jobs',
+            'queue'        => 'titan-signals',
+            'retry_after'  => 90,
+            'after_commit' => false,
+        ],
+
+        // Skill execution jobs (Zylos-managed processes)
+        'titan-skills' => [
+            'driver'       => 'database',
+            'table'        => 'jobs',
+            'queue'        => 'titan-skills',
+            'retry_after'  => 180,
+            'after_commit' => false,
+        ],
+
     ],
 
     /*

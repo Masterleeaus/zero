@@ -90,5 +90,7 @@ class Kernel extends HttpKernel
         'updateUserActivity'        => \App\Http\Middleware\UpdateUserActivity::class,
         'sentry.context'            => \App\Http\Middleware\SentryContextMiddleware::class,
         'surveyMiddleware'          => \App\Http\Middleware\SurveyMiddleware::class,
+        'titan.mcp.throttle'        => \App\Http\Middleware\Titan\McpRateLimitMiddleware::class,
+        'titan.ai.throttle'         => \App\Http\Middleware\Titan\TitanAIRateLimitMiddleware::class,
     ];
 }

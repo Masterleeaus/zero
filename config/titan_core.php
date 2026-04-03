@@ -4,9 +4,10 @@ return [
     'enabled' => true,
     'ui_surface' => 'resources/views/default/panel/user/business-suite',
     'ai' => [
-        'default_runtime' => env('TITAN_CORE_DEFAULT_RUNTIME', 'null'),
-        'model_router' => env('TITAN_CORE_MODEL_ROUTER', 'zero'),
-        'minimum_confidence' => (float) env('TITAN_CORE_MINIMUM_CONFIDENCE', 0.7),
+        'default_runtime'     => env('TITAN_CORE_DEFAULT_RUNTIME', 'null'),
+        'model_router'        => env('TITAN_CORE_MODEL_ROUTER', 'zero'),
+        'minimum_confidence'  => (float) env('TITAN_CORE_MINIMUM_CONFIDENCE', 0.7),
+        'rate_limit_per_user' => (int) env('TITAN_AI_RATE_LIMIT_PER_USER', 60),
     ],
     'knowledge' => [
         'mode' => env('TITAN_CORE_KNOWLEDGE_MODE', 'deferred'),
@@ -75,5 +76,25 @@ return [
         ],
         'critique_rounds' => 1,
         'round_robin_refinement' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MCP Server
+    |--------------------------------------------------------------------------
+    */
+    'mcp' => [
+        'http_url'   => env('MCP_HTTP_URL', ''),
+        'ws_url'     => env('MCP_WS_URL', ''),
+        'rate_limit' => (int) env('MCP_RATE_LIMIT', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Skills (Zylos)
+    |--------------------------------------------------------------------------
+    */
+    'skills' => [
+        'registered' => [],
     ],
 ];
