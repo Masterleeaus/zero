@@ -1,0 +1,24 @@
+{
+  "name": "Asset",
+  "alias": "asset",
+  "description": "",
+  "keywords": [],
+  "active": 1,
+  "order": 2,
+  "providers": [
+    "Modules\\Asset\\Providers\\AssetServiceProvider",
+    "Modules\\Asset\\Providers\\EventServiceProvider",
+    "Modules\\FixedAssets\\Providers\\AiRoutesServiceProvider",
+    "Modules\\FixedAssets\\Providers\\FixedAssetsServiceProvider",
+    "Modules\\FixedAssets\\Providers\\RouteServiceProvider"
+  ],
+  "aliases": {},
+  "files": [
+    "start.php"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Modules\\FixedAssets\\": ""
+    }
+  }
+}

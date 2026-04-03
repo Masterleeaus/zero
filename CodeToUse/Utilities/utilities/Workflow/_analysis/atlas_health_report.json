@@ -1,0 +1,34 @@
+{
+  "module": "Workflow",
+  "checks": {
+    "namespace": "OK",
+    "folder_duplication": "OK",
+    "psr4_autoload": "OK",
+    "providers": "OK",
+    "db_alias": "OK",
+    "routes_permissions": "Warnings",
+    "package_plan_sync": "Unverified (DB); config present",
+    "integration_drift": "OK",
+    "sidebar_path": "OK",
+    "sidebar_links": "Missing route names: ['workflow.index']",
+    "cache": "Recommend clear"
+  },
+  "summary": "Issues: route/permission naming issues, sidebar links refer to undefined route names.",
+  "suggestions": [
+    "Ensure permission keys are unique (e.g., view_workflow, manage_workflow).",
+    "Add ->name('...') to routes or update sidebar to the correct route names.",
+    "Run: php artisan optimize:clear && php artisan view:clear && composer dump-autoload -o && php artisan migrate"
+  ],
+  "artifacts": {
+    "route_permission_collisions": [
+      {
+        "permission_duplicates": [
+          "view_workflow"
+        ]
+      }
+    ],
+    "sidebar_missing_routes": [
+      "workflow.index"
+    ]
+  }
+}

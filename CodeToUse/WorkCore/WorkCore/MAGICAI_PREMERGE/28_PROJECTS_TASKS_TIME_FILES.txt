@@ -1,0 +1,404 @@
+app/Console/Commands/AutoCreateRecurringService Jobs.php
+app/Console/Commands/ConvertService JobBase64Images.php
+app/Console/Commands/SendAutoService JobReminder.php
+app/Console/Commands/SendDailyTimelogReport.php
+app/Console/Commands/SendSiteReminder.php
+app/Console/Commands/SendService JobReminder.php
+app/Console/Commands/UpdateSiteProgressByDeadline.php
+app/DataTables/ArchiveSitesDataTable.php
+app/DataTables/ArchiveService JobsDataTable.php
+app/DataTables/CleanerWiseService JobDataTable.php
+app/DataTables/SiteNotesDataTable.php
+app/DataTables/SiteTemplateService JobsDataTable.php
+app/DataTables/SiteTemplatesDataTable.php
+app/DataTables/SitesDataTable.php
+app/DataTables/RecurringService JobsDataTable.php
+app/DataTables/Service JobReportDataTable.php
+app/DataTables/Service JobsDataTable.php
+app/DataTables/TimeLogConsolidatedReportDataTable.php
+app/DataTables/TimeLogPendingWeeklyApprovalReportDataTable.php
+app/DataTables/TimeLogSitewiseReportDataTable.php
+app/DataTables/TimeLogReportDataTable.php
+app/DataTables/TimeLogWeeklyApprovalReportDataTable.php
+app/DataTables/TimeLogsDataTable.php
+app/DataTables/consolidatedService JobReportDataTable.php
+app/Events/AutoService JobReminderEvent.php
+app/Events/DailyTimeLogReportEvent.php
+app/Events/NewSiteEvent.php
+app/Events/NewSiteMemberEvent.php
+app/Events/SiteNoteEvent.php
+app/Events/SiteNoteMentionEvent.php
+app/Events/SiteNoteUpdateEvent.php
+app/Events/SiteReminderEvent.php
+app/Events/SubService JobCompletedEvent.php
+app/Events/SubmitWeeklyTimesheet.php
+app/Events/Service JobCommentEvent.php
+app/Events/Service JobCommentMentionEvent.php
+app/Events/Service JobEvent.php
+app/Events/Service JobNoteEvent.php
+app/Events/Service JobNoteMentionEvent.php
+app/Events/Service JobReminderEvent.php
+app/Events/Service JobUpdated.php
+app/Events/TimelogEvent.php
+app/Events/WeeklyTimesheetApprovedEvent.php
+app/Events/WeeklyTimesheetDraftEvent.php
+app/Exports/CleanerTimelogs.php
+app/Exports/SiteTimeLogsExport.php
+app/Exports/SitewiseTimeLogExport.php
+app/Http/Controllers/GanttLinkController.php
+app/Http/Controllers/SiteCalendarController.php
+app/Http/Controllers/SiteCategoryController.php
+app/Http/Controllers/SiteController.php
+app/Http/Controllers/SiteFileController.php
+app/Http/Controllers/SiteLabelController.php
+app/Http/Controllers/SiteMemberController.php
+app/Http/Controllers/SiteMilestoneController.php
+app/Http/Controllers/SiteNoteController.php
+app/Http/Controllers/SiteRatingController.php
+app/Http/Controllers/SiteSettingController.php
+app/Http/Controllers/SiteSubCategoryController.php
+app/Http/Controllers/SiteTemplateController.php
+app/Http/Controllers/SiteTemplateMemberController.php
+app/Http/Controllers/SiteTemplateMilestoneController.php
+app/Http/Controllers/SiteTemplateSubService JobController.php
+app/Http/Controllers/SiteTemplateService JobController.php
+app/Http/Controllers/SiteTimelogBreakController.php
+app/Http/Controllers/RecurringService JobController.php
+app/Http/Controllers/SubService JobController.php
+app/Http/Controllers/SubService JobFileController.php
+app/Http/Controllers/Service JobBoardController.php
+app/Http/Controllers/Service JobCalendarController.php
+app/Http/Controllers/Service JobCategoryController.php
+app/Http/Controllers/Service JobCommentController.php
+app/Http/Controllers/Service JobController.php
+app/Http/Controllers/Service JobFileController.php
+app/Http/Controllers/Service JobLabelController.php
+app/Http/Controllers/Service JobNoteController.php
+app/Http/Controllers/Service JobReportController.php
+app/Http/Controllers/Service JobSettingController.php
+app/Http/Controllers/TimeLogSettingController.php
+app/Http/Controllers/TimelogCalendarController.php
+app/Http/Controllers/TimelogController.php
+app/Http/Controllers/TimelogReportController.php
+app/Http/Controllers/TimelogWeeklyApprovalController.php
+app/Http/Controllers/WeeklyTimesheetController.php
+app/Http/Requests/Site/StoreSite.php
+app/Http/Requests/Site/StoreSiteCategory.php
+app/Http/Requests/Site/StoreSiteNote.php
+app/Http/Requests/Site/UpdateSite.php
+app/Http/Requests/SiteMembers/StoreSiteMembers.php
+app/Http/Requests/SiteSetting/UpdateSiteSetting.php
+app/Http/Requests/SiteTemplate/StoreSite.php
+app/Http/Requests/SiteTemplate/StoreSiteCategory.php
+app/Http/Requests/SubService Job/StoreSubService Job.php
+app/Http/Requests/Service JobBoard/StoreService JobBoard.php
+app/Http/Requests/Service JobBoard/UpdateService JobBoard.php
+app/Http/Requests/Service Jobs/ActionService Job.php
+app/Http/Requests/Service Jobs/StoreService Job.php
+app/Http/Requests/Service Jobs/StoreService JobCategory.php
+app/Http/Requests/Service Jobs/StoreService JobComment.php
+app/Http/Requests/Service Jobs/StoreService JobNote.php
+app/Http/Requests/Service Jobs/UpdateService Job.php
+app/Http/Requests/TemplateService Jobs/StoreService Job.php
+app/Http/Requests/TemplateService Jobs/StoreService JobComment.php
+app/Http/Requests/TemplateService Jobs/SubService JobStoreRequest.php
+app/Http/Requests/TimeLogSetting/UpdateTimeLog.php
+app/Http/Requests/TimeLogs/StoreTimeLog.php
+app/Http/Requests/TimeLogs/UpdateSiteTimeLog.php
+app/Http/Requests/TimeLogs/UpdateTimeLog.php
+app/Http/Requests/TimelogBreak/UpdateTimelogBreak.php
+app/Imports/SiteImport.php
+app/Jobs/ImportSiteJob.php
+app/Listeners/AutoService JobReminderListener.php
+app/Listeners/DailyTimeLogReportListener.php
+app/Listeners/NewSiteListener.php
+app/Listeners/NewSiteMemberListener.php
+app/Listeners/SiteNoteListener.php
+app/Listeners/SiteNoteMentionListener.php
+app/Listeners/SiteNoteUpdateListener.php
+app/Listeners/SiteReminderListener.php
+app/Listeners/SubService JobCompletedListener.php
+app/Listeners/SubmitWeeklyTimesheetListener.php
+app/Listeners/Service JobCommentListener.php
+app/Listeners/Service JobCommentMentionListener.php
+app/Listeners/Service JobListener.php
+app/Listeners/Service JobNoteListener.php
+app/Listeners/Service JobNoteMentionListener.php
+app/Listeners/Service JobReminderListener.php
+app/Listeners/WeeklyTimesheetApprovedListener.php
+app/Listeners/WeeklyTimesheetDraftListener.php
+app/Models/GanttLink.php
+app/Models/Site.php
+app/Models/SiteActivity.php
+app/Models/SiteCategory.php
+app/Models/SiteZone.php
+app/Models/SiteFile.php
+app/Models/SiteLabel.php
+app/Models/SiteLabelList.php
+app/Models/SiteMember.php
+app/Models/SiteMilestone.php
+app/Models/SiteNote.php
+app/Models/SiteRating.php
+app/Models/SiteSetting.php
+app/Models/SiteStatusSetting.php
+app/Models/SiteSubCategory.php
+app/Models/SiteTemplate.php
+app/Models/SiteTemplateMember.php
+app/Models/SiteTemplateMilestone.php
+app/Models/SiteTemplateSubService Job.php
+app/Models/SiteTemplateService Job.php
+app/Models/SiteTemplateService JobUser.php
+app/Models/SiteTimeLog.php
+app/Models/SiteTimeLogBreak.php
+app/Models/SiteUserNote.php
+app/Models/SubService Job.php
+app/Models/SubService JobFile.php
+app/Models/Service Job.php
+app/Models/Service JobCategory.php
+app/Models/Service JobComment.php
+app/Models/Service JobCommentEmoji.php
+app/Models/Service JobFile.php
+app/Models/Service JobHistory.php
+app/Models/Service JobLabel.php
+app/Models/Service JobLabelList.php
+app/Models/Service JobNote.php
+app/Models/Service JobSetting.php
+app/Models/Service JobTag.php
+app/Models/Service JobTagList.php
+app/Models/Service JobUser.php
+app/Models/Service JobboardColumn.php
+app/Models/UserService JobboardSetting.php
+app/Models/WeeklyTimesheet.php
+app/Models/WeeklyTimesheetEntries.php
+app/Notifications/AutoService JobReminder.php
+app/Notifications/DailyTimeLogReport.php
+app/Notifications/NewSite.php
+app/Notifications/NewSiteMember.php
+app/Notifications/NewSiteNote.php
+app/Notifications/NewSiteStatus.php
+app/Notifications/NewService Job.php
+app/Notifications/SiteMemberMention.php
+app/Notifications/SiteNoteMention.php
+app/Notifications/SiteNoteUpdated.php
+app/Notifications/SiteRating.php
+app/Notifications/SiteReminder.php
+app/Notifications/SiteTimelogApproveNotification.php
+app/Notifications/SiteTimelogCreateNotification.php
+app/Notifications/SiteTimelogCreatedNotification.php
+app/Notifications/SiteTimelogNotification.php
+app/Notifications/SubService JobAssigneeAdded.php
+app/Notifications/SubService JobCompleted.php
+app/Notifications/SubService JobCreated.php
+app/Notifications/Service JobApproval.php
+app/Notifications/Service JobComment.php
+app/Notifications/Service JobCommentAdmin.php
+app/Notifications/Service JobCommentMention.php
+app/Notifications/Service JobCompleted.php
+app/Notifications/Service JobMention.php
+app/Notifications/Service JobNote.php
+app/Notifications/Service JobNoteMention.php
+app/Notifications/Service JobReminder.php
+app/Notifications/Service JobStatusUpdated.php
+app/Notifications/Service JobUpdated.php
+app/Notifications/WeeklyTimesheetApproved.php
+app/Notifications/WeeklyTimesheetRejected.php
+app/Observers/SiteCategoryObserver.php
+app/Observers/SiteMemberObserver.php
+app/Observers/SiteMilestoneObserver.php
+app/Observers/SiteNoteObserver.php
+app/Observers/SiteObserver.php
+app/Observers/SiteRatingObserver.php
+app/Observers/SiteSettingObserver.php
+app/Observers/SiteStatusSettingObserver.php
+app/Observers/SiteTemplateMilestoneObserver.php
+app/Observers/SiteTemplateObserver.php
+app/Observers/SiteTimelogBreakObserver.php
+app/Observers/SiteTimelogObserver.php
+app/Observers/SubService JobObserver.php
+app/Observers/Service JobBoardColumnObserver.php
+app/Observers/Service JobCategoryObserver.php
+app/Observers/Service JobCommentObserver.php
+app/Observers/Service JobFileObserver.php
+app/Observers/Service JobLabelListObserver.php
+app/Observers/Service JobNoteObserver.php
+app/Observers/Service JobObserver.php
+app/Observers/Service JobSettingObserver.php
+app/Observers/Service JobUserObserver.php
+app/Observers/UserService JobboardSettingObserver.php
+app/Observers/WeeklyTimeSheetObserver.php
+app/Observers/WeeklyTimesheetEntriesObserver.php
+app/Traits/SiteDashboard.php
+app/Traits/SiteProgress.php
+app/View/Components/Cards/PublicService JobCard.php
+app/View/Components/Service JobCard.php
+app/View/Components/Service JobSelectionDropdown.php
+database/migrations/2022_07_04_111754_add_site_short_code_column_site_table.php
+database/migrations/2022_08_13_070443_add_service job_unique_id_column_service jobs_table.php
+database/migrations/2022_08_18_120924_create_service job_settings_table.php
+database/migrations/2022_08_19_115209_create_site_status_settings_table.php
+database/migrations/2022_08_23_065943_change_status_type_sites_table.php
+database/migrations/2022_08_29_064339_add_added_by_to_site_template.php
+database/migrations/2022_09_05_064405_add_miro_board_column_in_site_table.php
+database/migrations/2023_03_31_123237_fix_timelog_site_id.php
+database/migrations/2023_04_11_101429_service job_hash_insert_in_service job_table.php
+database/migrations/2023_12_26_102738_add_site_column_in_orders_table.php
+database/migrations/2024_06_11_063115_create_site_zones_table.php
+database/migrations/2024_06_12_105831_site_time_log_null_entries_on_service job_soft_delete.php
+database/migrations/2024_06_21_093830_add_column_in_sites.php
+database/migrations/2024_06_21_113438_create_gantt_links_table.php
+database/migrations/2024_06_27_080827_insert_row_in_service jobboard_column.php
+database/migrations/2024_07_31_115255_update_service jobboard_column.php
+database/migrations/2024_08_27_051140_cleanup_deleted_service job_data.php
+database/migrations/2024_09_11_123540_add_column_in_site_templates_service job_table.php
+database/migrations/2024_09_12_044645_remove_on_delete_cascade_from_created_by_to_service jobs.php
+database/migrations/2024_09_23_081839_alter_data_type_of_service job_table_columns.php
+database/migrations/2024_11_05_051148_update_service job_short_code.php
+database/migrations/2025_05_12_045327_add_site_require_column_service jobs_settings_table.php
+database/migrations/2025_05_28_072917_create_site_template_milestone_table.php
+database/migrations/2025_05_29_052859_create_site_subcategory_table.php
+database/migrations/2025_05_29_121227_add_sub_category_column_in_sites_and_sites_templates_table.php
+database/migrations/2025_06_05_072931_add_milestone_id_in_site_tempalte_service job_table.php
+database/migrations/2025_06_19_122019_alter_site_timelog_table.php
+database/migrations/2025_07_14_062501_create_site_label_list_table.php
+database/migrations/2025_09_11_115809_modify_calculate_service job_progress_field_in_sites_table.php
+database/migrations/2025_10_01_084513_add_alias_column_to_site_status_settings_table.php
+resources/scss/site.scss
+resources/scss/service job-board.scss
+resources/scss/service job_list.scss
+resources/views/gantt.blade.php
+resources/views/gantt_dhtml.blade.php
+resources/views/site-settings/ajax/category.blade.php
+resources/views/site-settings/ajax/sendReminder.blade.php
+resources/views/site-settings/ajax/status.blade.php
+resources/views/site-settings/create-site-category-settings-modal.blade.php
+resources/views/site-settings/create-site-status-settings-modal.blade.php
+resources/views/site-settings/edit-category.blade.php
+resources/views/site-settings/edit.blade.php
+resources/views/site-settings/index.blade.php
+resources/views/site-templates/ajax/create.blade.php
+resources/views/site-templates/ajax/edit.blade.php
+resources/views/site-templates/ajax/members.blade.php
+resources/views/site-templates/ajax/milestones.blade.php
+resources/views/site-templates/ajax/overview.blade.php
+resources/views/site-templates/ajax/sites.blade.php
+resources/views/site-templates/ajax/service jobs.blade.php
+resources/views/site-templates/create.blade.php
+resources/views/site-templates/index.blade.php
+resources/views/site-templates/milestone/create.blade.php
+resources/views/site-templates/milestone/edit.blade.php
+resources/views/site-templates/milestone/show.blade.php
+resources/views/site-templates/site-member/create.blade.php
+resources/views/site-templates/show.blade.php
+resources/views/site-templates/service job/ajax/create.blade.php
+resources/views/site-templates/service job/ajax/edit.blade.php
+resources/views/site-templates/service job/ajax/show.blade.php
+resources/views/site-templates/service job/ajax/sub_service jobs.blade.php
+resources/views/site-templates/service job/create.blade.php
+resources/views/site-templates/service job/sub_service jobs/edit.blade.php
+resources/views/site-templates/service job/sub_service jobs/show.blade.php
+resources/views/sites/ajax/activity.blade.php
+resources/views/sites/ajax/burndown.blade.php
+resources/views/sites/ajax/create.blade.php
+resources/views/sites/ajax/discussion.blade.php
+resources/views/sites/ajax/edit.blade.php
+resources/views/sites/ajax/quotes.blade.php
+resources/views/sites/ajax/expenses.blade.php
+resources/views/sites/ajax/files.blade.php
+resources/views/sites/ajax/gantt.blade.php
+resources/views/sites/ajax/gantt_dhtml.blade.php
+resources/views/sites/ajax/import.blade.php
+resources/views/sites/ajax/import_progress.blade.php
+resources/views/sites/ajax/invoices.blade.php
+resources/views/sites/ajax/members.blade.php
+resources/views/sites/ajax/milestones.blade.php
+resources/views/sites/ajax/miroboard.blade.php
+resources/views/sites/ajax/notes.blade.php
+resources/views/sites/ajax/orders.blade.php
+resources/views/sites/ajax/overview.blade.php
+resources/views/sites/ajax/payments.blade.php
+resources/views/sites/ajax/sites.blade.php
+resources/views/sites/ajax/rating.blade.php
+resources/views/sites/ajax/service jobboard.blade.php
+resources/views/sites/ajax/service jobs.blade.php
+resources/views/sites/ajax/issues / support.blade.php
+resources/views/sites/ajax/timelogs.blade.php
+resources/views/sites/archive.blade.php
+resources/views/sites/calendar.blade.php
+resources/views/sites/create.blade.php
+resources/views/sites/create_category.blade.php
+resources/views/sites/create_label.blade.php
+resources/views/sites/create_sub_category.blade.php
+resources/views/sites/duplicate-site.blade.php
+resources/views/sites/files/show.blade.php
+resources/views/sites/index.blade.php
+resources/views/sites/milestone/create.blade.php
+resources/views/sites/milestone/edit.blade.php
+resources/views/sites/milestone/show.blade.php
+resources/views/sites/notes/create.blade.php
+resources/views/sites/notes/edit.blade.php
+resources/views/sites/notes/show.blade.php
+resources/views/sites/notes/verify-password.blade.php
+resources/views/sites/site-member/create.blade.php
+resources/views/sites/show.blade.php
+resources/views/recurring-service job/ajax/create.blade.php
+resources/views/recurring-service job/ajax/edit.blade.php
+resources/views/recurring-service job/ajax/show.blade.php
+resources/views/recurring-service job/ajax/service job.blade.php
+resources/views/recurring-service job/create.blade.php
+resources/views/recurring-service job/index.blade.php
+resources/views/recurring-service job/show.blade.php
+resources/views/service job-settings/index.blade.php
+resources/views/service jobboard.blade.php
+resources/views/service jobboard/board_data.blade.php
+resources/views/service jobboard/create.blade.php
+resources/views/service jobboard/edit.blade.php
+resources/views/service jobboard/index.blade.php
+resources/views/service jobboard/load_more.blade.php
+resources/views/service jobboard_data.blade.php
+resources/views/service jobboard_load_more.blade.php
+resources/views/service jobs/ajax/comments.blade.php
+resources/views/service jobs/ajax/create.blade.php
+resources/views/service jobs/ajax/edit.blade.php
+resources/views/service jobs/ajax/files.blade.php
+resources/views/service jobs/ajax/history.blade.php
+resources/views/service jobs/ajax/notes.blade.php
+resources/views/service jobs/ajax/sent-approval-modal.blade.php
+resources/views/service jobs/ajax/show.blade.php
+resources/views/service jobs/ajax/sub_service jobs.blade.php
+resources/views/service jobs/ajax/timelogs.blade.php
+resources/views/service jobs/calendar.blade.php
+resources/views/service jobs/comments/comment-emoji.blade.php
+resources/views/service jobs/comments/edit.blade.php
+resources/views/service jobs/comments/show.blade.php
+resources/views/service jobs/create.blade.php
+resources/views/service jobs/create_category.blade.php
+resources/views/service jobs/create_label.blade.php
+resources/views/service jobs/files/show.blade.php
+resources/views/service jobs/history/show.blade.php
+resources/views/service jobs/index.blade.php
+resources/views/service jobs/notes/edit.blade.php
+resources/views/service jobs/notes/show.blade.php
+resources/views/service jobs/show.blade.php
+resources/views/service jobs/status_reason_modal.blade.php
+resources/views/service jobs/sub_service jobs/detail.blade.php
+resources/views/service jobs/sub_service jobs/edit.blade.php
+resources/views/service jobs/sub_service jobs/files/show.blade.php
+resources/views/service jobs/sub_service jobs/show.blade.php
+resources/views/service jobs/waiting-approval.blade.php
+resources/views/timelog-break/edit.blade.php
+resources/views/timelog-report.blade.php
+resources/views/timelogs/ajax/active_timer.blade.php
+resources/views/timelogs/ajax/create.blade.php
+resources/views/timelogs/ajax/edit.blade.php
+resources/views/timelogs/ajax/member-list.blade.php
+resources/views/timelogs/ajax/show.blade.php
+resources/views/timelogs/ajax/timer.blade.php
+resources/views/timelogs/ajax/user-timelogs.blade.php
+resources/views/timelogs/by_cleaner.blade.php
+resources/views/timelogs/calendar.blade.php
+resources/views/timelogs/create.blade.php
+resources/views/timelogs/index.blade.php
+resources/views/timelogs/reject/index.blade.php
+resources/views/timelogs/show.blade.php
+resources/views/timelogs/stopper-alert.blade.php
+resources/views/timelogs/timelog-menu.blade.php

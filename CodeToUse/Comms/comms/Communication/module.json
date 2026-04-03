@@ -1,0 +1,25 @@
+{
+    "name": "Communication",
+    "alias": "communication",
+    "active": true,
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Communication\\Providers\\CommunicationServiceProvider",
+        "Modules\\Communication\\Providers\\RepositoryServiceProvider",
+        "Modules\\Communication\\Providers\\EventServiceProvider",
+        "Modules\\Communication\\Providers\\RouteServiceProvider"
+    ],
+    "files": [
+        "start.php"
+    ],
+    "order": 0,
+    "aliases": {},
+    "requires": [],
+    "permissions": [],
+    "roles_permissions": {
+        "admin": [],
+        "manager": []
+    }
+}

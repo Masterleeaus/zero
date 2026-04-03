@@ -1,0 +1,65 @@
+# Odoo Module Dependency Graph
+
+## Direct dependencies
+- `base_territory` -> (no internal addon deps)
+- `fieldservice` -> `base_territory`
+- `fieldservice_account` -> `fieldservice`
+- `fieldservice_activity` -> `fieldservice`
+- `fieldservice_agreement` -> `fieldservice`
+- `fieldservice_availability` -> `fieldservice_route`
+- `fieldservice_calendar` -> `fieldservice`
+- `fieldservice_crm` -> `fieldservice`
+- `fieldservice_equipment_stock` -> `fieldservice_stock`
+- `fieldservice_equipment_warranty` -> `fieldservice_equipment_stock`
+- `fieldservice_kanban_info` -> `fieldservice`
+- `fieldservice_portal` -> `fieldservice`
+- `fieldservice_project` -> `fieldservice`
+- `fieldservice_recurring` -> `fieldservice`
+- `fieldservice_repair` -> `fieldservice_equipment_stock`
+- `fieldservice_repair_order_template` -> `fieldservice_repair`
+- `fieldservice_route` -> `fieldservice`
+- `fieldservice_route_availability` -> `fieldservice_availability`
+- `fieldservice_sale` -> `fieldservice`, `fieldservice_account`
+- `fieldservice_sale_agreement` -> `fieldservice_agreement`, `fieldservice_sale`
+- `fieldservice_sale_agreement_equipment_stock` -> `fieldservice_agreement`, `fieldservice_sale`, `fieldservice_equipment_stock`
+- `fieldservice_sale_recurring` -> `fieldservice_recurring`, `fieldservice_sale`, `fieldservice_account`
+- `fieldservice_sale_recurring_agreement` -> `fieldservice_agreement`, `fieldservice_sale_recurring`
+- `fieldservice_sale_stock` -> `fieldservice_sale`, `fieldservice_stock`
+- `fieldservice_size` -> `fieldservice`
+- `fieldservice_skill` -> `fieldservice`
+- `fieldservice_stage_server_action` -> `fieldservice`
+- `fieldservice_stock` -> `fieldservice`
+- `fieldservice_timesheet` -> `fieldservice_project`
+- `fieldservice_vehicle` -> `fieldservice`
+
+## Reverse dependencies
+- `base_territory` <- `fieldservice`
+- `fieldservice` <- `fieldservice_account`, `fieldservice_activity`, `fieldservice_agreement`, `fieldservice_calendar`, `fieldservice_crm`, `fieldservice_kanban_info`, `fieldservice_portal`, `fieldservice_project`, `fieldservice_recurring`, `fieldservice_route`, `fieldservice_sale`, `fieldservice_size`, `fieldservice_skill`, `fieldservice_stage_server_action`, `fieldservice_stock`, `fieldservice_vehicle`
+- `fieldservice_account` <- `fieldservice_sale`, `fieldservice_sale_recurring`
+- `fieldservice_activity` <- (none)
+- `fieldservice_agreement` <- `fieldservice_sale_agreement`, `fieldservice_sale_agreement_equipment_stock`, `fieldservice_sale_recurring_agreement`
+- `fieldservice_availability` <- `fieldservice_route_availability`
+- `fieldservice_calendar` <- (none)
+- `fieldservice_crm` <- (none)
+- `fieldservice_equipment_stock` <- `fieldservice_equipment_warranty`, `fieldservice_repair`, `fieldservice_sale_agreement_equipment_stock`
+- `fieldservice_equipment_warranty` <- (none)
+- `fieldservice_kanban_info` <- (none)
+- `fieldservice_portal` <- (none)
+- `fieldservice_project` <- `fieldservice_timesheet`
+- `fieldservice_recurring` <- `fieldservice_sale_recurring`
+- `fieldservice_repair` <- `fieldservice_repair_order_template`
+- `fieldservice_repair_order_template` <- (none)
+- `fieldservice_route` <- `fieldservice_availability`
+- `fieldservice_route_availability` <- (none)
+- `fieldservice_sale` <- `fieldservice_sale_agreement`, `fieldservice_sale_agreement_equipment_stock`, `fieldservice_sale_recurring`, `fieldservice_sale_stock`
+- `fieldservice_sale_agreement` <- (none)
+- `fieldservice_sale_agreement_equipment_stock` <- (none)
+- `fieldservice_sale_recurring` <- `fieldservice_sale_recurring_agreement`
+- `fieldservice_sale_recurring_agreement` <- (none)
+- `fieldservice_sale_stock` <- (none)
+- `fieldservice_size` <- (none)
+- `fieldservice_skill` <- (none)
+- `fieldservice_stage_server_action` <- (none)
+- `fieldservice_stock` <- `fieldservice_equipment_stock`, `fieldservice_sale_stock`
+- `fieldservice_timesheet` <- (none)
+- `fieldservice_vehicle` <- (none)

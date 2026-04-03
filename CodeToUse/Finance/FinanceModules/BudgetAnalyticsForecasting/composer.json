@@ -1,0 +1,13 @@
+{
+  "name": "modules/budget-analytics-forecasting",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Modules\\BudgetAnalyticsForecasting\\": ""
+    }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "^7.8"
+  },
+  "description": "nWidart module: Budget Analytics & Forecasting with AI"
+}

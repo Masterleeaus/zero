@@ -1,0 +1,23 @@
+TitanTrust Hardening Pass H1
+
+FILES TOUCHED (20):
+~ System/Http/Controllers/CaptureController.php
+~ System/Http/Controllers/EvidenceController.php
+~ System/Http/Controllers/IncidentController.php
+~ System/Http/Controllers/RulesController.php
+~ System/Http/Controllers/SignoffController.php
+~ System/Http/Requests/StoreEvidenceRequest.php
++ System/Models/Concerns/TenantScoped.php
+~ System/Models/WorkEvidenceFile.php
+~ System/Models/WorkEvidenceItem.php
+~ System/Models/WorkEvidenceRule.php
+~ System/Models/WorkEvidenceSignoff.php
+~ System/Models/WorkJobAttendance.php
+~ System/Models/WorkJobIncident.php
+~ System/TitanTrustServiceProvider.php
++ config/titantrust.php
+~ database/migrations/2026_02_15_000012_create_work_evidence_tables.php
++ database/migrations/2026_02_20_000001_titantrust_hardening_identity_and_legacy_cleanup.php
+~ resources/views/editor/editor.blade.php
+~ resources/views/gallery/gallery.blade.php
+~ resources/views/home/recent-images-grid.blade.php

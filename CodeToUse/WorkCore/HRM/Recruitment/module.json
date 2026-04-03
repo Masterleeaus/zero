@@ -1,0 +1,13 @@
+{
+    "name": "Recruitment",
+    "alias": "Recruitment",
+    "description": "Depending on HRM",
+    "keywords": [],
+    "priority": 270,
+    "version":3.0,
+    "providers": [
+        "Modules\\Recruitment\\Providers\\RecruitmentServiceProvider"
+    ],
+    "files": [],
+    "parent_module": ["Hrm"]
+}

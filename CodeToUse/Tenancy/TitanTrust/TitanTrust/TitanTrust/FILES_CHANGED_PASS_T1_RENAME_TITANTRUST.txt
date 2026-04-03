@@ -1,0 +1,17 @@
+TitanTrust Pass T1 — Full Rename + Cleanup + Scan
+
+Summary:
+- Renamed extension identity from TitanVerify -> TitanTrust across namespaces, slugs, keys, routes, view namespaces.
+- Removed legacy pass report files from the extension root to prevent unzip clutter.
+- Updated route prefix: /dashboard/user/jobs/trust
+- Updated view namespace: titantrust::
+
+Key updated files:
+- extension.json
+- System/TitanTrustServiceProvider.php
+- routes/web.php
+- resources/views/titantrust/*
+
+Notes:
+- No core menu architecture modified.
+- Database tables remain work_jobs_* (Doctrine v2 typed).

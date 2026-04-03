@@ -1,0 +1,10 @@
+public/css
+public/js
+public/vendor
+public/fonts
+public/flags
+public/i18n
+public/img
+storage/fonts
+storage/framework
+storage/.DS_Store

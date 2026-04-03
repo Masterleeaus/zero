@@ -1,0 +1,432 @@
+# Route rename targets
+
+Shift route names into a WorkCore namespace when importing into MagicAI.
+
+- L136: `image.store` -> `workcore.image.store`
+- L139: `account_unverified` -> `workcore.account_unverified`
+- L140: `checklist` -> `workcore.checklist`
+- L141: `dashboard` -> `workcore.dashboard`
+- L142: `dashboard.universal_bundle_alert_dismiss` -> `workcore.dashboard.universal_bundle_alert_dismiss`
+- L143: `dashboard.advanced` -> `workcore.dashboard.advanced`
+- L144: `dashboard.widget` -> `workcore.dashboard.widget`
+- L145: `dashboard.week_timelog` -> `workcore.dashboard.week_timelog`
+- L146: `dashboard.deal-stage-data` -> `workcore.dashboard.deal-stage-data`
+- L148: `attendances.clock_in_modal` -> `workcore.attendances.clock_in_modal`
+- L149: `attendances.store_clock_in` -> `workcore.attendances.store_clock_in`
+- L150: `attendances.update_clock_in` -> `workcore.attendances.update_clock_in`
+- L151: `attendances.show_clocked_hours` -> `workcore.attendances.show_clocked_hours`
+- L152: `dashboard.private_calendar` -> `workcore.dashboard.private_calendar`
+- L153: `dashboard.beam_auth` -> `workcore.dashboard.beam_auth`
+- L155: `settings.change_language` -> `workcore.settings.change_language`
+- L159: `customers.approve` -> `workcore.customers.approve`
+- L160: `customers.save_consent_purpose_data` -> `workcore.customers.save_consent_purpose_data`
+- L161: `customers.gdpr_consent` -> `workcore.customers.gdpr_consent`
+- L162: `customers.save_customer_consent` -> `workcore.customers.save_customer_consent`
+- L163: `customers.ajax_details` -> `workcore.customers.ajax_details`
+- L164: `customers.customer_details` -> `workcore.customers.customer_details`
+- L165: `customers.site_list` -> `workcore.customers.site_list`
+- L166: `customers.apply_quick_action` -> `workcore.customers.apply_quick_action`
+- L167: `customers.import` -> `workcore.customers.import`
+- L168: `customers.import.store` -> `workcore.customers.import.store`
+- L169: `customers.import.process` -> `workcore.customers.import.process`
+- L170: `customers.finance_count` -> `workcore.customers.finance_count`
+- L173: `customer-contacts.apply_quick_action` -> `workcore.customer-contacts.apply_quick_action`
+- L174: `get.contacts` -> `workcore.get.contacts`
+- L177: `customer_notes.ask_for_password` -> `workcore.customer_notes.ask_for_password`
+- L178: `customer_notes.check_password` -> `workcore.customer_notes.check_password`
+- L179: `customer-notes.apply_quick_action` -> `workcore.customer-notes.apply_quick_action`
+- L180: `customer-notes.show_verified` -> `workcore.customer-notes.show_verified`
+- L183: `customer-docs.download` -> `workcore.customer-docs.download`
+- L189: `get_customer_sub_categories` -> `workcore.get_customer_sub_categories`
+- L196: `cleaners.apply_quick_action` -> `workcore.cleaners.apply_quick_action`
+- L197: `cleaners.assign_role` -> `workcore.cleaners.assign_role`
+- L198: `cleaners.by_zone` -> `workcore.cleaners.by_zone`
+- L199: `cleaners.invite_member` -> `workcore.cleaners.invite_member`
+- L200: `cleaners.import` -> `workcore.cleaners.import`
+- L201: `cleaners.import.store` -> `workcore.cleaners.import.store`
+- L202: `cleaners.import.process` -> `workcore.cleaners.import.process`
+- L203: `import.process.progress` -> `workcore.import.process.progress`
+- L205: `import.process.exception` -> `workcore.import.process.exception`
+- L206: `cleaners.send_invite` -> `workcore.cleaners.send_invite`
+- L207: `cleaners.create_link` -> `workcore.cleaners.create_link`
+- L208: `getExitDateMessage` -> `workcore.getExitDateMessage`
+- L215: `cleaner-docs.download` -> `workcore.cleaner-docs.download`
+- L218: `cleaner-document-expiries.download` -> `workcore.cleaner-document-expiries.download`
+- L221: `cleaner-leaves.cleaner_leave_types` -> `workcore.cleaner-leaves.cleaner_leave_types`
+- L224: `role.hierarchy` -> `workcore.role.hierarchy`
+- L225: `role.changeParent` -> `workcore.role.changeParent`
+- L226: `role.srchFilter` -> `workcore.role.srchFilter`
+- L227: `roles.apply_quick_action` -> `workcore.roles.apply_quick_action`
+- L230: `zones.apply_quick_action` -> `workcore.zones.apply_quick_action`
+- L231: `zone.hierarchy` -> `workcore.zone.hierarchy`
+- L232: `zone.changeParent` -> `workcore.zone.changeParent`
+- L233: `zones.search` -> `workcore.zones.search`
+- L234: `zones.members` -> `workcore.zones.members`
+- L237: `user-permissions.custom_permissions` -> `workcore.user-permissions.custom_permissions`
+- L238: `user-permissions.reset_permissions` -> `workcore.user-permissions.reset_permissions`
+- L243: `sites.change_status` -> `workcore.sites.change_status`
+- L246: `site.get_site_sub_category` -> `workcore.site.get_site_sub_category`
+- L253: `sites.import` -> `workcore.sites.import`
+- L254: `sites.import.store` -> `workcore.sites.import.store`
+- L255: `sites.import.process` -> `workcore.sites.import.process`
+- L257: `sites.assign_site_admin` -> `workcore.sites.assign_site_admin`
+- L258: `sites.archive_restore` -> `workcore.sites.archive_restore`
+- L259: `sites.archive_delete` -> `workcore.sites.archive_delete`
+- L260: `sites.archive` -> `workcore.sites.archive`
+- L261: `sites.apply_quick_action` -> `workcore.sites.apply_quick_action`
+- L262: `sites.update_status` -> `workcore.sites.update_status`
+- L263: `sites.store_pin` -> `workcore.sites.store_pin`
+- L264: `sites.destroy_pin` -> `workcore.sites.destroy_pin`
+- L265: `sites.gantt_data` -> `workcore.sites.gantt_data`
+- L266: `sites.invoice_list` -> `workcore.sites.invoice_list`
+- L267: `sites.duplicate_site` -> `workcore.sites.duplicate_site`
+- L269: `sites.members` -> `workcore.sites.members`
+- L270: `sites.pendingService Jobs` -> `workcore.sites.pendingService Jobs`
+- L271: `sites.labels` -> `workcore.sites.labels`
+- L274: `site-members.store_group` -> `workcore.site-members.store_group`
+- L277: `files.store_link` -> `workcore.files.store_link`
+- L278: `files.download` -> `workcore.files.download`
+- L279: `files.thumbnail` -> `workcore.files.thumbnail`
+- L280: `files.multiple_upload` -> `workcore.files.multiple_upload`
+- L283: `milestones.by_site` -> `workcore.milestones.by_site`
+- L284: `milestones.updateStatus` -> `workcore.milestones.updateStatus`
+- L290: `discussion.set_best_answer` -> `workcore.discussion.set_best_answer`
+- L292: `discussion-reply.get_replies` -> `workcore.discussion-reply.get_replies`
+- L296: `discussion_file.download` -> `workcore.discussion_file.download`
+- L302: `sites.burndown` -> `workcore.sites.burndown`
+- L305: `site_template.apply_quick_action` -> `workcore.site_template.apply_quick_action`
+- L307: `site_template_members.store_group` -> `workcore.site_template_members.store_group`
+- L309: `site_template_service job.data` -> `workcore.site_template_service job.data`
+- L310: `site-template-milestone.by_site` -> `workcore.site-template-milestone.by_site`
+- L311: `site-template-milestone.updateStatus` -> `workcore.site-template-milestone.updateStatus`
+- L319: `site_notes.ask_for_password` -> `workcore.site_notes.ask_for_password`
+- L320: `site_notes.check_password` -> `workcore.site_notes.check_password`
+- L321: `site_notes.apply_quick_action` -> `workcore.site_notes.apply_quick_action`
+- L323: `get.sites-ajax` -> `workcore.get.sites-ajax`
+- L324: `get.sites` -> `workcore.get.sites`
+- L328: `services / extras.apply_quick_action` -> `workcore.services / extras.apply_quick_action`
+- L329: `services / extras.remove_cart_item` -> `workcore.services / extras.remove_cart_item`
+- L330: `services / extras.options` -> `workcore.services / extras.options`
+- L333: `services / extras.add_cart_item` -> `workcore.services / extras.add_cart_item`
+- L334: `services / extras.cart` -> `workcore.services / extras.cart`
+- L335: `services / extras.empty_cart` -> `workcore.services / extras.empty_cart`
+- L341: `services / extras.import` -> `workcore.services / extras.import`
+- L342: `services / extras.import.store` -> `workcore.services / extras.import.store`
+- L343: `services / extras.import.process` -> `workcore.services / extras.import.process`
+- L349: `get_service / extra_sub_categories` -> `workcore.get_service / extra_sub_categories`
+- L353: `service / extra-files.download` -> `workcore.service / extra-files.download`
+- L354: `service / extra-files.delete_image` -> `workcore.service / extra-files.delete_image`
+- L355: `service / extra-files.update_images` -> `workcore.service / extra-files.update_images`
+- L359: `invoice-files.download` -> `workcore.invoice-files.download`
+- L364: `orders.offline_payment_modal` -> `workcore.orders.offline_payment_modal`
+- L365: `orders.add_item` -> `workcore.orders.add_item`
+- L366: `orders.stripe_modal` -> `workcore.orders.stripe_modal`
+- L367: `orders.make_invoice` -> `workcore.orders.make_invoice`
+- L369: `orders.payment_failed` -> `workcore.orders.payment_failed`
+- L370: `orders.save_stripe_detail` -> `workcore.orders.save_stripe_detail`
+- L371: `orders.change_status` -> `workcore.orders.change_status`
+- L373: `orders.download` -> `workcore.orders.download`
+- L374: `orders.store_quantity` -> `workcore.orders.store_quantity`
+- L382: `notices.apply_quick_action` -> `workcore.notices.apply_quick_action`
+- L386: `notice_files.download` -> `workcore.notice_files.download`
+- L393: `awards.apply_quick_action` -> `workcore.awards.apply_quick_action`
+- L394: `awards.change-status` -> `workcore.awards.change-status`
+- L395: `awards.quick-create` -> `workcore.awards.quick-create`
+- L396: `awards.quick-store` -> `workcore.awards.quick-store`
+- L400: `appreciations.apply_quick_action` -> `workcore.appreciations.apply_quick_action`
+- L404: `knowledgebase.create` -> `workcore.knowledgebase.create`
+- L405: `knowledgebase.apply_quick_action` -> `workcore.knowledgebase.apply_quick_action`
+- L406: `knowledgebase.searchQuery` -> `workcore.knowledgebase.searchQuery`
+- L409: `knowledgebase-files.download` -> `workcore.knowledgebase-files.download`
+- L417: `recurring-event.monthly_on` -> `workcore.recurring-event.monthly_on`
+- L418: `recurring-event.apply_quick_action` -> `workcore.recurring-event.apply_quick_action`
+- L420: `recurring-event.update_status` -> `workcore.recurring-event.update_status`
+- L421: `recurring-event.event_status_note` -> `workcore.recurring-event.event_status_note`
+- L425: `events.monthly_on` -> `workcore.events.monthly_on`
+- L426: `events.table_view` -> `workcore.events.table_view`
+- L427: `events.apply_quick_action` -> `workcore.events.apply_quick_action`
+- L429: `events.update_status` -> `workcore.events.update_status`
+- L430: `events.event_status_note` -> `workcore.events.event_status_note`
+- L433: `my-calendar.index` -> `workcore.my-calendar.index`
+- L437: `event-files.download` -> `workcore.event-files.download`
+- L441: `service jobs.customerDetail` -> `workcore.service jobs.customerDetail`
+- L442: `service jobs.change_status` -> `workcore.service jobs.change_status`
+- L443: `service jobs.change_milestone` -> `workcore.service jobs.change_milestone`
+- L445: `service jobs.apply_quick_action` -> `workcore.service jobs.apply_quick_action`
+- L446: `service jobs.store_pin` -> `workcore.service jobs.store_pin`
+- L447: `service jobs.reminder` -> `workcore.service jobs.reminder`
+- L448: `service jobs.destroy_pin` -> `workcore.service jobs.destroy_pin`
+- L449: `service jobs.check_service job` -> `workcore.service jobs.check_service job`
+- L450: `service jobs.send_approval` -> `workcore.service jobs.send_approval`
+- L451: `service jobs.gantt_service job_update` -> `workcore.service jobs.gantt_service job_update`
+- L452: `service jobs.members` -> `workcore.service jobs.members`
+- L453: `service jobs.site_service jobs` -> `workcore.service jobs.site_service jobs`
+- L454: `service jobs.checkLeaves` -> `workcore.service jobs.checkLeaves`
+- L455: `service jobs.waiting-approval` -> `workcore.service jobs.waiting-approval`
+- L456: `service jobs.show_status_reason_modal` -> `workcore.service jobs.show_status_reason_modal`
+- L457: `service jobs.store_comment_on_change_status` -> `workcore.service jobs.store_comment_on_change_status`
+- L461: `recurring-service job.apply_quick_action` -> `workcore.recurring-service job.apply_quick_action`
+- L466: `service jobComment.save_comment_like` -> `workcore.service jobComment.save_comment_like`
+- L471: `service job_files.download` -> `workcore.service job_files.download`
+- L475: `sub_service jobs.change_status` -> `workcore.sub_service jobs.change_status`
+- L479: `sub-service job-files.download` -> `workcore.sub-service job-files.download`
+- L483: `service jobboards.collapse_column` -> `workcore.service jobboards.collapse_column`
+- L484: `service jobboards.update_index` -> `workcore.service jobboards.update_index`
+- L485: `service jobboards.load_more` -> `workcore.service jobboards.load_more`
+- L494: `holidays.mark_holiday` -> `workcore.holidays.mark_holiday`
+- L495: `holidays.mark_holiday_store` -> `workcore.holidays.mark_holiday_store`
+- L496: `holidays.table_view` -> `workcore.holidays.table_view`
+- L497: `holidays.apply_quick_action` -> `workcore.holidays.apply_quick_action`
+- L501: `deal-files.download` -> `workcore.deal-files.download`
+- L502: `deal-files.layout` -> `workcore.deal-files.layout`
+- L506: `deals.follow_up` -> `workcore.deals.follow_up`
+- L507: `deals.follow_up_store` -> `workcore.deals.follow_up_store`
+- L508: `deals.follow_up_edit` -> `workcore.deals.follow_up_edit`
+- L509: `deals.follow_up_update` -> `workcore.deals.follow_up_update`
+- L510: `deals.follow_up_delete` -> `workcore.deals.follow_up_delete`
+- L513: `deals.stage_change` -> `workcore.deals.stage_change`
+- L514: `deals.save_stage_change` -> `workcore.deals.save_stage_change`
+- L515: `deals.change_stage` -> `workcore.deals.change_stage`
+- L516: `deals.apply_quick_action` -> `workcore.deals.apply_quick_action`
+- L518: `deals.gdpr_consent` -> `workcore.deals.gdpr_consent`
+- L519: `deals.save_lead_consent` -> `workcore.deals.save_lead_consent`
+- L520: `deals.change_follow_up_status` -> `workcore.deals.change_follow_up_status`
+- L523: `category.updateDefault` -> `workcore.category.updateDefault`
+- L527: `enquiry-notes.ask_for_password` -> `workcore.enquiry-notes.ask_for_password`
+- L528: `enquiry-notes.check_password` -> `workcore.enquiry-notes.check_password`
+- L529: `enquiry-notes.apply_quick_action` -> `workcore.enquiry-notes.apply_quick_action`
+- L534: `deal-notes.apply_quick_action` -> `workcore.deal-notes.apply_quick_action`
+- L538: `leadboards.get_stage_slug` -> `workcore.leadboards.get_stage_slug`
+- L539: `leadboards.collapse_column` -> `workcore.leadboards.collapse_column`
+- L540: `leadboards.update_index` -> `workcore.leadboards.update_index`
+- L541: `leadboards.load_more` -> `workcore.leadboards.load_more`
+- L544: `enquiry-form.sortFields` -> `workcore.enquiry-form.sortFields`
+- L548: `deals.import` -> `workcore.deals.import`
+- L549: `deals.import.store` -> `workcore.deals.import.store`
+- L550: `deals.import.process` -> `workcore.deals.import.process`
+- L554: `enquiry-contact.import` -> `workcore.enquiry-contact.import`
+- L555: `enquiry-contact.import.store` -> `workcore.enquiry-contact.import.store`
+- L556: `enquiry-contact.import.process` -> `workcore.enquiry-contact.import.process`
+- L562: `enquiry-contact.apply_quick_action` -> `workcore.enquiry-contact.apply_quick_action`
+- L564: `deals.get-stage` -> `workcore.deals.get-stage`
+- L565: `deals.get-deals` -> `workcore.deals.get-deals`
+- L566: `deals.get_agents` -> `workcore.deals.get_agents`
+- L570: `leave-files.download` -> `workcore.leave-files.download`
+- L574: `leaves.date` -> `workcore.leaves.date`
+- L575: `leaves.personal` -> `workcore.leaves.personal`
+- L576: `leaves.calendar` -> `workcore.leaves.calendar`
+- L577: `leaves.data` -> `workcore.leaves.data`
+- L578: `leaves.leave_action` -> `workcore.leaves.leave_action`
+- L579: `leaves.show_reject_modal` -> `workcore.leaves.show_reject_modal`
+- L580: `leaves.show_approved_modal` -> `workcore.leaves.show_approved_modal`
+- L581: `leaves.pre_approve_leave` -> `workcore.leaves.pre_approve_leave`
+- L582: `leaves.apply_quick_action` -> `workcore.leaves.apply_quick_action`
+- L583: `leaves.view_related_leave` -> `workcore.leaves.view_related_leave`
+- L584: `leaves.export_all_leave` -> `workcore.leaves.export_all_leave`
+- L588: `team chat.fetch_user_list` -> `workcore.team chat.fetch_user_list`
+- L589: `team chat.fetch_messages` -> `workcore.team chat.fetch_messages`
+- L590: `team chat.check_new_message` -> `workcore.team chat.check_new_message`
+- L591: `team chat.destroy_all` -> `workcore.team chat.destroy_all`
+- L595: `message_file.download` -> `workcore.message_file.download`
+- L599: `invoices.offline_method_description` -> `workcore.invoices.offline_method_description`
+- L600: `invoices.offline_payment_modal` -> `workcore.invoices.offline_payment_modal`
+- L601: `invoices.stripe_modal` -> `workcore.invoices.stripe_modal`
+- L602: `invoices.save_stripe_detail` -> `workcore.invoices.save_stripe_detail`
+- L603: `invoices.delete_image` -> `workcore.invoices.delete_image`
+- L604: `invoices.store_offline_payment` -> `workcore.invoices.store_offline_payment`
+- L605: `invoices.store_file` -> `workcore.invoices.store_file`
+- L606: `invoices.file_upload` -> `workcore.invoices.file_upload`
+- L607: `invoices.delete_applied_credit` -> `workcore.invoices.delete_applied_credit`
+- L608: `invoices.applied_credits` -> `workcore.invoices.applied_credits`
+- L609: `invoices.payment_reminder` -> `workcore.invoices.payment_reminder`
+- L610: `invoices.send_invoice` -> `workcore.invoices.send_invoice`
+- L611: `invoices.approve_offline_invoice` -> `workcore.invoices.approve_offline_invoice`
+- L612: `invoices.apply_quick_action` -> `workcore.invoices.apply_quick_action`
+- L613: `invoices.download` -> `workcore.invoices.download`
+- L614: `invoices.add_item` -> `workcore.invoices.add_item`
+- L615: `invoices.update_status` -> `workcore.invoices.update_status`
+- L616: `invoices.get_customer_company` -> `workcore.invoices.get_customer_company`
+- L617: `invoices.fetch_timelogs` -> `workcore.invoices.fetch_timelogs`
+- L618: `invoices.check_shipping_address` -> `workcore.invoices.check_shipping_address`
+- L619: `invoices.service / extra_category` -> `workcore.invoices.service / extra_category`
+- L621: `invoices.toggle_shipping_address` -> `workcore.invoices.toggle_shipping_address`
+- L622: `invoices.shipping_address_modal` -> `workcore.invoices.shipping_address_modal`
+- L623: `invoices.add_shipping_address` -> `workcore.invoices.add_shipping_address`
+- L624: `invoices.get_exchange_rate` -> `workcore.invoices.get_exchange_rate`
+- L626: `invoices.committed_modal` -> `workcore.invoices.committed_modal`
+- L630: `recurring_invoice.change_status` -> `workcore.recurring_invoice.change_status`
+- L631: `recurring_invoice.export` -> `workcore.recurring_invoice.export`
+- L632: `recurring_invoice.recurring_invoice` -> `workcore.recurring_invoice.recurring_invoice`
+- L633: `recurring_invoice.delete_repeat_invoices` -> `workcore.recurring_invoice.delete_repeat_invoices`
+- L641: `quotes.delete_image` -> `workcore.quotes.delete_image`
+- L642: `quotes.download` -> `workcore.quotes.download`
+- L643: `quotes.send_quote` -> `workcore.quotes.send_quote`
+- L644: `quotes.change_status` -> `workcore.quotes.change_status`
+- L645: `quotes.accept` -> `workcore.quotes.accept`
+- L646: `quotes.decline` -> `workcore.quotes.decline`
+- L647: `quotes.add_item` -> `workcore.quotes.add_item`
+- L652: `proposals.delete_image` -> `workcore.proposals.delete_image`
+- L653: `proposals.download` -> `workcore.proposals.download`
+- L654: `proposals.send_proposal` -> `workcore.proposals.send_proposal`
+- L655: `proposals.add_item` -> `workcore.proposals.add_item`
+- L659: `proposal_template.apply_quick_action` -> `workcore.proposal_template.apply_quick_action`
+- L660: `proposal-template.add_item` -> `workcore.proposal-template.add_item`
+- L662: `proposal-template.download` -> `workcore.proposal-template.download`
+- L663: `proposal_template.delete_image` -> `workcore.proposal_template.delete_image`
+- L666: `payments.apply_quick_action` -> `workcore.payments.apply_quick_action`
+- L667: `payments.download` -> `workcore.payments.download`
+- L668: `payments.account_list` -> `workcore.payments.account_list`
+- L669: `offline.methods` -> `workcore.offline.methods`
+- L670: `payments.add_bulk_payments` -> `workcore.payments.add_bulk_payments`
+- L671: `payments.save_bulk_payments` -> `workcore.payments.save_bulk_payments`
+- L676: `creditnotes.store_file` -> `workcore.creditnotes.store_file`
+- L677: `creditnotes.file_upload` -> `workcore.creditnotes.file_upload`
+- L678: `creditnotes.delete_credited_invoice` -> `workcore.creditnotes.delete_credited_invoice`
+- L679: `creditnotes.credited_invoices` -> `workcore.creditnotes.credited_invoices`
+- L680: `creditnotes.apply_invoice_credit` -> `workcore.creditnotes.apply_invoice_credit`
+- L681: `creditnotes.apply_to_invoice` -> `workcore.creditnotes.apply_to_invoice`
+- L682: `creditnotes.download` -> `workcore.creditnotes.download`
+- L684: `creditnotes.convert-invoice` -> `workcore.creditnotes.convert-invoice`
+- L689: `bankaccounts.apply_quick_action` -> `workcore.bankaccounts.apply_quick_action`
+- L690: `bankaccounts.apply_transaction_quick_action` -> `workcore.bankaccounts.apply_transaction_quick_action`
+- L691: `bankaccounts.create_transaction` -> `workcore.bankaccounts.create_transaction`
+- L692: `bankaccounts.store_transaction` -> `workcore.bankaccounts.store_transaction`
+- L693: `bankaccounts.change_status` -> `workcore.bankaccounts.change_status`
+- L695: `bankaccounts.view_transaction` -> `workcore.bankaccounts.view_transaction`
+- L696: `bankaccounts.destroy_transaction` -> `workcore.bankaccounts.destroy_transaction`
+- L697: `bankaccounts.generate_statement` -> `workcore.bankaccounts.generate_statement`
+- L698: `bankaccounts.get_bank_statement` -> `workcore.bankaccounts.get_bank_statement`
+- L704: `recurring-expenses.change_status` -> `workcore.recurring-expenses.change_status`
+- L706: `expenses.get_cleaner_sites` -> `workcore.expenses.get_cleaner_sites`
+- L707: `expenses.get_category_cleaners` -> `workcore.expenses.get_category_cleaners`
+- L708: `expenses.change_status` -> `workcore.expenses.change_status`
+- L709: `expenses.apply_quick_action` -> `workcore.expenses.apply_quick_action`
+- L710: `expenses.import` -> `workcore.expenses.import`
+- L711: `expenses.import.store` -> `workcore.expenses.import.store`
+- L712: `expenses.import.process` -> `workcore.expenses.import.process`
+- L721: `timelogs.by_cleaner` -> `workcore.timelogs.by_cleaner`
+- L722: `timelogs.export` -> `workcore.timelogs.export`
+- L723: `timelogs.export_time_logs` -> `workcore.timelogs.export_time_logs`
+- L724: `timelogs.show_active_timer` -> `workcore.timelogs.show_active_timer`
+- L725: `timelogs.show_timer` -> `workcore.timelogs.show_timer`
+- L726: `timelogs.start_timer` -> `workcore.timelogs.start_timer`
+- L727: `timelogs.timer_data` -> `workcore.timelogs.timer_data`
+- L728: `timelogs.stop_timer` -> `workcore.timelogs.stop_timer`
+- L729: `timelogs.pause_timer` -> `workcore.timelogs.pause_timer`
+- L730: `timelogs.resume_timer` -> `workcore.timelogs.resume_timer`
+- L731: `timelogs.apply_quick_action` -> `workcore.timelogs.apply_quick_action`
+- L733: `timelogs.cleaner_data` -> `workcore.timelogs.cleaner_data`
+- L734: `timelogs.user_time_logs` -> `workcore.timelogs.user_time_logs`
+- L735: `timelogs.approve_timelog` -> `workcore.timelogs.approve_timelog`
+- L736: `timelogs.revert_to_pending` -> `workcore.timelogs.revert_to_pending`
+- L737: `timelogs.stopper_alert` -> `workcore.timelogs.stopper_alert`
+- L738: `timelogs.check_site_time_limit` -> `workcore.timelogs.check_site_time_limit`
+- L740: `weekly-timesheets.change_status` -> `workcore.weekly-timesheets.change_status`
+- L741: `weekly-timesheets.pending_approval` -> `workcore.weekly-timesheets.pending_approval`
+- L745: `weekly-timesheets.show_reject_modal` -> `workcore.weekly-timesheets.show_reject_modal`
+- L746: `timelogs.timelog_action` -> `workcore.timelogs.timelog_action`
+- L747: `timelogs.show_reject_modal` -> `workcore.timelogs.show_reject_modal`
+- L748: `calculateTime` -> `workcore.calculateTime`
+- L752: `service agreements.apply_quick_action` -> `workcore.service agreements.apply_quick_action`
+- L753: `service agreements.download` -> `workcore.service agreements.download`
+- L754: `service agreements.sign` -> `workcore.service agreements.sign`
+- L755: `companySign.sign` -> `workcore.companySign.sign`
+- L756: `companySignStore.sign` -> `workcore.companySignStore.sign`
+- L757: `service agreements.site_detail` -> `workcore.service agreements.site_detail`
+- L758: `service agreements.company_sig` -> `workcore.service agreements.company_sig`
+- L763: `contractFiles.download` -> `workcore.contractFiles.download`
+- L772: `contract_template.apply_quick_action` -> `workcore.contract_template.apply_quick_action`
+- L774: `service agreement-template.download` -> `workcore.service agreement-template.download`
+- L777: `attendances.export_attendance` -> `workcore.attendances.export_attendance`
+- L778: `attendances.export_all_attendance` -> `workcore.attendances.export_all_attendance`
+- L779: `attendances.cleaner_data` -> `workcore.attendances.cleaner_data`
+- L780: `attendances.mark` -> `workcore.attendances.mark`
+- L781: `attendances.by_member` -> `workcore.attendances.by_member`
+- L782: `attendances.by_hour` -> `workcore.attendances.by_hour`
+- L783: `attendances.bulk_mark` -> `workcore.attendances.bulk_mark`
+- L784: `attendances.import` -> `workcore.attendances.import`
+- L785: `attendances.import.store` -> `workcore.attendances.import.store`
+- L786: `attendances.import.process` -> `workcore.attendances.import.process`
+- L787: `attendances.by_map_location` -> `workcore.attendances.by_map_location`
+- L788: `attendances.by_request` -> `workcore.attendances.by_request`
+- L789: `attendances.regularisationStore` -> `workcore.attendances.regularisationStore`
+- L790: `attendances.accept_status` -> `workcore.attendances.accept_status`
+- L791: `attendances.reject_status` -> `workcore.attendances.reject_status`
+- L792: `attendances.edit_attendance_regularisation` -> `workcore.attendances.edit_attendance_regularisation`
+- L793: `attendances.update_attendance_regularisation` -> `workcore.attendances.update_attendance_regularisation`
+- L794: `attendances.view_attendance_regularisation` -> `workcore.attendances.view_attendance_regularisation`
+- L795: `attendances.show_reject_modal` -> `workcore.attendances.show_reject_modal`
+- L797: `attendances.add-user-attendance` -> `workcore.attendances.add-user-attendance`
+- L798: `attendances.request-regulisation` -> `workcore.attendances.request-regulisation`
+- L799: `attendances.request-pending` -> `workcore.attendances.request-pending`
+- L800: `attendances.delete_request` -> `workcore.attendances.delete_request`
+- L801: `attendances.check_half_day` -> `workcore.attendances.check_half_day`
+- L802: `settings.qr-login` -> `workcore.settings.qr-login`
+- L803: `settings.change-qr-code-status` -> `workcore.settings.change-qr-code-status`
+- L806: `shifts.mark` -> `workcore.shifts.mark`
+- L807: `shifts.export_all` -> `workcore.shifts.export_all`
+- L809: `shifts.cleaner_shift_calendar` -> `workcore.shifts.cleaner_shift_calendar`
+- L810: `shifts.bulk_shift` -> `workcore.shifts.bulk_shift`
+- L813: `shifts-change.approve_request` -> `workcore.shifts-change.approve_request`
+- L814: `shifts-change.decline_request` -> `workcore.shifts-change.decline_request`
+- L815: `shifts-change.apply_quick_action` -> `workcore.shifts-change.apply_quick_action`
+- L822: `issues / support.apply_quick_action` -> `workcore.issues / support.apply_quick_action`
+- L823: `issues / support.update_other_data` -> `workcore.issues / support.update_other_data`
+- L824: `issues / support.change-status` -> `workcore.issues / support.change-status`
+- L825: `issues / support.refresh_count` -> `workcore.issues / support.refresh_count`
+- L826: `issues / support.agent_group` -> `workcore.issues / support.agent_group`
+- L827: `issues / support.edit_detail` -> `workcore.issues / support.edit_detail`
+- L828: `issues / support.update_detail` -> `workcore.issues / support.update_detail`
+- L832: `issue / support-form.sort_fields` -> `workcore.issue / support-form.sort_fields`
+- L835: `issue / support-files.download` -> `workcore.issue / support-files.download`
+- L839: `issue / support-replies.edit_note` -> `workcore.issue / support-replies.edit_note`
+- L841: `service job-report.chart` -> `workcore.service job-report.chart`
+- L842: `cleaner-wise-service job-report` -> `workcore.cleaner-wise-service job-report`
+- L843: `consolidated-service job-report` -> `workcore.consolidated-service job-report`
+- L847: `time-log-report.chart` -> `workcore.time-log-report.chart`
+- L848: `time-log-consolidated.report` -> `workcore.time-log-consolidated.report`
+- L849: `site-wise-timelog.report` -> `workcore.site-wise-timelog.report`
+- L850: `site-wise-timelog.export` -> `workcore.site-wise-timelog.export`
+- L852: `time-log-report.time` -> `workcore.time-log-report.time`
+- L855: `weekly-pending-time-log-report.report` -> `workcore.weekly-pending-time-log-report.report`
+- L857: `finance-report.chart` -> `workcore.finance-report.chart`
+- L862: `leave-report.leave_quota` -> `workcore.leave-report.leave_quota`
+- L863: `leave_quota.export_all_leave_quota` -> `workcore.leave_quota.export_all_leave_quota`
+- L864: `leave-report.cleaner-leave-quota` -> `workcore.leave-report.cleaner-leave-quota`
+- L869: `expense-report.chart` -> `workcore.expense-report.chart`
+- L870: `expense-report.expense_category_report` -> `workcore.expense-report.expense_category_report`
+- L873: `enquiry-report.lead_contact` -> `workcore.enquiry-report.lead_contact`
+- L874: `enquiry-report.total_contact` -> `workcore.enquiry-report.total_contact`
+- L876: `enquiry-report.chart` -> `workcore.enquiry-report.chart`
+- L877: `enquiry-report.profile` -> `workcore.enquiry-report.profile`
+- L878: `deal-report.export` -> `workcore.deal-report.export`
+- L887: `show_notifications` -> `workcore.show_notifications`
+- L890: `gdpr.enquiry.approve_reject` -> `workcore.gdpr.enquiry.approve_reject`
+- L891: `gdpr.customer.approve_reject` -> `workcore.gdpr.customer.approve_reject`
+- L893: `gdpr_settings.apply_quick_action` -> `workcore.gdpr_settings.apply_quick_action`
+- L894: `gdpr_settings.update_general` -> `workcore.gdpr_settings.update_general`
+- L896: `gdpr.store_consent` -> `workcore.gdpr.store_consent`
+- L897: `gdpr.add_consent` -> `workcore.gdpr.add_consent`
+- L898: `gdpr.edit_consent` -> `workcore.gdpr.edit_consent`
+- L900: `gdpr.update_consent` -> `workcore.gdpr.update_consent`
+- L902: `gdpr_settings.purpose_delete` -> `workcore.gdpr_settings.purpose_delete`
+- L906: `gdpr.update_customer_consent` -> `workcore.gdpr.update_customer_consent`
+- L907: `gdpr.export_data` -> `workcore.gdpr.export_data`
+- L908: `gdpr.update_consent_block` -> `workcore.gdpr.update_consent_block`
+- L911: `all-notifications` -> `workcore.all-notifications`
+- L912: `mark_single_notification_read` -> `workcore.mark_single_notification_read`
+- L913: `mark_notification_read` -> `workcore.mark_notification_read`
+- L918: `hideWebhookAlert` -> `workcore.hideWebhookAlert`
+- L921: `quote-template.add_item` -> `workcore.quote-template.add_item`
+- L923: `quote-template.delete_image` -> `workcore.quote-template.delete_image`
+- L924: `quote-template.download` -> `workcore.quote-template.download`
+- L926: `quickbooks.callback` -> `workcore.quickbooks.callback`
+- L927: `quickbooks.index` -> `workcore.quickbooks.index`
+- L930: `quote-request.apply_quick_action` -> `workcore.quote-request.apply_quick_action`
+- L931: `quote-request.change_status` -> `workcore.quote-request.change_status`
+- L932: `quote-request.confirm_rejected` -> `workcore.quote-request.confirm_rejected`
+- L933: `quote-request.send_quote_request` -> `workcore.quote-request.send_quote_request`
+- L934: `quote-request.send_quote_mail` -> `workcore.quote-request.send_quote_mail`
+- L937: `gantt_link.service job_update` -> `workcore.gantt_link.service job_update`
+- L949: `test-broadcast` -> `workcore.test-broadcast`
+- L960: `debug-broadcast` -> `workcore.debug-broadcast`

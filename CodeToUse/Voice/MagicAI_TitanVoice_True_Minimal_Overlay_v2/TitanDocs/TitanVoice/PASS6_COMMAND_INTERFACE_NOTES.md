@@ -1,0 +1,1 @@
+Pass 6 introduces unified command interface, confidence thresholds, and command log persistence.
