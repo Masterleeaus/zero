@@ -71,6 +71,8 @@ return [
             'after_commit' => false,
         ],
 
+        // ─── Titan Dedicated Queues ───────────────────────────────────
+        // AI jobs (provider calls, completions, router decisions)
         /*
         |----------------------------------------------------------------------
         | Titan Core Isolated Queues (Phase 6.7)
@@ -100,10 +102,12 @@ return [
             'after_commit' => false,
         ],
 
+        // Skill execution jobs (Zylos-managed processes)
         'titan-skills' => [
             'driver'       => 'database',
             'table'        => 'jobs',
             'queue'        => 'titan-skills',
+            'retry_after'  => 180,
             'retry_after'  => 300,
             'after_commit' => false,
         ],
