@@ -1,0 +1,13 @@
+{
+  "name": "modules/webhooks",
+  "description": "Webhooks Worksuite module (auto-patched)",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Modules\\Webhooks\\": ""
+    }
+  },
+  "require": {
+    "php": ">=8.0"
+  }
+}

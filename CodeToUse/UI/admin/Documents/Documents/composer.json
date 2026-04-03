@@ -1,0 +1,13 @@
+{
+  "name": "modules/Documents",
+  "description": "Documents Worksuite module (auto-patched)",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Modules\\Documents\\": ""
+    }
+  },
+  "require": {
+    "php": ">=8.0"
+  }
+}

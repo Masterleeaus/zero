@@ -1,0 +1,18 @@
+{
+  "name": "BudgetAnalyticsForecasting",
+  "alias": "budgetanalyticsforecasting",
+  "description": "Budget Analytics & Forecasting with AI-powered predictions and scenarios",
+  "keywords": [
+    "budget",
+    "forecast",
+    "analytics",
+    "ai"
+  ],
+  "priority": 0,
+  "providers": [
+    "Modules\\BudgetAnalyticsForecasting\\Providers\\BudgetUtilsModuleServiceProvider",
+    "Modules\\BudgetAnalyticsForecasting\\Providers\\AIServiceProvider",
+    "Modules\\BudgetAnalyticsForecasting\\Providers\\ConsoleServiceProvider"
+  ],
+  "files": []
+}

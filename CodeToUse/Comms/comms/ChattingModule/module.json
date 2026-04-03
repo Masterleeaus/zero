@@ -1,0 +1,23 @@
+{
+    "name": "ChattingModule",
+    "alias": "chattingmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ChattingModule\\Providers\\ChattingModuleServiceProvider",
+        "Modules\\ChattingModule\\Providers\\EventServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": [],
+    "active": 1,
+    "order": 0,
+    "permissions": [],
+    "roles_permissions": {
+        "admin": [],
+        "manager": []
+    }
+}

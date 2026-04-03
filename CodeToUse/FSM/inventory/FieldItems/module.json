@@ -1,0 +1,14 @@
+{
+  "name": "FieldItems",
+  "alias": "items",
+  "description": "Manage items, categories, subcategories, suppliers and attachments for field service use.",
+  "keywords": [],
+  "priority": 0,
+  "providers": [
+    "Modules\\FieldItems\\Providers\\FieldItemsServiceProvider",
+    "Modules\\FieldItems\\Providers\\ItemsViewComposerServiceProvider"
+  ],
+  "files": [],
+  "version": "1.0.1",
+  "active": 1
+}

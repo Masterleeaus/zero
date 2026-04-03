@@ -1,0 +1,2 @@
+
+Register App\\Providers\\TitanOmniServiceProvider::class in your provider loader.

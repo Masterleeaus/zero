@@ -1,0 +1,13 @@
+{
+  "name": "modules/restapi",
+  "description": "RestAPI Worksuite module (auto-patched)",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Modules\\RestAPI\\": ""
+    }
+  },
+  "require": {
+    "php": ">=8.0"
+  }
+}

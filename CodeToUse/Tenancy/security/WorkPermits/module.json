@@ -1,0 +1,12 @@
+{
+    "name": "TrWorkPermits",
+    "alias": "workpermits",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrWorkPermits\\Providers\\WorkPermitsServiceProvider",
+        "Modules\\TrWorkPermits\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

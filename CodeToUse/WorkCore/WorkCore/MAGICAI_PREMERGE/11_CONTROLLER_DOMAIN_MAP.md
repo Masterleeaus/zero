@@ -1,0 +1,44 @@
+# Controller domain map
+
+Top controller prefixes remaining after pre-merge pruning.
+
+- `Site`: 17
+- `Enquiry`: 12
+- `Issue / Support`: 11
+- `Service Job`: 10
+- `Service Agreement`: 7
+- `Cleaner`: 7
+- `Customer`: 6
+- `Leave`: 5
+- `Discussion`: 4
+- `Invoice`: 4
+- `Service / Extra`: 4
+- `Recurring`: 4
+- `Timelog`: 4
+- `Attendance`: 3
+- `Custom`: 3
+- `Quote`: 3
+- `Expense`: 3
+- `Knowledge`: 3
+- `Team Chat Item`: 3
+- `Deal`: 2
+- `Event`: 2
+- `Gdpr`: 2
+- `Notice`: 2
+- `Notification`: 2
+- `Payment`: 2
+- `Profile`: 2
+- `Proposal`: 2
+- `Public`: 2
+- `Quickbook`: 2
+- `Stripe`: 2
+- `Sub`: 2
+- `Account`: 1
+- `App`: 1
+- `Appreciation`: 1
+- `Authorize`: 1
+- `Award`: 1
+- `Bank`: 1
+- `Business`: 1
+- `Controller`: 1
+- `Credit`: 1

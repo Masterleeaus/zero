@@ -1,0 +1,109 @@
+{
+  "name": "@memvid/canvas-core",
+  "version": "0.1.0",
+  "description": "Core engine for Canvas - AI UI Kit",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "import": "./dist/errors/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./types-only": {
+      "types": "./dist/types-only.d.ts",
+      "import": "./dist/types-only.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js"
+    },
+    "./agents": {
+      "types": "./dist/agents/index.d.ts",
+      "import": "./dist/agents/index.js"
+    },
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "import": "./dist/themes/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./memory": {
+      "types": "./dist/memory/index.d.ts",
+      "import": "./dist/memory/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js",
+      "default": "./dist/config/index.js"
+    },
+    "./config/client": {
+      "types": "./dist/config/client.d.ts",
+      "import": "./dist/config/client.js",
+      "default": "./dist/config/client.js"
+    },
+    "./ingest": {
+      "types": "./dist/ingest/index.d.ts",
+      "import": "./dist/ingest/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.54",
+    "@ai-sdk/openai": "^2.0.80",
+    "@memvid/sdk": "^2.0.146",
+    "ai": "^5.0.108",
+    "mammoth": "^1.11.0",
+    "officeparser": "^6.0.1",
+    "unpdf": "^1.4.0",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/memvid/canvas"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "memory",
+    "memvid",
+    "canvas",
+    "vercel-ai-sdk"
+  ]
+}

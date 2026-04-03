@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: AIPlatform API
+  version: 0.1.0
+  description: "OpenAPI spec for AIPlatform \u2014 core endpoints for pipelines, jobs,\
+    \ and models."
+servers:
+- url: https://api.example.com
+  description: Production
+- url: http://localhost:8000
+  description: Local dev
+paths:
+  /api/v1/models:
+    get:
+      summary: List models
+      responses:
+        '200':
+          description: A list of available model adapters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/pipelines/run:
+    post:
+      summary: Run a pipeline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pipeline_id:
+                  type: string
+                inputs:
+                  type: object
+              required:
+              - pipeline_id
+      responses:
+        '202':
+          description: Pipeline accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+  /api/v1/jobs/{job_id}:
+    get:
+      summary: Get job status
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job status and logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  logs:
+                    type: array
+                    items:
+                      type: string
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+- BearerAuth: []

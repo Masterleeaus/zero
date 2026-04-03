@@ -1,0 +1,14 @@
+TitanBot merged base selection report
+
+Chosen base: TitanBot_overlay_pass11_full.zip
+Reason: highest file count (268), newest overlay bridge additions, and exact superset of pass6.
+
+Merged in from TitanBot.zip:
+- 5 unique avatar assets under public/uploads/avatars/
+
+Compared against TitanBot_overlay_pass3_big.zip:
+- no unique files missing from pass11
+- pass11 retained newer/different overlay/controller/model files
+
+Compared against TitanBot_overlay_pass6_full.zip:
+- pass11 is a direct superset with 14 extra bridge/ingress/channel files

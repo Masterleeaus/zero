@@ -1,0 +1,52 @@
+{
+  "name": "TitanTrust",
+  "type": "extension",
+  "version": "2.0.0",
+  "description": "TitanTrust (Jobs trust, proof, compliance & audit) extension for magicai",
+  "slug": "titan-trust",
+  "provider": "App\\Extensions\\TitanTrust\\System\\TitanTrustServiceProvider",
+  "key": "titan_trust",
+  "install": {
+    "mode": "full",
+    "dependencies": {
+      "requires": [
+        "menu"
+      ],
+      "php": ">=8.0",
+      "laravel": ">=8"
+    },
+    "db": {
+      "run_migrations": true,
+      "migrations_path": "database/migrations",
+      "run_seeders": true,
+      "seeders": [
+        "App\\Extensions\\TitanTrust\\Database\\Seeders\\MenuSeeder",
+        "App\\Extensions\\TitanTrust\\Database\\Seeders\\PermissionsSeeder"
+      ],
+      "idempotent_required": true
+    },
+    "menus": {
+      "regenerate_after": true,
+      "expected_keys": [
+        "jobs",
+        "jobs.verify",
+        "jobs.verify.gallery",
+        "jobs.verify.incidents"
+      ],
+      "route_drift_policy": "sync_to_manifest",
+      "route_map": {
+        "jobs.verify": "dashboard.user.titan-trust.index",
+        "jobs.verify.gallery": "dashboard.user.titan-trust.gallery",
+        "jobs.verify.incidents": "dashboard.user.titan-trust.incidents"
+      }
+    },
+    "routes": {
+      "expected_named_routes": [
+        "dashboard.user.titan-trust.index",
+        "dashboard.user.titan-trust.gallery",
+        "dashboard.user.titan-trust.incidents"
+      ],
+      "provider_boot_required": true
+    }
+  }
+}

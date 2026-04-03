@@ -1,0 +1,11 @@
+{
+    "name": "TrNotes",
+    "alias": "trnotes",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrNotes\\Providers\\TrNotesServiceProvider"
+    ],
+    "files": []
+}
