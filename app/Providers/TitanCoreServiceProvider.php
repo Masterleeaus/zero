@@ -150,6 +150,26 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(OmniManager::class);
         $this->app->singleton(AgentStudioManager::class);
 
+        // ── Chat Bridge ──────────────────────────────────────────────────────
+        // Canonical bridge: all chat surfaces (AIChatPro, Canvas, Chatbot, channels)
+        // route execution through TitanChatBridge → OmniManager → TitanAIRouter.
+        $this->app->singleton(\App\Services\TitanChat\TitanChatBridge::class, function ($app) {
+            $bridge = new \App\Services\TitanChat\TitanChatBridge(
+                $app->make(OmniManager::class),
+                $app->make(TitanMemoryService::class),
+            );
+
+            // Register all channel adapters
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\MessengerChannelAdapter::class));
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\WhatsAppChannelAdapter::class));
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\TelegramChannelAdapter::class));
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\VoiceChannelAdapter::class));
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\WebchatChannelAdapter::class));
+            $bridge->registerAdapter($app->make(\App\TitanCore\Chat\Channels\ExternalChatbotChannelAdapter::class));
+
+            return $bridge;
+        });
+
         // ── Registry / manifest / MCP ────────────────────────────────────────
         $this->app->singleton(CoreSourceCatalog::class);
         $this->app->singleton(CoreManifest::class);
