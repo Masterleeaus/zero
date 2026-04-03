@@ -215,6 +215,7 @@ return [
         App\Extensions\TitanRewind\System\TitanRewindServiceProvider::class,
         App\Providers\TitanCoreServiceProvider::class,
         App\Providers\TitanPwaServiceProvider::class,
+        App\Providers\AdminServiceProvider::class,
 
         /**
          * Laravel Json Localization Manager
