@@ -74,7 +74,6 @@ class ServicePlan extends Model
         'starts_on'                   => 'date',
         'start_date'                  => 'date',
         'ends_on'                     => 'date',
-        'start_date'                  => 'date',
         'end_date'                    => 'date',
         'next_visit_due'              => 'date',
         'last_visit_completed'        => 'date',

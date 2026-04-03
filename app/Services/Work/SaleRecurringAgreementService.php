@@ -69,7 +69,7 @@ class SaleRecurringAgreementService
      *     agreement: ServiceAgreement,
      *     plan: ServicePlan,
      *     visits: Collection<int, ServicePlanVisit>,
-     *     first_job: ServiceJob|null
+     *     firstJob: ServiceJob|null
      * }
      */
     public function runRecurringPipeline(Quote $quote, array $options = []): array
