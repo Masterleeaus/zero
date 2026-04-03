@@ -6,6 +6,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Crm\Customer;
+use App\Models\Crm\Deal;
 use App\Models\Money\Quote;
 use App\Models\Premises\Premises;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +28,13 @@ class ServiceAgreement extends Model
         'expired_at'             => 'datetime',
         'has_equipment_coverage' => 'boolean',
         'recurring_plan_count'   => 'integer',
+        'billing_amount'         => 'float',
+        'sla_response_hours'     => 'integer',
+        'sla_resolution_hours'   => 'integer',
+        'auto_renews'            => 'boolean',
+        'renewal_notice_days'    => 'integer',
+        'health_score'           => 'integer',
+        'health_flags'           => 'array',
     ];
 
     public function scopeActive($query)
@@ -121,6 +129,60 @@ class ServiceAgreement extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    // ── TitanContracts relationships ──────────────────────────────────────────
+
+    public function deal(): BelongsTo
+    {
+        return $this->belongsTo(Deal::class, 'deal_id');
+    }
+
+    public function renewedFrom(): BelongsTo
+    {
+        return $this->belongsTo(ServiceAgreement::class, 'renewed_from_id');
+    }
+
+    public function entitlements(): HasMany
+    {
+        return $this->hasMany(ContractEntitlement::class, 'agreement_id');
+    }
+
+    public function slaBreaches(): HasMany
+    {
+        return $this->hasMany(ContractSLABreach::class, 'agreement_id');
+    }
+
+    public function renewals(): HasMany
+    {
+        return $this->hasMany(ContractRenewal::class, 'agreement_id');
+    }
+
+    // ── TitanContracts status helpers ─────────────────────────────────────────
+
+    public function isExpired(): bool
+    {
+        if ($this->expired_at === null) {
+            return false;
+        }
+
+        return now()->gte($this->expired_at);
+    }
+
+    public function isDueForRenewal(): bool
+    {
+        if ($this->expired_at === null || ! $this->auto_renews) {
+            return false;
+        }
+
+        $noticeDays = $this->renewal_notice_days ?? 30;
+
+        return now()->addDays($noticeDays)->gte($this->expired_at);
+    }
+
+    public function getHealthScore(): int
+    {
+        return (int) ($this->health_score ?? 100);
     }
 
     // ── fieldservice_sale_agreement_equipment_stock helpers ──────────────────

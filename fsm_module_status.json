@@ -31,7 +31,8 @@
         "module_28": { "name": "fieldservice_distribution", "status": "pending" },
         "module_29": { "name": "fieldservice_change_management", "status": "pending" },
         "module_30": { "name": "fieldservice_quality", "status": "pending" },
-        "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" }
+        "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" },
+        "titan_contracts": { "name": "titan_contracts", "status": "installed", "installed_at": "2026-04-03", "notes": "Agreement entitlement engine: ContractEntitlement, ContractSLABreach, ContractRenewal, 4 services, 5 events, 4 listeners, ContractController, migration 900100" }
     },
     "next_module": "module_9",
     "updated_at": "2026-04-03"
