@@ -27,7 +27,7 @@ class StaffProfileTest extends TestCase
             'status'          => 'active',
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('dashboard.team.staff-profiles.index'));
 
         $this->assertDatabaseHas('staff_profiles', [
             'user_id'         => $user->id,

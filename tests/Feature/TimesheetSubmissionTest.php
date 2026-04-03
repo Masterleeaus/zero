@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Events\Work\TimesheetSubmitted;
 use App\Models\User;
 use App\Models\Work\WeeklyTimesheet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class TimesheetSubmissionTest extends TestCase
@@ -46,6 +48,8 @@ class TimesheetSubmissionTest extends TestCase
 
     public function test_timesheet_submit_changes_status(): void
     {
+        Event::fake([TimesheetSubmitted::class]);
+
         $user = User::factory()->create(['company_id' => 20]);
         $this->actingAs($user);
 
@@ -66,6 +70,10 @@ class TimesheetSubmissionTest extends TestCase
             'id'     => $timesheet->id,
             'status' => 'submitted',
         ]);
+
+        Event::assertDispatched(TimesheetSubmitted::class, static function (TimesheetSubmitted $event) use ($timesheet) {
+            return $event->timesheet->id === $timesheet->id;
+        });
     }
 
     public function test_timesheet_approve_restricted_to_managers(): void

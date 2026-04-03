@@ -9,6 +9,7 @@ use App\Models\Work\StaffProfile;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StaffProfileController extends CoreController
 {
@@ -37,8 +38,10 @@ class StaffProfileController extends CoreController
 
     public function store(Request $request): RedirectResponse
     {
+        $companyId = $request->user()?->company_id;
+
         $validated = $request->validate([
-            'user_id'                  => ['required', 'exists:users,id'],
+            'user_id'                  => ['required', Rule::exists('users', 'id')->where('company_id', $companyId)],
             'employee_number'          => ['nullable', 'string', 'max:50'],
             'job_title'                => ['nullable', 'string', 'max:100'],
             'department'               => ['nullable', 'string', 'max:100'],
@@ -48,7 +51,7 @@ class StaffProfileController extends CoreController
             'hourly_rate'              => ['nullable', 'numeric', 'min:0'],
             'salary'                   => ['nullable', 'numeric', 'min:0'],
             'pay_frequency'            => ['nullable', 'string', 'max:50'],
-            'manager_id'               => ['nullable', 'exists:users,id'],
+            'manager_id'               => ['nullable', Rule::exists('users', 'id')->where('company_id', $companyId)],
             'emergency_contact_name'   => ['nullable', 'string', 'max:100'],
             'emergency_contact_phone'  => ['nullable', 'string', 'max:30'],
             'notes'                    => ['nullable', 'string', 'max:2000'],
@@ -77,6 +80,8 @@ class StaffProfileController extends CoreController
     {
         abort_if($staffProfile->company_id !== $request->user()?->company_id, 403);
 
+        $companyId = $request->user()?->company_id;
+
         $validated = $request->validate([
             'employee_number'          => ['nullable', 'string', 'max:50'],
             'job_title'                => ['nullable', 'string', 'max:100'],
@@ -87,7 +92,7 @@ class StaffProfileController extends CoreController
             'hourly_rate'              => ['nullable', 'numeric', 'min:0'],
             'salary'                   => ['nullable', 'numeric', 'min:0'],
             'pay_frequency'            => ['nullable', 'string', 'max:50'],
-            'manager_id'               => ['nullable', 'exists:users,id'],
+            'manager_id'               => ['nullable', Rule::exists('users', 'id')->where('company_id', $companyId)],
             'emergency_contact_name'   => ['nullable', 'string', 'max:100'],
             'emergency_contact_phone'  => ['nullable', 'string', 'max:30'],
             'notes'                    => ['nullable', 'string', 'max:2000'],

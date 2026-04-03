@@ -61,6 +61,7 @@ class TimesheetSubmission extends Model
     public function timelogsForWeek(): \Illuminate\Database\Eloquent\Collection
     {
         return Timelog::query()
+            ->where('company_id', $this->company_id)
             ->where('user_id', $this->user_id)
             ->whereBetween('started_at', [
                 $this->week_start->startOfDay(),

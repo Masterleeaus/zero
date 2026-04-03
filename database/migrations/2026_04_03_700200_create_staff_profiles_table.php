@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('hourly_rate', 10, 2)->nullable();
             $table->decimal('salary', 12, 2)->nullable();
             $table->string('pay_frequency')->nullable();
-            $table->unsignedBigInteger('manager_id')->nullable();
+            $table->unsignedBigInteger('manager_id')->nullable()->index(); // No FK — allows flexible hierarchy; indexed for manager-tree queries
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_phone')->nullable();
             $table->text('notes')->nullable();

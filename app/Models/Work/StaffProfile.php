@@ -56,6 +56,7 @@ class StaffProfile extends Model
         return $this->belongsTo(User::class, 'manager_id');
     }
 
+    /** Staff profiles whose manager_id links to this profile's user_id. */
     public function managedStaff(): HasMany
     {
         return $this->hasMany(self::class, 'manager_id', 'user_id');

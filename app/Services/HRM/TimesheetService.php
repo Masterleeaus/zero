@@ -75,13 +75,15 @@ class TimesheetService
             'status' => 'rejected',
         ]);
 
-        if ($notes !== '') {
-            TimesheetSubmission::query()
-                ->where('company_id', $sheet->company_id)
-                ->where('user_id', $sheet->user_id)
-                ->where('week_start', $sheet->week_start)
-                ->update(['review_notes' => $notes, 'reviewed_by' => $reviewer->id, 'reviewed_at' => now()]);
-        }
+        TimesheetSubmission::query()
+            ->where('company_id', $sheet->company_id)
+            ->where('user_id', $sheet->user_id)
+            ->where('week_start', $sheet->week_start)
+            ->update([
+                'reviewed_by'  => $reviewer->id,
+                'reviewed_at'  => now(),
+                'review_notes' => $notes !== '' ? $notes : null,
+            ]);
 
         TimesheetRejected::dispatch($sheet, $reviewer);
 
