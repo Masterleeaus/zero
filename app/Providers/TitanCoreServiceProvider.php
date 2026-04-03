@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\TitanCore\Agents\AgentStudioManager;
+use App\TitanCore\Events\TitanCoreActivity;
+use App\TitanCore\MCP\McpCapabilityRegistry;
 use App\TitanCore\Omni\OmniManager;
 use App\TitanCore\Pulse\PulseManager;
 use App\TitanCore\Registry\CoreManifest;
@@ -25,15 +27,19 @@ use App\TitanCore\Zero\AI\Runtime\NullRuntimeAdapter;
 use App\TitanCore\Zero\AI\Runtime\RuntimeManager;
 use App\TitanCore\Zero\AI\TitanAIRouter;
 use App\TitanCore\Zero\AI\ZeroCoreManager;
+use App\TitanCore\Zero\Budget\TitanTokenBudget;
 use App\TitanCore\Zero\CoreKernel;
 use App\TitanCore\Zero\Knowledge\KnowledgeManager;
 use App\TitanCore\Zero\Knowledge\KnowledgeScopeResolver;
 use App\TitanCore\Zero\Memory\MemoryManager;
 use App\TitanCore\Zero\Memory\Session\SessionHandoffManager;
+use App\TitanCore\Zero\Memory\TitanMemoryService;
 use App\TitanCore\Zero\Process\ProcessBridge;
 use App\TitanCore\Zero\Rewind\RewindManager;
 use App\TitanCore\Zero\Signals\SignalBridge;
+use App\TitanCore\Zero\Skills\ZylosBridge;
 use App\TitanCore\Zero\Telemetry\TelemetryManager;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class TitanCoreServiceProvider extends ServiceProvider
@@ -89,7 +95,13 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(KnowledgeManager::class);
         $this->app->singleton(SessionHandoffManager::class);
         $this->app->singleton(MemoryManager::class);
+        $this->app->singleton(TitanMemoryService::class);
         $this->app->singleton(TelemetryManager::class);
+        $this->app->singleton(TitanTokenBudget::class);
+        $this->app->singleton(ZylosBridge::class, function ($app) {
+            return new ZylosBridge($app->make(\Illuminate\Http\Client\Factory::class));
+        });
+        $this->app->singleton(McpCapabilityRegistry::class);
         $this->app->singleton(ZeroCoreManager::class);
         $this->app->singleton(TitanAIRouter::class);
         $this->app->singleton(SignalBridge::class);
