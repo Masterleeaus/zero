@@ -6,6 +6,9 @@ namespace App\Services\Dispatch;
 
 use App\Contracts\SchedulableEntity;
 use App\Models\Inspection\InspectionInstance;
+use App\Models\Route\DispatchRoute;
+use App\Models\Route\DispatchRouteStop;
+use App\Models\Route\DispatchRouteStopItem;
 use App\Models\Work\ChecklistRun;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlanVisit;
@@ -70,6 +73,57 @@ class DispatchBoardEventAdapter
         return $this->surfaceProvider
             ->getEventsForPremises($premisesId)
             ->map(fn ($dto) => $this->toCard($dto));
+    }
+
+    /**
+     * Get dispatch board cards for all stops on a named route (optionally filtered by date).
+     *
+     * Module 10 (fieldservice_route) — route-aware dispatch board view.
+     *
+     * @return Collection<int, DispatchBoardCardDTO>
+     */
+    public function getCardsForRoute(int $routeId, ?Carbon $date = null): Collection
+    {
+        return $this->surfaceProvider
+            ->getEventsForRoute($routeId, $date)
+            ->map(fn ($dto) => $this->toCard($dto));
+    }
+
+    /**
+     * Get dispatch board cards for a specific day-route run.
+     *
+     * Module 10 (fieldservice_route) — stop-level dispatch board view.
+     *
+     * @return Collection<int, DispatchBoardCardDTO>
+     */
+    public function getCardsForRouteStop(int $routeStopId): Collection
+    {
+        return $this->surfaceProvider
+            ->getEventsForRouteStop($routeStopId)
+            ->map(fn ($dto) => $this->toCard($dto));
+    }
+
+    /**
+     * Build a RouteBoardCardDTO for a DispatchRouteStop (day-route summary card).
+     *
+     * Module 10 (fieldservice_route) — route summary card for board header rows.
+     */
+    public function toRouteBoardCard(DispatchRouteStop $routeStop): RouteBoardCardDTO
+    {
+        $route = $routeStop->route;
+        return new RouteBoardCardDTO(
+            routeStopId:     $routeStop->id,
+            routeId:         $routeStop->route_id,
+            routeName:       $route?->name ?? '—',
+            routeDate:       $routeStop->route_date?->toDateString() ?? '',
+            assignedUserId:  $routeStop->assigned_user_id,
+            teamId:          $routeStop->team_id,
+            status:          $routeStop->status,
+            plannedStart:    $routeStop->planned_start_at?->toIso8601String(),
+            plannedEnd:      $routeStop->planned_end_at?->toIso8601String(),
+            stopCount:       $routeStop->stopCount(),
+            capacityRemaining: $routeStop->capacityRemaining(),
+        );
     }
 
     /**

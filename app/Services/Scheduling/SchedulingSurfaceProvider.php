@@ -6,6 +6,8 @@ namespace App\Services\Scheduling;
 
 use App\Contracts\SchedulableEntity;
 use App\Models\Inspection\InspectionInstance;
+use App\Models\Route\DispatchRoute;
+use App\Models\Route\DispatchRouteStop;
 use App\Models\Work\ChecklistRun;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlanVisit;
@@ -208,6 +210,77 @@ class SchedulingSurfaceProvider
         ?int $customerId = null,
     ): ScheduledEventDTO {
         return $this->normalise($entity, $premisesId, $customerId);
+    }
+
+    /**
+     * Return all scheduled events for a specific dispatch route on a given date.
+     *
+     * Module 10 (fieldservice_route) — route-aware scheduling view.
+     *
+     * @return Collection<int, ScheduledEventDTO>
+     */
+    public function getEventsForRoute(int $routeId, ?Carbon $date = null): Collection
+    {
+        $query = DispatchRouteStop::where('route_id', $routeId)
+            ->with(['stopItems.schedulable']);
+
+        if ($date !== null) {
+            $query->where('route_date', $date->toDateString());
+        }
+
+        $events = collect();
+
+        foreach ($query->get() as $stop) {
+            foreach ($stop->stopItems as $item) {
+                $entity = $item->schedulable;
+                if ($entity instanceof SchedulableEntity) {
+                    $events->push(
+                        $this->normalise($entity, $item->premises_id, $item->customer_id)
+                    );
+                }
+            }
+        }
+
+        return $events->sortBy('scheduledStart')->values();
+    }
+
+    /**
+     * Return all scheduled events for a dispatch route stop (single day-route run).
+     *
+     * Module 10 (fieldservice_route) — stop-level timeline.
+     *
+     * @return Collection<int, ScheduledEventDTO>
+     */
+    public function getEventsForRouteStop(int $routeStopId): Collection
+    {
+        $stop = DispatchRouteStop::with(['stopItems.schedulable'])->find($routeStopId);
+
+        if ($stop === null) {
+            return collect();
+        }
+
+        return collect($stop->stopItems)
+            ->map(static function ($item) {
+                $entity = $item->schedulable;
+                if (! ($entity instanceof SchedulableEntity)) {
+                    return null;
+                }
+                return new ScheduledEventDTO(
+                    key:            $entity->getSchedulableType() . ':' . $entity->getKey(),
+                    entityType:     $entity->getSchedulableType(),
+                    entityId:       (int) $entity->getKey(),
+                    title:          $entity->getSchedulableTitle(),
+                    scheduledStart: $entity->getScheduledStart(),
+                    scheduledEnd:   $entity->getScheduledEnd(),
+                    assignedUserId: $entity->getAssignedUserId(),
+                    status:         $entity->getSchedulableStatus(),
+                    priority:       $entity->getSchedulablePriority(),
+                    premisesId:     $item->premises_id,
+                    customerId:     $item->customer_id,
+                );
+            })
+            ->filter()
+            ->values();
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────

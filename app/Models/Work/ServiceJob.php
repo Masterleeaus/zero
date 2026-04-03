@@ -15,6 +15,7 @@ use App\Models\Equipment\InstalledEquipment;
 use App\Models\Equipment\WarrantyClaim;
 use App\Models\Money\Invoice;
 use App\Models\Premises\Premises;
+use App\Models\Route\DispatchRouteStopItem;
 use App\Models\User;
 use App\Models\Team\Team;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ServiceJob extends Model implements SchedulableEntity
 {
@@ -936,6 +938,18 @@ class ServiceJob extends Model implements SchedulableEntity
     public function scopeWarrantyJobs(Builder $query): Builder
     {
         return $query->where('is_warranty_job', true);
+    }
+
+    // ── Route integration (Module 10 — fieldservice_route) ───────────────────
+
+    /**
+     * All dispatch route stop items that reference this job.
+     *
+     * A job may appear on multiple route stops (e.g. rescheduled across days).
+     */
+    public function routeStopItems(): MorphMany
+    {
+        return $this->morphMany(DispatchRouteStopItem::class, 'schedulable');
     }
 
     // ── SchedulableEntity contract ────────────────────────────────────────────
