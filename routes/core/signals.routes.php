@@ -3,7 +3,7 @@
 use App\Titan\Signals\SignalsService;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity'])
+Route::middleware(['auth', 'updateUserActivity', 'throttle:120,1'])
     ->prefix('dashboard/user/titan-signals')
     ->as('dashboard.user.titan-signals.')
     ->group(static function () {
