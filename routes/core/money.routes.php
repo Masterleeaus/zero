@@ -150,7 +150,7 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
             Route::delete('expense-categories/{expenseCategory}', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'destroy'])
                 ->name('expense-categories.destroy');
 
-            // ── Finance Pass 1: Chart of Accounts ─────────────────────────────
+            // ── Chart of Accounts ─────────────────────────────────────────────
             Route::get('accounts', [\App\Http\Controllers\Core\Money\AccountController::class, 'index'])
                 ->name('accounts.index');
             Route::get('accounts/create', [\App\Http\Controllers\Core\Money\AccountController::class, 'create'])
@@ -166,7 +166,7 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
             Route::delete('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'destroy'])
                 ->name('accounts.destroy');
 
-            // ── Finance Pass 1: Journal Entries ───────────────────────────────
+            // ── Journal Entries ────────────────────────────────────────────────
             Route::get('journal', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'index'])
                 ->name('journal.index');
             Route::get('journal/create', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'create'])

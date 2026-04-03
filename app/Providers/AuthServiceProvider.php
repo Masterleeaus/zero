@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Money\Account;
 use App\Models\Money\Invoice;
 use App\Models\Money\Expense;
+use App\Models\Money\JournalEntry;
 use App\Models\Money\Payment;
 use App\Models\Money\Quote;
 use App\Models\Money\Account;
