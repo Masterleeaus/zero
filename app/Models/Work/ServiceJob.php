@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Work;
 
+use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Deal;
@@ -11,8 +12,10 @@ use App\Models\Crm\Enquiry;
 use App\Models\Equipment\Equipment;
 use App\Models\Equipment\EquipmentMovement;
 use App\Models\Equipment\InstalledEquipment;
+use App\Models\Equipment\WarrantyClaim;
 use App\Models\Money\Invoice;
 use App\Models\Premises\Premises;
+use App\Models\Route\DispatchRouteStopItem;
 use App\Models\User;
 use App\Models\Team\Team;
 use Carbon\Carbon;
@@ -22,8 +25,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\Repair\RepairOrder;
 
-class ServiceJob extends Model
+class ServiceJob extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -97,6 +102,12 @@ class ServiceJob extends Model
         'billable_rate',
         'invoice_id',
         'invoiced_at',
+        // Module 8 — warranty linkage
+        'is_warranty_job',
+        'warranty_claim_id',
+        'covered_equipment_id',
+        // fieldservice_sale — quote line linkage
+        'sale_line_id',
     ];
 
     protected $casts = [
@@ -109,6 +120,7 @@ class ServiceJob extends Model
         'invoiced_at'          => 'datetime',
         'require_signature'    => 'boolean',
         'is_billable'          => 'boolean',
+        'is_warranty_job'      => 'boolean',
         'scheduled_duration'   => 'float',
         'billable_rate'        => 'decimal:2',
         'sequence'             => 'integer',
@@ -120,6 +132,7 @@ class ServiceJob extends Model
         'sequence'           => 10,
         'require_signature'  => false,
         'is_billable'        => false,
+        'is_warranty_job'    => false,
         'scheduled_duration' => 0,
     ];
 
@@ -153,6 +166,16 @@ class ServiceJob extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Money\Quote::class);
+    }
+
+    /**
+     * The specific quote line (item) that generated this job.
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_line_id → sale.order.line.
+     */
+    public function quoteItem(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
     }
 
     public function assignedUser(): BelongsTo
@@ -235,9 +258,6 @@ class ServiceJob extends Model
         return $this->hasMany(EquipmentMovement::class, 'service_job_id');
     }
 
-    public function inspectionInstances(): HasMany
-    {
-        return $this->hasMany(\App\Models\Inspection\InspectionInstance::class, 'service_job_id');
     public function inspections(): HasMany
     {
         return $this->hasMany(InspectionInstance::class, 'service_job_id');
@@ -247,12 +267,21 @@ class ServiceJob extends Model
     {
         return $this->hasMany(ChecklistRun::class, 'runnable_id')
             ->where('runnable_type', self::class);
-        return $this->hasMany(ChecklistRun::class, 'service_job_id');
     }
 
     public function planVisit(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ServicePlanVisit::class, 'service_job_id');
+    }
+
+    public function warrantyClaim(): BelongsTo
+    {
+        return $this->belongsTo(WarrantyClaim::class, 'warranty_claim_id');
+    }
+
+    public function coveredEquipment(): BelongsTo
+    {
+        return $this->belongsTo(InstalledEquipment::class, 'covered_equipment_id');
     }
 
     // ── Outcome helpers ───────────────────────────────────────────────────────
@@ -402,6 +431,20 @@ class ServiceJob extends Model
         }
 
         return $this->premises?->activeSiteAccess();
+    }
+
+    // ── Warranty helpers (Module 8) ───────────────────────────────────────────
+
+    /** Whether this job is classified as warranty work. */
+    public function isWarrantyWork(): bool
+    {
+        return (bool) $this->is_warranty_job;
+    }
+
+    /** Whether this job is linked to an active warranty claim. */
+    public function coveredByWarranty(): bool
+    {
+        return $this->is_warranty_job && $this->warranty_claim_id !== null;
     }
 
     /**
@@ -617,19 +660,77 @@ class ServiceJob extends Model
     public function toCalendarEvent(): array
     {
         return [
-            'id'              => $this->id,
-            'title'           => $this->title,
-            'start'           => $this->scheduled_date_start?->toIso8601String(),
-            'end'             => $this->scheduled_date_end?->toIso8601String(),
-            'color'           => $this->stage?->color ?? '#3B82F6',
-            'extendedProps'   => [
-                'status'     => $this->status,
-                'priority'   => $this->priority,
-                'assignee'   => $this->assignedUser?->name,
-                'customer'   => $this->customer?->name,
-                'site'       => $this->site?->name,
-                'duration'   => $this->scheduled_duration_formatted,
-            ],
+            'id'            => $this->id,
+            'title'         => $this->calendarTitle(),
+            'start'         => $this->scheduled_date_start?->toIso8601String(),
+            'end'           => $this->scheduled_date_end?->toIso8601String(),
+            'color'         => $this->calendarColor(),
+            'extendedProps' => $this->calendarMeta(),
+        ];
+    }
+
+    /**
+     * Human-readable calendar event title.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarTitle(): string
+    {
+        $base = $this->title ?? ('Job #' . $this->id);
+
+        if ($customer = $this->customer?->name) {
+            return $base . ' — ' . $customer;
+        }
+
+        return $base;
+    }
+
+    /**
+     * Calendar event colour — stage colour if set, otherwise priority-based fallback.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarColor(): string
+    {
+        if ($stageColor = $this->stage?->color) {
+            return $stageColor;
+        }
+
+        return match ($this->priority) {
+            'urgent' => '#ef4444',   // red-500
+            'high'   => '#f97316',   // orange-500
+            'normal' => '#3b82f6',   // blue-500
+            'low'    => '#6b7280',   // gray-500
+            default  => '#3b82f6',
+        };
+    }
+
+    /**
+     * Extended calendar metadata for FullCalendar extendedProps / rich tooltip rendering.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function calendarMeta(): array
+    {
+        return [
+            'type'         => 'service_job',
+            'status'       => $this->status,
+            'priority'     => $this->priority,
+            'assignee'     => $this->assignedUser?->name,
+            'assignee_id'  => $this->assigned_user_id,
+            'team'         => $this->team?->name,
+            'team_id'      => $this->team_id,
+            'customer'     => $this->customer?->name,
+            'customer_id'  => $this->customer_id,
+            'premises_id'  => $this->premises_id,
+            'site'         => $this->site?->name,
+            'duration'     => $this->scheduled_duration_formatted,
+            'is_billable'  => $this->is_billable,
+            'enquiry_id'   => $this->enquiry_id,
+            'deal_id'      => $this->deal_id,
+            'agreement_id' => $this->agreement_id,
         ];
     }
 
@@ -844,5 +945,105 @@ class ServiceJob extends Model
     public function scopeForAgreement(Builder $query, int $agreementId): Builder
     {
         return $query->where('agreement_id', $agreementId);
+    }
+
+    /** Scope: jobs flagged as warranty work. */
+    public function scopeWarrantyJobs(Builder $query): Builder
+    {
+        return $query->where('is_warranty_job', true);
+    }
+
+    // ── Route integration (Module 10 — fieldservice_route) ───────────────────
+
+    /**
+     * All dispatch route stop items that reference this job.
+     *
+     * A job may appear on multiple route stops (e.g. rescheduled across days).
+     */
+    public function routeStopItems(): MorphMany
+    {
+        return $this->morphMany(DispatchRouteStopItem::class, 'schedulable');
+    }
+
+    // ── SchedulableEntity contract ────────────────────────────────────────────
+
+    public function getScheduledStart(): ?string
+    {
+        return $this->scheduled_date_start?->toIso8601String();
+    }
+
+    public function getScheduledEnd(): ?string
+    {
+        return $this->scheduled_date_end?->toIso8601String();
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_user_id;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'scheduled';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return $this->priority;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->title ?? 'Service Job #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
+    }
+
+    // ── Repair relationships (Module 9) ───────────────────────────────────────
+
+    /**
+     * All repair orders that originated from this service job.
+     *
+     * @return HasMany<RepairOrder>
+     */
+    public function repairOrders(): HasMany
+    {
+        return $this->hasMany(RepairOrder::class, 'service_job_id');
+    }
+
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * The originating Quote for this job (via quote_id or sale_line_id → quote).
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_id.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        if ($this->quote_id) {
+            return $this->quote;
+        }
+
+        return $this->quoteItem?->quote ?? null;
+    }
+
+    /**
+     * Context summary for the sale line that generated this job.
+     *
+     * @return array{quote_id: int|null, quote_item_id: int|null, tracking: string|null, description: string|null}
+     */
+    public function saleLineContext(): array
+    {
+        $item = $this->quoteItem;
+
+        return [
+            'quote_id'      => $this->quote_id ?? $item?->quote_id,
+            'quote_item_id' => $this->sale_line_id,
+            'tracking'      => $item?->field_service_tracking,
+            'description'   => $item?->description,
+        ];
     }
 }

@@ -1,0 +1,107 @@
+{
+  "generated": "2026-04-03",
+  "module": "FSM Modules 9+10 — Repair Domain + Template Engine",
+  "canonical_owner_models": {
+    "RepairOrder": {
+      "path": "app/Models/Repair/RepairOrder.php",
+      "table": "repair_orders",
+      "purpose": "Central repair lifecycle aggregate. Tracks diagnosis, tasks, parts, checklists, resolution.",
+      "bridges": {
+        "Equipment": "equipment_id → equipment.id",
+        "InstalledEquipment": "installed_equipment_id → installed_equipment.id",
+        "SiteAsset": "site_asset_id → site_assets.id",
+        "Premises": "premises_id → premises.id",
+        "ServiceJob": "service_job_id → service_jobs.id",
+        "WarrantyClaim": "warranty_claim_id → warranty_claims.id",
+        "ServiceAgreement": "agreement_id → service_agreements.id",
+        "Customer": "customer_id → customers.id",
+        "Team": "assigned_team_id → teams.id",
+        "User": "assigned_user_id → users.id",
+        "RepairTemplate": "repair_template_id → repair_templates.id"
+      }
+    },
+    "RepairDiagnosis": {
+      "path": "app/Models/Repair/RepairDiagnosis.php",
+      "table": "repair_diagnoses",
+      "purpose": "Symptom analysis, root cause, specialist/parts/quote flags for a RepairOrder."
+    },
+    "RepairTask": {
+      "path": "app/Models/Repair/RepairTask.php",
+      "table": "repair_tasks",
+      "purpose": "Individual work items within a RepairOrder, sequenced and assigned."
+    },
+    "RepairAction": {
+      "path": "app/Models/Repair/RepairAction.php",
+      "table": "repair_actions",
+      "purpose": "Timestamped action log entries within a RepairOrder."
+    },
+    "RepairPartUsage": {
+      "path": "app/Models/Repair/RepairPartUsage.php",
+      "table": "repair_part_usages",
+      "purpose": "Parts reserved or consumed during a repair, with inventory linkage hooks."
+    },
+    "RepairChecklist": {
+      "path": "app/Models/Repair/RepairChecklist.php",
+      "table": "repair_checklists",
+      "purpose": "Checklist execution context within a RepairOrder."
+    },
+    "RepairResolution": {
+      "path": "app/Models/Repair/RepairResolution.php",
+      "table": "repair_resolutions",
+      "purpose": "Structured resolution record capturing root cause, preventive action, and verification."
+    },
+    "RepairTemplate": {
+      "path": "app/Models/Repair/RepairTemplate.php",
+      "table": "repair_templates",
+      "purpose": "Reusable repair procedure template for automatic task/parts/checklist generation."
+    },
+    "RepairTemplateStep": {
+      "path": "app/Models/Repair/RepairTemplateStep.php",
+      "table": "repair_template_steps",
+      "purpose": "Ordered step within a RepairTemplate, generates RepairTask on instantiation."
+    },
+    "RepairTemplatePart": {
+      "path": "app/Models/Repair/RepairTemplatePart.php",
+      "table": "repair_template_parts",
+      "purpose": "Part specification within a RepairTemplate, generates RepairPartUsage on instantiation."
+    },
+    "RepairTemplateChecklist": {
+      "path": "app/Models/Repair/RepairTemplateChecklist.php",
+      "table": "repair_template_checklists",
+      "purpose": "Checklist specification within a RepairTemplate, generates RepairChecklist on instantiation."
+    }
+  },
+  "host_model_extensions": {
+    "ServiceJob": {
+      "added_relationship": "repairOrders() → HasMany(RepairOrder, service_job_id)",
+      "reason": "Service jobs can trigger repair orders; existing warranty_claim_id and is_warranty_job fields already support the workflow."
+    },
+    "Premises": {
+      "added_methods": [
+        "repairOrders() → HasMany(RepairOrder)",
+        "openRepairs() → Collection of non-terminal repairs",
+        "repairHistory() → Collection of completed/closed repairs",
+        "repairRiskSummary() → array{urgent,high,normal,low,total}"
+      ],
+      "reason": "Premises requires spatial repair intelligence for risk assessment and history queries."
+    },
+    "SchedulingSurfaceProvider": {
+      "added": "RepairOrder added to ENTITY_TYPES. getEventsForRange, getEventsForUser, getEventsForPremises, getEventsForTeam all include RepairOrders via repairsForRange() private helper.",
+      "reason": "RepairOrder implements SchedulableEntity; repairs must appear on the unified dispatch board and calendar."
+    }
+  },
+  "duplicates_detected": {
+    "ServiceJob": "ServiceJob already captures repair-like workflows (is_warranty_job, warranty_claim_id). RepairOrder extends this capability with a dedicated lifecycle rather than replacing it. ServiceJob.repairOrders() bridges the two.",
+    "ChecklistRun": "RepairChecklist is repair-scoped and simpler (no polymorphic runnable). ChecklistRun remains the canonical execution engine for complex, template-driven checklists attached to ServiceJobs/InspectionInstances.",
+    "WarrantyClaim": "No duplication — RepairOrder references WarrantyClaim directly by FK. Warranty domain remains canonical.",
+    "asset_service_events": "The site_assets table already had an 'event_type' comment including 'repair' in migration 2026_04_02_000600. This is a log table and does not conflict with RepairOrder as an aggregate."
+  },
+  "future_merge_candidates": {
+    "ChecklistRun_RepairChecklist": "When checklist complexity grows, RepairChecklist could be superseded by a ChecklistRun with runnable_type=RepairOrder. Defer until needed.",
+    "RepairPartUsage_Inventory": "RepairPartUsage has stock_location and movement_reference hooks ready for full inventory module integration when that module is available.",
+    "ServiceRepairBridge": "RepairOrder.originatingServiceJob() / ServiceJob.repairOrders() bridge is live. Future: add RepairOrder as a runnable_type to ChecklistRun for unified checklist execution.",
+    "CRMSignals": "All CRM repair signals (CrmRepairDetected, CrmReplacementCandidate, CrmAgreementCandidate, CrmRecurringCandidate) are defined and registered but have empty listener arrays pending CRM pipeline integration pass.",
+    "FinanceSignals": "RepairInvoiceGenerated and RepairClaimOffsetApplied are defined and registered but have empty listeners pending Finance domain pass.",
+    "SchedulingSignals": "RepairScheduled, RepairRescheduled, RepairDispatchAssigned are defined and registered but have empty listeners pending Dispatch pass."
+  }
+}

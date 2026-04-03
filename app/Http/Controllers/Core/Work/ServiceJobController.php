@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Core\Work;
 
+use App\Events\Work\ServiceInvoiceGenerated;
 use App\Http\Controllers\Core\CoreController;
+use App\Models\Money\Invoice;
+use App\Models\Money\InvoiceItem;
 use App\Models\Work\JobStage;
 use App\Models\Work\JobType;
 use App\Models\Work\ServiceJob;
@@ -14,6 +17,7 @@ use App\Models\Crm\Customer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ServiceJobController extends CoreController
@@ -132,6 +136,81 @@ class ServiceJobController extends CoreController
             'type'    => 'success',
             'message' => __('Service job updated.'),
         ]);
+    }
+
+    /**
+     * Create a draft invoice from this service job.
+     *
+     * If the job is linked to a quote, its line items are copied into the
+     * new invoice. The job is stamped with the invoice_id and invoiced_at.
+     * Fires ServiceInvoiceGenerated so downstream listeners can react.
+     */
+    public function createInvoice(ServiceJob $job): RedirectResponse
+    {
+        $this->authorize('update', $job);
+
+        if ($job->invoice_id) {
+            return back()->with([
+                'type'    => 'error',
+                'message' => __('An invoice has already been generated for this job.'),
+            ]);
+        }
+
+        $job->load('quote.items');
+
+        $invoice = DB::transaction(function () use ($job) {
+            $invoice = Invoice::create([
+                'company_id'     => $job->company_id,
+                'created_by'     => auth()->id(),
+                'customer_id'    => $job->customer_id,
+                'quote_id'       => $job->quote_id,
+                'title'          => __('Invoice for :title', ['title' => $job->title]),
+                'status'         => 'draft',
+                'issue_date'     => now()->toDateString(),
+                'due_date'       => now()->addDays(30)->toDateString(),
+                'currency'       => $job->company->currency ?? config('app.default_currency', 'AUD'),
+                'subtotal'       => 0,
+                'tax'            => 0,
+                'total'          => 0,
+                'paid_amount'    => 0,
+                'balance'        => 0,
+            ]);
+
+            // Copy line items from the linked quote if available
+            if ($job->quote_id && $job->quote?->items?->isNotEmpty()) {
+                foreach ($job->quote->items as $order => $item) {
+                    InvoiceItem::create([
+                        'company_id'  => $job->company_id,
+                        'created_by'  => auth()->id(),
+                        'invoice_id'  => $invoice->id,
+                        'description' => $item->description,
+                        'quantity'    => $item->quantity,
+                        'unit_price'  => $item->unit_price,
+                        'tax_rate'    => $item->tax_rate,
+                        'line_total'  => $item->line_total,
+                        'sort_order'  => $order,
+                    ]);
+                }
+
+                $invoice->recomputeTotalsFromItems();
+                $invoice->update(['balance' => $invoice->total]);
+            }
+
+            $job->update([
+                'invoice_id'  => $invoice->id,
+                'invoiced_at' => now(),
+            ]);
+
+            ServiceInvoiceGenerated::dispatch($job->fresh(), $invoice->fresh());
+
+            return $invoice;
+        });
+
+        return redirect()->route('dashboard.money.invoices.show', $invoice)
+            ->with([
+                'type'    => 'success',
+                'message' => __('Invoice created from service job.'),
+            ]);
     }
 
     /**

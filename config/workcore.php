@@ -13,6 +13,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | WorkCore Vertical Labels
+    |--------------------------------------------------------------------------
+    | Maps internal snake_case keys to display labels for the active vertical.
+    | Used by workcore_label() in app/Helpers/helpers.php.
+    | These reflect the 'cleaning' vertical defaults; override via a subclass
+    | or env-driven verticals config for other deployments.
+    */
+    'labels' => [
+        'site'           => 'Job',
+        'sites'          => 'Jobs',
+        'service_job'    => 'Cleaning Checklist',
+        'service_jobs'   => 'Cleaning Checklists',
+        'checklist'      => 'Cleaning Checklist Item',
+        'checklists'     => 'Cleaning Checklist Items',
+        'attendance'     => 'Shift Log',
+        'shift'          => 'Availability',
+        'shifts'         => 'Availabilities',
+        'issues_support' => 'Service Requests',
+        'knowledge_base' => 'Playbooks',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | WorkCore Feature Flags
     |--------------------------------------------------------------------------
     | Toggle features on/off per deployment. Disabling hides menu items and

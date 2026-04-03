@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Inspection;
 
+use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Work\ServiceJob;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Status values: scheduled | in_progress | completed | failed | cancelled
  */
-class InspectionInstance extends Model
+class InspectionInstance extends Model implements SchedulableEntity
 {
     use HasFactory;
     use BelongsToCompany;
@@ -131,5 +132,114 @@ class InspectionInstance extends Model
     public function hasFailed(): bool
     {
         return $this->status === 'failed';
+    }
+
+    // ── Calendar helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Return a FullCalendar-compatible calendar event array.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id'            => $this->id,
+            'title'         => $this->calendarTitle(),
+            'start'         => $this->getScheduledStart(),
+            'end'           => $this->completed_at?->toIso8601String(),
+            'color'         => $this->calendarColor(),
+            'extendedProps' => $this->calendarMeta(),
+        ];
+    }
+
+    /**
+     * Human-readable calendar event title.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarTitle(): string
+    {
+        $base = $this->title ?? ('Inspection #' . $this->id);
+
+        return '[Inspection] ' . $base;
+    }
+
+    /**
+     * Calendar colour — varies by inspection type.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     */
+    public function calendarColor(): string
+    {
+        return match ($this->inspection_type) {
+            'compliance' => '#ef4444',   // red-500
+            'safety'     => '#f97316',   // orange-500
+            'handover'   => '#8b5cf6',   // violet-500
+            'quality'    => '#0ea5e9',   // sky-500
+            default      => '#f97316',   // orange-500 — default inspection colour
+        };
+    }
+
+    /**
+     * Extended calendar metadata for tooltip / detail rendering.
+     *
+     * Module 9 (fieldservice_calendar) — calendar display helper.
+     *
+     * @return array<string, mixed>
+     */
+    public function calendarMeta(): array
+    {
+        return [
+            'type'              => 'inspection',
+            'inspection_type'   => $this->inspection_type,
+            'status'            => $this->status,
+            'assignee_id'       => $this->assigned_to ?? $this->inspector_id,
+            'service_job_id'    => $this->service_job_id,
+            'schedule_id'       => $this->inspection_schedule_id,
+            'followup_required' => $this->followup_required,
+            'score'             => $this->score,
+            'scope_type'        => $this->scope_type,
+            'scope_id'          => $this->scope_id,
+        ];
+    }
+
+    // ── SchedulableEntity contract ────────────────────────────────────────────
+
+    public function getScheduledStart(): ?string
+    {
+        return $this->scheduled_at?->toIso8601String();
+    }
+
+    public function getScheduledEnd(): ?string
+    {
+        return null;
+    }
+
+    public function getAssignedUserId(): ?int
+    {
+        return $this->assigned_to ?? $this->inspector_id;
+    }
+
+    public function getSchedulableStatus(): string
+    {
+        return $this->status ?? 'scheduled';
+    }
+
+    public function getSchedulablePriority(): string|int|null
+    {
+        return null;
+    }
+
+    public function getSchedulableTitle(): string
+    {
+        return $this->title ?? 'Inspection #' . $this->id;
+    }
+
+    public function getSchedulableType(): string
+    {
+        return static::class;
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ServiceAgreement extends Model
@@ -102,5 +103,66 @@ class ServiceAgreement extends Model
     public function servicePlans(): HasMany
     {
         return $this->hasMany(ServicePlan::class, 'agreement_id');
+    }
+
+    /**
+     * All service plan visits linked to this agreement via its service plans.
+     */
+    public function visits(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(ServicePlanVisit::class, ServicePlan::class, 'agreement_id', 'service_plan_id');
+    }
+
+    /**
+     * Whether this agreement is currently active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    // ── fieldservice_sale_agreement helpers ───────────────────────────────────
+
+    /**
+     * The Quote that activated or originated this service agreement.
+     *
+     * Mirrors Odoo fieldservice_sale_agreement: agreement_id propagated from sale → fsm.order.
+     * Checks originating_quote_id first, then quote_id.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        if ($this->originating_quote_id) {
+            return \App\Models\Money\Quote::find($this->originating_quote_id);
+        }
+
+        return $this->quote;
+    }
+
+    /**
+     * Summary of service coverage sold through this agreement.
+     *
+     * @return array{
+     *     agreement_id: int,
+     *     status: string,
+     *     originating_quote_id: int|null,
+     *     total_jobs: int,
+     *     completed_jobs: int,
+     *     pending_jobs: int,
+     *     total_visits: int,
+     *     completed_visits: int
+     * }
+     */
+    public function saleCoverageSummary(): array
+    {
+        return [
+            'agreement_id'         => $this->id,
+            'status'               => $this->status,
+            'originating_quote_id' => $this->originating_quote_id ?? $this->quote_id,
+            'total_jobs'           => $this->jobs()->count(),
+            'completed_jobs'       => $this->jobs()->where('status', 'completed')->count(),
+            'pending_jobs'         => $this->jobs()->whereNotIn('status', ['completed', 'cancelled'])->count(),
+            'total_visits'         => $this->visits()->count(),
+            'completed_visits'     => $this->visits()->where('status', 'completed')->count(),
+        ];
     }
 }

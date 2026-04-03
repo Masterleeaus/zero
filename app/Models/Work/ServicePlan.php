@@ -51,10 +51,12 @@ class ServicePlan extends Model
         'starts_on',
         'start_date',
         'ends_on',
+        'start_date',
         'end_date',
         'next_visit_due',
         'last_visit_completed',
         'is_active',
+        'visits_per_cycle',
         'status',
         'notes',
     ];
@@ -65,6 +67,7 @@ class ServicePlan extends Model
         'starts_on'            => 'date',
         'start_date'           => 'date',
         'ends_on'              => 'date',
+        'start_date'           => 'date',
         'end_date'             => 'date',
         'next_visit_due'       => 'date',
         'last_visit_completed' => 'date',
@@ -76,6 +79,8 @@ class ServicePlan extends Model
     protected $attributes = [
         'frequency'        => 'monthly',
         'interval'         => 1,
+        'is_active'        => true,
+        'status'           => 'active',
         'visits_per_cycle' => 1,
         'is_active'        => true,
         'status'           => 'active',
@@ -148,5 +153,24 @@ class ServicePlan extends Model
 
         $this->last_visit_completed = now()->toDateString();
         $this->save();
+    }
+
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * The originating Quote for this service plan.
+     *
+     * Resolves via the linked ServiceAgreement when present,
+     * otherwise returns null.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        $agreement = $this->agreement;
+
+        if (! $agreement) {
+            return null;
+        }
+
+        return $agreement->originatingSale();
     }
 }

@@ -2,8 +2,11 @@
 
 namespace App\TitanCore\Zero\AI;
 
+use App\TitanCore\Events\TitanCoreActivity;
+use App\Titan\Core\TitanMemoryService;
 use App\TitanCore\Zero\AI\Context\DecisionContextFactory;
 use App\TitanCore\Zero\AI\Context\InstructionBuilder;
+use App\TitanCore\Zero\Budget\TitanTokenBudget;
 use App\TitanCore\Zero\Signals\SignalBridge;
 
 class TitanAIRouter
@@ -13,7 +16,22 @@ class TitanAIRouter
         protected DecisionContextFactory $contextFactory,
         protected InstructionBuilder $instructionBuilder,
         protected SignalBridge $signalBridge,
+        protected TitanTokenBudget $budget,
+        protected TitanMemoryService $memoryService,
     ) {
+    }
+
+    /**
+     * Canonical public entry-point (alias for execute).
+     *
+     * All callers — MCP, Omni, controllers — MUST route through here.
+     *
+     * @param  array<string, mixed>  $envelope
+     * @return array<string, mixed>
+     */
+    public function route(array $envelope): array
+    {
+        return $this->execute($envelope);
     }
 
     /**
@@ -26,27 +44,92 @@ class TitanAIRouter
      */
     public function execute(array $envelope): array
     {
-        $envelope = $this->normaliseEnvelope($envelope);
+        $envelope  = $this->normaliseEnvelope($envelope);
+        $startTime = microtime(true);
+
+        if (! $this->budget->isAllowed($envelope)) {
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            event(TitanCoreActivity::fromArray([
+                'intent'     => $envelope['intent'] ?? 'ai.complete',
+                'provider'   => 'titan_ai_router',
+                'duration'   => $duration,
+                'tokens'     => (int) ($envelope['tokens'] ?? 0),
+                'company_id' => $envelope['company_id'] ?? null,
+                'user_id'    => $envelope['user_id'] ?? null,
+                'status'     => 'blocked',
+            ]));
+
+            return [
+                'ok'     => false,
+                'status' => 'budget_exceeded',
+                'budget' => $this->budget->status($envelope),
+            ];
+        }
+
+        $result   = $this->manager->decide($envelope);
+        $duration = round((microtime(true) - $startTime) * 1000, 2);
+        $tokens   = (int) ($result['tokens_used'] ?? $result['tokens'] ?? 0);
+
+        if ($tokens > 0) {
+            $this->budget->record($envelope, $tokens);
+        }
+        $companyId = (int) ($envelope['company_id'] ?? 0);
+        $sessionId = (string) ($envelope['session_id'] ?? $envelope['id'] ?? 'global');
+
+        // Phase 3.8: Recall memory context before AI decision
+        $memoryContext = $companyId > 0
+            ? $this->memoryService->hydrateContext($envelope)
+            : ['memory' => [], 'knowledge' => [], 'scope' => 'global'];
+
+        $envelope['_memory_context'] = $memoryContext;
 
         $result = $this->manager->decide($envelope);
 
+        // Phase 3.8: Store result memory after execution
+        if ($companyId > 0 && ! empty($envelope['input'])) {
+            $this->memoryService->store(
+                $companyId,
+                (int) ($envelope['user_id'] ?? 0),
+                $sessionId,
+                'ai_decision',
+                (string) json_encode([
+                    'input' => $envelope['input'] ?? null,
+                    'decision' => $result['decision'] ?? null,
+                    'requires_approval' => $result['decision']['requires_approval'] ?? false,
+                    'confidence' => $result['decision']['confidence'] ?? null,
+                ], JSON_UNESCAPED_UNICODE),
+                ['importance_score' => 0.7]
+            );
+        }
+
         $this->signalBridge->recordAndPublish(
             [
-                'company_id' => $envelope['company_id'] ?? null,
-                'user_id' => $envelope['user_id'] ?? null,
-                'entity_type' => 'ai_router',
-                'domain' => 'titan_core',
-                'current_state' => $result['decision']['requires_approval'] ?? false
+                'company_id'       => $envelope['company_id'] ?? null,
+                'user_id'          => $envelope['user_id'] ?? null,
+                'entity_type'      => 'ai_router',
+                'domain'           => 'titan_core',
+                'current_state'    => ($result['decision']['requires_approval'] ?? false)
                     ? 'awaiting-approval'
                     : 'processing',
                 'originating_node' => 'titan_ai_router',
             ],
             [
                 'company_id' => $envelope['company_id'] ?? null,
-                'signals' => [],
-                'id' => $envelope['id'] ?? null,
-            ]
+                'signals'    => [],
+                'id'         => $envelope['id'] ?? null,
+            ],
         );
+
+        event(TitanCoreActivity::fromArray([
+            'intent'     => $envelope['intent'] ?? 'ai.complete',
+            'provider'   => $result['runtime'] ?? 'unknown',
+            'duration'   => $duration,
+            'tokens'     => $tokens,
+            'company_id' => $envelope['company_id'] ?? null,
+            'user_id'    => $envelope['user_id'] ?? null,
+            'status'     => $result['status'] ?? 'ok',
+        ]));
 
         return $result;
     }
@@ -59,17 +142,22 @@ class TitanAIRouter
     public function status(): array
     {
         return [
-            'router' => 'TitanAIRouter',
-            'runtime' => config('titan_core.ai.default_runtime', 'null'),
-            'model_router' => config('titan_core.ai.model_router', 'zero'),
-            'provider_selection' => true,
-            'nexus_execution' => true,
-            'authority_weighting' => true,
-            'critique_loop' => true,
-            'approval_state_aware' => true,
+            'router'                     => 'TitanAIRouter',
+            'runtime'                    => config('titan_core.ai.default_runtime', 'null'),
+            'model_router'               => config('titan_core.ai.model_router', 'zero'),
+            'provider_selection'         => true,
+            'nexus_execution'            => true,
+            'authority_weighting'        => true,
+            'critique_loop'              => true,
+            'approval_state_aware'       => true,
             'signal_envelope_compatible' => true,
+            'memory_injection'           => true,
+            'mcp_layer'                  => 'active',
+            'budget_enforcement'         => true,
+            'activity_telemetry'         => true,
             'memory_injection' => true,
-            'mcp_layer' => 'deferred',
+            'memory_service' => 'TitanMemoryService',
+            'mcp_layer' => 'active',
         ];
     }
 

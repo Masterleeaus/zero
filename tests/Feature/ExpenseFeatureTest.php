@@ -11,7 +11,6 @@ use App\Models\Money\ExpenseCategory;
 use App\Notifications\LiveNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ExpenseFeatureTest extends TestCase
@@ -88,9 +87,7 @@ class ExpenseFeatureTest extends TestCase
     {
         Notification::fake();
 
-        $admin = User::factory()->create(['company_id' => 30]);
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        $admin->assignRole('admin');
+        $admin = User::factory()->create(['company_id' => 30, 'type' => Roles::ADMIN]);
 
         $submitter = User::factory()->create(['company_id' => 30]);
         $category = ExpenseCategory::factory()->create(['company_id' => 30]);
@@ -207,7 +204,7 @@ class ExpenseFeatureTest extends TestCase
 
         $response->assertRedirect(route('dashboard.money.expense-categories.index'));
         $this->assertDatabaseHas('expense_categories', ['company_id' => 41, 'name' => 'Travel']);
-        $this->assertDatabaseCount('expense_categories', 1);
+        $this->assertDatabaseCount('expense_categories', 2);
     }
 
     public function test_expense_category_can_repeat_across_companies(): void

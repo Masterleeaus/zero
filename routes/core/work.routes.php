@@ -32,6 +32,8 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('service-jobs.edit');
             Route::put('service-jobs/{job}', [\App\Http\Controllers\Core\Work\ServiceJobController::class, 'update'])
                 ->name('service-jobs.update');
+            Route::post('service-jobs/{job}/create-invoice', [\App\Http\Controllers\Core\Work\ServiceJobController::class, 'createInvoice'])
+                ->name('service-jobs.create-invoice');
 
             Route::get('checklists', [\App\Http\Controllers\Core\Work\ChecklistController::class, 'index'])
                 ->name('checklists.index');

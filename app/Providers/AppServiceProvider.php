@@ -49,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
         if (class_exists(\SmartCache\Providers\SmartCacheServiceProvider::class)) {
             $this->app->register(\SmartCache\Providers\SmartCacheServiceProvider::class);
         }
+
+        if (class_exists(\Laravel\Cashier\Cashier::class)) {
+            \Laravel\Cashier\Cashier::ignoreMigrations();
+        }
     }
 
     public function boot(): void

@@ -7,6 +7,7 @@ namespace App\Models\Work;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Equipment\EquipmentWarranty;
 use App\Models\Premises\Building;
 use App\Models\Premises\Floor;
 use App\Models\Premises\Premises;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -59,15 +61,26 @@ class SiteAsset extends Model
         'last_service_date',
         'next_service_due',
         'warranty_expiry',
+        'warranty_start_date',
+        'warranty_provider',
+        'warranty_reference',
+        'coverage_type',
+        'coverage_notes',
+        'claimable_until',
+        'extended_warranty_flag',
+        'warranty_status',
         'location_description',
         'notes',
     ];
 
     protected $casts = [
-        'install_date'      => 'date',
-        'last_service_date' => 'date',
-        'next_service_due'  => 'date',
-        'warranty_expiry'   => 'date',
+        'install_date'           => 'date',
+        'last_service_date'      => 'date',
+        'next_service_due'       => 'date',
+        'warranty_expiry'        => 'date',
+        'warranty_start_date'    => 'date',
+        'claimable_until'        => 'date',
+        'extended_warranty_flag' => 'boolean',
     ];
 
     protected $attributes = [
@@ -106,6 +119,11 @@ class SiteAsset extends Model
         return $this->belongsTo(ServiceAgreement::class, 'agreement_id');
     }
 
+    public function warranties(): HasMany
+    {
+        return $this->hasMany(EquipmentWarranty::class, 'site_asset_id');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isActive(): bool
@@ -120,6 +138,48 @@ class SiteAsset extends Model
         }
 
         return $this->warranty_expiry->isFuture();
+    }
+
+    /**
+     * First active EquipmentWarranty record for this site asset.
+     *
+     * If multiple active warranties exist (e.g. vendor + extended), the most
+     * recently created one is returned. Use `warranties()->active()->get()` to
+     * retrieve all active records.
+     */
+    public function activeWarranty(): ?EquipmentWarranty
+    {
+        return $this->warranties()->active()->first();
+    }
+
+    /** Whether any active warranty record exists. */
+    public function hasWarranty(): bool
+    {
+        return $this->warranties()->active()->exists();
+    }
+
+    /** Whether the inline warranty_expiry has elapsed. */
+    public function warrantyExpired(): bool
+    {
+        return $this->warranty_expiry !== null && $this->warranty_expiry->isPast();
+    }
+
+    /** Whether warranty expires within the given number of days. */
+    public function warrantyExpiresSoon(int $days = 30): bool
+    {
+        return $this->warranty_expiry !== null
+            && $this->warranty_expiry->isFuture()
+            && $this->warranty_expiry->diffInDays(now()) <= $days;
+    }
+
+    /** Whether a warranty claim can be submitted. */
+    public function eligibleForClaim(): bool
+    {
+        if ($this->claimable_until) {
+            return $this->claimable_until->isFuture();
+        }
+
+        return $this->isUnderWarranty();
     }
 
     public function isServiceDue(): bool

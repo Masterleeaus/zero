@@ -3,7 +3,7 @@
 use App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindCaseController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'updateUserActivity'])
+Route::middleware(['auth', 'updateUserActivity', 'throttle:120,1'])
     ->prefix('dashboard/user/titanrewind')
     ->name('titanrewind.')
     ->group(function () {
