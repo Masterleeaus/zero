@@ -154,4 +154,23 @@ class ServicePlan extends Model
         $this->last_visit_completed = now()->toDateString();
         $this->save();
     }
+
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * The originating Quote for this service plan.
+     *
+     * Resolves via the linked ServiceAgreement when present,
+     * otherwise returns null.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        $agreement = $this->agreement;
+
+        if (! $agreement) {
+            return null;
+        }
+
+        return $agreement->originatingSale();
+    }
 }

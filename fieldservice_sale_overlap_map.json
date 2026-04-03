@@ -1,0 +1,153 @@
+{
+  "_meta": {
+    "generated_at": "2026-04-03",
+    "source_modules": ["fieldservice_sale", "fieldservice_sale_agreement"],
+    "canonical_target": "TitanZero host core"
+  },
+  "canonical_owner_models": {
+    "sale_order":      "App\\Models\\Money\\Quote",
+    "sale_order_line": "App\\Models\\Money\\QuoteItem",
+    "fsm_order":       "App\\Models\\Work\\ServiceJob",
+    "fsm_location":    "App\\Models\\Premises\\Premises",
+    "fsm_agreement":   "App\\Models\\Work\\ServiceAgreement",
+    "fsm_plan":        "App\\Models\\Work\\ServicePlan",
+    "invoice":         "App\\Models\\Money\\Invoice",
+    "payment":         "App\\Models\\Money\\Payment",
+    "product":         "App\\Models\\Money\\QuoteItem (field_service_tracking column)"
+  },
+  "domain_connectivity": {
+    "CRM": {
+      "Customer": {
+        "status": "fully_linked",
+        "methods": [
+          "serviceJobs()",
+          "quotes()",
+          "invoices()",
+          "soldServiceJobs()",
+          "soldAgreements()",
+          "saleToServiceTimeline()",
+          "serviceCoverageSummary()"
+        ]
+      },
+      "Enquiry": {
+        "status": "partially_linked",
+        "notes": "ServiceJob.enquiry_id present; Quote.enquiry_id present. Direct sale→enquiry conversion not yet automated."
+      },
+      "Deal": {
+        "status": "partially_linked",
+        "notes": "ServiceJob.deal_id present (Module 6). Quote does not yet carry deal_id directly."
+      }
+    },
+    "Finance": {
+      "Quote": {
+        "status": "fully_linked",
+        "added_columns": ["premises_id"],
+        "added_methods": ["toServiceExecutionCandidates()", "coversAgreementPlan()", "createsFieldWork()", "premises()"]
+      },
+      "QuoteItem": {
+        "status": "fully_linked",
+        "added_columns": ["field_service_tracking", "service_tracking_type"],
+        "added_methods": ["serviceJobs()", "generatesFieldWork()"]
+      },
+      "Invoice": {
+        "status": "already_linked",
+        "notes": "Invoice.quote_id, ServiceJob.invoice_id already present. No duplicate billing layer introduced."
+      },
+      "Payment": {
+        "status": "already_linked",
+        "notes": "Payment canonical entity unchanged. FSM has no separate payment flow."
+      }
+    },
+    "Service Execution": {
+      "ServiceJob": {
+        "status": "fully_linked",
+        "added_columns": ["sale_line_id"],
+        "added_methods": ["quoteItem()", "originatingSale()", "saleLineContext()"]
+      },
+      "ServicePlanVisit": {
+        "status": "partially_linked",
+        "notes": "ServicePlanVisit connected via ServicePlan→ServiceAgreement chain. Direct sale→visit scheduling not yet automated."
+      }
+    },
+    "Agreements / Plans": {
+      "ServiceAgreement": {
+        "status": "fully_linked",
+        "added_columns": ["originating_quote_id"],
+        "added_methods": ["originatingSale()", "saleCoverageSummary()"]
+      },
+      "ServicePlan": {
+        "status": "fully_linked",
+        "added_methods": ["originatingSale()"]
+      }
+    },
+    "Equipment / Assets": {
+      "Equipment": {
+        "status": "partially_linked",
+        "notes": "ServiceJob.covered_equipment_id links to Equipment. Sale→equipment record auto-creation deferred to fieldservice_sale_agreement_equipment_stock module."
+      },
+      "InstalledEquipment": {
+        "status": "partially_linked",
+        "notes": "InstalledEquipment.customer_id present. Sale-driven install record creation deferred to equipment_stock module."
+      },
+      "SiteAsset": {
+        "status": "not_linked",
+        "notes": "SiteAsset creation from sold equipment deferred to fieldservice_sale_agreement_equipment_stock module."
+      },
+      "EquipmentWarranty": {
+        "status": "not_linked",
+        "notes": "Warranty activation from sold equipment deferred to fieldservice_sale_agreement_equipment_stock module."
+      }
+    },
+    "Premises": {
+      "Premises": {
+        "status": "fully_linked",
+        "notes": "Quote.premises_id added. ServiceJob.premises_id already present. Job creation from quote propagates premises."
+      },
+      "Building / Unit": {
+        "status": "not_linked",
+        "notes": "Sub-premises hierarchy (building/unit) linkage from sale deferred to a future pass."
+      }
+    },
+    "Scheduling / Dispatch": {
+      "SchedulingSurfaceProvider": {
+        "status": "compatible",
+        "notes": "Sale-created ServiceJobs are immediately visible on the scheduling surface via ServiceJob entity type already registered. No additional wiring needed."
+      },
+      "BusinessSuiteCalendarAdapter": {
+        "status": "compatible",
+        "notes": "Calendar adapter aggregates ServiceJob; sale-generated jobs appear automatically."
+      },
+      "DispatchRoute": {
+        "status": "compatible",
+        "notes": "DispatchRoute (Module 11) already consumes ServiceJob. Sale-generated jobs enter routing pool automatically."
+      }
+    },
+    "Repair": {
+      "RepairOrder": {
+        "status": "partially_linked",
+        "notes": "ServiceJob→RepairOrder chain exists (Module 9+10). Sale-originated jobs can generate repair orders via existing ServiceRepairRequired event. No additional wiring needed here."
+      }
+    }
+  },
+  "duplicates_detected": [
+    {
+      "description": "Odoo sale.order maps to both Quote (pre-approval) and potentially a separate 'order' entity. In TitanZero we use Quote as the canonical pre-execution commercial document. No separate order table introduced.",
+      "resolution": "Quote is canonical. QuoteItem.field_service_tracking carries tracking behaviour."
+    }
+  ],
+  "future_merge_candidates": [
+    {
+      "module": "fieldservice_sale_agreement_equipment_stock",
+      "reason": "Equipment stock movement from sold agreement lines. Connects sale→InstalledEquipment, SiteAsset, and EquipmentWarranty activation."
+    },
+    {
+      "module": "fieldservice_sale_recurring",
+      "reason": "Recurring sale line → automatic ServicePlan generation with rrule/frequency from quote line data."
+    },
+    {
+      "module": "fieldservice_purchase",
+      "reason": "Purchase order (already Module 2) may need quote/sale linkage for parts procurement from sold jobs."
+    }
+  ],
+  "isolated_sale_logic_remaining": "None. All sale-to-service logic routes through canonical Quote, QuoteItem, ServiceJob, ServiceAgreement, ServicePlan entities."
+}
