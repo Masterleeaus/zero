@@ -4,6 +4,7 @@ namespace App\Models\Work;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\User;
+use App\Models\Vehicle\Vehicle;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,7 @@ class Shift extends Model
     protected $fillable = [
         'company_id',
         'user_id',
+        'vehicle_id',
         'service_job_id',
         'start_at',
         'end_at',
@@ -52,6 +54,11 @@ class Shift extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
     public function serviceJob()

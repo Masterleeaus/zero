@@ -1,0 +1,48 @@
+{
+  "module": "fieldservice_vehicle_stock",
+  "source": "CodeToUse/FSM/Odoo/fieldservice_agent_bundle/modules/fieldservice_vehicle (stock layer)",
+  "zero_main_targets": {
+    "new_models": [
+      "App\\Models\\Vehicle\\VehicleStock"
+    ],
+    "extended_services": [
+      {
+        "service": "App\\Services\\FSM\\VehicleService",
+        "methods_added": ["reserveStockForJob()", "consumeStockOnJob()"]
+      }
+    ],
+    "new_events": [
+      "App\\Events\\Work\\VehicleStockReserved",
+      "App\\Events\\Work\\VehicleStockConsumed"
+    ],
+    "migration": "database/migrations/2026_04_03_500400_create_vehicle_domain_tables.php (vehicle_stock table)"
+  },
+  "overlaps_detected": {
+    "inventory": {
+      "status": "parallel_domain",
+      "note": "No canonical Inventory domain exists in zero-main yet (Inventory migration 700100 adds tables but no InventoryItem model path confirmed). VehicleStock is scoped to vehicle-onboard stock and does not duplicate warehouse inventory."
+    },
+    "stock_consumption": {
+      "status": "new",
+      "note": "VehicleStock.consume() tracks on-site consumption. No existing equivalent in zero-main."
+    },
+    "service_job_stock_readiness": {
+      "status": "new",
+      "note": "ServiceJob.vehicleStockAvailable() computes stock readiness using VehicleStock query"
+    }
+  },
+  "odoo_concepts_ported": {
+    "vehicle stock reservation": "VehicleStock.reserveForJob() + VehicleService.reserveStockForJob()",
+    "vehicle stock consumption": "VehicleStock.consume() + VehicleService.consumeStockOnJob()",
+    "stock.quant on vehicle": "vehicle_stock table with quantity / quantity_reserved / quantity_consumed"
+  },
+  "odoo_concepts_discarded": [
+    "Odoo stock.move integration (Odoo-specific ORM)",
+    "Odoo product.product links (no product catalog in zero-main yet)",
+    "Odoo warehouse moves / valuation"
+  ],
+  "safe_to_extend_later": [
+    "Link VehicleStock.sku to a future ProductCatalog model",
+    "Hook VehicleStock.consume() into Inventory StockMovement when Inventory domain matures"
+  ]
+}
