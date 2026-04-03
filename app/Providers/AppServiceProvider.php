@@ -188,6 +188,11 @@ class AppServiceProvider extends ServiceProvider
         OpenAIGenerator::observe(OpenAIGeneratorObserver::class);
         Ad::observe(AdObserver::class);
         User::observe(UserObserver::class);
+
+        // Finance auto-posting hooks (Phase 7 — stubs registered, logic wired in Phase 7)
+        \App\Models\Money\Invoice::observe(\App\Observers\Money\InvoiceObserver::class);
+        \App\Models\Money\Payment::observe(\App\Observers\Money\PaymentObserver::class);
+        \App\Models\Money\Expense::observe(\App\Observers\Money\ExpenseObserver::class);
     }
 
     private function bootBladeDirectives(): void

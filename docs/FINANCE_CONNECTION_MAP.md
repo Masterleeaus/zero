@@ -309,3 +309,53 @@ Phase 7 — Auto-posting (Journal Observers)
 | Depreciation run → JournalEntry auto-post | Missing | Phase 7 |
 | ServiceAgreement → recurring invoice trigger | Missing | Deferred (Phase 8) |
 | TitanMoney mobile app → API endpoints | Missing | Deferred (after Phase 6) |
+
+---
+
+## 5. Journal Posting Integration Points (Phase 1 complete — 2026-04-03)
+
+### 5.1 Chart of Accounts — live integration points
+```
+Account (app/Models/Money/Account.php)
+ ├── company_id           → app/Models/Company.php  [BelongsToCompany ✓]
+ ├── gl_type              → asset|liability|equity|revenue|expense
+ ├── journalLines()       → app/Models/Money/JournalLine.php  [connected ✓]
+ └── ledgerTransactions() → app/Models/Money/LedgerTransaction.php  [connected ✓]
+```
+
+### 5.2 Journal Entry — live integration points
+```
+JournalEntry (app/Models/Money/JournalEntry.php)
+ ├── company_id           → app/Models/Company.php  [BelongsToCompany ✓]
+ ├── created_by           → app/Models/User.php  [OwnedByUser ✓]
+ ├── lines()              → app/Models/Money/JournalLine.php  [connected ✓]
+ ├── isBalanced()         → enforces debit == credit  [implemented ✓]
+ └── AccountingService    → app/Services/TitanMoney/AccountingService.php::postJournalEntry()  [connected ✓]
+```
+
+### 5.3 Ledger Transaction — live integration points
+```
+LedgerTransaction (app/Models/Money/LedgerTransaction.php)
+ ├── company_id           → app/Models/Company.php  [BelongsToCompany ✓]
+ ├── account_id           → app/Models/Money/Account.php  [connected ✓]
+ └── journal_entry_id     → app/Models/Money/JournalEntry.php  [optional link ✓]
+```
+
+### 5.4 Auto-posting observers — STUB REGISTERED (Phase 7 wiring pending)
+```
+InvoiceObserver   → app/Observers/Money/InvoiceObserver.php   (Invoice `issued` → Dr A/R / Cr Income)
+PaymentObserver   → app/Observers/Money/PaymentObserver.php   (Payment `created` → Dr Bank / Cr A/R)
+ExpenseObserver   → app/Observers/Money/ExpenseObserver.php   (Expense `approved` → Dr Expense / Cr Bank or Payable)
+```
+All three observers are registered in `app/Providers/AppServiceProvider::bootObservers()`.
+Logic bodies are empty stubs — **full wiring is deferred to Phase 7**.
+
+### 5.5 Routes added (2026-04-03)
+| Route name | HTTP | Path |
+|---|---|---|
+| `dashboard.money.accounts.index` | GET | /dashboard/money/accounts |
+| `dashboard.money.accounts.store` | POST | /dashboard/money/accounts |
+| `dashboard.money.accounts.update` | PUT | /dashboard/money/accounts/{account} |
+| `dashboard.money.accounts.destroy` | DELETE | /dashboard/money/accounts/{account} |
+| `dashboard.money.journal.index` | GET | /dashboard/money/journal |
+| `dashboard.money.journal.store` | POST | /dashboard/money/journal |

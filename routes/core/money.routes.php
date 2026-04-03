@@ -149,5 +149,21 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('expense-categories.update');
             Route::delete('expense-categories/{expenseCategory}', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'destroy'])
                 ->name('expense-categories.destroy');
+
+            // ── Chart of Accounts ───────────────────────────────────────────────
+            Route::get('accounts', [\App\Http\Controllers\Core\Money\AccountController::class, 'index'])
+                ->name('accounts.index');
+            Route::post('accounts', [\App\Http\Controllers\Core\Money\AccountController::class, 'store'])
+                ->name('accounts.store');
+            Route::put('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'update'])
+                ->name('accounts.update');
+            Route::delete('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'destroy'])
+                ->name('accounts.destroy');
+
+            // ── Journal Entries ─────────────────────────────────────────────────
+            Route::get('journal', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'index'])
+                ->name('journal.index');
+            Route::post('journal', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'store'])
+                ->name('journal.store');
         });
     });

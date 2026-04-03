@@ -2,7 +2,7 @@
 ## Prioritised Finance Integration Plan
 
 **Audit date:** 2026-04-03  
-**Status:** Audit-only pass complete. Code integration not yet started.
+**Status:** Phase 1 complete (2026-04-03). Chart of Accounts + Journal Ledger Foundation extracted and integrated.
 
 ---
 
@@ -21,16 +21,17 @@
 
 ## Phase 1 — Chart of Accounts Foundation
 **Priority: HIGHEST — blocks everything else**
+**Status: ✅ COMPLETE (2026-04-03)**
 
 ### What to build
 | Item | Source | Host target |
 |------|--------|------------|
-| `Account` model | `CommerceCore/app/Models/Account.php` | `app/Models/Money/Account.php` |
-| `AccountController` | `CommerceCore/Admin/AccountController.php` | `app/Http/Controllers/Core/Money/AccountController.php` |
-| Migration | `2026_03_22_192642_create_accounts_table.php` + `2026_03_23_174711_update_accounts_table_for_chart_of_accounts.php` | New migration `create_chart_of_accounts_table.php` |
-| Routes | (none) | Add to `routes/core/money.routes.php` under `money.accounts.*` |
-| Views | `resources/views/admin/accounts/` | `resources/views/default/panel/user/money/accounts/` |
-| Policy | (none in source) | `app/Policies/AccountPolicy.php` |
+| `Account` model | `CommerceCore/app/Models/Account.php` | `app/Models/Money/Account.php` ✅ |
+| `AccountController` | `CommerceCore/Admin/AccountController.php` | `app/Http/Controllers/Core/Money/AccountController.php` ✅ |
+| Migration | `2026_03_22_192642_create_accounts_table.php` + `2026_03_23_174711_update_accounts_table_for_chart_of_accounts.php` | `2026_04_03_600100_create_chart_of_accounts_and_journal_tables.php` ✅ |
+| Routes | (none) | Added to `routes/core/money.routes.php` under `money.accounts.*` ✅ |
+| Views | `resources/views/admin/accounts/` | `resources/views/default/panel/user/money/accounts/index.blade.php` ✅ |
+| Policy | (none in source) | `app/Policies/AccountPolicy.php` ✅ |
 
 ### Adaptation notes
 - Replace `store_id` with `company_id` throughout
@@ -48,18 +49,19 @@
 
 ## Phase 2 — Journal Entries + Transaction Ledger
 **Priority: HIGH — required for proper accounting**
+**Status: ✅ COMPLETE (2026-04-03) — delivered together with Phase 1**
 
 ### What to build
 | Item | Source | Host target |
 |------|--------|------------|
-| `JournalEntry` model | `CommerceCore/app/Models/JournalEntry.php` | `app/Models/Money/JournalEntry.php` |
-| `JournalLine` model | `CommerceCore/app/Models/JournalLine.php` | `app/Models/Money/JournalLine.php` |
-| `Transaction` model | `CommerceCore/app/Models/Transaction.php` | `app/Models/Money/LedgerTransaction.php` (rename to avoid collision with platform usage) |
-| `AccountingService` | `CommerceCore/app/Services/AccountingService.php` | `app/Services/Money/AccountingService.php` |
-| `JournalEntryController` | `CommerceCore/Admin/JournalEntryController.php` | `app/Http/Controllers/Core/Money/JournalEntryController.php` |
-| Migrations | Source migrations | New host migrations (additive) |
-| Routes | (none) | Add to `routes/core/money.routes.php` under `money.journal.*` |
-| Views | `resources/views/admin/journal/` | `resources/views/default/panel/user/money/journal/` |
+| `JournalEntry` model | `CommerceCore/app/Models/JournalEntry.php` | `app/Models/Money/JournalEntry.php` ✅ |
+| `JournalLine` model | `CommerceCore/app/Models/JournalLine.php` | `app/Models/Money/JournalLine.php` ✅ |
+| `Transaction` model | `CommerceCore/app/Models/Transaction.php` | `app/Models/Money/LedgerTransaction.php` ✅ (renamed to avoid collision) |
+| `AccountingService` | `CommerceCore/app/Services/AccountingService.php` | `app/Services/TitanMoney/AccountingService.php` ✅ |
+| `JournalEntryController` | `CommerceCore/Admin/JournalEntryController.php` | `app/Http/Controllers/Core/Money/JournalEntryController.php` ✅ |
+| Migrations | Source migrations | `2026_04_03_600100_create_chart_of_accounts_and_journal_tables.php` ✅ |
+| Routes | (none) | Added to `routes/core/money.routes.php` under `money.journal.*` ✅ |
+| Views | `resources/views/admin/journal/` | `resources/views/default/panel/user/money/journal/index.blade.php` ✅ |
 
 ### Adaptation notes
 - `Transaction` renamed to `LedgerTransaction` to avoid collision with any future payment
