@@ -13,7 +13,10 @@ class TitanPwaController extends Controller
     public function __construct(
         protected TitanPwaManifestService $manifestService,
         protected TitanPwaSyncService $syncService,
-    ) {}
+    ) {
+        // manifest and bootstrap are public; all other endpoints require auth
+        $this->middleware('auth')->only(['handshake', 'ingest', 'syncStatus']);
+    }
 
     /**
      * Serve the PWA web app manifest.
@@ -38,8 +41,6 @@ class TitanPwaController extends Controller
      */
     public function handshake(Request $request): JsonResponse
     {
-        $this->middleware('auth');
-
         $validated = $request->validate([
             'node_id'  => 'required|string|max:255',
             'platform' => 'required|string|max:100',
@@ -63,8 +64,6 @@ class TitanPwaController extends Controller
      */
     public function ingest(Request $request): JsonResponse
     {
-        $this->middleware('auth');
-
         $validated = $request->validate([
             'signals'  => 'required|array|min:1',
             'node_id'  => 'required|string|max:255',
@@ -96,8 +95,6 @@ class TitanPwaController extends Controller
      */
     public function syncStatus(Request $request): JsonResponse
     {
-        $this->middleware('auth');
-
         $nodeId = $request->query('node_id') ?? $request->input('node_id');
 
         if (! $nodeId) {
