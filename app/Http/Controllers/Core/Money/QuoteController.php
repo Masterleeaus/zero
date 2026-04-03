@@ -166,13 +166,6 @@ class QuoteController extends CoreController
     {
         $this->authorize('update', $quote);
 
-        if (! in_array($quote->status, ['accepted', 'approved', 'sent'], true)) {
-            return back()->withErrors(__('Quote must be accepted/approved or sent before invoicing.'));
-        }
-
-        $quote->loadMissing('items');
-
-        if ($quote->items->isEmpty()) {
         if (! in_array($quote->status, ['approved', 'sent'], true)) {
             return back()->withErrors(__('Quote must be approved or sent before invoicing.'));
         }
@@ -218,13 +211,6 @@ class QuoteController extends CoreController
             $invoice->recomputeTotalsFromItems();
             $invoice->refresh();
             $invoice->update(['balance' => $invoice->total]);
-
-            if (! $invoice->invoice_number) {
-                $invoice->invoice_number = $this->nextInvoiceNumber($invoice->company_id);
-                $invoice->save();
-            }
-
-            $quote->update(['status' => 'converted']);
 
             $quote->update(['status' => Quote::STATUS_CONVERTED]);
 
