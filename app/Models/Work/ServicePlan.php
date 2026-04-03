@@ -39,6 +39,11 @@ class ServicePlan extends Model
         'premises_id',
         'customer_id',
         'agreement_id',
+        'origin_quote_id',
+        'recurring_product_ref',
+        'recurrence_type',
+        'auto_generate_visits',
+        'equipment_scope',
         'name',
         'title',
         'service_type',
@@ -51,12 +56,10 @@ class ServicePlan extends Model
         'starts_on',
         'start_date',
         'ends_on',
-        'start_date',
         'end_date',
         'next_visit_due',
         'last_visit_completed',
         'is_active',
-        'visits_per_cycle',
         'status',
         'notes',
     ];
@@ -67,23 +70,23 @@ class ServicePlan extends Model
         'starts_on'            => 'date',
         'start_date'           => 'date',
         'ends_on'              => 'date',
-        'start_date'           => 'date',
         'end_date'             => 'date',
         'next_visit_due'       => 'date',
         'last_visit_completed' => 'date',
         'is_active'            => 'boolean',
         'interval'             => 'integer',
         'visits_per_cycle'     => 'integer',
+        'auto_generate_visits' => 'boolean',
+        'equipment_scope'      => 'array',
     ];
 
     protected $attributes = [
-        'frequency'        => 'monthly',
-        'interval'         => 1,
-        'is_active'        => true,
-        'status'           => 'active',
-        'visits_per_cycle' => 1,
-        'is_active'        => true,
-        'status'           => 'active',
+        'frequency'            => 'monthly',
+        'interval'             => 1,
+        'is_active'            => true,
+        'status'               => 'active',
+        'visits_per_cycle'     => 1,
+        'auto_generate_visits' => true,
     ];
 
     // ── Relationships ─────────────────────────────────────────────────────────
@@ -155,16 +158,19 @@ class ServicePlan extends Model
         $this->save();
     }
 
-    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+    // ── fieldservice_sale_recurring helpers ──────────────────────────────────
 
     /**
-     * The originating Quote for this service plan.
+     * The Quote that triggered this recurring plan's generation.
      *
-     * Resolves via the linked ServiceAgreement when present,
-     * otherwise returns null.
+     * Resolves via origin_quote_id first, then via the linked agreement.
      */
     public function originatingSale(): ?\App\Models\Money\Quote
     {
+        if ($this->origin_quote_id) {
+            return \App\Models\Money\Quote::find($this->origin_quote_id);
+        }
+
         $agreement = $this->agreement;
 
         if (! $agreement) {
@@ -172,5 +178,54 @@ class ServicePlan extends Model
         }
 
         return $agreement->originatingSale();
+    }
+
+    /**
+     * InstalledEquipment records within this plan's equipment scope.
+     *
+     * Reads the json `equipment_scope` column.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function coverageEquipment(): \Illuminate\Database\Eloquent\Collection
+    {
+        $scope = $this->equipment_scope;
+
+        if (empty($scope)) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
+
+        return \App\Models\Equipment\InstalledEquipment::query()
+            ->whereIn('id', $scope)
+            ->where('company_id', $this->company_id)
+            ->get();
+    }
+
+    /**
+     * Summary of recurring coverage scope for this plan.
+     *
+     * @return array{
+     *     plan_id: int,
+     *     recurrence_type: string|null,
+     *     frequency: string,
+     *     auto_generate_visits: bool,
+     *     equipment_count: int,
+     *     pending_visits: int,
+     *     completed_visits: int,
+     *     next_visit_due: string|null
+     * }
+     */
+    public function recurringCoverageScope(): array
+    {
+        return [
+            'plan_id'              => $this->id,
+            'recurrence_type'      => $this->recurrence_type,
+            'frequency'            => $this->frequency,
+            'auto_generate_visits' => (bool) $this->auto_generate_visits,
+            'equipment_count'      => count($this->equipment_scope ?? []),
+            'pending_visits'       => $this->visits()->whereIn('status', ['pending', 'scheduled'])->count(),
+            'completed_visits'     => $this->visits()->where('status', 'completed')->count(),
+            'next_visit_due'       => $this->next_visit_due?->toDateString(),
+        ];
     }
 }

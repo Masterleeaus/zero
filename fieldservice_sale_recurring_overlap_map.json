@@ -1,0 +1,97 @@
+{
+  "modules": [
+    "fieldservice_sale_agreement_equipment_stock",
+    "fieldservice_sale_recurring"
+  ],
+  "scan_date": "2026-04-03",
+  "canonical_entities": {
+    "ServiceAgreement": {
+      "status": "already_supported",
+      "table": "service_agreements",
+      "model": "App\\Models\\Work\\ServiceAgreement",
+      "new_columns": ["has_equipment_coverage", "recurring_plan_count"],
+      "new_helpers": ["coveredEquipment", "recurringCoverageSummary", "coverageTimeline", "installedEquipment"]
+    },
+    "ServicePlan": {
+      "status": "already_supported",
+      "table": "service_plans",
+      "model": "App\\Models\\Work\\ServicePlan",
+      "new_columns": ["origin_quote_id", "recurring_product_ref", "recurrence_type", "auto_generate_visits", "equipment_scope"],
+      "new_helpers": ["originatingSale", "coverageEquipment", "recurringCoverageScope"]
+    },
+    "ServicePlanVisit": {
+      "status": "already_supported",
+      "table": "service_plan_visits",
+      "model": "App\\Models\\Work\\ServicePlanVisit",
+      "new_columns": ["installed_equipment_id", "coverage_source", "recurring_sale_ref"],
+      "new_helpers": ["coverageSource", "agreementOrigin", "equipmentContext", "installedEquipment"]
+    },
+    "InstalledEquipment": {
+      "status": "already_supported",
+      "table": "installed_equipment",
+      "model": "App\\Models\\Equipment\\InstalledEquipment",
+      "new_columns": ["agreement_id", "sale_quote_id", "coverage_start_date", "coverage_end_date", "coverage_activated_at"],
+      "new_helpers": ["agreementCoverage", "coverageOriginSale", "coverageVisits", "maintenanceSchedule", "hasCoverageAgreement"]
+    },
+    "Equipment": {
+      "status": "already_supported",
+      "table": "equipment",
+      "note": "agreement_id already present; extended via InstalledEquipment coverage"
+    },
+    "ServiceJob": {
+      "status": "already_supported",
+      "note": "sale_line_id and agreement_id already present; materialized by RecurringSaleService"
+    },
+    "Quote": {
+      "status": "already_supported",
+      "note": "premises_id, issue_date, items() already present; origin of recurring plans via origin_quote_id"
+    }
+  },
+  "already_integrated": [
+    "fieldservice_sale (module) → FieldServiceSaleService, sale_line_id, field_service_tracking",
+    "fieldservice_sale_agreement → originating_quote_id, activateAgreementFromQuote",
+    "AgreementSchedulerService → due agreement execution",
+    "ServicePlanVisit.dispatch() → ServiceJob materialization",
+    "Equipment.agreement_id → direct equipment-to-agreement link"
+  ],
+  "new_deliverables": {
+    "migration": "2026_04_03_500500_add_fieldservice_sale_agreement_equipment_stock_recurring_columns.php",
+    "services": [
+      "App\\Services\\Work\\EquipmentCoverageService",
+      "App\\Services\\Work\\RecurringSaleService"
+    ],
+    "events": [
+      "App\\Events\\Work\\AgreementEquipmentCoverageCreated",
+      "App\\Events\\Work\\AgreementEquipmentCoverageExtended",
+      "App\\Events\\Work\\RecurringSaleCreated",
+      "App\\Events\\Work\\RecurringPlanGenerated",
+      "App\\Events\\Work\\RecurringPlanUpdated",
+      "App\\Events\\Work\\RecurringEquipmentServiceCreated",
+      "App\\Events\\Work\\RecurringVisitMaterialized"
+    ]
+  },
+  "duplicate_risk": "none — no parallel FSM equipment or recurring tables created; all logic attached to canonical models",
+  "partial_overlaps": [
+    {
+      "entity": "ServiceAgreement.saleCoverageSummary()",
+      "note": "Existing helper covers sale/job/visit totals. New recurringCoverageSummary() adds equipment coverage dimensions.",
+      "action": "kept both — different dimensions"
+    },
+    {
+      "entity": "ServicePlanVisit.dispatch()",
+      "note": "Existing dispatch() creates a ServiceJob. RecurringSaleService.materializeVisitToJob() adds RecurringVisitMaterialized event and batch support.",
+      "action": "extended — materializeVisitToJob wraps and fires new event"
+    },
+    {
+      "entity": "AgreementSchedulerService.runDueAgreements()",
+      "note": "Existing service handles recurring agreement job generation. RecurringSaleService handles recurring plan visit generation.",
+      "action": "no conflict — different grain: agreement-level vs plan-level"
+    }
+  ],
+  "safe_removals": [],
+  "reuse_candidates": [
+    "FieldServiceSaleService.createAgreementFromQuote() — used as upstream trigger before coverage activation",
+    "FieldServiceSaleService.convertQuoteToServicePlan() — reused for non-recurring plans",
+    "ServicePlanVisit.dispatch() — still valid for one-off visit dispatch"
+  ]
+}

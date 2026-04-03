@@ -36,12 +36,15 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         'service_plan_id',
         'service_job_id',
         'project_id',
+        'installed_equipment_id',
         'visit_type',
         'scheduled_for',
         'scheduled_date',
         'assigned_to',
         'status',
         'completed_at',
+        'coverage_source',
+        'recurring_sale_ref',
         'notes',
     ];
 
@@ -262,6 +265,66 @@ class ServicePlanVisit extends Model implements SchedulableEntity
     public function getSchedulableType(): string
     {
         return static::class;
+    }
+
+    // ── fieldservice_sale_recurring + agreement_equipment helpers ────────────
+
+    /**
+     * The InstalledEquipment unit this visit is servicing.
+     */
+    public function installedEquipment(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Equipment\InstalledEquipment::class, 'installed_equipment_id');
+    }
+
+    /**
+     * The origin of coverage for this visit: agreement | warranty | manual.
+     *
+     * Returns the coverage_source column value, defaulting to 'manual'.
+     */
+    public function coverageSource(): string
+    {
+        return $this->coverage_source ?? 'manual';
+    }
+
+    /**
+     * The ServiceAgreement that originated this visit, via its service plan.
+     *
+     * Resolves: visit → plan → agreement.
+     */
+    public function agreementOrigin(): ?\App\Models\Work\ServiceAgreement
+    {
+        return $this->plan?->agreement;
+    }
+
+    /**
+     * Context array for the equipment this visit covers.
+     *
+     * Returns null if no installed equipment is linked.
+     *
+     * @return array{
+     *     installed_equipment_id: int,
+     *     equipment_name: string|null,
+     *     serial_number: string|null,
+     *     premises_id: int|null,
+     *     coverage_active: bool
+     * }|null
+     */
+    public function equipmentContext(): ?array
+    {
+        $ie = $this->installedEquipment;
+
+        if (! $ie) {
+            return null;
+        }
+
+        return [
+            'installed_equipment_id' => $ie->id,
+            'equipment_name'         => $ie->equipment?->name,
+            'serial_number'          => $ie->equipment?->serial_number,
+            'premises_id'            => $ie->premises_id,
+            'coverage_active'        => $ie->hasCoverageAgreement(),
+        ];
     }
 
     // ── Portal helpers (Module 21 — fieldservice_portal) ─────────────────────

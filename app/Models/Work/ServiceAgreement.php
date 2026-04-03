@@ -23,8 +23,10 @@ class ServiceAgreement extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'next_run_at' => 'datetime',
-        'expired_at'  => 'datetime',
+        'next_run_at'            => 'datetime',
+        'expired_at'             => 'datetime',
+        'has_equipment_coverage' => 'boolean',
+        'recurring_plan_count'   => 'integer',
     ];
 
     public function scopeActive($query)
@@ -119,6 +121,74 @@ class ServiceAgreement extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    // ── fieldservice_sale_agreement_equipment_stock helpers ──────────────────
+
+    /**
+     * All InstalledEquipment records covered by this agreement.
+     *
+     * Mirrors Odoo fieldservice_sale_agreement_equipment_stock:
+     *   agreement → covered equipment instances.
+     */
+    public function installedEquipment(): HasMany
+    {
+        return $this->hasMany(\App\Models\Equipment\InstalledEquipment::class, 'agreement_id');
+    }
+
+    /**
+     * Active installed equipment units covered by this agreement.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment\InstalledEquipment>
+     */
+    public function coveredEquipment(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->installedEquipment()
+            ->where('status', 'active')
+            ->whereNotNull('coverage_activated_at')
+            ->where(static function ($q) {
+                $q->whereNull('coverage_end_date')
+                    ->orWhere('coverage_end_date', '>=', now()->toDateString());
+            })
+            ->with('equipment')
+            ->get();
+    }
+
+    /**
+     * Summary of recurring coverage across all active service plans.
+     *
+     * @return array{
+     *     agreement_id: int,
+     *     has_equipment_coverage: bool,
+     *     active_plan_count: int,
+     *     pending_visit_count: int,
+     *     completed_visit_count: int,
+     *     covered_equipment_count: int
+     * }
+     */
+    public function recurringCoverageSummary(): array
+    {
+        return [
+            'agreement_id'            => $this->id,
+            'has_equipment_coverage'  => (bool) $this->has_equipment_coverage,
+            'active_plan_count'       => $this->servicePlans()->where('is_active', true)->count(),
+            'pending_visit_count'     => $this->visits()->whereIn('status', ['pending', 'scheduled'])->count(),
+            'completed_visit_count'   => $this->visits()->where('status', 'completed')->count(),
+            'covered_equipment_count' => $this->coveredEquipment()->count(),
+        ];
+    }
+
+    /**
+     * Coverage timeline: per-equipment coverage state and visit history.
+     *
+     * Delegates to EquipmentCoverageService for the full structured output.
+     *
+     * @return array<string, mixed>
+     */
+    public function coverageTimeline(): array
+    {
+        return app(\App\Services\Work\EquipmentCoverageService::class)
+            ->coverageTimeline($this);
     }
 
     // ── fieldservice_sale_agreement helpers ───────────────────────────────────
