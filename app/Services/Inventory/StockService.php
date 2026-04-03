@@ -35,28 +35,34 @@ class StockService
         });
     }
 
-    public function adjustStock(int $itemId, int $warehouseId, int $targetQty, string $note, ?int $companyId = null, ?int $createdBy = null): StockMovement
+    /**
+     * Adjust stock for an item to a target quantity.
+     *
+     * @param  array{item_id: int, warehouse_id: int, target_qty: int, note: string, company_id?: int, created_by?: int}  $data
+     */
+    public function adjustStock(array $data): StockMovement
     {
-        $current = $this->onHand($itemId, $warehouseId);
+        $itemId      = (int) $data['item_id'];
+        $warehouseId = (int) $data['warehouse_id'];
+        $targetQty   = (int) $data['target_qty'];
+        $note        = (string) ($data['note'] ?? '');
+
+        $current    = $this->onHand($itemId, $warehouseId);
         $difference = $targetQty - $current;
 
-        $data = [
-            'item_id'      => $itemId,
-            'warehouse_id' => $warehouseId,
-            'type'         => 'adjust',
-            'qty_change'   => $difference,
-            'note'         => $note,
-            'reference'    => 'ADJ-' . now()->format('YmdHis'),
-        ];
-
-        if ($companyId !== null) {
-            $data['company_id'] = $companyId;
-        }
-
-        if ($createdBy !== null) {
-            $data['created_by'] = $createdBy;
-        }
-
-        return $this->recordMovement($data);
+        return $this->recordMovement(array_merge(
+            [
+                'item_id'      => $itemId,
+                'warehouse_id' => $warehouseId,
+                'type'         => 'adjust',
+                'qty_change'   => $difference,
+                'note'         => $note,
+                'reference'    => 'ADJ-' . now()->format('YmdHis'),
+            ],
+            array_filter([
+                'company_id' => $data['company_id'] ?? null,
+                'created_by' => $data['created_by'] ?? null,
+            ], static fn ($v) => $v !== null),
+        ));
     }
 }

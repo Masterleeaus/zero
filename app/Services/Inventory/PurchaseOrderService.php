@@ -7,6 +7,7 @@ namespace App\Services\Inventory;
 use App\Models\Inventory\PurchaseOrder;
 use App\Models\Inventory\PurchaseOrderItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderService
 {
@@ -18,13 +19,12 @@ class PurchaseOrderService
     {
         $year = now()->year;
 
-        $last = PurchaseOrder::withoutGlobalScopes()
+        $maxId = (int) PurchaseOrder::withoutGlobalScopes()
             ->where('company_id', $companyId)
             ->whereYear('created_at', $year)
-            ->lockForUpdate()
-            ->count();
+            ->max('id');
 
-        $seq = str_pad((string) ($last + 1), 4, '0', STR_PAD_LEFT);
+        $seq = str_pad((string) ($maxId + 1), 4, '0', STR_PAD_LEFT);
 
         return "PO-{$year}-{$seq}";
     }
@@ -60,6 +60,10 @@ class PurchaseOrderService
                     ->first();
 
                 if (! $line) {
+                    Log::warning('PurchaseOrderService::receivePurchaseOrder — line not found', [
+                        'purchase_order_id' => $po->id,
+                        'line_id'           => $lineData['id'] ?? null,
+                    ]);
                     continue;
                 }
 

@@ -249,7 +249,14 @@ class InventoryDomainTest extends TestCase
             'qty_change'   => 40,
         ]);
 
-        $movement = $service->adjustStock($item->id, $warehouse->id, 50, 'Stock count correction');
+        $movement = $service->adjustStock([
+            'company_id'   => $this->companyId,
+            'created_by'   => $user->id,
+            'item_id'      => $item->id,
+            'warehouse_id' => $warehouse->id,
+            'target_qty'   => 50,
+            'note'         => 'Stock count correction',
+        ]);
 
         $this->assertEquals(10, $movement->qty_change);
         $this->assertEquals('adjust', $movement->type);
@@ -271,7 +278,9 @@ class InventoryDomainTest extends TestCase
         ]);
 
         $this->actingAs($userB);
-        $items = InventoryItem::all();
-        $this->assertTrue($items->where('name', 'Company A Item')->isEmpty());
+        // The BelongsToCompany global scope filters by company_id = userB.company_id (102).
+        // Using count() respects the global scope; company A's item (company_id=101) must not appear.
+        $visibleCount = InventoryItem::where('name', 'Company A Item')->count();
+        $this->assertEquals(0, $visibleCount);
     }
 }
