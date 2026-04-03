@@ -288,3 +288,25 @@ depreciation.
 | Depreciation run not idempotent | 🟡 MEDIUM | Phase 5 |
 | AccountingService not bound | 🟢 LOW | Phase 2 |
 | CommerceCore migration timestamps | 🟡 MEDIUM | Each phase |
+
+---
+
+## 11. Phase 1 Risk Resolution (2026-04-03)
+
+| Risk | Status |
+|------|--------|
+| `accounts` table name collision | ✅ RESOLVED — `accounts` table created fresh, no existing table. |
+| `store_id` tenancy not updated | ✅ RESOLVED — all new models use `BelongsToCompany` / `company_id`. No `store_id` introduced. |
+| Route name collision | ✅ RESOLVED — `money.accounts.*` and `money.journal.*` added cleanly with no collision. |
+| Missing policies for new models | ✅ RESOLVED — `AccountPolicy` + `JournalEntryPolicy` created and registered. |
+| Missing tests | ✅ RESOLVED — `tests/Feature/Money/AccountingTest.php` covers accounts, journal, posting, tenancy isolation, event registration. |
+| Journal balance not enforced | ✅ RESOLVED — `AccountingService::assertBalanced()` throws `InvalidArgumentException` on imbalance. |
+| AccountingService not bound | ✅ RESOLVED — Laravel auto-resolution via constructor injection. No extra binding required. |
+| Expense model duplicated | ✅ RESOLVED — host `Expense` model used directly. No duplicate created. |
+| Auth controllers imported | ✅ RESOLVED — no standalone auth imported. |
+| CommerceCore route files imported | ✅ RESOLVED — only accounting core extracted; no CommerceCore route files imported. |
+
+### Remaining risks for Phase 2+
+- `transactions` table name collision risk (Phase 2) — renamed to `LedgerTransaction` if needed.
+- Employee vs TeamMember conflation (Phase 4) — deferred.
+- Depreciation run idempotency (Phase 5) — deferred.

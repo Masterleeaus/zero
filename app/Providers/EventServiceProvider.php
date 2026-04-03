@@ -78,6 +78,12 @@ use App\Events\Crm\CrmWarrantyClaimRejected;
 use App\Events\Crm\CrmWarrantyExpiring;
 use App\Events\Crm\CrmWarrantyReplacementOpportunity;
 use App\Events\YokassaWebhookEvent;
+// ── Finance / Accounting events (Finance Pass 1) ──────────────────────────────
+use App\Events\Money\ExpenseApproved;
+use App\Events\Money\PaymentRecorded;
+use App\Listeners\Money\PostExpenseApprovedToLedger;
+use App\Listeners\Money\PostInvoiceIssuedToLedger;
+use App\Listeners\Money\PostPaymentRecordedToLedger;
 use App\Listeners\BankTransferListener;
 use App\Listeners\FreePaymentListener;
 use App\Listeners\InvoiceIssuedListener;
@@ -232,9 +238,17 @@ class EventServiceProvider extends ServiceProvider
         ],
         InvoiceIssued::class => [
             InvoiceIssuedListener::class,
+            PostInvoiceIssuedToLedger::class,
         ],
         InvoicePaid::class => [
             InvoicePaidListener::class,
+        ],
+        // ── Finance Pass 1 — auto-posting accounting listeners ────────────────
+        PaymentRecorded::class => [
+            PostPaymentRecordedToLedger::class,
+        ],
+        ExpenseApproved::class => [
+            PostExpenseApprovedToLedger::class,
         ],
         UsersActivityEvent::class => [
             UsersActivityListener::class,

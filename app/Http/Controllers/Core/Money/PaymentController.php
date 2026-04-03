@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Core\Money;
 
+use App\Events\Money\PaymentRecorded;
 use App\Http\Controllers\Core\CoreController;
 use App\Models\Money\Invoice;
 use App\Models\Money\Payment;
@@ -47,12 +48,14 @@ class PaymentController extends CoreController
         $previousStatus = $invoice->status;
 
         DB::transaction(static function () use ($invoice, $validated, $request, $previousStatus): void {
-            Payment::create([
+            $payment = Payment::create([
                 'company_id' => $request->user()->company_id,
                 'created_by' => $request->user()->id,
                 'invoice_id' => $invoice->id,
                 ...$validated,
             ]);
+
+            event(new PaymentRecorded($payment));
 
             $invoice->refresh();
             $invoice->recomputeBalance();

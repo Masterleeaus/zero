@@ -2,7 +2,8 @@
 ## Prioritised Finance Integration Plan
 
 **Audit date:** 2026-04-03  
-**Status:** Audit-only pass complete. Code integration not yet started.
+**Status:** Phase 1 (Chart of Accounts + Journal Engine) — **COMPLETE** as of 2026-04-03  
+**Phase 2 (Suppliers + Purchases) — PENDING**
 
 ---
 

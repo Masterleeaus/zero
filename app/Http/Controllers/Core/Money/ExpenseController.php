@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Money;
 
 use App\Actions\Notify;
+use App\Events\Money\ExpenseApproved;
 use App\Http\Controllers\Core\CoreController;
 use App\Models\User;
 use App\Models\Money\Expense;
@@ -80,6 +81,8 @@ class ExpenseController extends CoreController
             'approved_by' => $request->user()->id,
             'approved_at' => now(),
         ]);
+
+        event(new ExpenseApproved($expense));
 
         if ($expense->created_by && $expense->created_by !== $request->user()->id) {
             Notify::to(
