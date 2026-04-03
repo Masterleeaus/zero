@@ -58,6 +58,17 @@ use App\Events\Inspection\InspectionScheduled;
 use App\Events\Inspection\InspectionStarted;
 use App\Events\Premises\HazardDetected;
 use App\Events\Premises\HazardResolved;
+use App\Events\Route\RouteAssigned;
+use App\Events\Route\RouteCapacityExceeded;
+use App\Events\Route\RouteConflictDetected;
+use App\Events\Route\RouteCreated;
+use App\Events\Route\RouteStopAdded;
+use App\Events\Route\RouteStopCompleted;
+use App\Events\Route\RouteStopFailed;
+use App\Events\Route\RouteStopReordered;
+use App\Events\Route\RouteUpdated;
+use App\Events\Route\TechnicianAvailabilityCreated;
+use App\Events\Route\TechnicianAvailabilityUpdated;
 use App\Events\Crm\CrmWarrantyClaimOpened;
 use App\Events\Crm\CrmWarrantyClaimRejected;
 use App\Events\Crm\CrmWarrantyExpiring;
@@ -92,6 +103,9 @@ use App\Listeners\Work\ServiceJobScheduledListener;
 use App\Listeners\Work\ServicePlanVisitCompletedListener;
 use App\Listeners\Work\ServicePlanVisitDispatchedListener;
 use App\Listeners\Work\ServicePlanVisitScheduledListener;
+use App\Listeners\Route\RouteAssignedListener;
+use App\Listeners\Route\RouteCapacityExceededListener;
+use App\Listeners\Route\RouteStopCompletedListener;
 use App\Listeners\YokassaWebhookListener;
 // ── Repair domain events (Modules 9 + 10) ────────────────────────────────────
 use App\Events\Repair\RepairOrderCreated;
@@ -280,6 +294,24 @@ class EventServiceProvider extends ServiceProvider
         CrmWarrantyClaimOpened::class            => [],
         CrmWarrantyClaimRejected::class          => [],
         CrmWarrantyReplacementOpportunity::class => [],
+        // ── Module 11 (fieldservice_route) — route lifecycle signals ──────
+        RouteCreated::class => [],
+        RouteUpdated::class => [],
+        RouteAssigned::class => [
+            RouteAssignedListener::class,
+        ],
+        RouteCapacityExceeded::class => [
+            RouteCapacityExceededListener::class,
+        ],
+        RouteConflictDetected::class => [],
+        RouteStopAdded::class        => [],
+        RouteStopCompleted::class    => [
+            RouteStopCompletedListener::class,
+        ],
+        RouteStopFailed::class     => [],
+        RouteStopReordered::class  => [],
+        TechnicianAvailabilityCreated::class => [],
+        TechnicianAvailabilityUpdated::class => [],
         // ── Repair domain signals (Modules 9 + 10) ────────────────────────
         RepairOrderCreated::class => [
             RepairOrderCreatedListener::class,
