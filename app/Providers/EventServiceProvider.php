@@ -177,6 +177,13 @@ use App\Events\Work\JobDispatchFailed;
 use App\Events\Work\JobReDispatched;
 use App\Listeners\Work\NotifyTechnicianOfAssignment;
 use App\Listeners\Work\RecordDispatchAuditTrail;
+// ── MODULE_02 CapabilityRegistry ────────────────────────────────────────────
+use App\Events\Team\SkillAssigned;
+use App\Events\Team\CertificationExpired;
+use App\Events\Team\CertificationRevoked;
+use App\Events\Team\CapabilityGapDetected;
+use App\Listeners\Team\NotifyOnCertificationExpiry;
+use App\Listeners\Team\RecordCapabilityAuditTrail;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -448,6 +455,20 @@ class EventServiceProvider extends ServiceProvider
         ],
         JobDispatchFailed::class  => [],
         JobReDispatched::class    => [],
+        // ── MODULE_02 CapabilityRegistry — skill and certification signals ─────
+        SkillAssigned::class => [
+            RecordCapabilityAuditTrail::class,
+        ],
+        CertificationExpired::class => [
+            NotifyOnCertificationExpiry::class,
+            RecordCapabilityAuditTrail::class,
+        ],
+        CertificationRevoked::class => [
+            RecordCapabilityAuditTrail::class,
+        ],
+        CapabilityGapDetected::class => [
+            RecordCapabilityAuditTrail::class,
+        ],
     ];
 
     /**

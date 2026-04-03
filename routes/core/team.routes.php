@@ -106,5 +106,19 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('app.dashb
                 ->name('staff-profiles.update');
             Route::delete('staff-profiles/{staff_profile}', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'destroy'])
                 ->name('staff-profiles.destroy');
+
+            // ── MODULE_02: Capability Registry ───────────────────────────────
+            Route::prefix('capabilities')->as('capabilities.')->group(static function () {
+                Route::get('profile', [\App\Http\Controllers\Team\CapabilityController::class, 'profile'])
+                    ->name('profile');
+                Route::get('skills', [\App\Http\Controllers\Team\CapabilityController::class, 'skills'])
+                    ->name('skills');
+                Route::get('certifications', [\App\Http\Controllers\Team\CapabilityController::class, 'certifications'])
+                    ->name('certifications');
+                Route::get('availability', [\App\Http\Controllers\Team\CapabilityController::class, 'availability'])
+                    ->name('availability');
+                Route::get('gaps', [\App\Http\Controllers\Team\CapabilityController::class, 'gaps'])
+                    ->name('gaps');
+            });
         });
     });
