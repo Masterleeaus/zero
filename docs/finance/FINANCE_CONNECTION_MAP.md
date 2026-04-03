@@ -309,3 +309,47 @@ Phase 7 — Auto-posting (Journal Observers)
 | Depreciation run → JournalEntry auto-post | Missing | Phase 7 |
 | ServiceAgreement → recurring invoice trigger | Missing | Deferred (Phase 8) |
 | TitanMoney mobile app → API endpoints | Missing | Deferred (after Phase 6) |
+
+---
+
+## 5. Phase 1 Implementation Status (2026-04-03)
+
+### COMPLETED in Finance Pass 2
+
+| Item | Status | File |
+|------|--------|------|
+| `Account` model | ✅ Done | `app/Models/Money/Account.php` |
+| `JournalEntry` model | ✅ Done | `app/Models/Money/JournalEntry.php` |
+| `JournalLine` model | ✅ Done | `app/Models/Money/JournalLine.php` |
+| Migration 600100 | ✅ Done | `database/migrations/2026_04_03_600100_create_chart_of_accounts_and_journal_tables.php` |
+| `AccountingService` | ✅ Done | `app/Services/TitanMoney/AccountingService.php` |
+| `AccountController` | ✅ Done | `app/Http/Controllers/Core/Money/AccountController.php` |
+| `JournalEntryController` | ✅ Done | `app/Http/Controllers/Core/Money/JournalEntryController.php` |
+| `AccountPolicy` | ✅ Done | `app/Policies/AccountPolicy.php` |
+| `JournalEntryPolicy` | ✅ Done | `app/Policies/JournalEntryPolicy.php` |
+| Routes `money.accounts.*` | ✅ Done | `routes/core/money.routes.php` |
+| Routes `money.journal.*` | ✅ Done | `routes/core/money.routes.php` |
+| Account CRUD views | ✅ Done | `resources/views/default/panel/user/money/accounts/` |
+| Journal CRUD views | ✅ Done | `resources/views/default/panel/user/money/journal/` |
+| `ExpenseApproved` event | ✅ Done | `app/Events/Money/ExpenseApproved.php` |
+| `PaymentRecorded` event | ✅ Done | `app/Events/Money/PaymentRecorded.php` |
+| Auto-post Invoice→Ledger | ✅ Done | `app/Listeners/Money/PostInvoiceIssuedToLedger.php` |
+| Auto-post Payment→Ledger | ✅ Done | `app/Listeners/Money/PostPaymentRecordedToLedger.php` |
+| Auto-post Expense→Ledger | ✅ Done | `app/Listeners/Money/PostExpenseApprovedToLedger.php` |
+| Tests | ✅ Done | `tests/Feature/Money/AccountingTest.php` |
+
+### Auto-Posting Hooks Connected
+
+| Trigger | Event | Listener | Target |
+|---------|-------|----------|--------|
+| Invoice status → 'issued' | `InvoiceIssued` | `PostInvoiceIssuedToLedger` | DR AR / CR Income |
+| Payment store | `PaymentRecorded` | `PostPaymentRecordedToLedger` | DR Bank / CR AR |
+| Expense approve | `ExpenseApproved` | `PostExpenseApprovedToLedger` | DR Expense / CR Payable |
+
+### Notes
+- Original plan phases 1+2 combined into a single pass (Chart of Accounts + Journal Engine together).
+- Auto-posting from Phase 7 brought forward to Phase 1 (minimum viable hooks for Invoice, Payment, Expense).
+- Debit/credit balance validation enforced in `AccountingService::assertBalanced()`.
+- All entries are idempotent: duplicate posts are silently skipped.
+- Default accounts (Bank 1000, AR 1200, Income 4000, Expenses 6000, Payable 2000) are
+  auto-created via `firstOrCreate` when a posting occurs without pre-configured accounts.

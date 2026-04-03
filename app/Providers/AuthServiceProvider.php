@@ -6,9 +6,13 @@ use App\Models\Money\Invoice;
 use App\Models\Money\Expense;
 use App\Models\Money\Payment;
 use App\Models\Money\Quote;
+use App\Models\Money\Account;
+use App\Models\Money\JournalEntry;
 use App\Models\UserSupport;
+use App\Policies\AccountPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\InvoicePolicy;
+use App\Policies\JournalEntryPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\QuotePolicy;
 use App\Policies\UserSupportPolicy;
@@ -28,6 +32,8 @@ class AuthServiceProvider extends ServiceProvider
         Payment::class      => PaymentPolicy::class,
         UserSupport::class  => UserSupportPolicy::class,
         Expense::class      => ExpensePolicy::class,
+        Account::class      => AccountPolicy::class,
+        JournalEntry::class => JournalEntryPolicy::class,
     ];
 
     /**

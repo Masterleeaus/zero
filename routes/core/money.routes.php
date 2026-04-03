@@ -149,5 +149,31 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('expense-categories.update');
             Route::delete('expense-categories/{expenseCategory}', [\App\Http\Controllers\Core\Money\ExpenseCategoryController::class, 'destroy'])
                 ->name('expense-categories.destroy');
+
+            // ── Finance Pass 1: Chart of Accounts ─────────────────────────────
+            Route::get('accounts', [\App\Http\Controllers\Core\Money\AccountController::class, 'index'])
+                ->name('accounts.index');
+            Route::get('accounts/create', [\App\Http\Controllers\Core\Money\AccountController::class, 'create'])
+                ->name('accounts.create');
+            Route::post('accounts', [\App\Http\Controllers\Core\Money\AccountController::class, 'store'])
+                ->name('accounts.store');
+            Route::get('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'show'])
+                ->name('accounts.show');
+            Route::get('accounts/{account}/edit', [\App\Http\Controllers\Core\Money\AccountController::class, 'edit'])
+                ->name('accounts.edit');
+            Route::put('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'update'])
+                ->name('accounts.update');
+            Route::delete('accounts/{account}', [\App\Http\Controllers\Core\Money\AccountController::class, 'destroy'])
+                ->name('accounts.destroy');
+
+            // ── Finance Pass 1: Journal Entries ───────────────────────────────
+            Route::get('journal', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'index'])
+                ->name('journal.index');
+            Route::get('journal/create', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'create'])
+                ->name('journal.create');
+            Route::post('journal', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'store'])
+                ->name('journal.store');
+            Route::get('journal/{journalEntry}', [\App\Http\Controllers\Core\Money\JournalEntryController::class, 'show'])
+                ->name('journal.show');
         });
     });
