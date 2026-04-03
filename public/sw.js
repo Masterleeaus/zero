@@ -10,12 +10,15 @@
 const CACHE_NAME   = 'titan-zero-v1';
 const OFFLINE_URL  = '/offline';
 
+// Core shell assets — only stable URLs that won't change with Vite hashes
 const SHELL_ASSETS = [
-  '/',
   '/offline',
   '/manifest.webmanifest',
-  '/build/assets/app-JHixOwCs.js',
-  '/build/assets/dashboard-D__tbcE2.css',
+  '/pwa-runtime/db.js',
+  '/pwa-runtime/signalQueue.js',
+  '/pwa-runtime/sync.js',
+  '/pwa-runtime/runtime.js',
+  '/pwa-runtime/ui.js',
 ];
 
 // ── Install ────────────────────────────────────────────────────────────────

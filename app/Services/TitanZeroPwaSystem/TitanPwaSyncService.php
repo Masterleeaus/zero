@@ -89,9 +89,12 @@ class TitanPwaSyncService
             [
                 'user_id'      => $userId,
                 'platform'     => $deviceData['platform'] ?? 'unknown',
+                'app_version'  => $deviceData['app_version'] ?? null,
+                'device_label' => $deviceData['device_label'] ?? null,
+                'node_origin'  => $deviceData['node_origin'] ?? null,
                 'trust_level'  => $deviceData['trust_level'] ?? 'provisional',
                 'last_seen_at' => now(),
-                'meta'         => array_merge(
+                'meta_json'    => array_merge(
                     $deviceData['meta'] ?? [],
                     ['handshake_at' => now()->toIso8601String()]
                 ),

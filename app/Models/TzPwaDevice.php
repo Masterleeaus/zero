@@ -14,14 +14,17 @@ class TzPwaDevice extends Model
         'node_id',
         'company_id',
         'user_id',
-        'platform',
+        'node_origin',
         'trust_level',
+        'device_label',
+        'platform',
+        'app_version',
+        'meta_json',
         'last_seen_at',
-        'meta',
     ];
 
     protected $casts = [
-        'meta' => 'array',
+        'meta_json' => 'array',
         'last_seen_at' => 'datetime',
     ];
 

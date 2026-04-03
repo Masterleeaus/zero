@@ -6,6 +6,12 @@ use Illuminate\Support\Facades\Log;
 
 class EquilibriumResolver
 {
+    /**
+     * Server authority override threshold in seconds.
+     * If the server record is more than 60 seconds newer, server wins unconditionally.
+     * 60 s is chosen as a balance between respecting recent client edits and preventing
+     * stale offline state from overwriting authoritative server data.
+     */
     private const SERVER_AUTHORITY_THRESHOLD_SECONDS = 60;
 
     /**

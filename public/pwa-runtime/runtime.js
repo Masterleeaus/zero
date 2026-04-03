@@ -26,7 +26,7 @@ class TitanRuntime {
 
             if (navigator.onLine) {
                 await this.handshake().catch((e) => {
-                    console.warn('[TitanRuntime] Handshake failed (non-fatal):', e.message);
+                    console.warn('[TitanRuntime] Handshake failed (non-fatal):', e instanceof Error ? e.message : String(e));
                 });
             }
 

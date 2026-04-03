@@ -4,6 +4,7 @@ namespace App\Services\TitanCoreConsensus;
 
 class TriCoreConsensus
 {
+    /** Maximum allowed clock drift between client and server, in seconds (5 minutes). */
     const TIMESTAMP_DRIFT_TOLERANCE = 300;
     const MIN_CONFIDENCE_SCORE = 0.3;
     const REQUIRED_PAYLOAD_KEYS = ['signal_key', 'payload'];

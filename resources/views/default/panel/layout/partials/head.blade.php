@@ -47,6 +47,15 @@
     >
     <title>{{ getMetaTitle($setting, $settings_two, ' ') ?? $setting->site_name }} | @yield('title')</title>
 
+    {{-- PWA manifest and meta --}}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Titan Zero">
+    <link rel="apple-touch-icon" href="/images/pwa-icon-192.png">
+
     @if (filled($google_fonts_string = \App\Helpers\Classes\ThemeHelper::googleFontsString('dashboard')))
         <link
             rel="preconnect"
