@@ -27,11 +27,11 @@ class DispatchController extends Controller
     {
         $request->validate([
             'job_id'        => ['required', 'integer', 'exists:service_jobs,id'],
-            'technician_id' => ['required', 'integer'],
+            'technician_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
         $job = ServiceJob::findOrFail($request->job_id);
-        $assignment = $this->dispatchService->allocate($job);
+        $assignment = $this->dispatchService->manualAssign($job, (int) $request->technician_id);
 
         return response()->json([
             'status'     => 'assigned',
@@ -46,6 +46,7 @@ class DispatchController extends Controller
         ]);
 
         $job = ServiceJob::findOrFail($request->job_id);
+        // Queue for tracking, then allocate immediately
         $this->dispatchService->queueForDispatch($job);
         $assignment = $this->dispatchService->allocate($job);
 

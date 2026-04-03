@@ -22,6 +22,34 @@ class DispatchService
         protected AuditTrail $auditTrail,
     ) {}
 
+    public function manualAssign(ServiceJob $job, int $technicianId): DispatchAssignment
+    {
+        return DB::transaction(function () use ($job, $technicianId) {
+            DispatchAssignment::where('job_id', $job->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'superseded']);
+
+            $assignment = DispatchAssignment::create([
+                'company_id'    => $job->company_id,
+                'job_id'        => $job->id,
+                'technician_id' => $technicianId,
+                'assigned_by'   => 'user',
+                'assigned_at'   => now(),
+                'status'        => 'pending',
+            ]);
+
+            $job->update(['assigned_user_id' => $technicianId]);
+
+            $tech = User::find($technicianId);
+            JobDispatched::dispatch($job, $assignment);
+            $this->emitSignal('dispatch.allocated', $job, $tech, [
+                'assigned_by' => 'user',
+            ]);
+
+            return $assignment;
+        });
+    }
+
     public function allocate(ServiceJob $job): DispatchAssignment
     {
         $candidates = $this->buildCandidatePool($job);

@@ -36,12 +36,9 @@ it('POST /dashboard/work/dispatch/assign fails validation without job_id', funct
 it('GET /dashboard/work/dispatch/history returns paginated results when authenticated', function () {
     $user = User::factory()->create();
 
-    $mockService = Mockery::mock(DispatchService::class);
-    $this->app->instance(DispatchService::class, $mockService);
-
     $response = $this->actingAs($user)
         ->getJson('/dashboard/work/dispatch/history');
 
-    // Either 200 (success) or 500 if DB not fully set up — both are acceptable in unit context
-    expect($response->status())->toBeIn([200, 500]);
+    expect($response->status())->toBe(200);
+    expect($response->json())->toHaveKey('data');
 });
