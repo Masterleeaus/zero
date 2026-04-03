@@ -249,6 +249,10 @@ class Premises extends Model
             ->whereNotNull('warranty_expiry')
             ->whereDate('warranty_expiry', '>', now()->toDateString())
             ->whereDate('warranty_expiry', '<=', $cutoff)
+            ->get();
+    }
+
+    /**
      * Upcoming open service jobs for this premises.
      *
      * Module 9 (fieldservice_calendar) — premises calendar surface helper.
@@ -277,5 +281,79 @@ class Premises extends Model
     public function scopeForCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('customer_id', $customerId);
+    }
+
+    // ── Repair relationships (Module 9) ───────────────────────────────────────
+
+    /**
+     * All repair orders at this premises.
+     *
+     * @return HasMany<\App\Models\Repair\RepairOrder>
+     */
+    public function repairOrders(): HasMany
+    {
+        return $this->hasMany(\App\Models\Repair\RepairOrder::class, 'premises_id');
+    }
+
+    /**
+     * Open (non-terminal) repair orders at this premises.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repair\RepairOrder>
+     */
+    public function openRepairs(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->repairOrders()
+            ->whereNotIn('repair_status', [
+                \App\Models\Repair\RepairOrder::STATUS_COMPLETED,
+                \App\Models\Repair\RepairOrder::STATUS_VERIFIED,
+                \App\Models\Repair\RepairOrder::STATUS_CLOSED,
+                \App\Models\Repair\RepairOrder::STATUS_CANCELLED,
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * All completed or closed repair orders (repair history) for this premises.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repair\RepairOrder>
+     */
+    public function repairHistory(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->repairOrders()
+            ->whereIn('repair_status', [
+                \App\Models\Repair\RepairOrder::STATUS_COMPLETED,
+                \App\Models\Repair\RepairOrder::STATUS_VERIFIED,
+                \App\Models\Repair\RepairOrder::STATUS_CLOSED,
+            ])
+            ->orderByDesc('completed_at')
+            ->get();
+    }
+
+    /**
+     * Risk summary for repairs at this premises.
+     *
+     * Returns counts of open repairs by priority level.
+     *
+     * @return array{urgent: int, high: int, normal: int, low: int, total: int}
+     */
+    public function repairRiskSummary(): array
+    {
+        $open = $this->repairOrders()
+            ->whereNotIn('repair_status', [
+                \App\Models\Repair\RepairOrder::STATUS_COMPLETED,
+                \App\Models\Repair\RepairOrder::STATUS_VERIFIED,
+                \App\Models\Repair\RepairOrder::STATUS_CLOSED,
+                \App\Models\Repair\RepairOrder::STATUS_CANCELLED,
+            ])
+            ->get(['priority']);
+
+        return [
+            'urgent' => $open->where('priority', 'urgent')->count(),
+            'high'   => $open->where('priority', 'high')->count(),
+            'normal' => $open->where('priority', 'normal')->count(),
+            'low'    => $open->where('priority', 'low')->count(),
+            'total'  => $open->count(),
+        ];
     }
 }

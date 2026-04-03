@@ -48,6 +48,10 @@ class RepairTemplate extends Model
         'estimated_duration' => 'integer',
     ];
 
+    protected $attributes = [
+        'active' => true,
+    ];
+
     // ── Relationships ─────────────────────────────────────────────────────────
 
     public function steps(): HasMany

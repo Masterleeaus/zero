@@ -93,6 +93,44 @@ use App\Listeners\Work\ServicePlanVisitCompletedListener;
 use App\Listeners\Work\ServicePlanVisitDispatchedListener;
 use App\Listeners\Work\ServicePlanVisitScheduledListener;
 use App\Listeners\YokassaWebhookListener;
+// ── Repair domain events (Modules 9 + 10) ────────────────────────────────────
+use App\Events\Repair\RepairOrderCreated;
+use App\Events\Repair\RepairOrderCompleted;
+use App\Events\Repair\RepairOrderCancelled;
+use App\Events\Repair\RepairWarrantyDetected;
+use App\Events\Repair\RepairClaimRequired;
+use App\Events\Repair\RepairClaimLinked;
+use App\Events\Repair\RepairWarrantyApplied;
+use App\Events\Repair\RepairDiagnosisRecorded;
+use App\Events\Repair\RepairSpecialistRequired;
+use App\Events\Repair\RepairQuoteRequired;
+use App\Events\Repair\RepairPartsReserved;
+use App\Events\Repair\RepairPartsConsumed;
+use App\Events\Repair\RepairPartsPending;
+use App\Events\Repair\RepairTemplateApplied;
+use App\Events\Repair\RepairTemplateGeneratedChecklist;
+use App\Events\Repair\RepairTemplateGeneratedParts;
+use App\Events\Repair\PremisesRepairCreated;
+use App\Events\Repair\PremisesRepairEscalated;
+use App\Events\Repair\PremisesRepairClosed;
+use App\Events\Repair\ServiceRepairRequired;
+use App\Events\Repair\RepairCreatedFromService;
+use App\Events\Repair\RepairFollowupScheduled;
+use App\Events\Repair\CrmRepairDetected;
+use App\Events\Repair\CrmReplacementCandidate;
+use App\Events\Repair\CrmServiceUpgradeCandidate;
+use App\Events\Repair\CrmAgreementCandidate;
+use App\Events\Repair\CrmRecurringCandidate;
+use App\Events\Repair\RepairInvoiceGenerated;
+use App\Events\Repair\RepairClaimOffsetApplied;
+use App\Events\Repair\RepairScheduled;
+use App\Events\Repair\RepairRescheduled;
+use App\Events\Repair\RepairDispatchAssigned;
+use App\Listeners\Repair\RepairOrderCreatedListener;
+use App\Listeners\Repair\RepairOrderCompletedListener;
+use App\Listeners\Repair\RepairWarrantyDetectedListener;
+use App\Listeners\Repair\RepairDiagnosisRecordedListener;
+use App\Listeners\Repair\RepairTemplateAppliedListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -242,6 +280,49 @@ class EventServiceProvider extends ServiceProvider
         CrmWarrantyClaimOpened::class            => [],
         CrmWarrantyClaimRejected::class          => [],
         CrmWarrantyReplacementOpportunity::class => [],
+        // ── Repair domain signals (Modules 9 + 10) ────────────────────────
+        RepairOrderCreated::class => [
+            RepairOrderCreatedListener::class,
+        ],
+        RepairOrderCompleted::class => [
+            RepairOrderCompletedListener::class,
+        ],
+        RepairOrderCancelled::class         => [],
+        RepairWarrantyDetected::class       => [
+            RepairWarrantyDetectedListener::class,
+        ],
+        RepairClaimRequired::class          => [],
+        RepairClaimLinked::class            => [],
+        RepairWarrantyApplied::class        => [],
+        RepairDiagnosisRecorded::class      => [
+            RepairDiagnosisRecordedListener::class,
+        ],
+        RepairSpecialistRequired::class     => [],
+        RepairQuoteRequired::class          => [],
+        RepairPartsReserved::class          => [],
+        RepairPartsConsumed::class          => [],
+        RepairPartsPending::class           => [],
+        RepairTemplateApplied::class        => [
+            RepairTemplateAppliedListener::class,
+        ],
+        RepairTemplateGeneratedChecklist::class => [],
+        RepairTemplateGeneratedParts::class     => [],
+        PremisesRepairCreated::class        => [],
+        PremisesRepairEscalated::class      => [],
+        PremisesRepairClosed::class         => [],
+        ServiceRepairRequired::class        => [],
+        RepairCreatedFromService::class     => [],
+        RepairFollowupScheduled::class      => [],
+        CrmRepairDetected::class            => [],
+        CrmReplacementCandidate::class      => [],
+        CrmServiceUpgradeCandidate::class   => [],
+        CrmAgreementCandidate::class        => [],
+        CrmRecurringCandidate::class        => [],
+        RepairInvoiceGenerated::class       => [],
+        RepairClaimOffsetApplied::class     => [],
+        RepairScheduled::class              => [],
+        RepairRescheduled::class            => [],
+        RepairDispatchAssigned::class       => [],
     ];
 
     /**

@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Repair\RepairOrder;
 
 class ServiceJob extends Model implements SchedulableEntity
 {
@@ -973,5 +974,17 @@ class ServiceJob extends Model implements SchedulableEntity
     public function getSchedulableType(): string
     {
         return static::class;
+    }
+
+    // ── Repair relationships (Module 9) ───────────────────────────────────────
+
+    /**
+     * All repair orders that originated from this service job.
+     *
+     * @return HasMany<RepairOrder>
+     */
+    public function repairOrders(): HasMany
+    {
+        return $this->hasMany(RepairOrder::class, 'service_job_id');
     }
 }

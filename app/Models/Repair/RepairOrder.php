@@ -155,6 +155,28 @@ class RepairOrder extends Model implements SchedulableEntity
         return $this->belongsTo(ServiceJob::class);
     }
 
+    /**
+     * The service job that triggered this repair (alias for semantic clarity).
+     */
+    public function originatingServiceJob(): BelongsTo
+    {
+        return $this->serviceJob();
+    }
+
+    /**
+     * A follow-up service job scheduled as a result of this repair.
+     *
+     * NOTE: This is a best-effort lookup via shared warranty_claim_id.
+     * A dedicated `repair_order_id` FK on service_jobs would provide a
+     * more robust link — defer to a future service_jobs schema extension pass.
+     */
+    public function followupServiceJob(): HasOne
+    {
+        return $this->hasOne(ServiceJob::class, 'warranty_claim_id', 'warranty_claim_id')
+            ->whereNotNull('warranty_claim_id')
+            ->where('is_warranty_job', true);
+    }
+
     public function warrantyClaim(): BelongsTo
     {
         return $this->belongsTo(WarrantyClaim::class);
