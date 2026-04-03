@@ -1,0 +1,6 @@
+TitanTrust Pass H2 Smoke Test
+
+1. Login as tenant A → confirm no data from tenant B visible.
+2. Attempt unauthenticated access → must redirect to login.
+3. Attempt invalid URL scrape (file://) → must 403.
+4. Attempt unsafe file upload (.php) → must fail validation.

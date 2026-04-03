@@ -1,0 +1,12 @@
+{
+    "name": "TrPackage",
+    "alias": "trpackage",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrPackage\\Providers\\PackageServiceProvider",
+        "Modules\\TrPackage\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

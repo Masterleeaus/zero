@@ -1,0 +1,23 @@
+{
+    "name": "modules/titanhello",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\TitanHello\\Providers\\TitanHelloServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\TitanHello\\": ""
+        }
+    }
+}

@@ -1,0 +1,5 @@
+app/Console/Kernel.php
+app/Providers/AppServiceProvider.php
+database/seeders/
+database/factories/
+database/schema/

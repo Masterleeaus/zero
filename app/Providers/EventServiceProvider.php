@@ -40,6 +40,10 @@ use App\Events\Work\ServicePlanVisitCompleted;
 use App\Events\Work\ServicePlanVisitDispatched;
 use App\Events\Work\ServicePlanVisitRescheduled;
 use App\Events\Work\ServicePlanVisitScheduled;
+// Module 23 — fieldservice_kanban_info signals
+use App\Events\Work\JobKanbanStateChanged;
+use App\Events\Work\JobBlockerAdded;
+use App\Events\Work\JobBlockerCleared;
 use App\Events\Equipment\EquipmentInstalled;
 use App\Events\Equipment\EquipmentRemoved;
 use App\Events\Equipment\EquipmentReplaced;
@@ -97,6 +101,7 @@ use App\Listeners\Equipment\WarrantyClaimCreatedListener;
 use App\Listeners\Equipment\WarrantyClaimRejectedListener;
 use App\Listeners\Work\ChecklistRunCompletedListener;
 use App\Listeners\Work\JobCompletedListener;
+use App\Listeners\Work\JobKanbanStateChangedListener;
 use App\Listeners\Work\JobStageChangedListener;
 use App\Listeners\Work\ServiceJobRescheduledListener;
 use App\Listeners\Work\ServiceJobScheduledListener;
@@ -160,6 +165,17 @@ use App\Listeners\Repair\RepairDiagnosisRecordedListener;
 use App\Listeners\Repair\RepairTemplateAppliedListener;
 use App\Listeners\Work\FieldServiceProjectCreatedListener;
 use App\Listeners\Work\FieldServiceProjectCompletedListener;
+// ── fieldservice_sale + fieldservice_sale_agreement events ───────────────────
+use App\Events\Work\FieldServiceSaleCreated;
+use App\Events\Work\FieldServiceSaleApproved;
+use App\Events\Work\FieldServiceSaleConvertedToJob;
+use App\Events\Work\FieldServiceSaleConvertedToPlan;
+use App\Events\Work\FieldServiceAgreementSaleCreated;
+use App\Events\Work\FieldServiceAgreementSaleActivated;
+use App\Events\Work\FieldServiceAgreementSaleExtended;
+use App\Events\Work\SaleServiceCoverageApplied;
+use App\Listeners\Work\FieldServiceSaleApprovedListener;
+use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -387,6 +403,25 @@ class EventServiceProvider extends ServiceProvider
         FieldServiceProjectCompleted::class   => [
             FieldServiceProjectCompletedListener::class,
         ],
+        // ── Module 23 (fieldservice_kanban_info) — kanban intelligence signals ──
+        JobKanbanStateChanged::class => [
+            JobKanbanStateChangedListener::class,
+        ],
+        JobBlockerAdded::class   => [],
+        JobBlockerCleared::class => [],
+        // ── fieldservice_sale + fieldservice_sale_agreement (Modules 3 + 3a) ──
+        FieldServiceSaleCreated::class            => [],
+        FieldServiceSaleApproved::class           => [
+            FieldServiceSaleApprovedListener::class,
+        ],
+        FieldServiceSaleConvertedToJob::class     => [],
+        FieldServiceSaleConvertedToPlan::class    => [],
+        FieldServiceAgreementSaleCreated::class   => [],
+        FieldServiceAgreementSaleActivated::class => [
+            FieldServiceAgreementSaleActivatedListener::class,
+        ],
+        FieldServiceAgreementSaleExtended::class  => [],
+        SaleServiceCoverageApplied::class         => [],
     ];
 
     /**

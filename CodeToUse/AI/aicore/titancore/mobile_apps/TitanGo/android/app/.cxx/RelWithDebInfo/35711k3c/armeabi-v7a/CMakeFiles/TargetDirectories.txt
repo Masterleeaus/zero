@@ -1,0 +1,2 @@
+/Users/mostafizurrahman/StudioProjects/Demandium-Service-Man-App/android/app/.cxx/RelWithDebInfo/35711k3c/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/mostafizurrahman/StudioProjects/Demandium-Service-Man-App/android/app/.cxx/RelWithDebInfo/35711k3c/armeabi-v7a/CMakeFiles/rebuild_cache.dir

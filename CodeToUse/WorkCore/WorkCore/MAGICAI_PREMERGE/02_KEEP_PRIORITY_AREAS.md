@@ -1,0 +1,171 @@
+# Keep / extract priority areas
+
+Likely high-value feature surfaces retained for merge:
+
+- `app/Models/AcceptQuote.php`
+- `app/Models/Attendance.php`
+- `app/Models/AttendanceRegularisation.php`
+- `app/Models/AttendanceSetting.php`
+- `app/Models/AutomateShift.php`
+- `app/Models/CustomerCategory.php`
+- `app/Models/CustomerContact.php`
+- `app/Models/CustomerDetails.php`
+- `app/Models/CustomerDocument.php`
+- `app/Models/CustomerNote.php`
+- `app/Models/CustomerSubCategory.php`
+- `app/Models/CustomerUserNote.php`
+- `app/Models/Service Agreement.php`
+- `app/Models/ContractDiscussion.php`
+- `app/Models/ContractFile.php`
+- `app/Models/ContractRenew.php`
+- `app/Models/ContractSign.php`
+- `app/Models/ContractTemplate.php`
+- `app/Models/ContractType.php`
+- `app/Models/Deal.php`
+- `app/Models/DealFile.php`
+- `app/Models/DealFollowUp.php`
+- `app/Models/DealHistory.php`
+- `app/Models/DealNote.php`
+- `app/Models/CleanerActivity.php`
+- `app/Models/CleanerDetails.php`
+- `app/Models/CleanerDocument.php`
+- `app/Models/CleanerDocumentExpiry.php`
+- `app/Models/CleanerLeaveQuota.php`
+- `app/Models/CleanerLeaveQuotaHistory.php`
+- `app/Models/CleanerShift.php`
+- `app/Models/CleanerShiftChangeRequest.php`
+- `app/Models/CleanerShiftSchedule.php`
+- `app/Models/CleanerSkill.php`
+- `app/Models/CleanerTeam.php`
+- `app/Models/Quote.php`
+- `app/Models/QuoteItem.php`
+- `app/Models/QuoteItemImage.php`
+- `app/Models/QuoteRequest.php`
+- `app/Models/QuoteTemplate.php`
+- `app/Models/QuoteTemplateItem.php`
+- `app/Models/QuoteTemplateItemImage.php`
+- `app/Models/Event.php`
+- `app/Models/EventAttendee.php`
+- `app/Models/EventFile.php`
+- `app/Models/Expense.php`
+- `app/Models/ExpenseRecurring.php`
+- `app/Models/ExpensesCategory.php`
+- `app/Models/ExpensesCategoryRole.php`
+- `app/Models/Holiday.php`
+- `app/Models/Invoice.php`
+- `app/Models/InvoiceFiles.php`
+- `app/Models/InvoiceItemImage.php`
+- `app/Models/InvoiceItems.php`
+- `app/Models/InvoicePaymentDetail.php`
+- `app/Models/InvoiceSetting.php`
+- `app/Models/Enquiry.php`
+- `app/Models/LeadAgent.php`
+- `app/Models/LeadCategory.php`
+- `app/Models/LeadCustomForm.php`
+- `app/Models/LeadNote.php`
+- `app/Models/LeadPipeline.php`
+- `app/Models/LeadPipelineStages.php`
+- `app/Models/LeadService / Extra.php`
+- `app/Models/LeadSetting.php`
+- `app/Models/LeadSource.php`
+- `app/Models/LeadStatus.php`
+- `app/Models/LeadUserNote.php`
+- `app/Models/Leave.php`
+- `app/Models/LeaveFile.php`
+- `app/Models/LeaveSetting.php`
+- `app/Models/LeaveType.php`
+- `app/Models/MessageSetting.php`
+- `app/Models/Notice.php`
+- `app/Models/NoticeBoardUser.php`
+- `app/Models/NoticeFile.php`
+- `app/Models/NoticeView.php`
+- `app/Models/OfflinePaymentMethod.php`
+- `app/Models/Order.php`
+- `app/Models/OrderCart.php`
+- `app/Models/OrderItemImage.php`
+- `app/Models/OrderItems.php`
+- `app/Models/Payment.php`
+- `app/Models/PaymentGatewayCredentials.php`
+- `app/Models/Site.php`
+- `app/Models/SiteActivity.php`
+- `app/Models/SiteCategory.php`
+- `app/Models/SiteZone.php`
+- `app/Models/SiteFile.php`
+- `app/Models/SiteLabel.php`
+- `app/Models/SiteLabelList.php`
+- `app/Models/SiteMember.php`
+- `app/Models/SiteMilestone.php`
+- `app/Models/SiteNote.php`
+- `app/Models/SiteRating.php`
+- `app/Models/SiteSetting.php`
+- `app/Models/SiteStatusSetting.php`
+- `app/Models/SiteSubCategory.php`
+- `app/Models/SiteTemplate.php`
+- `app/Models/SiteTemplateMember.php`
+- `app/Models/SiteTemplateMilestone.php`
+- `app/Models/SiteTemplateSubService Job.php`
+- `app/Models/SiteTemplateService Job.php`
+- `app/Models/SiteTemplateService JobUser.php`
+- `app/Models/SiteTimeLog.php`
+- `app/Models/SiteTimeLogBreak.php`
+- `app/Models/SiteUserNote.php`
+- `app/Models/PurposeConsentLead.php`
+- `app/Models/RecurringInvoice.php`
+- `app/Models/RecurringInvoiceItemImage.php`
+- `app/Models/RecurringInvoiceItems.php`
+- `app/Models/RemovalRequestLead.php`
+- `app/Models/ShiftRotation.php`
+- `app/Models/ShiftRotationSequence.php`
+- `app/Models/SubService Job.php`
+- `app/Models/SubService JobFile.php`
+- `app/Models/SuperAdmin/AuthorizationInvoice.php`
+- `app/Models/SuperAdmin/AuthorizeInvoice.php`
+- `app/Models/SuperAdmin/CustomerPayment.php`
+- `app/Models/SuperAdmin/FrontCustomers.php`
+- `app/Models/SuperAdmin/GlobalInvoice.php`
+- `app/Models/SuperAdmin/GlobalInvoiceSetting.php`
+- `app/Models/SuperAdmin/GlobalPaymentGatewayCredentials.php`
+- `app/Models/SuperAdmin/MollieInvoice.php`
+- `app/Models/SuperAdmin/OfflineInvoice.php`
+- `app/Models/SuperAdmin/PayfastInvoice.php`
+- `app/Models/SuperAdmin/PaypalInvoice.php`
+- `app/Models/SuperAdmin/PaystackInvoice.php`
+- `app/Models/SuperAdmin/RazorpayInvoice.php`
+- `app/Models/SuperAdmin/StripeInvoice.php`
+- `app/Models/SuperAdmin/SupportIssue / Support.php`
+- `app/Models/SuperAdmin/SupportIssue / SupportFile.php`
+- `app/Models/SuperAdmin/SupportIssue / SupportReply.php`
+- `app/Models/SuperAdmin/SupportIssue / SupportType.php`
+- `app/Models/Service Job.php`
+- `app/Models/Service JobCategory.php`
+- `app/Models/Service JobComment.php`
+- `app/Models/Service JobCommentEmoji.php`
+- `app/Models/Service JobFile.php`
+- `app/Models/Service JobHistory.php`
+- `app/Models/Service JobLabel.php`
+- `app/Models/Service JobLabelList.php`
+- `app/Models/Service JobNote.php`
+- `app/Models/Service JobSetting.php`
+- `app/Models/Service JobTag.php`
+- `app/Models/Service JobTagList.php`
+- `app/Models/Service JobUser.php`
+- `app/Models/Service JobboardColumn.php`
+- `app/Models/Issue / Support.php`
+- `app/Models/Issue / SupportActivity.php`
+- `app/Models/Issue / SupportAgentGroups.php`
+- `app/Models/Issue / SupportChannel.php`
+- `app/Models/Issue / SupportCustomForm.php`
+- `app/Models/Issue / SupportEmailSetting.php`
+- `app/Models/Issue / SupportFile.php`
+- `app/Models/Issue / SupportGroup.php`
+- `app/Models/Issue / SupportReply.php`
+- `app/Models/Issue / SupportReplyTemplate.php`
+- `app/Models/Issue / SupportReplyUser.php`
+- `app/Models/Issue / SupportSettingForAgents.php`
+- `app/Models/Issue / SupportTag.php`
+- `app/Models/Issue / SupportTagList.php`
+- `app/Models/Issue / SupportType.php`
+- `app/Models/UserChat.php`
+- `app/Models/UserLeadboardSetting.php`
+- `app/Models/UserService JobboardSetting.php`
+- `app/Models/UserchatFile.php`

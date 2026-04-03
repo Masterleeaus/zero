@@ -2,7 +2,7 @@
 
 namespace App\TitanCore\MCP\Handlers;
 
-use App\TitanCore\Zero\Skills\ZylosBridge;
+use App\TitanCore\Zylos\ZylosBridge;
 
 class SkillStatusHandler
 {
@@ -13,6 +13,6 @@ class SkillStatusHandler
     /** @param array<string, mixed> $params */
     public function handle(array $params): array
     {
-        return $this->bridge->status((string) ($params['execution_id'] ?? ''));
+        return $this->bridge->executionStatus((string) ($params['execution_id'] ?? ''));
     }
 }

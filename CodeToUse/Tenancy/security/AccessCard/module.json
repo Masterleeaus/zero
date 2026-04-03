@@ -1,0 +1,12 @@
+{
+    "name": "TrAccessCard",
+    "alias": "traccesscard",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrAccessCard\\Providers\\TrAccessCardServiceProvider",
+        "Modules\\TrAccessCard\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

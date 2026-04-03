@@ -26,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\FSM\FsmJobBlocker;
+use App\Models\FSM\FsmJobPriorityScore;
+use App\Models\FSM\FsmJobStatusMeta;
 use App\Models\Repair\RepairOrder;
 
 class ServiceJob extends Model implements SchedulableEntity
@@ -109,6 +112,14 @@ class ServiceJob extends Model implements SchedulableEntity
         // Module 21 — fieldservice_project linkage
         'project_id',
         'project_task_ref',
+        // Module 23 — fieldservice_kanban_info
+        'kanban_state',
+        'kanban_state_label',
+        'sla_deadline',
+        'sla_breached',
+        'readiness_score',
+        // fieldservice_sale — quote line linkage
+        'sale_line_id',
     ];
 
     protected $casts = [
@@ -125,6 +136,10 @@ class ServiceJob extends Model implements SchedulableEntity
         'scheduled_duration'   => 'float',
         'billable_rate'        => 'decimal:2',
         'sequence'             => 'integer',
+        // Module 23 — fieldservice_kanban_info
+        'sla_deadline'         => 'datetime',
+        'sla_breached'         => 'boolean',
+        'readiness_score'      => 'integer',
     ];
 
     protected $attributes = [
@@ -135,6 +150,10 @@ class ServiceJob extends Model implements SchedulableEntity
         'is_billable'        => false,
         'is_warranty_job'    => false,
         'scheduled_duration' => 0,
+        // Module 23 — fieldservice_kanban_info
+        'kanban_state'       => 'normal',
+        'sla_breached'       => false,
+        'readiness_score'    => 0,
     ];
 
     // ── Relationships ────────────────────────────────────────────────────────
@@ -167,6 +186,16 @@ class ServiceJob extends Model implements SchedulableEntity
     public function quote(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Money\Quote::class);
+    }
+
+    /**
+     * The specific quote line (item) that generated this job.
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_line_id → sale.order.line.
+     */
+    public function quoteItem(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
     }
 
     public function assignedUser(): BelongsTo
@@ -638,6 +667,17 @@ class ServiceJob extends Model implements SchedulableEntity
             'is_dispatch_ready' => $this->isDispatchReady(),
             'enquiry_id'       => $this->enquiry_id,
             'deal_id'          => $this->deal_id,
+            // Module 23 — fieldservice_kanban_info
+            'kanban_state'           => $this->kanban_state,
+            'kanban_state_label'     => $this->kanban_state_label,
+            'readiness_score'        => $this->readiness_score,
+            'is_ready_to_start'      => $this->is_ready_to_start,
+            'is_waiting_parts'       => $this->is_waiting_parts,
+            'is_blocked'             => $this->is_blocked,
+            'requires_followup'      => $this->requires_followup,
+            'customer_action_pending'=> $this->customer_action_pending,
+            'sla_deadline'           => $this->sla_deadline?->toIso8601String(),
+            'sla_breached'           => $this->sla_breached,
         ];
     }
 
@@ -722,6 +762,13 @@ class ServiceJob extends Model implements SchedulableEntity
             'enquiry_id'   => $this->enquiry_id,
             'deal_id'      => $this->deal_id,
             'agreement_id' => $this->agreement_id,
+            // Module 23 — fieldservice_kanban_info readiness signals
+            'kanban_state'       => $this->kanban_state,
+            'is_ready_to_start'  => $this->is_ready_to_start,
+            'is_blocked'         => $this->is_blocked,
+            'is_overdue'         => $this->is_overdue,
+            'sla_breached'       => $this->sla_breached,
+            'readiness_score'    => $this->readiness_score,
         ];
     }
 
@@ -1056,5 +1103,204 @@ class ServiceJob extends Model implements SchedulableEntity
             return \Illuminate\Support\Carbon::parse($this->scheduled_at)->format('d M Y');
         }
         return 'To be confirmed';
+    // ── Kanban intelligence relationships (Module 23) ─────────────────────────
+
+    /**
+     * Computed status meta overlay for this job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<FsmJobStatusMeta>
+     */
+    public function kanbanMeta(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FsmJobStatusMeta::class, 'service_job_id');
+    }
+
+    /**
+     * All blocking reasons attached to this job.
+     *
+     * @return HasMany<FsmJobBlocker>
+     */
+    public function blockers(): HasMany
+    {
+        return $this->hasMany(FsmJobBlocker::class, 'service_job_id');
+    }
+
+    /**
+     * Active (unresolved) blocking reasons.
+     *
+     * @return HasMany<FsmJobBlocker>
+     */
+    public function activeBlockers(): HasMany
+    {
+        return $this->hasMany(FsmJobBlocker::class, 'service_job_id')
+            ->where('is_resolved', false);
+    }
+
+    /**
+     * Computed dispatch priority score for this job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<FsmJobPriorityScore>
+     */
+    public function priorityScore(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FsmJobPriorityScore::class, 'service_job_id');
+    }
+
+    // ── Kanban computed attributes (Module 23) ────────────────────────────────
+
+    /**
+     * Whether the job is ready to be started by the assigned technician.
+     *
+     * Relies on the persisted kanban meta when available, otherwise computes
+     * inline for quick access without a service injection.
+     */
+    public function getIsReadyToStartAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->is_ready_to_start;
+        }
+
+        return ! is_null($this->assigned_user_id)
+            && ! in_array($this->status, ['completed', 'cancelled'], true)
+            && $this->activeBlockers()->doesntExist()
+            && ! $this->activities()->where('required', true)->where('state', 'todo')->exists();
+    }
+
+    /**
+     * Whether the job is blocked waiting for parts or equipment.
+     */
+    public function getIsWaitingPartsAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->is_waiting_parts;
+        }
+
+        return $this->activeBlockers()
+            ->where('blocker_type', FsmJobBlocker::TYPE_PARTS_MISSING)
+            ->exists();
+    }
+
+    /**
+     * Whether the job has any active blockers preventing progression.
+     */
+    public function getIsBlockedAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->is_blocked;
+        }
+
+        return $this->activeBlockers()->exists();
+    }
+
+    /**
+     * Whether the job has missed its scheduled window or SLA deadline.
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->is_overdue;
+        }
+
+        if (in_array($this->status, ['completed', 'cancelled'], true)) {
+            return false;
+        }
+
+        if ($this->sla_deadline && $this->sla_deadline->isPast()) {
+            return true;
+        }
+
+        return $this->scheduled_date_end !== null && $this->scheduled_date_end->isPast();
+    }
+
+    /**
+     * Whether a follow-up visit or action is required after this job.
+     */
+    public function getRequiresFollowupAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->requires_followup;
+        }
+
+        if ($this->service_outcome === null) {
+            return false;
+        }
+
+        return in_array($this->service_outcome, [
+            self::OUTCOME_COMPLETED_WITH_FOLLOWUP,
+            self::OUTCOME_RETURN_VISIT_REQUIRED,
+            self::OUTCOME_RESCHEDULE_REQUIRED,
+            self::OUTCOME_QUOTE_REQUIRED,
+            self::OUTCOME_AGREEMENT_REQUIRED,
+        ], true);
+    }
+
+    /**
+     * Whether the job is pending an action from the customer (e.g. signature, quote approval).
+     */
+    public function getCustomerActionPendingAttribute(): bool
+    {
+        if ($meta = $this->kanbanMeta) {
+            return $meta->customer_action_pending;
+        }
+
+        if ($this->require_signature && is_null($this->signed_on)) {
+            return true;
+        }
+
+        return $this->quote_id !== null
+            && $this->service_outcome === self::OUTCOME_QUOTE_REQUIRED;
+    }
+
+    /**
+     * Return the dispatch metadata payload consumed by EasyDispatch and RouteOptimizer.
+     *
+     * @return array<string, mixed>
+     */
+    public function getDispatchMetadataAttribute(): array
+    {
+        $score = $this->priorityScore;
+
+        return [
+            'job_id'              => $this->id,
+            'kanban_state'        => $this->kanban_state,
+            'readiness_score'     => $this->readiness_score,
+            'is_ready_to_start'   => $this->is_ready_to_start,
+            'is_blocked'          => $this->is_blocked,
+            'is_overdue'          => $this->is_overdue,
+            'sla_deadline'        => $this->sla_deadline?->toIso8601String(),
+            'sla_breached'        => $this->sla_breached,
+            'priority_score'      => $score?->total_score ?? 0,
+            'score_breakdown'     => $score?->score_breakdown ?? [],
+    // ── fieldservice_sale helpers ─────────────────────────────────────────────
+
+    /**
+     * The originating Quote for this job (via quote_id or sale_line_id → quote).
+     *
+     * Mirrors Odoo fieldservice_sale: fsm.order.sale_id.
+     */
+    public function originatingSale(): ?\App\Models\Money\Quote
+    {
+        if ($this->quote_id) {
+            return $this->quote;
+        }
+
+        return $this->quoteItem?->quote ?? null;
+    }
+
+    /**
+     * Context summary for the sale line that generated this job.
+     *
+     * @return array{quote_id: int|null, quote_item_id: int|null, tracking: string|null, description: string|null}
+     */
+    public function saleLineContext(): array
+    {
+        $item = $this->quoteItem;
+
+        return [
+            'quote_id'      => $this->quote_id ?? $item?->quote_id,
+            'quote_item_id' => $this->sale_line_id,
+            'tracking'      => $item?->field_service_tracking,
+            'description'   => $item?->description,
+        ];
     }
 }

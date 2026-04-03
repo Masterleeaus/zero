@@ -1,0 +1,13 @@
+app/Actions/Fortify | removed items: 8
+app/Http/Controllers/SuperAdmin | removed items: 48
+app/Models/SuperAdmin | removed items: 44
+app/View/Components/Auth.php | removed items: 1
+app/Http/Controllers/GoogleAuthController.php | removed items: 1
+app/Http/Controllers/SocialAuthSettingController.php | removed items: 1
+config/fortify.php | removed items: 1
+public/saas | removed items: 104
+public/front | removed items: 41
+tests/CreatesApplication.php | removed items: 1
+bootstrap/app.php | removed items: 1
+
+TOTAL REMOVED ITEMS: 251

@@ -172,5 +172,17 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 ->name('job-activities.update');
             Route::delete('service-jobs/{job}/activities/{jobActivity}', [\App\Http\Controllers\Core\Work\JobActivityController::class, 'destroy'])
                 ->name('job-activities.destroy');
+
+            // ── Module 23: fieldservice_kanban_info API ────────────────────────
+            Route::get('service-jobs/{job}/kanban-state', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'show'])
+                ->name('kanban.show');
+            Route::post('service-jobs/{job}/kanban-state/refresh', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'refresh'])
+                ->name('kanban.refresh');
+            Route::post('service-jobs/{job}/blockers', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'addBlocker'])
+                ->name('kanban.blockers.add');
+            Route::delete('service-jobs/{job}/blockers/{blocker}', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'clearBlocker'])
+                ->name('kanban.blockers.clear');
+            Route::get('service-jobs/{job}/dispatch-priority', [\App\Http\Controllers\Core\Work\KanbanStatusController::class, 'dispatchPriority'])
+                ->name('kanban.dispatch-priority');
         });
     });

@@ -28,6 +28,10 @@ class JobStage extends Model
         'portal_visible',
         'color',
         'description',
+        // Module 23 — fieldservice_kanban_info
+        'display_badge',
+        'badge_color',
+        'kanban_fold',
     ];
 
     protected $casts = [
@@ -37,6 +41,8 @@ class JobStage extends Model
         'fold'              => 'boolean',
         'require_signature' => 'boolean',
         'portal_visible'    => 'boolean',
+        // Module 23 — fieldservice_kanban_info
+        'kanban_fold'       => 'boolean',
     ];
 
     protected $attributes = [
@@ -49,6 +55,8 @@ class JobStage extends Model
         'portal_visible'    => true,
         'color'             => '#FFFFFF',
         'sequence'          => 1,
+        // Module 23 — fieldservice_kanban_info
+        'kanban_fold'       => false,
     ];
 
     public function serviceJobs(): HasMany

@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        if (Schema::hasTable('document_metadata')) {
+            return;
+        }
+
+        Schema::create('document_metadata', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('tenant_id')->index();
+            $table->unsignedBigInteger('document_id')->index();
+            $table->string('meta_key', 64);
+            $table->text('meta_value')->nullable();
+            $table->timestamps();
+
+            $table->unique(['tenant_id', 'document_id', 'meta_key'], 'doc_metadata_unique');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('document_metadata');
+    }
+};

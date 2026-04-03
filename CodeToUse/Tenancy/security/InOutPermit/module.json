@@ -1,0 +1,12 @@
+{
+    "name": "TrInOutPermit",
+    "alias": "trinoutpermit",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrInOutPermit\\Providers\\TrInOutPermitServiceProvider",
+        "Modules\\TrInOutPermit\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

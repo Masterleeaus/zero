@@ -2,19 +2,39 @@
 
 namespace App\TitanCore\Zylos;
 
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\DB;
 
 /**
- * ZylosBridge – gateway to the Zylos skill execution runtime.
+ * ZylosBridge — canonical gateway to the Zylos skill execution runtime.
  *
- * This class provides the host-side interface for managing skills registered
- * with the Zylos process manager (PM2 or equivalent). It surfaces skill
- * health, execution state, and control commands to the Titan Core admin panel.
+ * Canonical location: App\TitanCore\Zylos\ZylosBridge
+ *
+ * Responsibilities:
+ *   - Admin monitoring: status snapshot of all registered skills (DB-backed)
+ *   - Skill control:    restart / disable skill processes (DB event log)
+ *   - Async dispatch:   send skill execution requests to the Zylos HTTP runtime
+ *   - Runtime query:    status of a specific execution by ID
+ *   - Skill listing:    enumerate skills known to the Zylos runtime
+ *   - Callback auth:    validate HMAC-signed inbound Zylos callbacks
+ *
+ * Rules:
+ *   - Zylos is a sidecar / async skill runtime only.
+ *   - No direct DB ownership beyond the tz_skill_events / tz_skill_registry event log.
+ *   - Signal / Memory / Rewind remain source of truth.
+ *   - Signed callbacks or canonical Laravel processing remain authoritative.
  */
 class ZylosBridge
 {
+    public function __construct(
+        protected HttpFactory $http,
+    ) {
+    }
+
+    // ─── Admin monitoring ────────────────────────────────────────────────────
+
     /**
-     * Return a snapshot of all registered skill statuses.
+     * Return a snapshot of all registered skill statuses (admin monitor).
      *
      * @return array<string, mixed>
      */
@@ -62,7 +82,7 @@ class ZylosBridge
     }
 
     /**
-     * Restart a named skill process.
+     * Restart a named skill process (admin control).
      *
      * @return array<string, mixed>
      */
@@ -74,7 +94,7 @@ class ZylosBridge
     }
 
     /**
-     * Disable a named skill process.
+     * Disable a named skill process (admin control).
      *
      * @return array<string, mixed>
      */
@@ -84,6 +104,136 @@ class ZylosBridge
 
         return ['ok' => true, 'skill' => $skill, 'action' => 'disabled'];
     }
+
+    // ─── Async dispatch ──────────────────────────────────────────────────────
+
+    /**
+     * Dispatch a skill execution request to the Zylos HTTP runtime.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    public function dispatch(string $skillSlug, array $payload): array
+    {
+        $endpoint = rtrim((string) config('titan_core.zylos.endpoint', ''), '/');
+        $secret   = (string) config('titan_core.zylos.secret', '');
+
+        if ($endpoint === '') {
+            return [
+                'ok'      => false,
+                'status'  => 'misconfigured',
+                'message' => 'ZYLOS_ENDPOINT is not configured.',
+                'skill'   => $skillSlug,
+            ];
+        }
+
+        $body = array_merge($payload, [
+            'skill'         => $skillSlug,
+            'dispatched_at' => now()->toIso8601String(),
+        ]);
+
+        $signature = hash_hmac('sha256', json_encode($body, JSON_UNESCAPED_UNICODE), $secret);
+
+        try {
+            $response = $this->http
+                ->withHeaders([
+                    'X-Zylos-Signature' => $signature,
+                    'Content-Type'      => 'application/json',
+                    'Accept'            => 'application/json',
+                ])
+                ->timeout((int) config('titan_core.zylos.timeout', 10))
+                ->post("{$endpoint}/dispatch", $body);
+
+            return [
+                'ok'            => $response->successful(),
+                'status'        => $response->status(),
+                'skill'         => $skillSlug,
+                'response'      => $response->json() ?? [],
+                'dispatched_at' => now()->toIso8601String(),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'ok'      => false,
+                'status'  => 'error',
+                'skill'   => $skillSlug,
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Query the runtime status of a specific dispatched skill execution.
+     *
+     * @return array<string, mixed>
+     */
+    public function executionStatus(string $executionId): array
+    {
+        $endpoint = rtrim((string) config('titan_core.zylos.endpoint', ''), '/');
+        $secret   = (string) config('titan_core.zylos.secret', '');
+
+        if ($endpoint === '') {
+            return ['ok' => false, 'status' => 'misconfigured'];
+        }
+
+        $body      = ['execution_id' => $executionId];
+        $signature = hash_hmac('sha256', json_encode($body, JSON_UNESCAPED_UNICODE), $secret);
+
+        try {
+            $response = $this->http
+                ->withHeaders(['X-Zylos-Signature' => $signature])
+                ->timeout((int) config('titan_core.zylos.timeout', 10))
+                ->post("{$endpoint}/status", $body);
+
+            return [
+                'ok'           => $response->successful(),
+                'status'       => $response->status(),
+                'execution_id' => $executionId,
+                'response'     => $response->json() ?? [],
+            ];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Return list of available skills from the Zylos HTTP runtime.
+     *
+     * @return array<string, mixed>
+     */
+    public function list(): array
+    {
+        $endpoint = rtrim((string) config('titan_core.zylos.endpoint', ''), '/');
+
+        if ($endpoint === '') {
+            return ['ok' => false, 'status' => 'misconfigured', 'skills' => []];
+        }
+
+        try {
+            $response = $this->http
+                ->timeout((int) config('titan_core.zylos.timeout', 10))
+                ->get("{$endpoint}/skills");
+
+            return [
+                'ok'     => $response->successful(),
+                'skills' => $response->json('skills') ?? [],
+            ];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'skills' => [], 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Validate an inbound Zylos callback HMAC signature.
+     */
+    public function validateCallback(string $rawBody, string $incomingSignature): bool
+    {
+        $secret   = (string) config('titan_core.zylos.secret', '');
+        $expected = hash_hmac('sha256', $rawBody, $secret);
+
+        return hash_equals($expected, $incomingSignature);
+    }
+
+    // ─── Internal helpers ────────────────────────────────────────────────────
 
     /**
      * Return list of registered skills from config or DB.
@@ -109,7 +259,9 @@ class ZylosBridge
     }
 
     /**
-     * Record a skill lifecycle event.
+     * Record a skill lifecycle event in the event log.
+     *
+     * @param  array<string, mixed>  $payload
      */
     protected function recordEvent(string $skill, string $event, array $payload): void
     {

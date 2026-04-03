@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners\Work;
 
 use App\Events\Work\JobStageChanged;
+use App\Services\FSM\KanbanStatusService;
 use App\Services\Work\JobBillingService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Log;
  *
  * When a job moves to an invoiceable stage and is marked billable,
  * trigger the billing pipeline to auto-generate an invoice.
+ *
+ * Also refreshes the kanban intelligence meta so readiness flags remain
+ * accurate after every stage transition (Module 23).
  */
 class JobStageChangedListener implements ShouldQueue
 {
@@ -24,7 +28,10 @@ class JobStageChangedListener implements ShouldQueue
 
     public ?string $queue = 'default';
 
-    public function __construct(private readonly JobBillingService $billingService) {}
+    public function __construct(
+        private readonly JobBillingService $billingService,
+        private readonly KanbanStatusService $kanbanService,
+    ) {}
 
     public function handle(JobStageChanged $event): void
     {
@@ -42,6 +49,9 @@ class JobStageChangedListener implements ShouldQueue
             if ($stage->is_closed && $job->agreement_id && $job->agreement) {
                 $this->billingService->recordAgreementConsumption($job->agreement, $job);
             }
+
+            // Module 23 — refresh kanban intelligence after every stage change
+            $this->kanbanService->refresh($job);
         } catch (\Throwable $th) {
             Log::error('JobStageChangedListener: ' . $th->getMessage(), [
                 'job_id'   => $job->id,

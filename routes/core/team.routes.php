@@ -90,5 +90,21 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('app.dashb
                 ->name('timesheets.approve');
             Route::post('timesheets/{timesheet}/reject', [\App\Http\Controllers\Core\Team\WeeklyTimesheetController::class, 'reject'])
                 ->name('timesheets.reject');
+
+            // Staff profiles (HRM)
+            Route::get('staff-profiles', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'index'])
+                ->name('staff-profiles.index');
+            Route::get('staff-profiles/create', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'create'])
+                ->name('staff-profiles.create');
+            Route::post('staff-profiles', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'store'])
+                ->name('staff-profiles.store');
+            Route::get('staff-profiles/{staff_profile}', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'show'])
+                ->name('staff-profiles.show');
+            Route::get('staff-profiles/{staff_profile}/edit', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'edit'])
+                ->name('staff-profiles.edit');
+            Route::put('staff-profiles/{staff_profile}', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'update'])
+                ->name('staff-profiles.update');
+            Route::delete('staff-profiles/{staff_profile}', [\App\Http\Controllers\Core\Team\StaffProfileController::class, 'destroy'])
+                ->name('staff-profiles.destroy');
         });
     });
