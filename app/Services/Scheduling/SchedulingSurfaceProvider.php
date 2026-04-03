@@ -229,7 +229,17 @@ class SchedulingSurfaceProvider
     private function checklistRunsForRange(Carbon $from, Carbon $to): Collection
     {
         return ChecklistRun::query()
-            ->whereBetween('started_at', [$from, $to])
+            ->where(function ($q) use ($from, $to) {
+                // Include runs that start within the range OR started before and end after range start
+                $q->whereBetween('started_at', [$from, $to])
+                  ->orWhere(function ($inner) use ($from, $to) {
+                      $inner->where('started_at', '<=', $to)
+                            ->where(function ($end) use ($from) {
+                                $end->whereNull('completed_at')
+                                    ->orWhere('completed_at', '>=', $from);
+                            });
+                  });
+            })
             ->get()
             ->map(fn (ChecklistRun $e) => $this->normalise($e));
     }

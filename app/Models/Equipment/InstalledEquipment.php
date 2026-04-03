@@ -99,7 +99,7 @@ class InstalledEquipment extends Model
     public function maintenanceHistory(): \Illuminate\Database\Eloquent\Collection
     {
         if (! $this->premises_id) {
-            return collect();
+            return new \Illuminate\Database\Eloquent\Collection();
         }
 
         return ServiceJob::query()
@@ -118,7 +118,7 @@ class InstalledEquipment extends Model
     public function inspectionHistory(): \Illuminate\Database\Eloquent\Collection
     {
         if (! $this->premises_id) {
-            return collect();
+            return new \Illuminate\Database\Eloquent\Collection();
         }
 
         return \App\Models\Inspection\InspectionInstance::query()

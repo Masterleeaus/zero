@@ -52,8 +52,8 @@ class CustomerTimelineAggregator
         // Service plan visits
         $entries = $entries->merge(
             ServicePlanVisit::query()
-                ->whereHas('plan', fn ($q) => $q->where('customer_id', $customer->id)
-                    ->orWhereIn('premises_id', $premisesIds))
+                ->whereHas('plan', fn ($q) => $q->whereIn('premises_id', $premisesIds)
+                    ->where('customer_id', $customer->id))
                 ->get()
                 ->map(fn (ServicePlanVisit $v) => $this->visitEntry($v))
         );

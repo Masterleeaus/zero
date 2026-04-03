@@ -138,10 +138,12 @@ class ServicePlanVisitCompletedListener implements ShouldQueue
         }
 
         // Update last_serviced_at for all active site assets at this premises.
+        $serviceDate = ($visit->completed_at ?? $visit->serviceJob?->date_end ?? now())->toDateString();
+
         \App\Models\Facility\SiteAsset::query()
             ->where('premises_id', $plan->premises_id)
             ->where('status', 'active')
-            ->update(['last_serviced_at' => now()->toDateString()]);
+            ->update(['last_serviced_at' => $serviceDate]);
 
         Log::info('AssetMaintenanceUpdate: assets updated for premises', [
             'premises_id' => $plan->premises_id,

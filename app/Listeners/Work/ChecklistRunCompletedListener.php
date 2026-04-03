@@ -101,7 +101,7 @@ class ChecklistRunCompletedListener implements ShouldQueue
             'description'   => $failedWithNotes->notes,
             'severity'      => 'medium',
             'status'        => 'active',
-            'identified_at' => now()->toDateString(),
+            'identified_at' => ($run->completed_at ?? now())->toDateString(),
         ]);
 
         \App\Events\Premises\HazardDetected::dispatch($hazard);
