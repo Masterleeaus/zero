@@ -89,47 +89,38 @@ return new class extends Migration {
             $table->index(['company_id', 'is_active'], 'is_company_active');
         });
 
-        // ── Inspection Instances ──────────────────────────────────────────────
-        Schema::create('inspection_instances', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-
-            $table->unsignedBigInteger('inspection_template_id')->nullable()->index();
-            $table->unsignedBigInteger('inspection_schedule_id')->nullable()->index();
-
-            // Scope: premises | building | unit | site_asset
-            $table->string('scope_type', 30)->nullable();
-            $table->unsignedBigInteger('scope_id')->nullable();
-
-            // Optional service job link
-            $table->unsignedBigInteger('service_job_id')->nullable()->index();
-
-            $table->string('inspection_type', 50)->nullable();
-            $table->string('title')->nullable();
-
-            $table->string('status', 30)->default('scheduled')
-                ->comment('scheduled | in_progress | completed | failed | cancelled');
-
-            $table->unsignedBigInteger('inspector_id')->nullable()->index();
-            $table->unsignedBigInteger('assigned_to')->nullable()->index();
-
-            $table->dateTime('scheduled_at')->nullable();
-            $table->dateTime('started_at')->nullable();
-            $table->dateTime('completed_at')->nullable();
-
-            $table->unsignedTinyInteger('score')->nullable();
-            $table->json('findings')->nullable();
-            $table->text('notes')->nullable();
-
-            $table->boolean('followup_required')->default(false);
-            $table->text('followup_notes')->nullable();
-
-            $table->unsignedBigInteger('created_by')->nullable()->index();
-            $table->timestamps();
-
-            $table->index(['scope_type', 'scope_id'], 'ii_scope');
-            $table->index(['company_id', 'status'], 'ii_company_status');
-            $table->index(['company_id', 'scheduled_at'], 'ii_company_scheduled');
+        // ── Inspection Instances (extend existing table from Stage J) ─────────
+        Schema::table('inspection_instances', static function (Blueprint $table) {
+            if (! Schema::hasColumn('inspection_instances', 'inspection_template_id')) {
+                $table->unsignedBigInteger('inspection_template_id')->nullable()->index()->after('company_id');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'inspection_schedule_id')) {
+                $table->unsignedBigInteger('inspection_schedule_id')->nullable()->index()->after('inspection_template_id');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'scope_type')) {
+                $table->string('scope_type', 30)->nullable()->after('inspection_schedule_id');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'scope_id')) {
+                $table->unsignedBigInteger('scope_id')->nullable()->after('scope_type');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'inspector_id')) {
+                $table->unsignedBigInteger('inspector_id')->nullable()->index()->after('assigned_to');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'started_at')) {
+                $table->dateTime('started_at')->nullable()->after('scheduled_at');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'score')) {
+                $table->unsignedTinyInteger('score')->nullable()->after('completed_at');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'findings')) {
+                $table->json('findings')->nullable()->after('score');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'followup_required')) {
+                $table->boolean('followup_required')->default(false)->after('notes');
+            }
+            if (! Schema::hasColumn('inspection_instances', 'followup_notes')) {
+                $table->text('followup_notes')->nullable()->after('followup_required');
+            }
         });
 
         // ── Inspection Items (per-instance line items) ────────────────────────
@@ -204,9 +195,21 @@ return new class extends Migration {
         Schema::dropIfExists('inspection_attachments');
         Schema::dropIfExists('inspection_responses');
         Schema::dropIfExists('inspection_items');
-        Schema::dropIfExists('inspection_instances');
         Schema::dropIfExists('inspection_schedules');
         Schema::dropIfExists('inspection_template_items');
         Schema::dropIfExists('inspection_templates');
+
+        // Remove extended columns from inspection_instances (do not drop the table itself)
+        Schema::table('inspection_instances', static function (Blueprint $table) {
+            $cols = [
+                'inspection_template_id', 'inspection_schedule_id', 'scope_type', 'scope_id',
+                'inspector_id', 'started_at', 'score', 'findings', 'followup_required', 'followup_notes',
+            ];
+            foreach ($cols as $col) {
+                if (Schema::hasColumn('inspection_instances', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
+        });
     }
 };
