@@ -73,21 +73,53 @@ async function createIssue(issue) {
 
     const data = JSON.stringify(payload);
 
-    const options = {
-      hostname: 'api.github.com',
-      port: 443,
-      path: `/repos/${owner}/${repo}/issues`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': data.length,
-        'User-Agent': 'node-script',
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    };
+    // Try local git server first, then fall back to github.com
+    const isLocal = process.env.GIT_REMOTE_URL ? process.env.GIT_REMOTE_URL.includes('127.0.0.1') : false;
 
-    const req = https.request(options, (res) => {
+    let options;
+    if (isLocal || process.env.USE_LOCAL_API === 'true') {
+      // Use local git server API
+      const http = require('http');
+      options = {
+        hostname: '127.0.0.1',
+        port: 43293,
+        path: `/api/v3/repos/${owner}/${repo}/issues`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length,
+          'User-Agent': 'node-script',
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      };
+      // Use http for local, https for remote
+      const req = http.request(options, handleResponse);
+      req.on('error', reject);
+      req.write(data);
+      req.end();
+    } else {
+      // Use GitHub.com API
+      options = {
+        hostname: 'api.github.com',
+        port: 443,
+        path: `/repos/${owner}/${repo}/issues`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length,
+          'User-Agent': 'node-script',
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      };
+      const req = https.request(options, handleResponse);
+      req.on('error', reject);
+      req.write(data);
+      req.end();
+    }
+
+    function handleResponse(res) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -98,11 +130,7 @@ async function createIssue(issue) {
           reject(new Error(`API Error ${res.statusCode}: ${body}`));
         }
       });
-    });
-
-    req.on('error', reject);
-    req.write(data);
-    req.end();
+    }
   });
 }
 
