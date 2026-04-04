@@ -20,6 +20,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @deprecated Use App\Models\Facility\SiteAsset (canonical model for the site_assets table).
+ *             This class in App\Models\Work\ is a duplicate targeting the same table and will
+ *             be removed in a future cleanup pass. All new references should use the Facility
+ *             namespace model.
+ *
  * SiteAsset — installed infrastructure at a premises.
  *
  * Represents fixed plant and infrastructure (fire panels, sprinkler systems,

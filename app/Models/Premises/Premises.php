@@ -11,7 +11,7 @@ use App\Models\Equipment\Equipment;
 use App\Models\Equipment\InstalledEquipment;
 use App\Models\Facility\SiteAsset;
 use App\Models\Meter\Meter;
-use App\Models\Work\InspectionInstance;
+use App\Models\Inspection\InspectionInstance;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlan;
 use App\Models\Work\ServicePlanVisit;

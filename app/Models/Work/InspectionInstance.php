@@ -18,6 +18,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @deprecated Use App\Models\Inspection\InspectionInstance (canonical model for the
+ *             inspection_instances table). This class in App\Models\Work\ is a duplicate
+ *             and will be removed in a future cleanup pass. All new references should use
+ *             the Inspection namespace model.
+ *
  * InspectionInstance — an executed inspection linked to a job and/or premises.
  *
  * Attaches to:

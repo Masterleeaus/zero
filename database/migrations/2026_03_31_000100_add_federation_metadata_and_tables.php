@@ -269,24 +269,28 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('tz_signals', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-            $table->uuid('signal_uuid')->index();
-            $table->string('signal_type')->index();
-            $table->string('source_table')->nullable()->index();
-            $table->uuid('source_object_uuid')->nullable()->index();
-            $table->unsignedBigInteger('source_object_id')->nullable()->index();
-            $table->unsignedBigInteger('source_node_id')->nullable()->index();
-            $table->unsignedBigInteger('actor_user_id')->nullable()->index();
-            $table->unsignedBigInteger('team_id')->nullable()->index();
-            $table->json('payload_json')->nullable();
-            $table->string('priority')->nullable()->index();
-            $table->string('status')->nullable()->index();
-            $table->timestamp('emit_at')->nullable()->index();
-            $table->timestamp('processed_at')->nullable()->index();
-            $table->timestamps();
-        });
+        // tz_signals is created by 2026_03_30_220000_create_titan_signal_tables.php which runs
+        // before this migration. Guard prevents a fresh-install collision.
+        if (! Schema::hasTable('tz_signals')) {
+            Schema::create('tz_signals', static function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('company_id')->index();
+                $table->uuid('signal_uuid')->index();
+                $table->string('signal_type')->index();
+                $table->string('source_table')->nullable()->index();
+                $table->uuid('source_object_uuid')->nullable()->index();
+                $table->unsignedBigInteger('source_object_id')->nullable()->index();
+                $table->unsignedBigInteger('source_node_id')->nullable()->index();
+                $table->unsignedBigInteger('actor_user_id')->nullable()->index();
+                $table->unsignedBigInteger('team_id')->nullable()->index();
+                $table->json('payload_json')->nullable();
+                $table->string('priority')->nullable()->index();
+                $table->string('status')->nullable()->index();
+                $table->timestamp('emit_at')->nullable()->index();
+                $table->timestamp('processed_at')->nullable()->index();
+                $table->timestamps();
+            });
+        }
 
         Schema::create('tz_signal_deliveries', static function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -312,42 +316,50 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('tz_rewind_snapshots', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-            $table->uuid('snapshot_uuid')->index();
-            $table->string('snapshot_scope')->index();
-            $table->unsignedBigInteger('source_node_id')->nullable()->index();
-            $table->unsignedBigInteger('actor_user_id')->nullable()->index();
-            $table->string('reason')->nullable();
-            $table->timestamps();
-        });
+        // tz_rewind_snapshots is owned by 2026_03_31_100007_create_tz_rewind_snapshots_table.php
+        // (the canonical TitanRewind migration). Guard prevents schema collision on fresh install.
+        if (! Schema::hasTable('tz_rewind_snapshots')) {
+            Schema::create('tz_rewind_snapshots', static function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('company_id')->index();
+                $table->uuid('snapshot_uuid')->index();
+                $table->string('snapshot_scope')->index();
+                $table->unsignedBigInteger('source_node_id')->nullable()->index();
+                $table->unsignedBigInteger('actor_user_id')->nullable()->index();
+                $table->string('reason')->nullable();
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('tz_rewind_snapshot_items', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('snapshot_id')->index();
-            $table->uuid('object_uuid')->index();
-            $table->string('object_table')->index();
-            $table->unsignedBigInteger('object_id')->nullable()->index();
-            $table->string('object_hash')->nullable()->index();
-            $table->string('payload_ref')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('tz_rewind_snapshot_items')) {
+            Schema::create('tz_rewind_snapshot_items', static function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('snapshot_id')->index();
+                $table->uuid('object_uuid')->index();
+                $table->string('object_table')->index();
+                $table->unsignedBigInteger('object_id')->nullable()->index();
+                $table->string('object_hash')->nullable()->index();
+                $table->string('payload_ref')->nullable();
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('tz_rewind_restores', static function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-            $table->unsignedBigInteger('snapshot_id')->index();
-            $table->uuid('restore_uuid')->index();
-            $table->string('target_scope')->index();
-            $table->unsignedBigInteger('initiated_by_user_id')->nullable()->index();
-            $table->unsignedBigInteger('source_node_id')->nullable()->index();
-            $table->string('restore_status')->nullable()->index();
-            $table->timestamp('started_at')->nullable()->index();
-            $table->timestamp('completed_at')->nullable()->index();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('tz_rewind_restores')) {
+            Schema::create('tz_rewind_restores', static function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('company_id')->index();
+                $table->unsignedBigInteger('snapshot_id')->index();
+                $table->uuid('restore_uuid')->index();
+                $table->string('target_scope')->index();
+                $table->unsignedBigInteger('initiated_by_user_id')->nullable()->index();
+                $table->unsignedBigInteger('source_node_id')->nullable()->index();
+                $table->string('restore_status')->nullable()->index();
+                $table->timestamp('started_at')->nullable()->index();
+                $table->timestamp('completed_at')->nullable()->index();
+                $table->text('notes')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
