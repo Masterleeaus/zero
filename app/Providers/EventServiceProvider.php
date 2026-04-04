@@ -191,6 +191,14 @@ use App\Events\Team\CertificationRevoked;
 use App\Events\Team\CapabilityGapDetected;
 use App\Listeners\Team\NotifyOnCertificationExpiry;
 use App\Listeners\Team\RecordCapabilityAuditTrail;
+// ── MODULE_07 TitanPredict ───────────────────────────────────────────────────
+use App\Events\Predict\PredictionGenerated;
+use App\Events\Predict\HighConfidencePrediction;
+use App\Events\Predict\PredictionTriggered;
+use App\Events\Predict\PredictionFeedbackRecorded;
+use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
+use App\Listeners\Predict\UpdateAssetPredictionOnServiceEvent;
+use App\Listeners\Predict\UpdateSLAPredictionOnJobCompletion;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -217,6 +225,12 @@ use App\Events\Sync\EdgeConflictDetected;
 use App\Events\Sync\EdgeConflictResolved;
 use App\Events\Sync\EdgeSyncFailed;
 use App\Listeners\Sync\RecordSyncEventOnTrustLedger;
+// ── MODULE_07 TitanPredict ───────────────────────────────────────────────────
+use App\Events\Predict\PredictionGenerated;
+use App\Events\Predict\HighConfidencePrediction;
+use App\Events\Predict\PredictionTriggered;
+use App\Events\Predict\PredictionFeedbackRecorded;
+use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -520,6 +534,13 @@ class EventServiceProvider extends ServiceProvider
         EdgeConflictDetected::class => [],
         EdgeConflictResolved::class => [],
         EdgeSyncFailed::class       => [],
+        // ── MODULE_07 TitanPredict — predictive lifecycle signals ──────────────
+        PredictionGenerated::class => [],
+        HighConfidencePrediction::class => [
+            NotifyOnHighConfidencePrediction::class,
+        ],
+        PredictionTriggered::class       => [],
+        PredictionFeedbackRecorded::class => [],
     ];
 
     /**
