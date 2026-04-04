@@ -1,0 +1,112 @@
+name: CI — Boot & Test Proof
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  # ──────────────────────────────────────────────────────────────
+  # Job 1: GitHub-hosted runner — clean reproducibility proof
+  # ──────────────────────────────────────────────────────────────
+  ci-hosted:
+    name: CI (GitHub-hosted)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, zip, sqlite3, pdo_sqlite, mbstring, openssl, bcmath, xml
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env
+        run: cp .env.example .env 2>/dev/null || cp .env.testing .env 2>/dev/null || echo "APP_KEY=" > .env
+
+      - name: Generate app key
+        run: php artisan key:generate --force
+
+      - name: Boot check — config cache
+        run: php artisan config:cache
+
+      - name: Boot check — route list
+        run: php artisan route:list --no-ansi
+
+      - name: Boot check — migrations (SQLite in-memory)
+        run: php artisan migrate --force --env=testing
+
+      - name: Run tests (Pest)
+        run: php artisan test --parallel --no-ansi
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-hosted
+          path: |
+            storage/logs/laravel.log
+            .env
+
+  # ──────────────────────────────────────────────────────────────
+  # Job 2: Self-hosted runner — real environment proof
+  # Requires a self-hosted runner tagged [self-hosted, linux, zero]
+  # installed on your DirectAdmin VPS.
+  # Comment this job out until the runner is configured.
+  # ──────────────────────────────────────────────────────────────
+  ci-selfhosted:
+    name: CI (Self-hosted / Real Env)
+    runs-on: [self-hosted, linux, zero]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env (real env)
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+            php artisan key:generate --force
+          fi
+
+      - name: Boot check — config & routes
+        run: |
+          php artisan config:clear
+          php artisan route:list --no-ansi
+
+      - name: Run migrations (real DB — testing connection)
+        run: php artisan migrate --force --env=testing
+
+      - name: Run tests
+        run: php artisan test --no-ansi
+        env:
+          APP_ENV: testing
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-selfhosted
+          path: storage/logs/laravel.log
