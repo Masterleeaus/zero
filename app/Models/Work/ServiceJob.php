@@ -32,6 +32,7 @@ use App\Models\FSM\FsmJobStatusMeta;
 use App\Models\Repair\RepairOrder;
 use App\Models\Vehicle\Vehicle;
 use App\Models\Vehicle\VehicleStock;
+use App\Models\Premises\JobInjectedDocument;
 
 class ServiceJob extends Model implements SchedulableEntity
 {
@@ -1108,6 +1109,8 @@ class ServiceJob extends Model implements SchedulableEntity
             return \Illuminate\Support\Carbon::parse($this->scheduled_at)->format('d M Y');
         }
         return 'To be confirmed';
+    }
+
     // ── Kanban intelligence relationships (Module 23) ─────────────────────────
 
     /**
@@ -1374,5 +1377,12 @@ class ServiceJob extends Model implements SchedulableEntity
         $vehicle = $this->assignedVehicle;
 
         return $vehicle && $vehicle->vehicleEquipment()->exists();
+    }
+
+    // ── MODULE 08 — DocsExecutionBridge ───────────────────────────────────────
+
+    public function injectedDocuments(): HasMany
+    {
+        return $this->hasMany(JobInjectedDocument::class, 'job_id');
     }
 }

@@ -169,6 +169,12 @@
             "status": "installed",
             "installed_at": "2026-04-04",
             "notes": "MODULE_07: Prediction/PredictionSignal/PredictionOutcome/PredictionSchedule models, TitanPredictService+PredictionSignalExtractorService+PredictionModelService, 4 events+3 listeners, TitanPredictController routes at dashboard.predict.*"
+        },
+        "docs_execution_bridge": {
+            "name": "docs_execution_bridge",
+            "status": "installed",
+            "installed_at": "2026-04-04",
+            "notes": "MODULE_08: FacilityDocument/JobInjectedDocument/InspectionInjectedDocument/DocumentInjectionRule models, DocsExecutionBridgeService+DocumentSearchService+DocumentVersionService, 4 Docs events + JobCreated, 3 listeners, DocsExecutionBridgeController routes at dashboard.docs.*"
         }
     },
     "next_module": "module_9",

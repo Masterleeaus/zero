@@ -7,6 +7,7 @@ namespace App\Models\Inspection;
 use App\Contracts\SchedulableEntity;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\Premises\InspectionInjectedDocument;
 use App\Models\Work\ServiceJob;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -241,5 +242,12 @@ class InspectionInstance extends Model implements SchedulableEntity
     public function getSchedulableType(): string
     {
         return static::class;
+    }
+
+    // ── MODULE 08 — DocsExecutionBridge ───────────────────────────────────────
+
+    public function injectedDocuments(): HasMany
+    {
+        return $this->hasMany(InspectionInjectedDocument::class, 'inspection_instance_id');
     }
 }
