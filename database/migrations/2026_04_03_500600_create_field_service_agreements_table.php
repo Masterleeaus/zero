@@ -99,17 +99,33 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('service_plan_visits', static function (Blueprint $table) {
-            $table->dropIndex('spv_sale_line_id');
-            $table->dropColumn('sale_line_id');
-            $table->dropIndex('spv_fsa_id');
-            $table->dropColumn('field_service_agreement_id');
+            if (Schema::hasIndex('service_plan_visits', 'spv_sale_line_id')) {
+                $table->dropIndex('spv_sale_line_id');
+            }
+            if (Schema::hasColumn('service_plan_visits', 'sale_line_id')) {
+                $table->dropColumn('sale_line_id');
+            }
+            if (Schema::hasIndex('service_plan_visits', 'spv_fsa_id')) {
+                $table->dropIndex('spv_fsa_id');
+            }
+            if (Schema::hasColumn('service_plan_visits', 'field_service_agreement_id')) {
+                $table->dropColumn('field_service_agreement_id');
+            }
         });
 
         Schema::table('service_jobs', static function (Blueprint $table) {
-            $table->dropIndex('sj_recurring_source_id');
-            $table->dropColumn('recurring_source_id');
-            $table->dropIndex('sj_contract_visit_id');
-            $table->dropColumn('contract_visit_id');
+            if (Schema::hasIndex('service_jobs', 'sj_recurring_source_id')) {
+                $table->dropIndex('sj_recurring_source_id');
+            }
+            if (Schema::hasColumn('service_jobs', 'recurring_source_id')) {
+                $table->dropColumn('recurring_source_id');
+            }
+            if (Schema::hasIndex('service_jobs', 'sj_contract_visit_id')) {
+                $table->dropIndex('sj_contract_visit_id');
+            }
+            if (Schema::hasColumn('service_jobs', 'contract_visit_id')) {
+                $table->dropColumn('contract_visit_id');
+            }
         });
 
         Schema::dropIfExists('field_service_agreements');

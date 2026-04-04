@@ -36,8 +36,13 @@ class FieldServiceAgreementController extends CoreController
      */
     public function index(Request $request): View
     {
+        $user = $request->user();
+        if ($user === null) {
+            abort(403);
+        }
+
         $agreements = FieldServiceAgreement::query()
-            ->where('company_id', $request->user()?->company_id)
+            ->where('company_id', $user->company_id)
             ->with(['customer', 'premises'])
             ->latest()
             ->paginate(15);

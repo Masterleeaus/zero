@@ -157,7 +157,7 @@ class PortalController extends Controller
     public function portalAgreementShow(Request $request, FieldServiceAgreement $agreement)
     {
         $customer = $this->resolvePortalCustomer($request);
-        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+        if ($customer === null || (int) $agreement->customer_id !== (int) $customer->id) {
             abort(403);
         }
 
@@ -172,7 +172,7 @@ class PortalController extends Controller
     public function portalAgreementInvoices(Request $request, FieldServiceAgreement $agreement)
     {
         $customer = $this->resolvePortalCustomer($request);
-        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+        if ($customer === null || (int) $agreement->customer_id !== (int) $customer->id) {
             abort(403);
         }
 
@@ -189,7 +189,7 @@ class PortalController extends Controller
     public function portalAgreementVisits(Request $request, FieldServiceAgreement $agreement)
     {
         $customer = $this->resolvePortalCustomer($request);
-        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+        if ($customer === null || (int) $agreement->customer_id !== (int) $customer->id) {
             abort(403);
         }
 

@@ -150,7 +150,7 @@ class FieldServiceAgreementService
                 'premises_id'         => $agreement->premises_id,
                 'recurring_source_id' => $agreement->id,
                 'contract_visit_id'   => $visit->id,
-                'title'               => "Service visit – {$visit->scheduled_date?->format('d M Y')}",
+                'title'               => 'Service visit – ' . ($visit->scheduled_date?->format('d M Y') ?? __('Date TBD')),
                 'status'              => 'scheduled',
                 'scheduled_at'        => $visit->scheduled_for,
             ]);
