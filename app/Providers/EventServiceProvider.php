@@ -672,6 +672,15 @@ class EventServiceProvider extends ServiceProvider
         FinanceJobInvoiced::class => [
             RecordRevenueOnJobBilled::class,
         ],
+        // ── MODULE 10 — Money Cost Allocation signals ──────────────────────────
+        \App\Events\Money\TimesheetApproved::class => [
+            \App\Listeners\Money\PostTimesheetApprovedToJobCost::class,
+        ],
+        \App\Events\Money\PayrollInputFinalized::class => [
+            \App\Listeners\Money\PostPayrollInputFinalizedToLedger::class,
+        ],
+        \App\Events\Money\CostAllocationCreated::class  => [],
+        \App\Events\Money\MaterialIssuedToJob::class    => [],
         // ── MODULE_10 TitanMesh — federated capability exchange signals ───────
         MeshNodeHandshaked::class => [
             RecordMeshOperationOnTrustLedger::class,

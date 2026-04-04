@@ -271,5 +271,20 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('reports.aged-payables');
             Route::get('reports/job-profitability', [\App\Http\Controllers\Core\Money\FinanceReportController::class, 'jobProfitability'])
                 ->name('reports.job-profitability');
+
+            // ── Job Costing — cost allocations ────────────────────────────────
+            Route::prefix('cost-allocations')->name('cost-allocations.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Money\JobCostingController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Core\Money\JobCostingController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Core\Money\JobCostingController::class, 'store'])->name('store');
+                Route::get('/{allocation}', [\App\Http\Controllers\Core\Money\JobCostingController::class, 'show'])->name('show');
+            });
+
+            // ── Profitability ─────────────────────────────────────────────────
+            Route::prefix('profitability')->name('profitability.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Money\ProfitabilityController::class, 'index'])->name('index');
+                Route::get('/job/{job}', [\App\Http\Controllers\Core\Money\ProfitabilityController::class, 'job'])->name('job');
+                Route::get('/by-period', [\App\Http\Controllers\Core\Money\ProfitabilityController::class, 'byPeriod'])->name('by-period');
+            });
         });
     });

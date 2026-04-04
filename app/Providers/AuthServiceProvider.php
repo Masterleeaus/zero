@@ -54,6 +54,7 @@ class AuthServiceProvider extends ServiceProvider
         PurchaseOrder::class   => PurchaseOrderPolicy::class,
         SupplierBill::class    => SupplierBillPolicy::class,
         SupplierPayment::class => SupplierPaymentPolicy::class,
+        \App\Models\Money\JobCostAllocation::class => \App\Policies\JobCostAllocationPolicy::class,
         // ── HRM Pass 2 ─────────────────────────────────────────────────────
         StaffProfile::class    => StaffProfilePolicy::class,
         Department::class      => DepartmentPolicy::class,
