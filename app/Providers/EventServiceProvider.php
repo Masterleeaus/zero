@@ -184,6 +184,14 @@ use App\Events\Team\CertificationRevoked;
 use App\Events\Team\CapabilityGapDetected;
 use App\Listeners\Team\NotifyOnCertificationExpiry;
 use App\Listeners\Team\RecordCapabilityAuditTrail;
+// ── MODULE 09 — ExecutionFinanceLayer ────────────────────────────────────────
+use App\Events\Finance\JobCostRecorded;
+use App\Events\Finance\JobFinancialSummaryUpdated;
+use App\Events\Finance\UnprofitableJobDetected;
+use App\Events\Finance\JobInvoiced as FinanceJobInvoiced;
+use App\Listeners\Finance\RecalculateFinancialSummaryOnCostChange;
+use App\Listeners\Finance\NotifyOnUnprofitableJob;
+use App\Listeners\Finance\RecordRevenueOnJobBilled;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -468,6 +476,17 @@ class EventServiceProvider extends ServiceProvider
         ],
         CapabilityGapDetected::class => [
             RecordCapabilityAuditTrail::class,
+        ],
+        // ── MODULE 09 — ExecutionFinanceLayer ──────────────────────────────────────
+        JobCostRecorded::class => [
+            RecalculateFinancialSummaryOnCostChange::class,
+        ],
+        JobFinancialSummaryUpdated::class => [],
+        UnprofitableJobDetected::class => [
+            NotifyOnUnprofitableJob::class,
+        ],
+        FinanceJobInvoiced::class => [
+            RecordRevenueOnJobBilled::class,
         ],
     ];
 

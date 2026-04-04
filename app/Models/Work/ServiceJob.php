@@ -1057,6 +1057,23 @@ class ServiceJob extends Model implements SchedulableEntity
         return $this->hasMany(RepairOrder::class, 'service_job_id');
     }
 
+    // ── Finance relationships (MODULE 09 — ExecutionFinanceLayer) ────────────
+
+    public function costRecords(): HasMany
+    {
+        return $this->hasMany(\App\Models\Finance\JobCostRecord::class, 'job_id');
+    }
+
+    public function revenueRecords(): HasMany
+    {
+        return $this->hasMany(\App\Models\Finance\JobRevenueRecord::class, 'job_id');
+    }
+
+    public function financialSummary(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Finance\JobFinancialSummary::class, 'job_id');
+    }
+
     // ── Project relationships (Module 22 — fieldservice_project) ─────────────
 
     public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -1108,6 +1125,8 @@ class ServiceJob extends Model implements SchedulableEntity
             return \Illuminate\Support\Carbon::parse($this->scheduled_at)->format('d M Y');
         }
         return 'To be confirmed';
+    }
+
     // ── Kanban intelligence relationships (Module 23) ─────────────────────────
 
     /**

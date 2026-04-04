@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Work;
 
+use App\Events\Finance\JobInvoiced;
 use App\Events\Work\AgreementServiceConsumed;
 use App\Events\Work\JobCompletedBillable;
 use App\Events\Work\JobMarkedBillable;
@@ -259,6 +260,17 @@ class JobBillingService
                 'estimated_revenue' => round((float) ($job->billable_rate ?? 0) * $job->duration, 2),
             ])->all(),
         ];
+    }
+
+    /**
+     * Finance layer hook — called after invoice generation.
+     *
+     * Triggers RecordRevenueOnJobBilled listener by firing JobInvoiced event.
+     * Do NOT modify existing billing logic — extend via this hook.
+     */
+    public function applyFinanceLayerOnBill(ServiceJob $job, Invoice $invoice): void
+    {
+        JobInvoiced::dispatch($job, $invoice);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
