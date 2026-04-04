@@ -32,8 +32,9 @@
         "module_29": { "name": "fieldservice_change_management", "status": "pending" },
         "module_30": { "name": "fieldservice_quality", "status": "pending" },
         "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" },
-        "capability_registry": { "name": "capability_registry", "status": "installed", "installed_at": "2026-04-03", "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes" }
+        "capability_registry": { "name": "capability_registry", "status": "installed", "installed_at": "2026-04-03", "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes" },
+        "titan_mesh": { "name": "titan_mesh", "status": "installed", "installed_at": "2026-04-04", "notes": "MODULE_10: 5 tables (mesh_nodes/mesh_capability_exports/mesh_dispatch_requests/mesh_trust_events/mesh_settlements), 5 models in App\\Models\\Mesh\\, 5 services (MeshRegistryService/MeshDispatchService/MeshTrustService/MeshSettlementService/MeshSignatureService), 6 events, 3 listeners, MeshNodeController (API), MeshDashboardController, mesh.routes.php. Activation gate: Modules 01-06 must be installed. HMAC-SHA256 payload signing. Trust-level gating." }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-03"
+    "updated_at": "2026-04-04"
 }

@@ -177,6 +177,16 @@ use App\Events\Work\JobDispatchFailed;
 use App\Events\Work\JobReDispatched;
 use App\Listeners\Work\NotifyTechnicianOfAssignment;
 use App\Listeners\Work\RecordDispatchAuditTrail;
+// ── MODULE_10 TitanMesh ──────────────────────────────────────────────────────
+use App\Events\Mesh\MeshNodeHandshaked;
+use App\Events\Mesh\MeshDispatchRequested;
+use App\Events\Mesh\MeshDispatchAccepted;
+use App\Events\Mesh\MeshDispatchCompleted;
+use App\Events\Mesh\MeshTrustChanged;
+use App\Events\Mesh\MeshSettlementDue;
+use App\Listeners\Mesh\RecordMeshOperationOnTrustLedger;
+use App\Listeners\Mesh\RecordMeshEventOnTimeGraph;
+use App\Listeners\Mesh\NotifyOnMeshDispatchAccepted;
 // ── MODULE_02 CapabilityRegistry ────────────────────────────────────────────
 use App\Events\Team\SkillAssigned;
 use App\Events\Team\CertificationExpired;
@@ -469,6 +479,25 @@ class EventServiceProvider extends ServiceProvider
         CapabilityGapDetected::class => [
             RecordCapabilityAuditTrail::class,
         ],
+        // ── MODULE_10 TitanMesh — federated capability exchange signals ───────
+        MeshNodeHandshaked::class => [
+            RecordMeshOperationOnTrustLedger::class,
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshDispatchRequested::class => [
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshDispatchAccepted::class => [
+            NotifyOnMeshDispatchAccepted::class,
+        ],
+        MeshDispatchCompleted::class => [
+            RecordMeshOperationOnTrustLedger::class,
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshTrustChanged::class => [
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshSettlementDue::class => [],
     ];
 
     /**
