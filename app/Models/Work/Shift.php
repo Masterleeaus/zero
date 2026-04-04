@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Vehicle\Vehicle;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shift extends Model
 {
@@ -21,11 +22,17 @@ class Shift extends Model
         'start_at',
         'end_at',
         'status',
+        'shift_type',
+        'recurring_days',
+        'location_id',
+        'is_published',
     ];
 
     protected $casts = [
-        'start_at' => 'datetime',
-        'end_at'   => 'datetime',
+        'start_at'       => 'datetime',
+        'end_at'         => 'datetime',
+        'recurring_days' => 'array',
+        'is_published'   => 'boolean',
     ];
 
     public function scopeUnassigned($query)
@@ -69,5 +76,10 @@ class Shift extends Model
     public function attendance()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ShiftAssignment::class);
     }
 }
