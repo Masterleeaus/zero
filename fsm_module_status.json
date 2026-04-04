@@ -151,6 +151,12 @@
             "status": "installed",
             "installed_at": "2026-04-03",
             "notes": "MODULE_04: ContractEntitlement/ContractSLABreach/ContractRenewal models, ContractEntitlementService+ContractSLAService+ContractHealthService+ContractRenewalService, 5 events+4 listeners, ContractController, contracts routes"
+        },
+        "titan_edge_sync": {
+            "name": "titan_edge_sync",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_05: EdgeDeviceSession/EdgeSyncQueue/EdgeSyncLog/EdgeSyncConflict models, EdgeSyncService+EdgeConflictResolverService+EdgeSyncPayloadProcessor, 4 events+1 listener, EdgeSyncController at /api/v1/sync/*"
         }
     },
     "next_module": "module_9",

@@ -241,4 +241,14 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/cases/{case}/snapshots', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'snapshots'])->name('cases.snapshots');
         Route::post('/cases/{case}/promote-lifecycle', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'promoteLifecycle'])->name('cases.promoteLifecycle');
     });
+
+    // ── MODULE 05 — TitanEdgeSync ─────────────────────────────────────────────
+    Route::prefix('sync')->name('api.sync.')->group(function () {
+        Route::post('/register', [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'register'])->name('register');
+        Route::post('/push',     [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'push'])->name('push');
+        Route::get('/pull',      [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'pull'])->name('pull');
+        Route::post('/acknowledge', [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'acknowledge'])->name('acknowledge');
+        Route::get('/conflicts', [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'conflicts'])->name('conflicts');
+        Route::post('/conflicts/{id}/resolve', [\App\Http\Controllers\Api\Sync\EdgeSyncController::class, 'resolveConflict'])->name('conflicts.resolve');
+    });
 });
