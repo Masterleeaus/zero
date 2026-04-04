@@ -584,6 +584,12 @@ class EventServiceProvider extends ServiceProvider
         FinanceJobInvoiced::class => [
             RecordRevenueOnJobBilled::class,
         ],
+        // ── MODULE HRM_PASS2 — HRM Extension signals ──────────────────────────────
+        \App\Events\Work\ShiftAssigned::class          => [],
+        \App\Events\Work\LeaveApproved::class          => [],
+        \App\Events\Work\LeaveRejected::class          => [],
+        \App\Events\Work\EmployeeStatusChanged::class  => [],
+        \App\Events\Work\DepartmentAssigned::class     => [],
     ];
 
     /**

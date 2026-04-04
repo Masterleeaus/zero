@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Core\Work;
 
 use App\Http\Controllers\Core\CoreController;
+use App\Events\Work\LeaveApproved;
+use App\Events\Work\LeaveRejected;
 use App\Models\User;
 use App\Models\Work\Leave;
 use App\Models\Work\LeaveHistory;
@@ -124,5 +126,36 @@ class LeaveController extends CoreController
         $leave->delete();
 
         return redirect()->route('dashboard.work.leaves.index')->with('message', __('Leave deleted'));
+    }
+
+    public function approve(Request $request, Leave $leave): RedirectResponse
+    {
+        $this->authorize('approve', $leave);
+
+        $leave->update([
+            'status'      => 'approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+        ]);
+
+        LeaveApproved::dispatch($leave, $request->user());
+
+        return redirect()->back()->with('success', 'Leave approved.');
+    }
+
+    public function reject(Request $request, Leave $leave): RedirectResponse
+    {
+        $this->authorize('reject', $leave);
+
+        $reason = $request->input('reason', '');
+
+        $leave->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $reason,
+        ]);
+
+        LeaveRejected::dispatch($leave, $request->user(), $reason);
+
+        return redirect()->back()->with('success', 'Leave rejected.');
     }
 }
