@@ -233,6 +233,11 @@ use App\Events\Sync\EdgeConflictDetected;
 use App\Events\Sync\EdgeConflictResolved;
 use App\Events\Sync\EdgeSyncFailed;
 use App\Listeners\Sync\RecordSyncEventOnTrustLedger;
+// ── MODULE_06 ExecutionTimeGraph events ──────────────────────────────────────
+use App\Events\TimeGraph\ExecutionGraphOpened;
+use App\Events\TimeGraph\ExecutionGraphCompleted;
+use App\Events\TimeGraph\ExecutionCheckpointCreated;
+use App\Events\TimeGraph\ExecutionAnomalyDetected;
 // ── MODULE_08 DocsExecutionBridge ────────────────────────────────────────────
 use App\Events\Docs\DocumentsInjectedForJob;
 use App\Events\Docs\MandatoryDocumentAcknowledged;
@@ -548,6 +553,11 @@ class EventServiceProvider extends ServiceProvider
         EdgeConflictDetected::class => [],
         EdgeConflictResolved::class => [],
         EdgeSyncFailed::class       => [],
+        // ── MODULE_06 ExecutionTimeGraph — temporal lifecycle signals ─────────
+        ExecutionGraphOpened::class       => [],
+        ExecutionGraphCompleted::class    => [],
+        ExecutionCheckpointCreated::class => [],
+        ExecutionAnomalyDetected::class   => [],
         // ── MODULE_07 TitanPredict — predictive lifecycle signals ──────────────
         PredictionGenerated::class => [],
         HighConfidencePrediction::class => [
