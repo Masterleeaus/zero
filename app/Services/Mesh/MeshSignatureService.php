@@ -75,8 +75,33 @@ class MeshSignatureService
      */
     private function canonicalise(array $payload): string
     {
-        ksort($payload);
-        return json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return json_encode(
+            $this->canonicaliseValue($payload),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+        );
+    }
+
+    /**
+     * Recursively canonicalise nested arrays so associative structures have a
+     * deterministic key order while preserving sequential list ordering.
+     *
+     * @return mixed
+     */
+    private function canonicaliseValue(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        foreach ($value as $key => $nestedValue) {
+            $value[$key] = $this->canonicaliseValue($nestedValue);
+        }
+
+        if (! array_is_list($value)) {
+            ksort($value);
+        }
+
+        return $value;
     }
 
     /**
