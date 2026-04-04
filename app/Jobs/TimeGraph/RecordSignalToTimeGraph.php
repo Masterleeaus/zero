@@ -47,6 +47,7 @@ class RecordSignalToTimeGraph implements ShouldQueue
             ->withoutGlobalScope('company')
             ->where('root_subject_type', $subjectClass)
             ->where('root_subject_id', $entityId)
+            ->where('company_id', $subject->company_id)
             ->where('status', 'active')
             ->first();
 

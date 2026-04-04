@@ -20,6 +20,14 @@ class UpdateAssetPredictionOnServiceEvent implements ShouldQueue
 
     public function __construct(private readonly TitanPredictService $predictService) {}
 
+    /**
+     * Handle an asset service event.
+     *
+     * Designed to receive any event that carries an `assetServiceEvent` property
+     * with a `site_asset_id` field (e.g. AgreementServiceConsumed).
+     *
+     * @param  object  $event
+     */
     public function handle(object $event): void
     {
         try {

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TimeGraph\ExecutionGraph;
 use App\Services\TimeGraph\ExecutionReplayService;
 use App\Services\TimeGraph\ExecutionTimeGraphService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -54,7 +55,7 @@ class ExecutionTimeGraphController extends Controller
         $request->validate(['to_time' => 'required|date']);
 
         $graph = ExecutionGraph::query()->withoutGlobalScope('company')->where('graph_id', $graphId)->firstOrFail();
-        $plan  = $this->replayService->buildReplayPlan($graph, now()->parse($request->input('to_time')));
+        $plan  = $this->replayService->buildReplayPlan($graph, Carbon::parse($request->input('to_time')));
 
         return response()->json($plan);
     }

@@ -17,7 +17,7 @@ class RecordJobCompletionOnLedger
         $job = $event->job;
 
         $this->ledger->record(
-            TrustLedgerEntry::ENTRY_TYPES[0], // 'job_completed'
+            'job_completed',
             $job,
             [
                 'job_id'     => $job->id,

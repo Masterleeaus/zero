@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners\Predict;
 
+use App\Events\Work\JobCompleted;
 use App\Models\Work\ServiceAgreement;
 use App\Services\Predict\TitanPredictService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,7 +21,7 @@ class UpdateSLAPredictionOnJobCompletion implements ShouldQueue
 
     public function __construct(private readonly TitanPredictService $predictService) {}
 
-    public function handle(object $event): void
+    public function handle(JobCompleted $event): void
     {
         try {
             $agreementId = $event->job->service_agreement_id ?? null;

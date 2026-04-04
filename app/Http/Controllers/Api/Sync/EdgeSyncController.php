@@ -88,6 +88,7 @@ class EdgeSyncController extends Controller
 
         $session = EdgeDeviceSession::withoutGlobalScopes()
             ->where('user_id', Auth::id())
+            ->where('company_id', Auth::user()->company_id)
             ->where('device_id', $data['device_id'])
             ->firstOrFail();
 
@@ -111,6 +112,7 @@ class EdgeSyncController extends Controller
 
         $session = EdgeDeviceSession::withoutGlobalScopes()
             ->where('user_id', Auth::id())
+            ->where('company_id', Auth::user()->company_id)
             ->where('device_id', $data['device_id'])
             ->firstOrFail();
 

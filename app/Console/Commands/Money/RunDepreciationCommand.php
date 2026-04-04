@@ -27,7 +27,7 @@ class RunDepreciationCommand extends Command
         $query = FinancialAsset::active();
 
         if ($companyId) {
-            $query->where('company_id', (int) $companyId);
+            $query->withoutGlobalScope('company')->where('company_id', (int) $companyId);
         }
 
         $assetCount = (clone $query)->count();
