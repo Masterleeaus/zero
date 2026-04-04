@@ -37,10 +37,15 @@
             "name": "fieldservice_sale_recurring_agreement",
             "status": "merged",
             "confirmed_at": "2026-04-03",
-            "notes": "Sale-backed recurring agreements: SaleRecurringAgreementService, migration 500400 (service_agreements/service_plans/service_plan_visits columns), 6 new events (SaleRecurringAgreementCreated/Updated/PlanGenerated/VisitProjected/VisitMaterialized/CoverageApplied). Canonical linkage helpers on Quote/ServiceAgreement/ServicePlan/ServicePlanVisit/Customer/Premises."
+            "notes": "Sale-backed recurring agreements: SaleRecurringAgreementService, migration 500410, 6 new events"
+        },
+        "trust_work_ledger": {
+            "name": "trust_work_ledger",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_03: TrustLedgerEntry/TrustChainSeal/TrustEvidenceAttachment models, TrustLedgerService+TrustVerificationService, 3 events+4 listeners, TrustLedgerController, trust routes"
         }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-03"
+    "updated_at": "2026-04-04"
 }
-
