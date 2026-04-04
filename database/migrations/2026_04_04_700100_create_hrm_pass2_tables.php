@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id')->index();
             $table->string('name');
             $table->string('code')->nullable();
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreignId('parent_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('status')->default('active');
             $table->timestamps();
         });

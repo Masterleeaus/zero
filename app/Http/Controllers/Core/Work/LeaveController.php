@@ -130,8 +130,7 @@ class LeaveController extends CoreController
 
     public function approve(Request $request, Leave $leave): RedirectResponse
     {
-        abort_if($leave->company_id !== $request->user()->company_id, 403);
-        abort_if(! $request->user()->isAdmin(), 403);
+        $this->authorize('approve', $leave);
 
         $leave->update([
             'status'      => 'approved',
@@ -146,8 +145,7 @@ class LeaveController extends CoreController
 
     public function reject(Request $request, Leave $leave): RedirectResponse
     {
-        abort_if($leave->company_id !== $request->user()->company_id, 403);
-        abort_if(! $request->user()->isAdmin(), 403);
+        $this->authorize('reject', $leave);
 
         $reason = $request->input('reason', '');
 

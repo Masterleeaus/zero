@@ -54,7 +54,7 @@ class PayrollInputService
     public function calculatePayableHours(int $userId, string $periodStart, string $periodEnd): array
     {
         $worked   = $this->calculateWeeklyHours($userId, $periodStart, $periodEnd);
-        $overtime = $this->calculateOvertime($userId, $periodStart, $periodEnd);
+        $overtime = max(0.0, round($worked - 40.0, 2));
         $leave    = $this->calculateLeaveHours($userId, $periodStart, $periodEnd);
         $regular  = round(max(0.0, $worked - $overtime), 2);
 

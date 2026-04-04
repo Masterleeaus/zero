@@ -29,7 +29,7 @@ class BiometricIngestService
             ]);
 
             $punch->attendance_id = $attendance->id;
-            $punch->saveQuietly();
+            $punch->save();
 
             return $attendance;
         }
@@ -46,7 +46,7 @@ class BiometricIngestService
             if ($attendance) {
                 $attendance->update(['check_out_at' => $punch->punched_at]);
                 $punch->attendance_id = $attendance->id;
-                $punch->saveQuietly();
+                $punch->save();
             }
 
             return $attendance;

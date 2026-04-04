@@ -23,16 +23,16 @@ class DepartmentController extends CoreController
         return $this->placeholder('Departments', 'Manage company departments');
     }
 
-    public function create(Request $request): View
+    public function create(): View
     {
-        abort_if($request->user()->company_id === null, 403);
+        $this->authorize('create', Department::class);
 
         return $this->placeholder('Create Department');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        abort_if($request->user()->company_id === null, 403);
+        $this->authorize('create', Department::class);
 
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
@@ -50,25 +50,23 @@ class DepartmentController extends CoreController
             ->with('success', 'Department created.');
     }
 
-    public function show(Request $request, Department $department): View
+    public function show(Department $department): View
     {
-        abort_if($department->company_id !== $request->user()->company_id, 403);
+        $this->authorize('view', $department);
 
         return $this->placeholder('Department: ' . $department->name);
     }
 
-    public function edit(Request $request, Department $department): View
+    public function edit(Department $department): View
     {
-        abort_if($department->company_id !== $request->user()->company_id, 403);
-        abort_if(! $request->user()->isAdmin(), 403);
+        $this->authorize('update', $department);
 
         return $this->placeholder('Edit Department: ' . $department->name);
     }
 
     public function update(Request $request, Department $department): RedirectResponse
     {
-        abort_if($department->company_id !== $request->user()->company_id, 403);
-        abort_if(! $request->user()->isAdmin(), 403);
+        $this->authorize('update', $department);
 
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
@@ -83,10 +81,9 @@ class DepartmentController extends CoreController
             ->with('success', 'Department updated.');
     }
 
-    public function destroy(Request $request, Department $department): RedirectResponse
+    public function destroy(Department $department): RedirectResponse
     {
-        abort_if($department->company_id !== $request->user()->company_id, 403);
-        abort_if(! $request->user()->isAdmin(), 403);
+        $this->authorize('delete', $department);
 
         $department->delete();
 
