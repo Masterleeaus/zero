@@ -233,12 +233,6 @@ use App\Events\Sync\EdgeConflictDetected;
 use App\Events\Sync\EdgeConflictResolved;
 use App\Events\Sync\EdgeSyncFailed;
 use App\Listeners\Sync\RecordSyncEventOnTrustLedger;
-// ── MODULE_07 TitanPredict ───────────────────────────────────────────────────
-use App\Events\Predict\PredictionGenerated;
-use App\Events\Predict\HighConfidencePrediction;
-use App\Events\Predict\PredictionTriggered;
-use App\Events\Predict\PredictionFeedbackRecorded;
-use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
 // ── MODULE_08 DocsExecutionBridge ────────────────────────────────────────────
 use App\Events\Docs\DocumentsInjectedForJob;
 use App\Events\Docs\MandatoryDocumentAcknowledged;
