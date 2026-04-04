@@ -1,0 +1,181 @@
+{
+    "report_type": "fsm_repair_plan",
+    "generated_at": "2026-04-04",
+    "pass": "FSM Graph Verification + Drift Repair",
+    "status": "completed",
+    "repairs_completed": [
+        {
+            "id": "R-001",
+            "file": "app/Models/Work/ServiceJob.php",
+            "action": "Added vehicleAssignments() MorphMany → VehicleAssignment",
+            "justification": "VehicleAssignment is polymorphic covering ServiceJob but ServiceJob had no inverse relationship. Job-to-vehicle-assignment navigation via ORM was broken.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-002",
+            "file": "app/Models/Work/ServiceJob.php",
+            "action": "Added vehicleStockItems() HasMany → VehicleStock (reserved_for_job_id)",
+            "justification": "VehicleStock.reserved_for_job_id FK existed but ServiceJob had no HasMany inverse. Stock reservation queries from job side required raw queries instead of ORM.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-003",
+            "file": "app/Models/Work/ServiceAgreement.php",
+            "action": "Added originatingQuote() BelongsTo → Quote (originating_quote_id)",
+            "justification": "originating_quote_id FK exists on service_agreements. The commercial sale-to-agreement lineage was only queryable via computed method, not via Eloquent relationship.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-004",
+            "file": "app/Models/Work/ServiceAgreement.php",
+            "action": "Added renewalQuote() BelongsTo → Quote (renewal_quote_id)",
+            "justification": "renewal_quote_id FK exists on service_agreements for contract renewal cycles. No BelongsTo was declared.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-005",
+            "file": "app/Models/Work/ServicePlan.php",
+            "action": "Added originatingQuote() BelongsTo → Quote (origin_quote_id) + added Quote import",
+            "justification": "origin_quote_id FK exists on service_plans. Sale-to-plan commercial lineage was only accessible via computed method.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-006",
+            "file": "app/Models/Work/ServicePlan.php",
+            "action": "Added saleAgreement() BelongsTo → ServiceAgreement (sale_agreement_id)",
+            "justification": "sale_agreement_id FK exists on service_plans for sale-recurring plans. No BelongsTo was declared.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-007",
+            "file": "app/Models/Work/ServicePlanVisit.php",
+            "action": "Added saleAgreement() BelongsTo → ServiceAgreement (sale_agreement_id) + User import",
+            "justification": "sale_agreement_id FK exists on service_plan_visits. No BelongsTo was declared.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-008",
+            "file": "app/Models/Work/ServicePlanVisit.php",
+            "action": "Added assignedUser() BelongsTo → User (assigned_to)",
+            "justification": "assigned_to FK exists on service_plan_visits but no Eloquent BelongsTo was declared. Visit-level user assignment was not ORM-queryable.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-009",
+            "file": "app/Models/Premises/Premises.php",
+            "action": "Added serviceAgreements() HasMany → ServiceAgreement (premises_id)",
+            "justification": "service_agreements.premises_id FK properly migrated and ServiceAgreement.premises() BelongsTo declared, but Premises had no inverse. Premises→ServiceAgreement ORM navigation was broken.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-010",
+            "file": "app/Models/Vehicle/Vehicle.php",
+            "action": "Added dispatchRoutes() HasMany → DispatchRoute (vehicle_id)",
+            "justification": "dispatch_routes.vehicle_id FK properly migrated and DispatchRoute.vehicle() BelongsTo declared, but Vehicle had no inverse HasMany.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-011",
+            "file": "app/Models/Route/DispatchRoute.php",
+            "action": "Added technicianAvailabilities() HasMany → TechnicianAvailability (via assigned_user_id) + TechnicianAvailability import",
+            "justification": "Route and technician availability were completely disconnected at the ORM layer. Availability checks against routes required cross-querying through user_id.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-012",
+            "file": "app/Services/Repair/RepairOrderService.php",
+            "action": "Created RepairOrderService with full lifecycle methods: create(), createFromServiceJob(), schedule(), reserveParts(), consumeParts(), complete(), close(), cancel()",
+            "justification": "The repair lifecycle had no orchestrating service. RepairOrder records could only be manipulated via direct model operations without event emission or lifecycle consistency.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-013",
+            "file": "app/Providers/WorkCoreServiceProvider.php",
+            "action": "Added Relation::morphMap() registration for 'service_job', 'dispatch_route', 'shift' aliases",
+            "justification": "VehicleAssignment stores morph aliases ('service_job', 'dispatch_route') rather than FQCNs. Without morphMap, the new ServiceJob.vehicleAssignments() MorphMany would query/write FQCNs while existing data uses aliases. morphMap registration ensures Eloquent resolves aliases to correct model classes.",
+            "breaking_change": false
+        },
+        {
+            "id": "R-014",
+            "file": "app/Providers/EventServiceProvider.php",
+            "action": "Registered 28 previously unregistered Work-namespace events in $listen array",
+            "justification": "28 event classes existed in app/Events/Work/ but were not registered in EventServiceProvider. They could be dispatched but no listeners would fire (silent signals). Critical operational signals including VehicleAssignedToJob, VehicleStockReserved, VehicleStockConsumed, DispatchETAChanged, DispatchJobLate, and all SaleRecurring* events were affected.",
+            "breaking_change": false,
+            "events_registered": [
+                "ActivityFollowUpScheduled",
+                "AgreementEquipmentCoverageCreated",
+                "AgreementEquipmentCoverageExtended",
+                "DispatchETAChanged",
+                "DispatchJobLate",
+                "DispatchReadinessChanged",
+                "DispatchStockBlocked",
+                "DispatchVehicleBlocked",
+                "RecurringEquipmentServiceCreated",
+                "RecurringPlanGenerated",
+                "RecurringPlanUpdated",
+                "RecurringSaleCreated",
+                "RecurringVisitMaterialized",
+                "SaleRecurringAgreementCreated",
+                "SaleRecurringAgreementUpdated",
+                "SaleRecurringCoverageApplied",
+                "SaleRecurringPlanGenerated",
+                "SaleRecurringVisitMaterialized",
+                "SaleRecurringVisitProjected",
+                "TimesheetApproved",
+                "TimesheetRejected",
+                "TimesheetSubmitted",
+                "VehicleAssignedToJob",
+                "VehicleEquipmentMissing",
+                "VehicleLocationUpdated",
+                "VehicleRouteReady",
+                "VehicleStockConsumed",
+                "VehicleStockReserved"
+            ]
+        }
+    ],
+    "deferred_repairs": [
+        {
+            "id": "D-001",
+            "description": "RepairOrder ↔ VehicleStock direct model relationship",
+            "reason": "No FK or bridge table exists. Requires schema decision (add vehicle_stock_id to repair_part_usages or create bridge table).",
+            "next_phase": "repair/inventory integration pass"
+        },
+        {
+            "id": "D-002",
+            "description": "ServiceJobSchedulingService creation",
+            "reason": "Requires design of slot allocation algorithm, conflict detection, and calendar integration strategy.",
+            "next_phase": "dispatch intelligence scoring pass"
+        },
+        {
+            "id": "D-003",
+            "description": "TechnicianAvailabilityService creation",
+            "reason": "Requires design of availability window query logic vs scheduled jobs.",
+            "next_phase": "dispatch intelligence scoring pass"
+        },
+        {
+            "id": "D-004",
+            "description": "Dispatch readiness score convergence",
+            "reason": "Multiple services compute readiness independently. DispatchReadinessService should be sole aggregator.",
+            "next_phase": "dispatch intelligence scoring pass"
+        },
+        {
+            "id": "D-005",
+            "description": "Coverage logic convergence to EquipmentCoverageService",
+            "reason": "Coverage resolution is split across model helpers and EquipmentCoverageService.",
+            "next_phase": "contract/coverage hardening pass"
+        },
+        {
+            "id": "D-006",
+            "description": "Shift.vehicleAssignment() MorphMany",
+            "reason": "VehicleAssignment.assignable morph covers Shift but no inverse declared on Shift model.",
+            "next_phase": "vehicle/shift integration pass"
+        },
+        {
+            "id": "D-007",
+            "description": "ServiceAgreement $guarded=[] → explicit $fillable",
+            "reason": "ServiceAgreement uses $guarded=[] while all other FSM models use explicit $fillable. Risk of accidental mass-assignment of internal columns.",
+            "next_phase": "hardening pass"
+        }
+    ],
+    "next_correct_phase": "dispatch intelligence scoring / predictive scheduling / capability registry extension"
+}

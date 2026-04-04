@@ -9,6 +9,7 @@ use App\Events\Work\ServicePlanVisitDispatched;
 use App\Events\Work\ServicePlanVisitScheduled;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -77,6 +78,22 @@ class ServicePlanVisit extends Model implements SchedulableEntity
     public function project(): BelongsTo
     {
         return $this->belongsTo(FieldServiceProject::class, 'project_id');
+    }
+
+    /**
+     * The sale agreement that originated this visit (from recurring sale commercial terms).
+     */
+    public function saleAgreement(): BelongsTo
+    {
+        return $this->belongsTo(ServiceAgreement::class, 'sale_agreement_id');
+    }
+
+    /**
+     * The user assigned to carry out this visit.
+     */
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────

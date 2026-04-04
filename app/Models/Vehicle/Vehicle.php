@@ -117,6 +117,18 @@ class Vehicle extends Model
         return $this->hasMany(VehicleLocationSnapshot::class, 'vehicle_id');
     }
 
+    /**
+     * All dispatch routes assigned to this vehicle.
+     *
+     * Inverse of DispatchRoute::vehicle() BelongsTo.
+     *
+     * @return HasMany<\App\Models\Route\DispatchRoute>
+     */
+    public function dispatchRoutes(): HasMany
+    {
+        return $this->hasMany(\App\Models\Route\DispatchRoute::class, 'vehicle_id');
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): Builder

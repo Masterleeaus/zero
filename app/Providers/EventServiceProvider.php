@@ -215,6 +215,35 @@ use App\Events\Work\FieldServiceAgreementSaleCreated;
 use App\Events\Work\FieldServiceAgreementSaleActivated;
 use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
+// ── FSM Drift Repair — previously unregistered Work events ──────────────────
+use App\Events\Work\ActivityFollowUpScheduled;
+use App\Events\Work\AgreementEquipmentCoverageCreated;
+use App\Events\Work\AgreementEquipmentCoverageExtended;
+use App\Events\Work\DispatchETAChanged;
+use App\Events\Work\DispatchJobLate;
+use App\Events\Work\DispatchReadinessChanged;
+use App\Events\Work\DispatchStockBlocked;
+use App\Events\Work\DispatchVehicleBlocked;
+use App\Events\Work\RecurringEquipmentServiceCreated;
+use App\Events\Work\RecurringPlanGenerated;
+use App\Events\Work\RecurringPlanUpdated;
+use App\Events\Work\RecurringSaleCreated;
+use App\Events\Work\RecurringVisitMaterialized;
+use App\Events\Work\SaleRecurringAgreementCreated;
+use App\Events\Work\SaleRecurringAgreementUpdated;
+use App\Events\Work\SaleRecurringCoverageApplied;
+use App\Events\Work\SaleRecurringPlanGenerated;
+use App\Events\Work\SaleRecurringVisitMaterialized;
+use App\Events\Work\SaleRecurringVisitProjected;
+use App\Events\Work\TimesheetApproved;
+use App\Events\Work\TimesheetRejected;
+use App\Events\Work\TimesheetSubmitted;
+use App\Events\Work\VehicleAssignedToJob;
+use App\Events\Work\VehicleEquipmentMissing;
+use App\Events\Work\VehicleLocationUpdated;
+use App\Events\Work\VehicleRouteReady;
+use App\Events\Work\VehicleStockConsumed;
+use App\Events\Work\VehicleStockReserved;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
 // ── MODULE 04 TitanContracts — agreement entitlement signals ──────────────
@@ -509,6 +538,41 @@ class EventServiceProvider extends ServiceProvider
         ],
         FieldServiceAgreementSaleExtended::class  => [],
         SaleServiceCoverageApplied::class         => [],
+        // ── FSM Drift Repair — Dispatch readiness signals ─────────────────────
+        DispatchETAChanged::class        => [],
+        DispatchJobLate::class           => [],
+        DispatchReadinessChanged::class  => [],
+        DispatchStockBlocked::class      => [],
+        DispatchVehicleBlocked::class    => [],
+        // ── FSM Drift Repair — Activity follow-up ─────────────────────────────
+        ActivityFollowUpScheduled::class => [],
+        // ── FSM Drift Repair — Agreement equipment coverage ───────────────────
+        AgreementEquipmentCoverageCreated::class  => [],
+        AgreementEquipmentCoverageExtended::class => [],
+        // ── FSM Drift Repair — Recurring plan lifecycle ───────────────────────
+        RecurringEquipmentServiceCreated::class => [],
+        RecurringPlanGenerated::class           => [],
+        RecurringPlanUpdated::class             => [],
+        RecurringSaleCreated::class             => [],
+        RecurringVisitMaterialized::class       => [],
+        // ── FSM Drift Repair — Sale recurring agreement lifecycle ─────────────
+        SaleRecurringAgreementCreated::class    => [],
+        SaleRecurringAgreementUpdated::class    => [],
+        SaleRecurringCoverageApplied::class     => [],
+        SaleRecurringPlanGenerated::class       => [],
+        SaleRecurringVisitMaterialized::class   => [],
+        SaleRecurringVisitProjected::class      => [],
+        // ── FSM Drift Repair — HRM / Timesheet signals ────────────────────────
+        TimesheetSubmitted::class => [],
+        TimesheetApproved::class  => [],
+        TimesheetRejected::class  => [],
+        // ── FSM Drift Repair — Vehicle operational signals ────────────────────
+        VehicleAssignedToJob::class   => [],
+        VehicleEquipmentMissing::class => [],
+        VehicleLocationUpdated::class  => [],
+        VehicleRouteReady::class       => [],
+        VehicleStockReserved::class    => [],
+        VehicleStockConsumed::class    => [],
         // ── MODULE_01 TitanDispatch — dispatch lifecycle signals ──────────
         JobDispatched::class => [
             RecordDispatchAuditTrail::class,

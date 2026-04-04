@@ -31,6 +31,7 @@ use App\Models\FSM\FsmJobPriorityScore;
 use App\Models\FSM\FsmJobStatusMeta;
 use App\Models\Repair\RepairOrder;
 use App\Models\Vehicle\Vehicle;
+use App\Models\Vehicle\VehicleAssignment;
 use App\Models\Vehicle\VehicleStock;
 use App\Models\Premises\JobInjectedDocument;
 
@@ -1401,5 +1402,27 @@ class ServiceJob extends Model implements SchedulableEntity
     public function injectedDocuments(): HasMany
     {
         return $this->hasMany(JobInjectedDocument::class, 'job_id');
+    }
+
+    // ── FSM Graph repair — missing inverse relationships ──────────────────────
+
+    /**
+     * All vehicle assignments (polymorphic) for this job.
+     *
+     * @return MorphMany<VehicleAssignment>
+     */
+    public function vehicleAssignments(): MorphMany
+    {
+        return $this->morphMany(VehicleAssignment::class, 'assignable');
+    }
+
+    /**
+     * Vehicle stock items reserved for this job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<VehicleStock>
+     */
+    public function vehicleStockItems(): HasMany
+    {
+        return $this->hasMany(VehicleStock::class, 'reserved_for_job_id');
     }
 }

@@ -1,0 +1,60 @@
+{
+    "report_type": "fsm_duplicate_logic_candidates",
+    "generated_at": "2026-04-04",
+    "description": "Logic or data patterns that appear more than once across the FSM system and may indicate duplication or need convergence.",
+    "candidates": [
+        {
+            "id": "DUP-001",
+            "title": "Dual service_plan_tables migration names",
+            "severity": "low",
+            "description": "Both '2026_04_02_000100_create_service_plan_tables.php' and '2026_04_02_000800_create_service_plan_tables.php' share the same filename pattern. The 000800 migration is an additive extension pass using Schema::table with hasColumn guards. This is intentional but the identical name pattern is a maintenance hazard.",
+            "files": [
+                "database/migrations/2026_04_02_000100_create_service_plan_tables.php",
+                "database/migrations/2026_04_02_000800_create_service_plan_tables.php"
+            ],
+            "recommendation": "Intentional — but consider renaming 000800 to 'extend_service_plan_tables' for clarity in future passes.",
+            "status": "deferred"
+        },
+        {
+            "id": "DUP-002",
+            "title": "originatingSale() computed methods vs. Eloquent BelongsTo relationships",
+            "severity": "medium",
+            "description": "ServiceAgreement, ServicePlan, and ServicePlanVisit all declare originatingSale()/originatingSaleAgreement() computed methods that manually query Quote/ServiceAgreement rather than using Eloquent relationships. This duplicates logic now covered by the new originatingQuote() and saleAgreement() BelongsTo relationships added in this pass.",
+            "files": [
+                "app/Models/Work/ServiceAgreement.php → originatingSale()",
+                "app/Models/Work/ServicePlan.php → originatingSale(), originatingSaleAgreement()",
+                "app/Models/Work/ServicePlanVisit.php → agreementOrigin(), saleAgreementSource()"
+            ],
+            "recommendation": "The computed methods can be simplified to delegate to the new BelongsTo relationships in a follow-up refactor pass. Do not remove yet — the computed methods add additional filtering/fallback logic.",
+            "status": "deferred"
+        },
+        {
+            "id": "DUP-003",
+            "title": "Dispatch readiness evaluated in multiple services",
+            "severity": "medium",
+            "description": "Readiness evaluation for dispatch exists in DispatchReadinessService, DispatchConstraintService (evaluateAvailability), VehicleDispatchService, StockDispatchService, and AgreementDispatchService. While these are intentionally specialized, the readiness score computation (readiness_score column on service_jobs) may be computed in overlapping ways.",
+            "files": [
+                "app/Services/Work/DispatchReadinessService.php",
+                "app/Services/Work/DispatchConstraintService.php",
+                "app/Services/Work/VehicleDispatchService.php",
+                "app/Services/Work/StockDispatchService.php",
+                "app/Services/Work/AgreementDispatchService.php"
+            ],
+            "recommendation": "DispatchReadinessService should be the single aggregator. Other services should feed scores into it rather than directly computing readiness_score. Converge in a future dispatch intelligence pass.",
+            "status": "deferred"
+        },
+        {
+            "id": "DUP-004",
+            "title": "Coverage logic spread across EquipmentCoverageService, ServiceAgreement helpers, and ServicePlan helpers",
+            "severity": "low",
+            "description": "EquipmentCoverageService (app/Services/Work/EquipmentCoverageService.php) computes agreement coverage. ServiceAgreement also has coveredEquipment(), coverageTimeline(), recurringCoverageSummary() methods. ServicePlan has coverageEquipment(), recurringCoverageScope(). This creates multiple paths to coverage resolution.",
+            "files": [
+                "app/Services/Work/EquipmentCoverageService.php",
+                "app/Models/Work/ServiceAgreement.php → coveredEquipment(), coverageTimeline()",
+                "app/Models/Work/ServicePlan.php → coverageEquipment(), recurringCoverageScope()"
+            ],
+            "recommendation": "All coverage resolution should flow through EquipmentCoverageService. Model helpers can call the service or return raw relationships. Converge in a contract/coverage hardening pass.",
+            "status": "deferred"
+        }
+    ]
+}
