@@ -11,7 +11,7 @@ use App\Models\Equipment\Equipment;
 use App\Models\Equipment\InstalledEquipment;
 use App\Models\Facility\SiteAsset;
 use App\Models\Meter\Meter;
-use App\Models\Work\InspectionInstance;
+use App\Models\Inspection\InspectionInstance;
 use App\Models\Work\ServiceJob;
 use App\Models\Work\ServicePlan;
 use App\Models\Work\ServicePlanVisit;
@@ -150,6 +150,16 @@ class Premises extends Model
     public function inspections(): HasMany
     {
         return $this->hasMany(InspectionInstance::class, 'premises_id');
+    }
+
+    /**
+     * All service agreements covering this premises.
+     *
+     * Inverse of ServiceAgreement::premises() BelongsTo.
+     */
+    public function serviceAgreements(): HasMany
+    {
+        return $this->hasMany(\App\Models\Work\ServiceAgreement::class, 'premises_id');
     }
 
     public function serviceVisits(): HasManyThrough

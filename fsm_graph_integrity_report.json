@@ -1,0 +1,116 @@
+{
+    "report_type": "fsm_graph_integrity_report",
+    "generated_at": "2026-04-04",
+    "pass": "FSM Graph Verification + Drift Repair",
+    "overall_status": "repaired",
+    "summary": {
+        "canonical_entities_verified": 28,
+        "missing_relationships_found": 12,
+        "missing_relationships_repaired": 10,
+        "unregistered_events_found": 28,
+        "unregistered_events_repaired": 28,
+        "missing_services_found": 7,
+        "missing_services_repaired": 1,
+        "shadow_subsystems_found": 0,
+        "duplicate_logic_candidates": 4,
+        "migration_drift_issues": 2
+    },
+    "lifecycle_chain": {
+        "Customer": {
+            "canonical_owner": "App\\Models\\Crm\\Customer",
+            "status": "verified",
+            "outbound_links": ["Premises", "ServiceJob", "ServiceAgreement", "ServicePlan", "RepairOrder", "Quote", "Deal"]
+        },
+        "Premises": {
+            "canonical_owner": "App\\Models\\Premises\\Premises",
+            "status": "repaired",
+            "repairs": ["Added serviceAgreements() HasMany (previously missing inverse for service_agreements.premises_id FK)"],
+            "outbound_links": ["ServiceJob", "ServicePlan", "ServiceAgreement", "InstalledEquipment", "RepairOrder", "FieldServiceProject"]
+        },
+        "Quote": {
+            "canonical_owner": "App\\Models\\Money\\Quote",
+            "status": "verified",
+            "outbound_links": ["ServiceJob", "ServiceAgreement", "ServicePlan"]
+        },
+        "ServiceAgreement": {
+            "canonical_owner": "App\\Models\\Work\\ServiceAgreement",
+            "status": "repaired",
+            "repairs": [
+                "Added originatingQuote() BelongsTo (originating_quote_id FK existed but no ORM relationship)",
+                "Added renewalQuote() BelongsTo (renewal_quote_id FK existed but no ORM relationship)"
+            ],
+            "outbound_links": ["ServicePlan", "ServicePlanVisit", "ServiceJob", "ContractEntitlement", "ContractSLABreach", "ContractRenewal"]
+        },
+        "ServicePlan": {
+            "canonical_owner": "App\\Models\\Work\\ServicePlan",
+            "status": "repaired",
+            "repairs": [
+                "Added originatingQuote() BelongsTo (origin_quote_id FK existed but no ORM relationship)",
+                "Added saleAgreement() BelongsTo (sale_agreement_id FK existed but no ORM relationship)"
+            ],
+            "outbound_links": ["ServicePlanVisit", "ServiceAgreement"]
+        },
+        "ServicePlanVisit": {
+            "canonical_owner": "App\\Models\\Work\\ServicePlanVisit",
+            "status": "repaired",
+            "repairs": [
+                "Added saleAgreement() BelongsTo (sale_agreement_id FK existed but no ORM relationship)",
+                "Added assignedUser() BelongsTo (assigned_to FK existed but no ORM relationship)"
+            ],
+            "outbound_links": ["ServiceJob", "ServicePlan", "FieldServiceProject"]
+        },
+        "ServiceJob": {
+            "canonical_owner": "App\\Models\\Work\\ServiceJob",
+            "status": "repaired",
+            "repairs": [
+                "Added vehicleAssignments() MorphMany (VehicleAssignment is polymorphic but ServiceJob had no inverse)",
+                "Added vehicleStockItems() HasMany (reserved_for_job_id FK existed in VehicleStock but ServiceJob had no HasMany)"
+            ],
+            "outbound_links": ["ServiceAgreement", "ServicePlanVisit", "RepairOrder", "Invoice", "Equipment", "Vehicle", "DispatchRouteStopItem", "FsmJobBlocker", "FsmJobPriorityScore", "FsmJobStatusMeta"]
+        },
+        "RepairOrder": {
+            "canonical_owner": "App\\Models\\Repair\\RepairOrder",
+            "status": "repaired",
+            "repairs": ["Created RepairOrderService (lifecycle orchestrator was missing — only RepairTemplateService existed)"],
+            "deferred": ["vehicleStock() link not yet established at model level — RepairOrder↔VehicleStock requires a bridge table or new FK"],
+            "outbound_links": ["Equipment", "InstalledEquipment", "SiteAsset", "Premises", "ServiceJob", "WarrantyClaim", "ServiceAgreement", "Customer"]
+        },
+        "Vehicle": {
+            "canonical_owner": "App\\Models\\Vehicle\\Vehicle",
+            "status": "repaired",
+            "repairs": ["Added dispatchRoutes() HasMany (dispatch_routes.vehicle_id FK existed but Vehicle had no inverse)"],
+            "outbound_links": ["VehicleAssignment", "VehicleStock", "VehicleEquipment", "DispatchRoute"]
+        },
+        "DispatchRoute": {
+            "canonical_owner": "App\\Models\\Route\\DispatchRoute",
+            "status": "repaired",
+            "repairs": ["Added technicianAvailabilities() HasMany via assigned_user_id (availability was disconnected from route at ORM layer)"],
+            "outbound_links": ["DispatchRouteStop", "Vehicle", "TechnicianAvailability"]
+        },
+        "TechnicianAvailability": {
+            "canonical_owner": "App\\Models\\Route\\TechnicianAvailability",
+            "status": "verified",
+            "outbound_links": ["AvailabilityWindow", "User"]
+        },
+        "Invoice": {
+            "canonical_owner": "App\\Models\\Money\\Invoice",
+            "status": "verified",
+            "outbound_links": ["ServiceJob", "Customer"]
+        }
+    },
+    "event_registration": {
+        "total_work_events": 76,
+        "previously_registered": 48,
+        "newly_registered_this_pass": 28,
+        "unregistered_remaining": 0
+    },
+    "deferred_items": [
+        "RepairOrder ↔ VehicleStock direct model relationship — requires schema decision (new FK or bridge table)",
+        "ServiceJobSchedulingService — dedicated slot-allocation service not yet created",
+        "TechnicianAvailabilityService — query/validation service not yet created",
+        "PremisesService — dedicated premises operations service not yet created",
+        "VehicleRouteAssignmentService — route-level vehicle assignment service not yet created",
+        "InspectionSchedulingService — inspection scheduling orchestrator not yet created",
+        "RepairInvoiceService — repair-specific invoice generation service not yet created"
+    ]
+}

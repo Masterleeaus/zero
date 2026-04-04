@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Work\Department;
+use App\Models\Work\EmploymentLifecycleState;
 
 class StaffProfile extends Model
 {
@@ -22,7 +24,9 @@ class StaffProfile extends Model
         'employee_number',
         'job_title',
         'department',
+        'department_id',
         'employment_type',
+        'employment_status',
         'start_date',
         'end_date',
         'hourly_rate',
@@ -36,7 +40,8 @@ class StaffProfile extends Model
     ];
 
     protected $attributes = [
-        'status' => 'active',
+        'status'            => 'active',
+        'employment_status' => 'active',
     ];
 
     protected $casts = [
@@ -60,6 +65,16 @@ class StaffProfile extends Model
     public function managedStaff(): HasMany
     {
         return $this->hasMany(self::class, 'manager_id', 'user_id');
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function lifecycleStates(): HasMany
+    {
+        return $this->hasMany(EmploymentLifecycleState::class, 'staff_profile_id');
     }
 
 }

@@ -1,0 +1,137 @@
+{
+    "report_type": "fsm_missing_linkages",
+    "generated_at": "2026-04-04",
+    "description": "Missing Eloquent relationships, service bindings, and lifecycle linkages found during the FSM graph verification pass.",
+    "repaired_this_pass": [
+        {
+            "id": "ML-001",
+            "entity": "ServiceJob",
+            "linkage": "vehicleAssignments() MorphMany → VehicleAssignment",
+            "reason": "VehicleAssignment is polymorphic (assignable morph) covering ServiceJob|DispatchRoute|Shift, but ServiceJob had no inverse MorphMany. This meant VehicleAssignment records could not be queried from the ServiceJob side via ORM.",
+            "fix": "Added vehicleAssignments(): MorphMany to ServiceJob and VehicleAssignment use import.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-002",
+            "entity": "ServiceJob",
+            "linkage": "vehicleStockItems() HasMany → VehicleStock",
+            "reason": "VehicleStock.reserved_for_job_id FK existed and VehicleStock.reservedForJob() BelongsTo was declared, but ServiceJob had no inverse HasMany. Vehicle stock items reserved for a job were retrieved via raw queries in helper methods.",
+            "fix": "Added vehicleStockItems(): HasMany to ServiceJob.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-003",
+            "entity": "ServiceAgreement",
+            "linkage": "originatingQuote() BelongsTo → Quote",
+            "reason": "originating_quote_id FK exists on service_agreements and is referenced in computed method originatingSale(), but no Eloquent BelongsTo relationship was declared.",
+            "fix": "Added originatingQuote(): BelongsTo to ServiceAgreement.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-004",
+            "entity": "ServiceAgreement",
+            "linkage": "renewalQuote() BelongsTo → Quote",
+            "reason": "renewal_quote_id FK exists on service_agreements and is referenced in commercialCoverageSource() computed method, but no Eloquent BelongsTo relationship was declared.",
+            "fix": "Added renewalQuote(): BelongsTo to ServiceAgreement.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-005",
+            "entity": "ServicePlan",
+            "linkage": "originatingQuote() BelongsTo → Quote",
+            "reason": "origin_quote_id FK exists on service_plans and is used in originatingSale() computed method, but no Eloquent BelongsTo was declared.",
+            "fix": "Added originatingQuote(): BelongsTo to ServicePlan.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-006",
+            "entity": "ServicePlan",
+            "linkage": "saleAgreement() BelongsTo → ServiceAgreement",
+            "reason": "sale_agreement_id FK exists on service_plans for sale-recurring plans, used in originatingSaleAgreement() computed method, but no Eloquent BelongsTo was declared.",
+            "fix": "Added saleAgreement(): BelongsTo to ServicePlan.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-007",
+            "entity": "ServicePlanVisit",
+            "linkage": "saleAgreement() BelongsTo → ServiceAgreement",
+            "reason": "sale_agreement_id FK exists on service_plan_visits and is referenced in saleAgreementSource() computed method, but no Eloquent BelongsTo was declared.",
+            "fix": "Added saleAgreement(): BelongsTo to ServicePlanVisit.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-008",
+            "entity": "ServicePlanVisit",
+            "linkage": "assignedUser() BelongsTo → User",
+            "reason": "assigned_to FK exists on service_plan_visits but no Eloquent BelongsTo was declared. User assignment at the visit level was not queryable via ORM.",
+            "fix": "Added assignedUser(): BelongsTo to ServicePlanVisit.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-009",
+            "entity": "Premises",
+            "linkage": "serviceAgreements() HasMany → ServiceAgreement",
+            "reason": "service_agreements.premises_id FK is properly migrated. ServiceAgreement.premises() BelongsTo is declared. But Premises had no inverse HasMany, breaking the Premises→ServiceAgreement navigation.",
+            "fix": "Added serviceAgreements(): HasMany to Premises.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-010",
+            "entity": "Vehicle",
+            "linkage": "dispatchRoutes() HasMany → DispatchRoute",
+            "reason": "dispatch_routes.vehicle_id FK is properly migrated and DispatchRoute.vehicle() BelongsTo is declared, but Vehicle had no inverse HasMany. Vehicle-to-route navigation was impossible via ORM.",
+            "fix": "Added dispatchRoutes(): HasMany to Vehicle.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-011",
+            "entity": "DispatchRoute",
+            "linkage": "technicianAvailabilities() HasMany → TechnicianAvailability",
+            "reason": "TechnicianAvailability records are keyed by user_id. DispatchRoute has assigned_user_id. No Eloquent relationship connected route to technician availability, making ORM-based availability-vs-route queries impossible.",
+            "fix": "Added technicianAvailabilities(): HasMany via assigned_user_id to DispatchRoute.",
+            "status": "repaired"
+        },
+        {
+            "id": "ML-012",
+            "entity": "Repair domain",
+            "linkage": "RepairOrderService — lifecycle orchestrator",
+            "reason": "Only RepairTemplateService existed in app/Services/Repair/. There was no service to create, schedule, advance status, consume parts, complete, or cancel a RepairOrder. The repair lifecycle had no orchestrating service.",
+            "fix": "Created app/Services/Repair/RepairOrderService.php with create(), createFromServiceJob(), schedule(), reserveParts(), consumeParts(), complete(), close(), cancel() methods.",
+            "status": "repaired"
+        }
+    ],
+    "deferred_linkages": [
+        {
+            "id": "DML-001",
+            "entity": "RepairOrder",
+            "linkage": "vehicleStock() → VehicleStock",
+            "reason": "No FK or bridge table exists between repair_orders and vehicle_stock. Parts consumed during repairs reference vehicle stock at the RepairPartUsage level, not directly on RepairOrder.",
+            "recommendation": "Add repair_part_usages.vehicle_stock_id FK in a future schema pass to link parts consumption to vehicle stock at the usage line level.",
+            "status": "deferred"
+        },
+        {
+            "id": "DML-002",
+            "entity": "ServiceJobSchedulingService",
+            "linkage": "Dedicated job slot-allocation service",
+            "reason": "AgreementSchedulerService exists for agreement-scoped scheduling. No general-purpose ServiceJobSchedulingService exists for direct slot allocation, conflict detection, and calendar integration.",
+            "recommendation": "Create in scheduling intelligence pass.",
+            "status": "deferred"
+        },
+        {
+            "id": "DML-003",
+            "entity": "TechnicianAvailabilityService",
+            "linkage": "Availability query/validation service",
+            "reason": "TechnicianAvailability and AvailabilityWindow models exist, and DispatchConstraintService references availability. But no dedicated service encapsulates availability window queries, conflict detection, or capacity checks.",
+            "recommendation": "Create in dispatch intelligence scoring pass.",
+            "status": "deferred"
+        },
+        {
+            "id": "DML-004",
+            "entity": "Shift",
+            "linkage": "vehicleAssignment() → VehicleAssignment",
+            "reason": "VehicleAssignment.assignable morph covers Shift but Shift model has no vehicleAssignment() inverse relationship.",
+            "recommendation": "Add morphMany to Shift model in vehicle/shift integration pass.",
+            "status": "deferred"
+        }
+    ]
+}

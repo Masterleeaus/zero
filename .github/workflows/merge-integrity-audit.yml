@@ -1,0 +1,262 @@
+name: Merge Integrity Audit
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    - cron: "0 2 * * *"   # nightly 2am UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Architecture Integrity Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, zip, sqlite3, pdo_sqlite, mbstring, openssl, bcmath, xml
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Prepare report directory
+        run: mkdir -p docs/repo-audit
+
+      # ── 1. Migration collision scan ─────────────────────────────────────
+      - name: Scan for duplicate migration timestamps
+        id: migration_scan
+        run: |
+          echo "### Migration Collision Scan" > /tmp/migration_report.txt
+          echo "" >> /tmp/migration_report.txt
+
+          DUPES=$(ls database/migrations/*.php | xargs -I{} basename {} | cut -c1-17 | sort | uniq -d)
+
+          if [ -z "$DUPES" ]; then
+            echo "✅ No duplicate migration timestamps found." >> /tmp/migration_report.txt
+          else
+            echo "❌ Duplicate timestamps detected:" >> /tmp/migration_report.txt
+            echo "$DUPES" >> /tmp/migration_report.txt
+            echo "MIGRATION_FAIL=true" >> $GITHUB_ENV
+          fi
+
+          TOTAL=$(ls database/migrations/*.php | wc -l)
+          echo "" >> /tmp/migration_report.txt
+          echo "Total migrations: $TOTAL" >> /tmp/migration_report.txt
+          cat /tmp/migration_report.txt
+
+      # ── 2. Provider wiring scan ─────────────────────────────────────────
+      - name: Scan service provider registrations
+        id: provider_scan
+        run: |
+          echo "### Provider Wiring Scan" > /tmp/provider_report.txt
+          echo "" >> /tmp/provider_report.txt
+
+          PROVIDERS=(
+            "AppServiceProvider"
+            "EventServiceProvider"
+            "ExtensionServiceProvider"
+            "TitanCoreServiceProvider"
+            "TitanSignalsServiceProvider"
+            "RouteServiceProvider"
+          )
+
+          # Check bootstrap/app.php or config/app.php for provider registration
+          for PROVIDER in "${PROVIDERS[@]}"; do
+            FILE="app/Providers/${PROVIDER}.php"
+            if [ -f "$FILE" ]; then
+              # Check it's registered in config/app.php
+              if grep -q "$PROVIDER" config/app.php 2>/dev/null || grep -q "$PROVIDER" bootstrap/app.php 2>/dev/null; then
+                echo "✅ $PROVIDER — exists + registered" >> /tmp/provider_report.txt
+              else
+                echo "⚠️  $PROVIDER — exists but NOT registered in config/app.php" >> /tmp/provider_report.txt
+                echo "PROVIDER_WARN=true" >> $GITHUB_ENV
+              fi
+            else
+              echo "❌ $PROVIDER — FILE MISSING" >> /tmp/provider_report.txt
+              echo "PROVIDER_FAIL=true" >> $GITHUB_ENV
+            fi
+          done
+
+          cat /tmp/provider_report.txt
+
+      # ── 3. Route → Controller wiring scan ──────────────────────────────
+      - name: Scan routes for missing controllers
+        id: route_scan
+        run: |
+          echo "### Route → Controller Scan" > /tmp/route_report.txt
+          echo "" >> /tmp/route_report.txt
+
+          MISSING=0
+
+          # Extract controller class references from all route files
+          CONTROLLERS=$(grep -rh "::class" routes/ --include="*.php" | grep -oP "App\\\\[A-Za-z\\\\]+" | sort -u)
+
+          for CLASS in $CONTROLLERS; do
+            FILE="$(echo $CLASS | sed 's/\\\\/\//g; s/^App\//app\//').php"
+            if [ ! -f "$FILE" ]; then
+              echo "❌ Missing: $CLASS" >> /tmp/route_report.txt
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ $MISSING -eq 0 ]; then
+            echo "✅ All route-referenced controllers found." >> /tmp/route_report.txt
+          else
+            echo "" >> /tmp/route_report.txt
+            echo "Total missing: $MISSING" >> /tmp/route_report.txt
+            echo "ROUTE_FAIL=true" >> $GITHUB_ENV
+          fi
+
+          cat /tmp/route_report.txt
+
+      # ── 4. Orphan listener scan ─────────────────────────────────────────
+      - name: Scan for orphan listeners
+        id: listener_scan
+        run: |
+          echo "### Orphan Listener Scan" > /tmp/listener_report.txt
+          echo "" >> /tmp/listener_report.txt
+
+          ORPHANS=0
+
+          for LISTENER in $(find app/Listeners -name "*.php" | xargs -I{} basename {} .php); do
+            if ! grep -rq "$LISTENER" app/Providers/EventServiceProvider.php 2>/dev/null; then
+              echo "⚠️  $LISTENER — not wired in EventServiceProvider" >> /tmp/listener_report.txt
+              ORPHANS=$((ORPHANS + 1))
+            fi
+          done
+
+          if [ $ORPHANS -eq 0 ]; then
+            echo "✅ All listeners registered in EventServiceProvider." >> /tmp/listener_report.txt
+          else
+            echo "" >> /tmp/listener_report.txt
+            echo "Total orphans: $ORPHANS" >> /tmp/listener_report.txt
+            echo "LISTENER_WARN=true" >> $GITHUB_ENV
+          fi
+
+          cat /tmp/listener_report.txt
+
+      # ── 5. MCP capability → handler wiring ─────────────────────────────
+      - name: Scan MCP handler wiring
+        id: mcp_scan
+        run: |
+          echo "### MCP Capability Handler Scan" > /tmp/mcp_report.txt
+          echo "" >> /tmp/mcp_report.txt
+
+          if [ -f "app/TitanCore/MCP/McpCapabilityRegistry.php" ]; then
+            HANDLERS=$(grep -oP "Handlers\\\\[A-Za-z]+" app/TitanCore/MCP/McpCapabilityRegistry.php | sort -u)
+            MISSING=0
+
+            for HANDLER in $HANDLERS; do
+              FILE="app/TitanCore/MCP/${HANDLER}.php"
+              FILE=$(echo $FILE | sed 's/Handlers\\\\/Handlers\//g')
+              if [ ! -f "$FILE" ]; then
+                echo "❌ Missing handler: $HANDLER" >> /tmp/mcp_report.txt
+                MISSING=$((MISSING + 1))
+              else
+                echo "✅ $HANDLER" >> /tmp/mcp_report.txt
+              fi
+            done
+
+            if [ $MISSING -eq 0 ]; then
+              echo "" >> /tmp/mcp_report.txt
+              echo "All MCP handlers present." >> /tmp/mcp_report.txt
+            else
+              echo "MCP_FAIL=true" >> $GITHUB_ENV
+            fi
+          else
+            echo "⚠️  McpCapabilityRegistry.php not found — skipping." >> /tmp/mcp_report.txt
+          fi
+
+          cat /tmp/mcp_report.txt
+
+      # ── 6. Compile full report ──────────────────────────────────────────
+      - name: Compile audit report
+        run: |
+          REPORT="docs/repo-audit/MERGE_INTEGRITY_REPORT.md"
+
+          cat > $REPORT <<EOF
+          # Merge Integrity Audit Report
+
+          > Auto-generated by GitHub Actions on $(date -u "+%Y-%m-%d %H:%M UTC")
+          > Triggered by: ${{ github.event_name }} on \`${{ github.ref_name }}\`
+          > Commit: ${{ github.sha }}
+
+          ---
+
+          $(cat /tmp/migration_report.txt)
+
+          ---
+
+          $(cat /tmp/provider_report.txt)
+
+          ---
+
+          $(cat /tmp/route_report.txt)
+
+          ---
+
+          $(cat /tmp/listener_report.txt)
+
+          ---
+
+          $(cat /tmp/mcp_report.txt)
+
+          ---
+
+          ## Summary
+
+          EOF
+
+          if [ -z "$MIGRATION_FAIL$PROVIDER_FAIL$ROUTE_FAIL$MCP_FAIL" ]; then
+            echo "✅ **All critical checks passed.**" >> $REPORT
+          else
+            echo "❌ **Critical issues found — review above.**" >> $REPORT
+          fi
+
+          if [ -n "$PROVIDER_WARN$LISTENER_WARN" ]; then
+            echo "⚠️  **Warnings present — review recommended.**" >> $REPORT
+          fi
+
+          cat $REPORT
+
+      # ── 7. Fail job if critical issues found ───────────────────────────
+      - name: Fail on critical issues
+        run: |
+          if [ -n "$MIGRATION_FAIL" ] || [ -n "$PROVIDER_FAIL" ] || [ -n "$ROUTE_FAIL" ] || [ -n "$MCP_FAIL" ]; then
+            echo "Critical integrity issues detected. See report above."
+            exit 1
+          fi
+
+      # ── 8. Commit report back to repo ─────────────────────────────────
+      - name: Commit audit report to repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/repo-audit/MERGE_INTEGRITY_REPORT.md
+          git diff --cached --quiet || git commit -m "audit: update merge integrity report [skip ci]"
+          git push origin HEAD
+
+      # ── 9. Upload report as artifact ───────────────────────────────────
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-integrity-report-${{ github.run_number }}
+          path: docs/repo-audit/MERGE_INTEGRITY_REPORT.md

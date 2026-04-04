@@ -207,6 +207,16 @@ use App\Events\Finance\JobInvoiced as FinanceJobInvoiced;
 use App\Listeners\Finance\RecalculateFinancialSummaryOnCostChange;
 use App\Listeners\Finance\NotifyOnUnprofitableJob;
 use App\Listeners\Finance\RecordRevenueOnJobBilled;
+// ── MODULE_10 TitanMesh ──────────────────────────────────────────────────────
+use App\Events\Mesh\MeshNodeHandshaked;
+use App\Events\Mesh\MeshDispatchRequested;
+use App\Events\Mesh\MeshDispatchAccepted;
+use App\Events\Mesh\MeshDispatchCompleted;
+use App\Events\Mesh\MeshTrustChanged;
+use App\Events\Mesh\MeshSettlementDue;
+use App\Listeners\Mesh\RecordMeshOperationOnTrustLedger;
+use App\Listeners\Mesh\RecordMeshEventOnTimeGraph;
+use App\Listeners\Mesh\NotifyOnMeshDispatchAccepted;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -215,6 +225,42 @@ use App\Events\Work\FieldServiceAgreementSaleCreated;
 use App\Events\Work\FieldServiceAgreementSaleActivated;
 use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
+// ── FSM Modules — fieldservice_sale_agreement lifecycle events ───────────────
+use App\Events\Work\FieldServiceAgreementCreated;
+use App\Events\Work\FieldServiceAgreementUpdated;
+use App\Events\Work\FieldServiceAgreementActivated;
+use App\Events\Work\FieldServiceAgreementExpired;
+use App\Events\Work\FieldServiceAgreementRenewed;
+use App\Events\Work\FieldServiceAgreementCancelled;
+// ── FSM Drift Repair — previously unregistered Work events ──────────────────
+use App\Events\Work\ActivityFollowUpScheduled;
+use App\Events\Work\AgreementEquipmentCoverageCreated;
+use App\Events\Work\AgreementEquipmentCoverageExtended;
+use App\Events\Work\DispatchETAChanged;
+use App\Events\Work\DispatchJobLate;
+use App\Events\Work\DispatchReadinessChanged;
+use App\Events\Work\DispatchStockBlocked;
+use App\Events\Work\DispatchVehicleBlocked;
+use App\Events\Work\RecurringEquipmentServiceCreated;
+use App\Events\Work\RecurringPlanGenerated;
+use App\Events\Work\RecurringPlanUpdated;
+use App\Events\Work\RecurringSaleCreated;
+use App\Events\Work\RecurringVisitMaterialized;
+use App\Events\Work\SaleRecurringAgreementCreated;
+use App\Events\Work\SaleRecurringAgreementUpdated;
+use App\Events\Work\SaleRecurringCoverageApplied;
+use App\Events\Work\SaleRecurringPlanGenerated;
+use App\Events\Work\SaleRecurringVisitMaterialized;
+use App\Events\Work\SaleRecurringVisitProjected;
+use App\Events\Work\TimesheetApproved;
+use App\Events\Work\TimesheetRejected;
+use App\Events\Work\TimesheetSubmitted;
+use App\Events\Work\VehicleAssignedToJob;
+use App\Events\Work\VehicleEquipmentMissing;
+use App\Events\Work\VehicleLocationUpdated;
+use App\Events\Work\VehicleRouteReady;
+use App\Events\Work\VehicleStockConsumed;
+use App\Events\Work\VehicleStockReserved;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
 // ── MODULE 04 TitanContracts — agreement entitlement signals ──────────────
@@ -509,6 +555,48 @@ class EventServiceProvider extends ServiceProvider
         ],
         FieldServiceAgreementSaleExtended::class  => [],
         SaleServiceCoverageApplied::class         => [],
+        // ── fieldservice_sale_agreement lifecycle events ──────────────────────
+        FieldServiceAgreementCreated::class   => [],
+        FieldServiceAgreementUpdated::class   => [],
+        FieldServiceAgreementActivated::class => [],
+        FieldServiceAgreementExpired::class   => [],
+        FieldServiceAgreementRenewed::class   => [],
+        FieldServiceAgreementCancelled::class => [],
+        // ── FSM Drift Repair — Dispatch readiness signals ─────────────────────
+        DispatchETAChanged::class        => [],
+        DispatchJobLate::class           => [],
+        DispatchReadinessChanged::class  => [],
+        DispatchStockBlocked::class      => [],
+        DispatchVehicleBlocked::class    => [],
+        // ── FSM Drift Repair — Activity follow-up ─────────────────────────────
+        ActivityFollowUpScheduled::class => [],
+        // ── FSM Drift Repair — Agreement equipment coverage ───────────────────
+        AgreementEquipmentCoverageCreated::class  => [],
+        AgreementEquipmentCoverageExtended::class => [],
+        // ── FSM Drift Repair — Recurring plan lifecycle ───────────────────────
+        RecurringEquipmentServiceCreated::class => [],
+        RecurringPlanGenerated::class           => [],
+        RecurringPlanUpdated::class             => [],
+        RecurringSaleCreated::class             => [],
+        RecurringVisitMaterialized::class       => [],
+        // ── FSM Drift Repair — Sale recurring agreement lifecycle ─────────────
+        SaleRecurringAgreementCreated::class    => [],
+        SaleRecurringAgreementUpdated::class    => [],
+        SaleRecurringCoverageApplied::class     => [],
+        SaleRecurringPlanGenerated::class       => [],
+        SaleRecurringVisitMaterialized::class   => [],
+        SaleRecurringVisitProjected::class      => [],
+        // ── FSM Drift Repair — HRM / Timesheet signals ────────────────────────
+        TimesheetSubmitted::class => [],
+        TimesheetApproved::class  => [],
+        TimesheetRejected::class  => [],
+        // ── FSM Drift Repair — Vehicle operational signals ────────────────────
+        VehicleAssignedToJob::class   => [],
+        VehicleEquipmentMissing::class => [],
+        VehicleLocationUpdated::class  => [],
+        VehicleRouteReady::class       => [],
+        VehicleStockReserved::class    => [],
+        VehicleStockConsumed::class    => [],
         // ── MODULE_01 TitanDispatch — dispatch lifecycle signals ──────────
         JobDispatched::class => [
             RecordDispatchAuditTrail::class,
@@ -593,6 +681,31 @@ class EventServiceProvider extends ServiceProvider
         ],
         \App\Events\Money\CostAllocationCreated::class  => [],
         \App\Events\Money\MaterialIssuedToJob::class    => [],
+        // ── MODULE_10 TitanMesh — federated capability exchange signals ───────
+        MeshNodeHandshaked::class => [
+            RecordMeshOperationOnTrustLedger::class,
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshDispatchRequested::class => [
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshDispatchAccepted::class => [
+            NotifyOnMeshDispatchAccepted::class,
+        ],
+        MeshDispatchCompleted::class => [
+            RecordMeshOperationOnTrustLedger::class,
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshTrustChanged::class => [
+            RecordMeshEventOnTimeGraph::class,
+        ],
+        MeshSettlementDue::class => [],
+        // ── MODULE HRM_PASS2 — HRM Extension signals ──────────────────────────────
+        \App\Events\Work\ShiftAssigned::class          => [],
+        \App\Events\Work\LeaveApproved::class          => [],
+        \App\Events\Work\LeaveRejected::class          => [],
+        \App\Events\Work\EmployeeStatusChanged::class  => [],
+        \App\Events\Work\DepartmentAssigned::class     => [],
     ];
 
     /**
