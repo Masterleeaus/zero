@@ -36,13 +36,12 @@ class JobCostAllocation extends Model
     ];
 
     protected $casts = [
-        'amount'                   => 'decimal:2',
-        'quantity'                 => 'decimal:4',
-        'unit_cost'                => 'decimal:2',
-        'reimbursable_to_customer' => 'boolean',
-        'posted'                   => 'boolean',
-        'posted_at'                => 'datetime',
-        'allocated_at'             => 'date',
+        'amount'       => 'decimal:2',
+        'quantity'     => 'decimal:4',
+        'unit_cost'    => 'decimal:2',
+        'posted'       => 'boolean',
+        'posted_at'    => 'datetime',
+        'allocated_at' => 'date',
     ];
 
     public function serviceJob()

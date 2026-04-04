@@ -42,7 +42,8 @@ class PayrollPostingService
             ];
         }
 
-        // Credit: Superannuation / Benefit Payable (deductions = gross - net - tax)
+        // Credit: Superannuation / Benefit Payable
+        // Deductions = gross - net - tax (covers super, salary sacrifice, etc.)
         $deductions = (float) $payroll->total_gross - (float) $payroll->total_net - $taxAmount;
         if ($deductions > 0) {
             $lines[] = [

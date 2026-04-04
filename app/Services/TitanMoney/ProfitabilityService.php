@@ -143,7 +143,7 @@ class ProfitabilityService
             ->toArray();
     }
 
-    private function applyDateFilter($query, ?Carbon $from, ?Carbon $to): void
+    private function applyDateFilter(\Illuminate\Database\Eloquent\Builder $query, ?Carbon $from, ?Carbon $to): void
     {
         if ($from) {
             $query->whereDate('allocated_at', '>=', $from);

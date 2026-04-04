@@ -58,7 +58,7 @@ class JobCostingService
             'source_type'    => 'supplier_bill_line',
             'source_id'      => $line->id,
             'cost_type'      => 'material',
-            'amount'         => $line->amount ?? ($line->quantity * $line->unit_price),
+            'amount'         => $line->amount ?? round($line->quantity * $line->unit_price, 2),
             'quantity'       => $line->quantity,
             'unit_cost'      => $line->unit_price,
             'description'    => $line->description,

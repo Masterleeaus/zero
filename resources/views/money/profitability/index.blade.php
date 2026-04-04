@@ -38,7 +38,7 @@ document.getElementById('periodForm').addEventListener('submit', function(e) {
     const data = new FormData(this);
     const params = new URLSearchParams({ from: data.get('from'), to: data.get('to') });
     fetch('{{ route('money.profitability.by-period') }}?' + params, {
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json' }
     })
     .then(r => r.json())
     .then(d => {
