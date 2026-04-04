@@ -96,6 +96,16 @@ class FieldServiceAgreementTest extends TestCase
 
         $this->assertCount(3, $visits);
 
+        // Assert backing ServicePlan was auto-created
+        $this->assertDatabaseHas('service_plans', [
+            'company_id'                 => $this->company,
+            'field_service_agreement_id' => $agreement->id,
+        ]);
+
+        // Assert visits are linked to the backing plan (satisfying NOT NULL FK)
+        $visit = $visits->first();
+        $this->assertNotNull($visit->service_plan_id);
+
         $this->assertDatabaseHas('service_plan_visits', [
             'field_service_agreement_id' => $agreement->id,
             'coverage_source'            => 'agreement',

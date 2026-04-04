@@ -77,6 +77,17 @@ return new class extends Migration {
             }
         });
 
+        // ── service_plans: FSA backing plan linkage ───────────────────────────
+        Schema::table('service_plans', static function (Blueprint $table) {
+            if (! Schema::hasColumn('service_plans', 'field_service_agreement_id')) {
+                $table->unsignedBigInteger('field_service_agreement_id')
+                    ->nullable()
+                    ->after('sale_agreement_id')
+                    ->comment('The FieldServiceAgreement that this plan was auto-generated for');
+                $table->index('field_service_agreement_id', 'sp_fsa_id');
+            }
+        });
+
         // ── service_plan_visits: FSA + sale line linkage ──────────────────────
         Schema::table('service_plan_visits', static function (Blueprint $table) {
             if (! Schema::hasColumn('service_plan_visits', 'field_service_agreement_id')) {
@@ -98,6 +109,15 @@ return new class extends Migration {
 
     public function down(): void
     {
+        Schema::table('service_plans', static function (Blueprint $table) {
+            if (Schema::hasIndex('service_plans', 'sp_fsa_id')) {
+                $table->dropIndex('sp_fsa_id');
+            }
+            if (Schema::hasColumn('service_plans', 'field_service_agreement_id')) {
+                $table->dropColumn('field_service_agreement_id');
+            }
+        });
+
         Schema::table('service_plan_visits', static function (Blueprint $table) {
             if (Schema::hasIndex('service_plan_visits', 'spv_sale_line_id')) {
                 $table->dropIndex('spv_sale_line_id');

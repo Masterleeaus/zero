@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * FieldServiceAgreement — contract-driven service lifecycle entity.
@@ -30,6 +31,7 @@ class FieldServiceAgreement extends Model
 {
     use HasFactory;
     use BelongsToCompany;
+    use SoftDeletes;
 
     protected $table = 'field_service_agreements';
 
@@ -83,12 +85,14 @@ class FieldServiceAgreement extends Model
 
     public function scopeExpired($query)
     {
-        return $query->where('status', 'expired')
-            ->orWhere(function ($q) {
-                $q->whereNotNull('end_date')
-                    ->where('end_date', '<', now()->toDateString())
-                    ->where('status', 'active');
-            });
+        return $query->where(function ($q) {
+            $q->where('status', 'expired')
+                ->orWhere(function ($q) {
+                    $q->whereNotNull('end_date')
+                        ->where('end_date', '<', now()->toDateString())
+                        ->where('status', 'active');
+                });
+        });
     }
 
     // ── Relationships ─────────────────────────────────────────────────────────

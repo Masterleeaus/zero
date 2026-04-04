@@ -168,6 +168,9 @@ class PortalController extends Controller
 
     /**
      * Portal invoices associated with a FieldServiceAgreement.
+     *
+     * Derives invoices via service jobs created from the agreement,
+     * since the invoices table does not carry an agreement_id column.
      */
     public function portalAgreementInvoices(Request $request, FieldServiceAgreement $agreement)
     {
@@ -176,11 +179,19 @@ class PortalController extends Controller
             abort(403);
         }
 
-        $invoices = $customer->portalInvoices()
-            ->where('agreement_id', $agreement->id)
-            ->sortByDesc('created_at');
+        $invoiceIds = $agreement->jobs()
+            ->whereNotNull('invoice_id')
+            ->pluck('invoice_id')
+            ->unique();
 
-        return view('default.panel.work.portal.agreements.invoices', compact('customer', 'agreement', 'invoices'));
+        $invoices = $invoiceIds->isEmpty()
+            ? collect()
+            : $customer->portalInvoices()
+                ->whereIn('id', $invoiceIds->all())
+                ->sortByDesc('created_at')
+                ->values();
+
+        return view('default.panel.work.portal.agreements.show', compact('customer', 'agreement', 'invoices'));
     }
 
     /**
@@ -193,10 +204,12 @@ class PortalController extends Controller
             abort(403);
         }
 
+        $agreement->load(['premises', 'quote', 'visits', 'jobs']);
+
         $visits = $agreement->visits()
             ->orderBy('scheduled_date')
             ->get();
 
-        return view('default.panel.work.portal.agreements.visits', compact('customer', 'agreement', 'visits'));
+        return view('default.panel.work.portal.agreements.show', compact('customer', 'agreement', 'visits'));
     }
 }

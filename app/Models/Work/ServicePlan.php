@@ -69,6 +69,8 @@ class ServicePlan extends Model
         'commercial_start_date',
         'commercial_end_date',
         'sale_agreement_id',
+        // fieldservice_sale_agreement
+        'field_service_agreement_id',
     ];
 
     protected $casts = [

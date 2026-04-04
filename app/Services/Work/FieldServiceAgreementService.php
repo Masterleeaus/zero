@@ -14,6 +14,7 @@ use App\Models\Money\Quote;
 use App\Models\Premises\Premises;
 use App\Models\Work\FieldServiceAgreement;
 use App\Models\Work\ServiceJob;
+use App\Models\Work\ServicePlan;
 use App\Models\Work\ServicePlanVisit;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -89,11 +90,35 @@ class FieldServiceAgreementService
     /**
      * Generate projected ServicePlanVisit records from an active agreement.
      *
-     * Projects visits according to service_frequency for the agreement window,
-     * or for the next $limit occurrences if no end_date is set.
+     * Resolves (or creates) a backing ServicePlan to satisfy the NOT NULL
+     * service_plan_id FK on service_plan_visits, then projects visits according
+     * to service_frequency for the agreement window.
      */
     public function generateVisitsFromAgreement(FieldServiceAgreement $agreement, int $limit = 12): Collection
     {
+        // Ensure a backing ServicePlan exists for this FSA so that the
+        // service_plan_id FK (NOT NULL) on service_plan_visits is satisfied.
+        $plan = ServicePlan::query()
+            ->where('company_id', $agreement->company_id)
+            ->where('field_service_agreement_id', $agreement->id)
+            ->first();
+
+        if ($plan === null) {
+            $plan = ServicePlan::query()->create([
+                'company_id'        => $agreement->company_id,
+                'created_by'        => $agreement->created_by,
+                'customer_id'       => $agreement->customer_id,
+                'premises_id'       => $agreement->premises_id,
+                'title'             => $agreement->title ?? "Plan for FSA #{$agreement->id}",
+                'frequency'         => $agreement->service_frequency ?? 'monthly',
+                'start_date'        => $agreement->start_date,
+                'end_date'          => $agreement->end_date,
+                'is_active'         => true,
+                'status'            => 'active',
+                'field_service_agreement_id' => $agreement->id,
+            ]);
+        }
+
         $visits   = new Collection();
         $start    = $agreement->start_date ?? now()->toDate();
         $end      = $agreement->end_date;
@@ -108,16 +133,17 @@ class FieldServiceAgreementService
             }
 
             $visit = ServicePlanVisit::query()->create([
-                'company_id'                => $agreement->company_id,
-                'created_by'                => $agreement->created_by,
+                'company_id'                 => $agreement->company_id,
+                'created_by'                 => $agreement->created_by,
+                'service_plan_id'            => $plan->id,
                 'field_service_agreement_id' => $agreement->id,
-                'visit_type'                => 'scheduled',
-                'scheduled_for'             => $current->clone(),
-                'scheduled_date'            => $current->toDateString(),
-                'status'                    => 'pending',
-                'coverage_source'           => 'agreement',
-                'sale_originated'           => $agreement->quote_id !== null,
-                'notes'                     => "Generated from agreement #{$agreement->id}",
+                'visit_type'                 => 'scheduled',
+                'scheduled_for'              => $current->clone(),
+                'scheduled_date'             => $current->toDateString(),
+                'status'                     => 'pending',
+                'coverage_source'            => 'agreement',
+                'sale_originated'            => $agreement->quote_id !== null,
+                'notes'                      => "Generated from agreement #{$agreement->id}",
             ]);
 
             $visits->push($visit);
