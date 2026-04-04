@@ -19,16 +19,17 @@ use App\Models\Money\Expense;
  */
 class ExpenseObserver
 {
+    public function __construct(
+        private readonly \App\Services\TitanMoney\AccountingService $accounting,
+    ) {}
+
     /**
-     * Handle the Expense "updated" event.
-     * When an expense transitions to `approved`, a journal entry should be posted.
-     *
-     * @todo Phase 7 — wire AccountingService::postJournalEntry() here.
+     * Handle the Expense "updated" event — post expense-approved journal entry.
      */
     public function updated(Expense $expense): void
     {
         if ($expense->wasChanged('status') && $expense->status === 'approved') {
-            // Phase 7: post debit Expense Account + credit Bank/Payable via AccountingService
+            $this->accounting->postExpenseApproved($expense);
         }
     }
 }
