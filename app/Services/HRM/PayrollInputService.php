@@ -41,9 +41,11 @@ class PayrollInputService
         $totalDays = 0.0;
 
         foreach ($leaves as $leave) {
-            $start = Carbon::parse(max($leave->start_date->toDateString(), $periodStart));
-            $end   = Carbon::parse(min($leave->end_date->toDateString(), $periodEnd));
-            $totalDays += $start->diffInDays($end) + 1;
+            $start = Carbon::parse($leave->start_date)->max(Carbon::parse($periodStart));
+            $end   = Carbon::parse($leave->end_date)->min(Carbon::parse($periodEnd));
+            if ($end->gte($start)) {
+                $totalDays += $start->diffInDays($end) + 1;
+            }
         }
 
         return round($totalDays * $hoursPerDay, 2);
@@ -51,15 +53,16 @@ class PayrollInputService
 
     public function calculatePayableHours(int $userId, string $periodStart, string $periodEnd): array
     {
-        $regular  = $this->calculateWeeklyHours($userId, $periodStart, $periodEnd);
+        $worked   = $this->calculateWeeklyHours($userId, $periodStart, $periodEnd);
         $overtime = $this->calculateOvertime($userId, $periodStart, $periodEnd);
         $leave    = $this->calculateLeaveHours($userId, $periodStart, $periodEnd);
+        $regular  = round(max(0.0, $worked - $overtime), 2);
 
         return [
-            'regular'  => round(max(0.0, $regular - $overtime), 2),
+            'regular'  => $regular,
             'overtime' => $overtime,
             'leave'    => $leave,
-            'total'    => round(max(0.0, $regular - $overtime) + $overtime + $leave, 2),
+            'total'    => round($regular + $overtime + $leave, 2),
         ];
     }
 }

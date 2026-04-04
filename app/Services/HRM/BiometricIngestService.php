@@ -13,15 +13,7 @@ class BiometricIngestService
     {
         $punch = BiometricPunch::create($data);
 
-        if ($punch->punch_type === 'clock_in') {
-            $attendance = $this->resolveAttendance($punch);
-            if ($attendance) {
-                $punch->attendance_id = $attendance->id;
-                $punch->saveQuietly();
-            }
-        } elseif ($punch->punch_type === 'clock_out') {
-            $this->resolveAttendance($punch);
-        }
+        $this->resolveAttendance($punch);
 
         return $punch->refresh();
     }
