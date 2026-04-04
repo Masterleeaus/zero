@@ -184,6 +184,14 @@ use App\Events\Team\CertificationRevoked;
 use App\Events\Team\CapabilityGapDetected;
 use App\Listeners\Team\NotifyOnCertificationExpiry;
 use App\Listeners\Team\RecordCapabilityAuditTrail;
+// ── MODULE_07 TitanPredict ───────────────────────────────────────────────────
+use App\Events\Predict\PredictionGenerated;
+use App\Events\Predict\HighConfidencePrediction;
+use App\Events\Predict\PredictionTriggered;
+use App\Events\Predict\PredictionFeedbackRecorded;
+use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
+use App\Listeners\Predict\UpdateAssetPredictionOnServiceEvent;
+use App\Listeners\Predict\UpdateSLAPredictionOnJobCompletion;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -469,6 +477,13 @@ class EventServiceProvider extends ServiceProvider
         CapabilityGapDetected::class => [
             RecordCapabilityAuditTrail::class,
         ],
+        // ── MODULE_07 TitanPredict — predictive lifecycle signals ──────────────
+        PredictionGenerated::class => [],
+        HighConfidencePrediction::class => [
+            NotifyOnHighConfidencePrediction::class,
+        ],
+        PredictionTriggered::class       => [],
+        PredictionFeedbackRecorded::class => [],
     ];
 
     /**
