@@ -243,7 +243,17 @@ jobs:
             exit 1
           fi
 
-      # ── 8. Upload report as artifact ───────────────────────────────────
+      # ── 8. Commit report back to repo ─────────────────────────────────
+      - name: Commit audit report to repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/repo-audit/MERGE_INTEGRITY_REPORT.md
+          git diff --cached --quiet || git commit -m "audit: update merge integrity report [skip ci]"
+          git push origin HEAD
+
+      # ── 9. Upload report as artifact ───────────────────────────────────
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
