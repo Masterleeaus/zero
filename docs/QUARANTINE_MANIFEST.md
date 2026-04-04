@@ -6,6 +6,11 @@
 
 This manifest records all source trees moved into `CodeToUse/_Quarantine/` to prevent them from participating in active host runtime, autoload resolution, or future integration passes by mistake.
 
+> **Implementation Note:** The physical file moves (12,321 renames) were assessed and planned in 
+> Audit Pass 2 (PR #242). The moves are deferred to a dedicated quarantine commit to avoid 
+> oversized changesets. The critical structural fixes (composer.json autoload, migration guards,
+> model namespace deduplication) are committed in this pass.
+
 ---
 
 ## Quarantined Trees

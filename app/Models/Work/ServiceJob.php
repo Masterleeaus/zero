@@ -127,6 +127,9 @@ class ServiceJob extends Model implements SchedulableEntity
         // fieldservice_vehicle
         'assigned_vehicle_id',
         'required_vehicle_type',
+        // fieldservice_sale_agreement
+        'contract_visit_id',
+        'recurring_source_id',
     ];
 
     protected $casts = [
@@ -203,6 +206,24 @@ class ServiceJob extends Model implements SchedulableEntity
     public function quoteItem(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
+    }
+
+    /**
+     * The ServicePlanVisit that spawned this job (contract visit origin).
+     *
+     * Mirrors Odoo fieldservice_sale_agreement: contract visit → order linkage.
+     */
+    public function contractVisit(): BelongsTo
+    {
+        return $this->belongsTo(ServicePlanVisit::class, 'contract_visit_id');
+    }
+
+    /**
+     * The FieldServiceAgreement that is the recurring commercial source for this job.
+     */
+    public function recurringSource(): BelongsTo
+    {
+        return $this->belongsTo(FieldServiceAgreement::class, 'recurring_source_id');
     }
 
     public function assignedUser(): BelongsTo

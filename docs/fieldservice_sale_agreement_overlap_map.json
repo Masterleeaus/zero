@@ -1,0 +1,118 @@
+{
+    "generated_at": "2026-04-04",
+    "module_set": ["fieldservice_sale", "fieldservice_sale_agreement", "fieldservice_sale_recurring"],
+    "overlap_analysis": {
+        "already_integrated": [
+            {
+                "feature": "Quote → ServiceJob pipeline",
+                "existing_location": "app/Services/Work/FieldServiceSaleService.php",
+                "action": "reused",
+                "notes": "sale_line_id and quote_id already on ServiceJob"
+            },
+            {
+                "feature": "ServiceAgreement recurring plan generation",
+                "existing_location": "app/Services/Work/SaleRecurringAgreementService.php",
+                "action": "reused",
+                "notes": "SaleRecurringAgreementService covers ServiceAgreement-based recurring; FieldServiceAgreement is a complementary contract entity"
+            },
+            {
+                "feature": "Sale agreement events (SaleCreated/Activated/Extended)",
+                "existing_location": "app/Events/Work/FieldServiceAgreementSale*.php",
+                "action": "reused",
+                "notes": "Existing events retained; new lifecycle events are separate"
+            },
+            {
+                "feature": "Portal customer agreement visibility",
+                "existing_location": "app/Models/Crm/Customer.php::portalAgreements()",
+                "action": "reused",
+                "notes": "portalAgreements() already returns active ServiceAgreements; new methods cover FieldServiceAgreement"
+            },
+            {
+                "feature": "Contract SLA/Entitlement/Health",
+                "existing_location": "app/Services/Work/ContractEntitlementService.php etc.",
+                "action": "reused",
+                "notes": "MODULE_04 TitanContracts covers ServiceAgreement contracts; not duplicated on FieldServiceAgreement"
+            }
+        ],
+        "new_additions": [
+            {
+                "feature": "FieldServiceAgreement model",
+                "new_location": "app/Models/Work/FieldServiceAgreement.php",
+                "table": "field_service_agreements",
+                "notes": "Dedicated contract entity with billing_cycle, service_frequency, terms_json, auto_generate flags"
+            },
+            {
+                "feature": "FieldServiceAgreementService",
+                "new_location": "app/Services/Work/FieldServiceAgreementService.php",
+                "notes": "createAgreementFromQuote, generateVisits, generateJobs, renew, terminate, expire, activate"
+            },
+            {
+                "feature": "ServiceJob.contract_visit_id + recurring_source_id",
+                "new_location": "app/Models/Work/ServiceJob.php",
+                "migration": "2026_04_03_500600",
+                "notes": "Traces jobs back to their contract visit and recurring agreement source"
+            },
+            {
+                "feature": "ServicePlanVisit.field_service_agreement_id + sale_line_id",
+                "new_location": "app/Models/Work/ServicePlanVisit.php",
+                "migration": "2026_04_03_500600",
+                "notes": "Visits linked to FieldServiceAgreement and originating sale line"
+            },
+            {
+                "feature": "6 FieldServiceAgreement lifecycle events",
+                "new_location": "app/Events/Work/FieldServiceAgreement*.php",
+                "events": [
+                    "FieldServiceAgreementCreated",
+                    "FieldServiceAgreementUpdated",
+                    "FieldServiceAgreementActivated",
+                    "FieldServiceAgreementExpired",
+                    "FieldServiceAgreementRenewed",
+                    "FieldServiceAgreementCancelled"
+                ]
+            },
+            {
+                "feature": "FieldServiceAgreementController",
+                "new_location": "app/Http/Controllers/Core/Work/FieldServiceAgreementController.php",
+                "routes": [
+                    "dashboard.work.fsm-agreements.index",
+                    "dashboard.work.fsm-agreements.show",
+                    "dashboard.work.fsm-agreements.renew",
+                    "dashboard.work.fsm-agreements.terminate"
+                ]
+            },
+            {
+                "feature": "Customer.activeServiceContracts + expiringServiceContracts",
+                "new_location": "app/Models/Crm/Customer.php",
+                "notes": "Returns FieldServiceAgreement collections; scoped by company and status"
+            },
+            {
+                "feature": "Portal FSA views",
+                "new_locations": [
+                    "resources/views/default/panel/work/portal/agreements/index.blade.php",
+                    "resources/views/default/panel/work/portal/agreements/show.blade.php"
+                ],
+                "portal_routes": [
+                    "portal.service.fsm-agreements.show",
+                    "portal.service.fsm-agreements.invoices",
+                    "portal.service.fsm-agreements.visits"
+                ]
+            }
+        ],
+        "partial_overlaps": [
+            {
+                "feature": "Agreement billing schedule",
+                "existing_location": "app/Services/Work/SaleRecurringAgreementService.php::syncAgreementBillingSchedule()",
+                "new_location": "app/Services/Work/FieldServiceAgreementService.php::syncAgreementBillingSchedule()",
+                "notes": "Different targets: SaleRecurringAgreementService operates on ServiceAgreement; FieldServiceAgreementService on FieldServiceAgreement"
+            }
+        ],
+        "conflicting_versions": [],
+        "safe_removals": [],
+        "reuse_candidates": [
+            {
+                "candidate": "ServiceAgreement model",
+                "notes": "Could be extended instead of creating FieldServiceAgreement; kept separate for clean contract-entity boundary"
+            }
+        ]
+    }
+}
