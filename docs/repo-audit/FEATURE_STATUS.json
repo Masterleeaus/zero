@@ -1,0 +1,402 @@
+[
+  {
+    "feature_key": "core_saas_platform",
+    "feature_name": "Core SaaS AI Platform",
+    "domain": "Core",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/User.php", "app/Models/Plan.php", "app/Services/PaymentGateways/", "app/Services/Ai/", "2014–2023 migrations"],
+    "gaps": [],
+    "main_files": ["app/Models/User.php", "app/Models/Setting.php", "app/Providers/AppServiceProvider.php"]
+  },
+  {
+    "feature_key": "crm_domain",
+    "feature_name": "CRM (Customer/Deal/Enquiry)",
+    "domain": "CRM",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Crm/", "app/Services/Crm/", "routes/core/crm.routes.php", "app/Events/Crm/"],
+    "gaps": ["CrmFollowUpActivityCreated, ServiceJobCreatedFromDeal/Enquiry events - registration in EventServiceProvider unverified"],
+    "main_files": ["app/Models/Crm/Customer.php", "app/Models/Crm/Deal.php", "app/Services/Crm/CrmServiceJobService.php"]
+  },
+  {
+    "feature_key": "work_fsm_core",
+    "feature_name": "Work / Field Service Management Core",
+    "domain": "Work",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Work/ServiceJob.php", "app/Services/Work/WorkflowService.php", "app/Services/Work/JobStageService.php", "routes/core/work.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Work/ServiceJob.php", "app/Models/Work/ServiceAgreement.php", "app/Models/Work/ServicePlan.php"]
+  },
+  {
+    "feature_key": "dispatch_system",
+    "feature_name": "Dispatch System (Easy Dispatch Canonical)",
+    "domain": "Dispatch",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Services/Work/DispatchService.php", "app/Services/Work/DispatchReadinessService.php", "app/Services/Work/VehicleDispatchService.php", "docs/EASY_DISPATCH_CANONICAL_MERGE_REPORT.md"],
+    "gaps": [],
+    "main_files": ["app/Services/Work/DispatchService.php", "app/Services/Work/DispatchConstraintService.php"]
+  },
+  {
+    "feature_key": "route_planning",
+    "feature_name": "Route Planning / Technician Availability",
+    "domain": "Route",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Route/", "app/Services/Route/RouteService.php", "routes/core/route.routes.php", "database/migrations/2026_04_03_400100"],
+    "gaps": ["Route/AvailabilityWindow vs Team/AvailabilityWindow duplication"],
+    "main_files": ["app/Models/Route/DispatchRoute.php", "app/Models/Route/TechnicianAvailability.php"]
+  },
+  {
+    "feature_key": "premises_domain",
+    "feature_name": "Premises / Facilities",
+    "domain": "Premises",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Premises/", "app/Events/Premises/", "app/Listeners/Premises/"],
+    "gaps": ["SiteAsset exists in both Facility/ and Work/ namespaces"],
+    "main_files": ["app/Models/Premises/Premises.php", "app/Models/Premises/FacilityDocument.php"]
+  },
+  {
+    "feature_key": "equipment_domain",
+    "feature_name": "Equipment & Warranty Management",
+    "domain": "Equipment",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Equipment/", "app/Events/Equipment/", "app/Listeners/Equipment/", "database/migrations/2026_04_03_300100"],
+    "gaps": [],
+    "main_files": ["app/Models/Equipment/Equipment.php", "app/Models/Equipment/EquipmentWarranty.php"]
+  },
+  {
+    "feature_key": "vehicle_domain",
+    "feature_name": "Vehicle Domain",
+    "domain": "Vehicle",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Vehicle/", "app/Services/FSM/VehicleService.php", "database/migrations/2026_04_03_500400"],
+    "gaps": ["Vehicle events (VehicleAssignedToJob etc.) - EventServiceProvider registration unverified"],
+    "main_files": ["app/Models/Vehicle/Vehicle.php", "app/Models/Vehicle/VehicleStock.php"]
+  },
+  {
+    "feature_key": "inspection_domain",
+    "feature_name": "Inspection Framework",
+    "domain": "Inspection",
+    "status": "PARTIAL",
+    "confidence": "high",
+    "evidence": ["app/Models/Inspection/", "app/Events/Inspection/", "database/migrations/2026_04_02_000400"],
+    "gaps": ["2 migration files at same timestamp", "Work/InspectionInstance duplicate exists", "both migrations may create conflicting tables"],
+    "main_files": ["app/Models/Inspection/InspectionTemplate.php", "app/Models/Inspection/InspectionInstance.php"]
+  },
+  {
+    "feature_key": "inventory_domain",
+    "feature_name": "Inventory Management",
+    "domain": "Inventory",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Inventory/", "app/Services/Inventory/", "routes/core/inventory.routes.php", "database/migrations/2026_04_03_700100"],
+    "gaps": [],
+    "main_files": ["app/Models/Inventory/InventoryItem.php", "app/Models/Inventory/PurchaseOrder.php"]
+  },
+  {
+    "feature_key": "finance_money",
+    "feature_name": "Finance / Money (TitanMoney)",
+    "domain": "Finance",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Money/", "app/Services/TitanMoney/", "routes/core/money.routes.php", "database/migrations/2026_04_03_600100-600210"],
+    "gaps": ["Finance/ and TitanMoney/ service layer boundary not documented"],
+    "main_files": ["app/Models/Money/Invoice.php", "app/Models/Money/SupplierBill.php", "app/Services/TitanMoney/AccountingService.php"]
+  },
+  {
+    "feature_key": "repair_domain",
+    "feature_name": "Repair Management",
+    "domain": "Repair",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Repair/", "app/Events/Repair/", "app/Listeners/Repair/", "app/Services/Repair/", "routes/core/repair.routes.php", "database/migrations/2026_04_03_400000"],
+    "gaps": ["Some repair events may not be in EventServiceProvider $listen"],
+    "main_files": ["app/Models/Repair/RepairOrder.php", "app/Services/Repair/RepairTemplateService.php"]
+  },
+  {
+    "feature_key": "security_domain",
+    "feature_name": "Security Domain",
+    "domain": "Security",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Security/", "app/Services/Security/", "routes/core/security.routes.php", "database/migrations/2026_04_03_800100_create_security"],
+    "gaps": [],
+    "main_files": ["app/Models/Security/CyberSecurityConfig.php", "app/Services/Security/SecurityAuditService.php"]
+  },
+  {
+    "feature_key": "admin_module",
+    "feature_name": "Admin Module",
+    "domain": "Admin",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Providers/AdminServiceProvider.php", "app/Services/Admin/", "routes/core/admin.routes.php", "app/Models/Admin/AdminAuditLog.php"],
+    "gaps": [],
+    "main_files": ["app/Providers/AdminServiceProvider.php", "app/Services/Admin/AdminUserService.php"]
+  },
+  {
+    "feature_key": "hrm_domain",
+    "feature_name": "HRM (Timesheets, Staff, Leave)",
+    "domain": "HRM",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Work/TimesheetSubmission.php", "app/Services/HRM/TimesheetService.php", "app/Models/Work/Leave.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Work/TimesheetSubmission.php", "app/Services/HRM/TimesheetService.php"]
+  },
+  {
+    "feature_key": "capability_registry",
+    "feature_name": "MODULE 02: Capability Registry",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Team/SkillDefinition.php", "app/Services/Team/CapabilityRegistryService.php", "database/migrations/2026_04_03_800200", "docs/modules/MODULE_02_CapabilityRegistry_report.md"],
+    "gaps": [],
+    "main_files": ["app/Models/Team/SkillDefinition.php", "app/Services/Team/CapabilityRegistryService.php"]
+  },
+  {
+    "feature_key": "trust_work_ledger",
+    "feature_name": "MODULE 03: Trust Work Ledger",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Trust/TrustLedgerEntry.php", "app/Services/Trust/TrustLedgerService.php", "database/migrations/2026_04_03_900100", "routes/core/trust.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Trust/TrustLedgerEntry.php", "app/Services/Trust/TrustLedgerService.php"]
+  },
+  {
+    "feature_key": "titan_contracts",
+    "feature_name": "MODULE 04: Titan Contracts",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Work/ContractEntitlement.php", "app/Services/Work/ContractEntitlementService.php", "database/migrations/2026_04_03_900110"],
+    "gaps": [],
+    "main_files": ["app/Models/Work/ContractEntitlement.php", "app/Services/Work/ContractSLAService.php"]
+  },
+  {
+    "feature_key": "titan_edge_sync",
+    "feature_name": "MODULE 05: Titan Edge Sync",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Sync/EdgeDeviceSession.php", "app/Services/Sync/EdgeSyncService.php", "database/migrations/2026_04_03_900120"],
+    "gaps": [],
+    "main_files": ["app/Models/Sync/EdgeDeviceSession.php", "app/Services/Sync/EdgeSyncService.php"]
+  },
+  {
+    "feature_key": "execution_time_graph",
+    "feature_name": "MODULE 06: Execution Time Graph",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/TimeGraph/ExecutionGraph.php", "app/Services/TimeGraph/ExecutionTimeGraphService.php", "database/migrations/2026_04_03_900200", "routes/core/timegraph.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/TimeGraph/ExecutionGraph.php", "app/Services/TimeGraph/ExecutionTimeGraphService.php"]
+  },
+  {
+    "feature_key": "titan_predict",
+    "feature_name": "MODULE 07: Titan Predict",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Predict/Prediction.php", "app/Services/Predict/TitanPredictService.php", "database/migrations/2026_04_04_900300", "routes/core/predict.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Predict/Prediction.php", "app/Services/Predict/TitanPredictService.php"]
+  },
+  {
+    "feature_key": "docs_execution_bridge",
+    "feature_name": "MODULE 08: Docs Execution Bridge",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Premises/FacilityDocument.php", "app/Services/Docs/DocsExecutionBridgeService.php", "database/migrations/2026_04_04_000800", "routes/core/docs.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Services/Docs/DocsExecutionBridgeService.php", "app/Models/Premises/JobInjectedDocument.php"]
+  },
+  {
+    "feature_key": "execution_finance_layer",
+    "feature_name": "MODULE 09: Execution Finance Layer",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Finance/JobCostRecord.php", "app/Services/Finance/JobCostingService.php", "database/migrations/2026_04_04_900310"],
+    "gaps": [],
+    "main_files": ["app/Models/Finance/JobCostRecord.php", "app/Services/Finance/JobProfitabilityService.php"]
+  },
+  {
+    "feature_key": "titan_mesh",
+    "feature_name": "MODULE 10: Titan Mesh",
+    "domain": "TitanCore",
+    "status": "LOST",
+    "confidence": "high",
+    "evidence": ["fsm_module_status.json marks as 'installed'"],
+    "gaps": ["No app/Models/Mesh/ directory", "No routes/core/mesh.routes.php", "No mesh migrations", "No app/Services/Mesh/ directory"],
+    "main_files": []
+  },
+  {
+    "feature_key": "titan_pwa",
+    "feature_name": "Titan PWA System",
+    "domain": "PWA",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/TzPwaDevice.php", "app/Services/TitanZeroPwaSystem/", "app/Providers/TitanPwaServiceProvider.php", "routes/core/pwa.routes.php", "7 migrations 000100-000700"],
+    "gaps": [],
+    "main_files": ["app/Models/TzPwaDevice.php", "app/Services/TitanZeroPwaSystem/TitanPwaSyncService.php"]
+  },
+  {
+    "feature_key": "titancore_ai_memory",
+    "feature_name": "TitanCore AI Memory Tables",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["database/migrations/2026_04_03_200001-200004 (tz_ai_memories, embeddings, snapshots, handoffs)"],
+    "gaps": [],
+    "main_files": ["database/migrations/2026_04_03_200001_create_tz_ai_memories_table.php"]
+  },
+  {
+    "feature_key": "titancore_skeleton",
+    "feature_name": "TitanCore Agent/Registry/Zylos Skeleton",
+    "domain": "TitanCore",
+    "status": "PARTIAL",
+    "confidence": "medium",
+    "evidence": ["app/TitanCore/ directory structure exists", "app/Providers/TitanCoreServiceProvider.php"],
+    "gaps": ["Binding completeness of TitanCoreServiceProvider unverified", "Zylos bridge wiring unclear", "MCP handler routing unverified", "Duplicate tree in app/Titan/Core/"],
+    "main_files": ["app/Providers/TitanCoreServiceProvider.php", "app/TitanCore/Zylos/", "app/TitanCore/MCP/"]
+  },
+  {
+    "feature_key": "titan_signals",
+    "feature_name": "Titan Signals",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Providers/TitanSignalsServiceProvider.php", "routes/core/signals.routes.php", "app/Titan/Signals/"],
+    "gaps": [],
+    "main_files": ["app/Providers/TitanSignalsServiceProvider.php", "app/Titan/Signals/Providers/"]
+  },
+  {
+    "feature_key": "titan_chat_bridge",
+    "feature_name": "Titan Chat Bridge",
+    "domain": "TitanCore",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Services/TitanChat/TitanChatBridge.php", "routes/core/chat.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Services/TitanChat/TitanChatBridge.php"]
+  },
+  {
+    "feature_key": "support_domain",
+    "feature_name": "Support / Knowledge Base",
+    "domain": "Support",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Support/", "app/Services/Support/SupportLifecycleService.php", "routes/core/support.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Support/KnowledgeBaseArticle.php", "app/Models/Support/ServiceIssue.php"]
+  },
+  {
+    "feature_key": "portal_customer",
+    "feature_name": "Customer Portal (FSM Module 21)",
+    "domain": "Work",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Events/Work/Portal*/", "routes/core/portal.routes.php", "database/migrations/2026_04_03_500200"],
+    "gaps": [],
+    "main_files": ["routes/core/portal.routes.php", "app/Events/Work/PortalBookingRequested.php"]
+  },
+  {
+    "feature_key": "fieldservice_project",
+    "feature_name": "Field Service Projects (FSM Module 22)",
+    "domain": "Work",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Models/Work/FieldServiceProject.php", "app/Services/Work/FieldServiceProjectService.php", "routes/core/project.routes.php"],
+    "gaps": [],
+    "main_files": ["app/Models/Work/FieldServiceProject.php", "app/Services/Work/FieldServiceProjectService.php"]
+  },
+  {
+    "feature_key": "nexus_architecture",
+    "feature_name": "Nexus 5-Mode Architecture",
+    "domain": "Nexus",
+    "status": "DOCS_ONLY",
+    "confidence": "high",
+    "evidence": ["docs/nexuscore/ (145+ docs)", "docs/nexuscore/DOC01_Five_Mode_Model.md"],
+    "gaps": ["Zero code implementation found", "No route renames", "No mode routing", "No entity registry", "No controller realignment"],
+    "main_files": ["docs/nexuscore/README.md", "docs/nexuscore/DOC38_Master_Development_Roadmap.md"]
+  },
+  {
+    "feature_key": "omni_comms",
+    "feature_name": "Omni / Comms System",
+    "domain": "Omni",
+    "status": "DOCS_ONLY",
+    "confidence": "high",
+    "evidence": ["docs/omni/Titan_Omni_Master_Docs_Pass05_Wiring_Blueprint.zip", "docs/COMMS_TRIAGE_PLAN.md"],
+    "gaps": ["Zip not extracted", "No Comms models or services found", "social.routes.php exists but no comms domain"],
+    "main_files": ["docs/omni/Titan_Omni_Master_Docs_Pass05_Wiring_Blueprint.zip"]
+  },
+  {
+    "feature_key": "mobile_apps",
+    "feature_name": "Mobile Apps (TitanCommand/Go/Portal/Money/Pro)",
+    "domain": "Mobile",
+    "status": "DOCS_ONLY",
+    "confidence": "high",
+    "evidence": ["docs/MOBILE_STACK_ALIGNMENT.md"],
+    "gaps": ["No mobile app source code in repo", "No react-native or flutter code found", "mobile_apps/ directory empty or absent"],
+    "main_files": []
+  },
+  {
+    "feature_key": "codeto_use_bundles",
+    "feature_name": "CodeToUse Source Bundles",
+    "domain": "CodeToUse",
+    "status": "LOST",
+    "confidence": "high",
+    "evidence": ["CodeToUse/ directories exist with only .gitkeep files"],
+    "gaps": ["All domain folders empty", "AGENTS.md describes extraction workflow with no source material"],
+    "main_files": ["CodeToUse/AGENTS.md"]
+  },
+  {
+    "feature_key": "titan_rewind_extension",
+    "feature_name": "TitanRewind Extension",
+    "domain": "Extensions",
+    "status": "PARTIAL",
+    "confidence": "medium",
+    "evidence": ["app/Extensions/TitanRewind/", "routes/core/rewind.routes.php"],
+    "gaps": ["Extension wiring completeness unverified", "No confirmed menu installer"],
+    "main_files": ["app/Extensions/TitanRewind/System/"]
+  },
+  {
+    "feature_key": "fsm_modules_pending",
+    "feature_name": "FSM Modules 9-20, 23-30 (Pending)",
+    "domain": "FSM",
+    "status": "LOST",
+    "confidence": "high",
+    "evidence": ["fsm_module_status.json marks all as 'pending'"],
+    "gaps": ["fieldservice_calendar, recurring, geoengine, timeline, partner_multi_relation, account_analytic, maintenance, mrp, helpdesk, location_geolocalize, distribution, change_management, quality — all absent"],
+    "main_files": []
+  },
+  {
+    "feature_key": "sale_recurring_agreements",
+    "feature_name": "Sale Recurring Agreements",
+    "domain": "Work",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Services/Work/SaleRecurringAgreementService.php", "database/migrations/2026_04_03_500410", "app/Events/Work/SaleRecurring*"],
+    "gaps": [],
+    "main_files": ["app/Services/Work/SaleRecurringAgreementService.php"]
+  },
+  {
+    "feature_key": "equipment_coverage_recurring_sale",
+    "feature_name": "Equipment Coverage & Recurring Sale",
+    "domain": "Work",
+    "status": "FULLY_MERGED",
+    "confidence": "high",
+    "evidence": ["app/Services/Work/EquipmentCoverageService.php", "app/Services/Work/RecurringSaleService.php", "database/migrations/2026_04_03_500500"],
+    "gaps": [],
+    "main_files": ["app/Services/Work/EquipmentCoverageService.php", "app/Services/Work/RecurringSaleService.php"]
+  }
+]
