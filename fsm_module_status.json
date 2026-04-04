@@ -32,8 +32,9 @@
         "module_29": { "name": "fieldservice_change_management", "status": "pending" },
         "module_30": { "name": "fieldservice_quality", "status": "pending" },
         "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" },
-        "capability_registry": { "name": "capability_registry", "status": "installed", "installed_at": "2026-04-03", "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes" }
+        "capability_registry": { "name": "capability_registry", "status": "installed", "installed_at": "2026-04-03", "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes" },
+        "docs_execution_bridge": { "name": "docs_execution_bridge", "status": "installed", "installed_at": "2026-04-04", "notes": "MODULE_08: JobInjectedDocument/InspectionInjectedDocument/DocumentInjectionRule models, FacilityDocument extended, DocsExecutionBridgeService/DocumentSearchService/DocumentVersionService, 4 Docs events, 3 listeners, DocsExecutionBridgeController, docs routes, JobStageService gated on mandatory docs" }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-03"
+    "updated_at": "2026-04-04"
 }

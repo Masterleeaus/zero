@@ -107,6 +107,31 @@ class JobStageService
                 'activities' => __('All required activities must be completed before closing this job.'),
             ]);
         }
+
+        // MODULE 08 — block closure when mandatory documents are unacknowledged
+        if ($newStage->is_closed) {
+            /** @var \App\Services\Docs\DocsExecutionBridgeService|null $docsBridge */
+            $docsBridge = app()->bound(\App\Services\Docs\DocsExecutionBridgeService::class)
+                ? app(\App\Services\Docs\DocsExecutionBridgeService::class)
+                : null;
+
+            if ($docsBridge !== null) {
+                $unacknowledged = $docsBridge->getMandatoryUnacknowledged($job);
+
+                if ($unacknowledged->isNotEmpty()) {
+                    $titles = $unacknowledged
+                        ->map(static fn ($pivot) => $pivot->document?->title ?? 'Document #' . $pivot->document_id)
+                        ->implode(', ');
+
+                    throw ValidationException::withMessages([
+                        'mandatory_documents' => __(
+                            'The following mandatory documents must be acknowledged before completing this job: :titles',
+                            ['titles' => $titles],
+                        ),
+                    ]);
+                }
+            }
+        }
     }
 
     /**

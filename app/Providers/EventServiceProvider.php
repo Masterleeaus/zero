@@ -194,6 +194,15 @@ use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
+// ── MODULE_08 DocsExecutionBridge ────────────────────────────────────────────
+use App\Events\Docs\DocumentsInjectedForJob;
+use App\Events\Docs\MandatoryDocumentAcknowledged;
+use App\Events\Docs\DocumentVersionPublished;
+use App\Events\Docs\DocumentReviewDue;
+use App\Events\Work\JobCreated;
+use App\Listeners\Docs\InjectDocumentsOnJobCreated;
+use App\Listeners\Docs\InjectDocumentsOnInspectionScheduled;
+use App\Listeners\Docs\BlockJobCompletionIfMandatoryUnacknowledged;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -268,6 +277,7 @@ class EventServiceProvider extends ServiceProvider
         // ── Work / Field Service events ───────────────────────────────────
         JobStageChanged::class => [
             JobStageChangedListener::class,
+            BlockJobCompletionIfMandatoryUnacknowledged::class,
         ],
         JobCompleted::class => [
             JobCompletedListener::class,
@@ -300,7 +310,9 @@ class EventServiceProvider extends ServiceProvider
         ServicePlanVisitRescheduled::class => [],
         InspectionRescheduled::class       => [],
         // ── Inspection lifecycle signals (canonical Inspection namespace) ──
-        InspectionScheduled::class        => [],
+        InspectionScheduled::class        => [
+            InjectDocumentsOnInspectionScheduled::class,
+        ],
         InspectionStarted::class          => [],
         InspectionCompleted::class        => [],
         InspectionFailed::class           => [],
@@ -469,6 +481,14 @@ class EventServiceProvider extends ServiceProvider
         CapabilityGapDetected::class => [
             RecordCapabilityAuditTrail::class,
         ],
+        // ── MODULE_08 DocsExecutionBridge — document injection signals ────────
+        JobCreated::class => [
+            InjectDocumentsOnJobCreated::class,
+        ],
+        DocumentsInjectedForJob::class    => [],
+        MandatoryDocumentAcknowledged::class => [],
+        DocumentVersionPublished::class   => [],
+        DocumentReviewDue::class          => [],
     ];
 
     /**
