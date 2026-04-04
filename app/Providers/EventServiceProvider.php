@@ -201,13 +201,16 @@ use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
-// ── MODULE 03 TrustWorkLedger ──────────────────────────────────────────────
-use App\Events\Trust\ChainSealed;
-use App\Events\Trust\ChainTamperingDetected;
-use App\Events\Trust\LedgerEntryRecorded;
-use App\Listeners\Trust\RecordInspectionCompletedOnLedger;
-use App\Listeners\Trust\RecordInspectionFailedOnLedger;
-use App\Listeners\Trust\RecordJobCompletionOnLedger;
+// ── MODULE 04 TitanContracts — agreement entitlement signals ──────────────
+use App\Events\Work\ContractEntitlementExhausted;
+use App\Events\Work\ContractExpired;
+use App\Events\Work\ContractHealthDegraded;
+use App\Events\Work\ContractRenewed;
+use App\Events\Work\ContractSLABreached;
+use App\Listeners\Work\CheckSLAOnJobStatusChange;
+use App\Listeners\Work\NotifyOnContractExpiry;
+use App\Listeners\Work\UpdateContractHealthOnJobCompletion;
+use App\Listeners\Crm\LinkAgreementToDeal;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -492,6 +495,18 @@ class EventServiceProvider extends ServiceProvider
         LedgerEntryRecorded::class    => [],
         ChainTamperingDetected::class => [],
         ChainSealed::class            => [],
+        // ── MODULE 04 TitanContracts — entitlement + SLA + renewal signals ──
+        ContractEntitlementExhausted::class => [],
+        ContractExpired::class => [
+            NotifyOnContractExpiry::class,
+        ],
+        ContractHealthDegraded::class => [
+            UpdateContractHealthOnJobCompletion::class,
+        ],
+        ContractRenewed::class        => [],
+        ContractSLABreached::class    => [
+            CheckSLAOnJobStatusChange::class,
+        ],
     ];
 
     /**
