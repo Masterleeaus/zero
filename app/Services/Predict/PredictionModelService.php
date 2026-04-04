@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Predict;
 
-use App\Domains\Engine\Services\AnthropicService;
-use App\Domains\Entity\Enums\EntityEnum;
 use App\Services\Ai\AiCompletionService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
