@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Core\Work;
 
 use App\Http\Controllers\Controller;
 use App\Models\Crm\Customer;
+use App\Models\Work\FieldServiceAgreement;
 use App\Models\Work\ServiceJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -146,5 +147,56 @@ class PortalController extends Controller
             ->where('company_id', $user->company_id ?? null)
             ->where('email', $user->email)
             ->first();
+    }
+
+    // ── fieldservice_sale_agreement portal exposure ───────────────────────────
+
+    /**
+     * Show a single FieldServiceAgreement for the authenticated portal customer.
+     */
+    public function portalAgreementShow(Request $request, FieldServiceAgreement $agreement)
+    {
+        $customer = $this->resolvePortalCustomer($request);
+        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+            abort(403);
+        }
+
+        $agreement->load(['premises', 'quote', 'visits', 'jobs']);
+
+        return view('default.panel.work.portal.agreements.show', compact('customer', 'agreement'));
+    }
+
+    /**
+     * Portal invoices associated with a FieldServiceAgreement.
+     */
+    public function portalAgreementInvoices(Request $request, FieldServiceAgreement $agreement)
+    {
+        $customer = $this->resolvePortalCustomer($request);
+        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+            abort(403);
+        }
+
+        $invoices = $customer->portalInvoices()
+            ->where('agreement_id', $agreement->id)
+            ->sortByDesc('created_at');
+
+        return view('default.panel.work.portal.agreements.invoices', compact('customer', 'agreement', 'invoices'));
+    }
+
+    /**
+     * Portal visits associated with a FieldServiceAgreement.
+     */
+    public function portalAgreementVisits(Request $request, FieldServiceAgreement $agreement)
+    {
+        $customer = $this->resolvePortalCustomer($request);
+        if (!$customer || (int) $agreement->customer_id !== (int) $customer->id) {
+            abort(403);
+        }
+
+        $visits = $agreement->visits()
+            ->orderBy('scheduled_date')
+            ->get();
+
+        return view('default.panel.work.portal.agreements.visits', compact('customer', 'agreement', 'visits'));
     }
 }

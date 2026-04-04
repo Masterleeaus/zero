@@ -711,6 +711,36 @@ class Customer extends Model
     }
 
     /**
+     * Active FieldServiceAgreement contracts for this customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\FieldServiceAgreement>
+     */
+    public function activeServiceContracts(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\FieldServiceAgreement::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('status', 'active')
+            ->orderByDesc('start_date')
+            ->get();
+    }
+
+    /**
+     * FieldServiceAgreement contracts expiring within the given number of days.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\FieldServiceAgreement>
+     */
+    public function expiringServiceContracts(int $withinDays = 30): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\FieldServiceAgreement::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->expiring($withinDays)
+            ->orderBy('end_date')
+            ->get();
+    }
+
+    /**
      * Service agreements for this customer that were created via a quote/sale.
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceAgreement>

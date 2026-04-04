@@ -227,5 +227,17 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 Route::post('{agreement}/renew', [\App\Http\Controllers\Work\ContractController::class, 'renew'])
                     ->name('renew');
             });
+
+            // ── fieldservice_sale_agreement — FieldServiceAgreement lifecycle ──
+            Route::prefix('fsm-agreements')->as('fsm-agreements.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Work\FieldServiceAgreementController::class, 'index'])
+                    ->name('index');
+                Route::get('{agreement}', [\App\Http\Controllers\Core\Work\FieldServiceAgreementController::class, 'show'])
+                    ->name('show');
+                Route::post('{agreement}/renew', [\App\Http\Controllers\Core\Work\FieldServiceAgreementController::class, 'renew'])
+                    ->name('renew');
+                Route::post('{agreement}/terminate', [\App\Http\Controllers\Core\Work\FieldServiceAgreementController::class, 'terminate'])
+                    ->name('terminate');
+            });
         });
     });

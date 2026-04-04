@@ -13,7 +13,7 @@
             "name": "fieldservice_sale",
             "status": "merged",
             "confirmed_at": "2026-04-03",
-            "notes": "Sale pipeline: quote→job, quote→plan, agreement activation, events, FieldServiceSaleService"
+            "notes": "Sale pipeline: quote\u2192job, quote\u2192plan, agreement activation, events, FieldServiceSaleService. FSA lifecycle: FieldServiceAgreement model, FieldServiceAgreementService, 6 lifecycle events, FieldServiceAgreementController, migration 500600."
         },
         "module_4": {
             "name": "fieldservice_activity",
@@ -181,6 +181,18 @@
             "status": "installed",
             "installed_at": "2026-04-04",
             "notes": "MODULE_09: JobCostRecord/JobRevenueRecord/JobFinancialSummary/FinancialRollup models, JobCostingService+JobRevenueService+JobProfitabilityService+FinancialRollupService, 4 Finance events+3 listeners, JobFinanceController routes at dashboard.money.finance.*"
+        },
+        "fieldservice_sale_agreement": {
+            "name": "fieldservice_sale_agreement",
+            "status": "merged",
+            "confirmed_at": "2026-04-04",
+            "notes": "Contract-driven service lifecycle: FieldServiceAgreement model (field_service_agreements table), FieldServiceAgreementService (createAgreementFromQuote/attachToPremises/generateVisits/generateJobs/syncBilling/terminate/renew), 6 lifecycle events, FieldServiceAgreementController, routes at dashboard.work.fsm-agreements.*, portal exposure, migration 500600"
+        },
+        "fieldservice_sale_recurring": {
+            "name": "fieldservice_sale_recurring",
+            "status": "merged",
+            "confirmed_at": "2026-04-04",
+            "notes": "Recurring execution via FieldServiceAgreement: generateVisitsFromAgreement/generateJobsFromAgreement, recurring_source_id + contract_visit_id on ServiceJob, field_service_agreement_id + sale_line_id on ServicePlanVisit, Customer.activeServiceContracts/expiringServiceContracts"
         }
     },
     "next_module": "module_9",

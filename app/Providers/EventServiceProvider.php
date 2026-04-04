@@ -215,6 +215,12 @@ use App\Events\Work\FieldServiceAgreementSaleCreated;
 use App\Events\Work\FieldServiceAgreementSaleActivated;
 use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
+use App\Events\Work\FieldServiceAgreementCreated;
+use App\Events\Work\FieldServiceAgreementUpdated;
+use App\Events\Work\FieldServiceAgreementActivated;
+use App\Events\Work\FieldServiceAgreementExpired;
+use App\Events\Work\FieldServiceAgreementRenewed;
+use App\Events\Work\FieldServiceAgreementCancelled;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
 // ── MODULE 04 TitanContracts — agreement entitlement signals ──────────────
@@ -509,6 +515,13 @@ class EventServiceProvider extends ServiceProvider
         ],
         FieldServiceAgreementSaleExtended::class  => [],
         SaleServiceCoverageApplied::class         => [],
+        // ── fieldservice_sale_agreement lifecycle events ──────────────────────
+        FieldServiceAgreementCreated::class   => [],
+        FieldServiceAgreementUpdated::class   => [],
+        FieldServiceAgreementActivated::class => [],
+        FieldServiceAgreementExpired::class   => [],
+        FieldServiceAgreementRenewed::class   => [],
+        FieldServiceAgreementCancelled::class => [],
         // ── MODULE_01 TitanDispatch — dispatch lifecycle signals ──────────
         JobDispatched::class => [
             RecordDispatchAuditTrail::class,
