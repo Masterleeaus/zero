@@ -1,0 +1,270 @@
+{
+    "report_type": "fsm_relationship_matrix",
+    "generated_at": "2026-04-04",
+    "description": "Canonical entity relationship matrix — each row is a source model, each column entry is a declared Eloquent relationship post-repair.",
+    "matrix": {
+        "Customer": {
+            "model": "App\\Models\\Crm\\Customer",
+            "table": "customers",
+            "outbound_relationships": {
+                "premises": "HasMany → Premises",
+                "serviceJobs": "HasMany → ServiceJob",
+                "serviceAgreements": "HasMany → ServiceAgreement",
+                "deals": "HasMany → Deal",
+                "enquiries": "HasMany → Enquiry",
+                "quotes": "HasMany → Quote"
+            },
+            "inbound_relationships": {
+                "ServiceJob.customer": "BelongsTo",
+                "ServiceAgreement.customer": "BelongsTo",
+                "ServicePlan.customer": "BelongsTo",
+                "Premises.customer": "BelongsTo",
+                "RepairOrder.customer": "BelongsTo"
+            }
+        },
+        "Premises": {
+            "model": "App\\Models\\Premises\\Premises",
+            "table": "premises",
+            "outbound_relationships": {
+                "customer": "BelongsTo → Customer",
+                "buildings": "HasMany → Building",
+                "serviceJobs": "HasMany → ServiceJob",
+                "servicePlans": "HasMany → ServicePlan",
+                "serviceAgreements": "HasMany → ServiceAgreement [REPAIRED]",
+                "serviceVisits": "HasManyThrough → ServicePlanVisit via ServicePlan",
+                "installedEquipment": "HasMany → InstalledEquipment",
+                "equipment": "HasMany → Equipment",
+                "siteAssets": "HasMany → SiteAsset",
+                "repairOrders": "HasMany → RepairOrder",
+                "projects": "HasMany → FieldServiceProject",
+                "inspections": "HasMany → InspectionInstance",
+                "meters": "HasMany → Meter",
+                "hazardRecords": "HasMany → HazardRecord",
+                "siteAccessProfile": "HasMany → SiteAccessProfile",
+                "documents": "MorphMany → Document"
+            },
+            "inbound_relationships": {
+                "ServiceJob.premises": "BelongsTo",
+                "ServiceAgreement.premises": "BelongsTo",
+                "ServicePlan.premises": "BelongsTo",
+                "RepairOrder.premises": "BelongsTo"
+            }
+        },
+        "Quote": {
+            "model": "App\\Models\\Money\\Quote",
+            "table": "quotes",
+            "outbound_relationships": {
+                "customer": "BelongsTo → Customer",
+                "items": "HasMany → QuoteItem"
+            },
+            "inbound_relationships": {
+                "ServiceJob.quote": "BelongsTo",
+                "ServiceAgreement.quote": "BelongsTo",
+                "ServiceAgreement.originatingQuote": "BelongsTo [REPAIRED]",
+                "ServiceAgreement.renewalQuote": "BelongsTo [REPAIRED]",
+                "ServicePlan.originatingQuote": "BelongsTo [REPAIRED]"
+            }
+        },
+        "ServiceAgreement": {
+            "model": "App\\Models\\Work\\ServiceAgreement",
+            "table": "service_agreements",
+            "outbound_relationships": {
+                "customer": "BelongsTo → Customer",
+                "site": "BelongsTo → Site",
+                "premises": "BelongsTo → Premises",
+                "quote": "BelongsTo → Quote",
+                "originatingQuote": "BelongsTo → Quote (originating_quote_id) [REPAIRED]",
+                "renewalQuote": "BelongsTo → Quote (renewal_quote_id) [REPAIRED]",
+                "deal": "BelongsTo → Deal",
+                "renewedFrom": "BelongsTo → ServiceAgreement (self-referential)",
+                "jobs": "HasMany → ServiceJob",
+                "servicePlan": "HasOne → ServicePlan",
+                "servicePlans": "HasMany → ServicePlan",
+                "visits": "HasManyThrough → ServicePlanVisit via ServicePlan",
+                "entitlements": "HasMany → ContractEntitlement",
+                "slaBreaches": "HasMany → ContractSLABreach",
+                "renewals": "HasMany → ContractRenewal",
+                "installedEquipment": "HasMany → InstalledEquipment"
+            },
+            "inbound_relationships": {
+                "ServiceJob.agreement": "BelongsTo",
+                "ServicePlan.agreement": "BelongsTo",
+                "ServicePlan.saleAgreement": "BelongsTo [REPAIRED]",
+                "ServicePlanVisit.saleAgreement": "BelongsTo [REPAIRED]",
+                "Premises.serviceAgreements": "HasMany [REPAIRED]",
+                "RepairOrder.agreement": "BelongsTo"
+            }
+        },
+        "ServicePlan": {
+            "model": "App\\Models\\Work\\ServicePlan",
+            "table": "service_plans",
+            "outbound_relationships": {
+                "premises": "BelongsTo → Premises",
+                "customer": "BelongsTo → Customer",
+                "agreement": "BelongsTo → ServiceAgreement",
+                "originatingQuote": "BelongsTo → Quote (origin_quote_id) [REPAIRED]",
+                "saleAgreement": "BelongsTo → ServiceAgreement (sale_agreement_id) [REPAIRED]",
+                "visits": "HasMany → ServicePlanVisit",
+                "checklists": "HasMany → ServicePlanChecklist"
+            },
+            "inbound_relationships": {
+                "ServiceAgreement.servicePlan": "HasOne",
+                "ServiceAgreement.servicePlans": "HasMany",
+                "Premises.servicePlans": "HasMany"
+            }
+        },
+        "ServicePlanVisit": {
+            "model": "App\\Models\\Work\\ServicePlanVisit",
+            "table": "service_plan_visits",
+            "outbound_relationships": {
+                "plan": "BelongsTo → ServicePlan",
+                "serviceJob": "BelongsTo → ServiceJob",
+                "project": "BelongsTo → FieldServiceProject",
+                "saleAgreement": "BelongsTo → ServiceAgreement (sale_agreement_id) [REPAIRED]",
+                "assignedUser": "BelongsTo → User (assigned_to) [REPAIRED]",
+                "installedEquipment": "BelongsTo → InstalledEquipment"
+            },
+            "inbound_relationships": {
+                "ServicePlan.visits": "HasMany",
+                "ServiceAgreement.visits": "HasManyThrough via ServicePlan",
+                "Premises.serviceVisits": "HasManyThrough via ServicePlan"
+            }
+        },
+        "ServiceJob": {
+            "model": "App\\Models\\Work\\ServiceJob",
+            "table": "service_jobs",
+            "outbound_relationships": {
+                "agreement": "BelongsTo → ServiceAgreement",
+                "site": "BelongsTo → Site",
+                "customer": "BelongsTo → Customer",
+                "enquiry": "BelongsTo → Enquiry",
+                "deal": "BelongsTo → Deal",
+                "quote": "BelongsTo → Quote",
+                "premises": "BelongsTo → Premises",
+                "assignedUser": "BelongsTo → User",
+                "assignedVehicle": "BelongsTo → Vehicle",
+                "team": "BelongsTo → Team",
+                "stage": "BelongsTo → JobStage",
+                "jobType": "BelongsTo → JobType",
+                "template": "BelongsTo → JobTemplate",
+                "territory": "BelongsTo → Territory",
+                "invoice": "BelongsTo → Invoice",
+                "warrantyClaim": "BelongsTo → WarrantyClaim",
+                "coveredEquipment": "BelongsTo → InstalledEquipment",
+                "planVisit": "HasOne → ServicePlanVisit",
+                "repairOrders": "HasMany → RepairOrder",
+                "vehicleAssignments": "MorphMany → VehicleAssignment [REPAIRED]",
+                "vehicleStockItems": "HasMany → VehicleStock (reserved_for_job_id) [REPAIRED]",
+                "stopItems": "MorphMany → DispatchRouteStopItem",
+                "equipment": "HasMany → Equipment",
+                "installedEquipment": "HasMany → InstalledEquipment",
+                "equipmentMovements": "HasMany → EquipmentMovement",
+                "inspections": "HasMany → InspectionInstance",
+                "checklistRuns": "HasMany → ChecklistRun",
+                "activities": "HasMany → JobActivity",
+                "project": "BelongsTo → FieldServiceProject",
+                "blockers": "HasMany → FsmJobBlocker",
+                "kanbanMeta": "HasOne → FsmJobStatusMeta",
+                "priorityScore": "HasOne → FsmJobPriorityScore",
+                "injectedDocuments": "HasMany → JobInjectedDocument"
+            },
+            "inbound_relationships": {
+                "ServiceAgreement.jobs": "HasMany",
+                "ServicePlanVisit.serviceJob": "BelongsTo",
+                "Premises.serviceJobs": "HasMany",
+                "RepairOrder.serviceJob": "BelongsTo",
+                "VehicleStock.reservedForJob": "BelongsTo"
+            }
+        },
+        "RepairOrder": {
+            "model": "App\\Models\\Repair\\RepairOrder",
+            "table": "repair_orders",
+            "outbound_relationships": {
+                "equipment": "BelongsTo → Equipment",
+                "installedEquipment": "BelongsTo → InstalledEquipment",
+                "siteAsset": "BelongsTo → SiteAsset",
+                "premises": "BelongsTo → Premises",
+                "serviceJob": "BelongsTo → ServiceJob (service_job_id)",
+                "originatingServiceJob": "BelongsTo → ServiceJob (originating_service_job_id)",
+                "followupServiceJob": "HasOne → ServiceJob",
+                "warrantyClaim": "BelongsTo → WarrantyClaim",
+                "agreement": "BelongsTo → ServiceAgreement",
+                "customer": "BelongsTo → Customer",
+                "template": "BelongsTo → RepairTemplate",
+                "diagnoses": "HasMany → RepairDiagnosis",
+                "tasks": "HasMany → RepairTask",
+                "actions": "HasMany → RepairAction",
+                "partUsages": "HasMany → RepairPartUsage",
+                "checklists": "HasMany → RepairChecklist",
+                "resolution": "HasOne → RepairResolution"
+            },
+            "deferred": {
+                "vehicleStock": "NOT YET LINKED — RepairOrder↔VehicleStock has no FK/bridge (deferred)"
+            },
+            "inbound_relationships": {
+                "ServiceJob.repairOrders": "HasMany",
+                "Premises.repairOrders": "HasMany"
+            }
+        },
+        "DispatchRoute": {
+            "model": "App\\Models\\Route\\DispatchRoute",
+            "table": "dispatch_routes",
+            "outbound_relationships": {
+                "assignedUser": "BelongsTo → User",
+                "team": "BelongsTo → Team",
+                "vehicle": "BelongsTo → Vehicle",
+                "territory": "BelongsTo → Territory",
+                "serviceArea": "BelongsTo → ServiceArea",
+                "routeStops": "HasMany → DispatchRouteStop",
+                "technicianAvailabilities": "HasMany → TechnicianAvailability (via assigned_user_id) [REPAIRED]",
+                "blackoutGroups": "BelongsToMany → RouteBlackoutGroup"
+            },
+            "inbound_relationships": {
+                "Vehicle.dispatchRoutes": "HasMany [REPAIRED]",
+                "DispatchRouteStop.route": "BelongsTo"
+            }
+        },
+        "Vehicle": {
+            "model": "App\\Models\\Vehicle\\Vehicle",
+            "table": "vehicles",
+            "outbound_relationships": {
+                "team": "BelongsTo → Team",
+                "assignedDriver": "BelongsTo → User",
+                "assignments": "HasMany → VehicleAssignment",
+                "stockItems": "HasMany → VehicleStock",
+                "vehicleEquipment": "HasMany → VehicleEquipment",
+                "locationSnapshots": "HasMany → VehicleLocationSnapshot",
+                "dispatchRoutes": "HasMany → DispatchRoute [REPAIRED]"
+            },
+            "inbound_relationships": {
+                "ServiceJob.assignedVehicle": "BelongsTo",
+                "DispatchRoute.vehicle": "BelongsTo"
+            }
+        },
+        "VehicleAssignment": {
+            "model": "App\\Models\\Vehicle\\VehicleAssignment",
+            "table": "vehicle_assignments",
+            "outbound_relationships": {
+                "vehicle": "BelongsTo → Vehicle",
+                "assignedBy": "BelongsTo → User",
+                "assignable": "MorphTo → ServiceJob|DispatchRoute|Shift"
+            },
+            "inbound_relationships": {
+                "Vehicle.assignments": "HasMany",
+                "ServiceJob.vehicleAssignments": "MorphMany [REPAIRED]"
+            }
+        },
+        "VehicleStock": {
+            "model": "App\\Models\\Vehicle\\VehicleStock",
+            "table": "vehicle_stock",
+            "outbound_relationships": {
+                "vehicle": "BelongsTo → Vehicle",
+                "reservedForJob": "BelongsTo → ServiceJob (reserved_for_job_id)"
+            },
+            "inbound_relationships": {
+                "Vehicle.stockItems": "HasMany",
+                "ServiceJob.vehicleStockItems": "HasMany [REPAIRED]"
+            }
+        }
+    }
+}

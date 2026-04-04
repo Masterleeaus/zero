@@ -184,5 +184,15 @@
         }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-04"
+    "updated_at": "2026-04-04",
+    "fsm_graph_verification_pass": {
+        "status": "completed",
+        "completed_at": "2026-04-04",
+        "repairs_applied": 14,
+        "events_registered": 28,
+        "missing_relationships_repaired": 11,
+        "services_created": 1,
+        "shadow_subsystems": 0,
+        "notes": "FSM Graph Verification + Drift Repair pass complete. All lifecycle chains verified. RepairOrderService created. 28 unregistered events registered. 11 missing ORM relationships added. See docs/FSM_GRAPH_VERIFICATION_REPORT.md"
+    }
 }

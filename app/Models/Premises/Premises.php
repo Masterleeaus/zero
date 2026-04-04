@@ -152,6 +152,16 @@ class Premises extends Model
         return $this->hasMany(InspectionInstance::class, 'premises_id');
     }
 
+    /**
+     * All service agreements covering this premises.
+     *
+     * Inverse of ServiceAgreement::premises() BelongsTo.
+     */
+    public function serviceAgreements(): HasMany
+    {
+        return $this->hasMany(\App\Models\Work\ServiceAgreement::class, 'premises_id');
+    }
+
     public function serviceVisits(): HasManyThrough
     {
         return $this->hasManyThrough(ServicePlanVisit::class, ServicePlan::class, 'premises_id', 'service_plan_id');

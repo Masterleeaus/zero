@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Route;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Route\TechnicianAvailability;
 use App\Models\Team\Team;
 use App\Models\User;
 use App\Models\Vehicle\Vehicle;
@@ -106,6 +107,18 @@ class DispatchRoute extends Model
     public function routeStops(): HasMany
     {
         return $this->hasMany(DispatchRouteStop::class, 'route_id');
+    }
+
+    /**
+     * All technician availability records associated with the route's assigned user.
+     *
+     * Provides the availability → route linkage at the model layer.
+     *
+     * @return HasMany<TechnicianAvailability>
+     */
+    public function technicianAvailabilities(): HasMany
+    {
+        return $this->hasMany(TechnicianAvailability::class, 'user_id', 'assigned_user_id');
     }
 
     /** Blackout groups linked to this route. */

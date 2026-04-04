@@ -105,6 +105,22 @@ class ServiceAgreement extends Model
         return $this->belongsTo(Quote::class);
     }
 
+    /**
+     * The originating quote that created this agreement (canonical sale-to-agreement link).
+     */
+    public function originatingQuote(): BelongsTo
+    {
+        return $this->belongsTo(Quote::class, 'originating_quote_id');
+    }
+
+    /**
+     * The renewal quote generated during the most recent contract renewal cycle.
+     */
+    public function renewalQuote(): BelongsTo
+    {
+        return $this->belongsTo(Quote::class, 'renewal_quote_id');
+    }
+
     public function jobs(): HasMany
     {
         return $this->hasMany(ServiceJob::class, 'agreement_id');
