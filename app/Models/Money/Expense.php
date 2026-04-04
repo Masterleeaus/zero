@@ -25,9 +25,10 @@ class Expense extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'expense_date' => 'date',
-        'amount'       => 'decimal:2',
-        'approved_at'  => 'datetime',
+        'expense_date'              => 'date',
+        'amount'                    => 'decimal:2',
+        'approved_at'               => 'datetime',
+        'reimbursable_to_customer'  => 'boolean',
     ];
 
     public function category(): BelongsTo
@@ -58,6 +59,16 @@ class Expense extends Model
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
+    }
+
+    public function serviceJob()
+    {
+        return $this->belongsTo(\App\Models\Work\ServiceJob::class);
+    }
+
+    public function costAllocations()
+    {
+        return $this->morphMany(JobCostAllocation::class, 'source');
     }
 
     public function scopeBetweenDates(Builder $query, ?string $start, ?string $end): Builder
