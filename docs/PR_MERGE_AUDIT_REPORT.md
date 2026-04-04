@@ -440,3 +440,161 @@ All 10 mergeable pull requests have been merged into the working branch with con
 | 9 | #231 DocsExecutionBridge | f46ebf092 |
 | 10 | #232 ExecutionFinanceLayer | 39563af39 |
 | — | Migration + ESP fixes | ae5a265ec, baf92a1c7 |
+
+---
+
+# AUDIT PASS 2 — 2026-04-04
+
+**Agent:** GitHub Copilot Merge/Review Agent  
+**Base Branch:** `main` (`fa7b36ef30b9`)  
+**Working Branch:** `copilot/merge-pull-requests-audit` (PR #242)  
+**PRs Reviewed:** 5 (PR #233, #238, #239, #240, #243)  
+**PRs Merged:** 4 (PR #233, #238, #239, #240)  
+**PRs Held:** 1 (PR #243)  
+
+---
+
+## PR Inventory — Pass 2
+
+| PR# | Title | Domain | Risk | Decision |
+|-----|-------|--------|------|----------|
+| #233 | MODULE 10 TitanMesh — Federated Capability Exchange Engine | Mesh | Medium | **MERGED WITH FIXES** |
+| #238 | FSM Graph Verification + Drift Repair | FSM/Work/ORM | Medium-Low | **MERGED** |
+| #239 | Merge FSM Modules: fieldservice_sale_agreement + fieldservice_sale_recurring | FSM/Work | Medium | **MERGED** |
+| #240 | Phase 9: Critical Structural Stabilisation | Infrastructure | Medium | **MERGED** |
+| #243 | [WIP] HRM Pass 2: Source Reconciliation + Domain Completion | HRM | Low | **HOLD** |
+
+---
+
+## PR #233 — MODULE 10 TitanMesh
+
+**Decision: MERGED WITH FIXES**
+
+**Purpose:** Federated capability exchange — cross-company job fulfillment with HMAC signing and trust-gated protocol.
+
+**Conflicts resolved:**
+- `EventServiceProvider.php`: PR based on older main — MODULE 10 imports + `$listen` entries added after MODULE 09 block.
+- `fsm_module_status.json`: Current main base kept; `titan_mesh: installed` preserved from PR.
+
+**Gap analysis:** Settlement execution deferred; peer discovery bootstrap deferred; dashboard UI deferred.
+
+See: [PR_233_AUDIT.md](pr-audits/PR_233_AUDIT.md)
+
+---
+
+## PR #238 — FSM Graph Verification + Drift Repair
+
+**Decision: MERGED**
+
+**Purpose:** Repair 11 missing ORM inverse relationships, register 28 silently-dispatched events, add `RepairOrderService`, register `VehicleAssignment` morph aliases.
+
+**Conflicts:** None.
+
+**Semantic merge notes:**
+- `ServiceJob.php` and `ServicePlanVisit.php` also modified by PR #239 — non-overlapping additions merged cleanly.
+- `Premises.php` modified by PR #240 (namespace fix) and PR #238 (new relationship) — both applied.
+
+**Gap analysis:** 28 registered events have empty listeners; `RepairOrder ↔ VehicleStock` FK deferred; `ServiceAgreement.$guarded` hardening deferred.
+
+See: [PR_238_AUDIT.md](pr-audits/PR_238_AUDIT.md)
+
+---
+
+## PR #239 — Merge FSM Modules: fieldservice_sale_agreement + fieldservice_sale_recurring
+
+**Decision: MERGED**
+
+**Purpose:** `FieldServiceAgreement` contract entity connecting `Quote → FSA → ServicePlanVisits → ServiceJobs → Invoices`. Enables subscription cleaning and maintenance contract workflows.
+
+**Conflicts:** None.
+
+**Key additions:**
+- New `FieldServiceAgreement` model (distinct from `ServiceAgreement`)
+- Migration `500600`
+- 6 lifecycle events
+- `FieldServiceAgreementService` with full lifecycle transitions
+- Portal views + routes for customer-facing agreement access
+- Feature test coverage
+
+**Gap analysis:** Auto-invoice on activation deferred; SLA breach detection deferred; portal auth hardening needed.
+
+See: [PR_239_AUDIT.md](pr-audits/PR_239_AUDIT.md)
+
+---
+
+## PR #240 — Phase 9: Critical Structural Stabilisation
+
+**Decision: MERGED**
+
+**Purpose:** Structural repair pass — no features added. Targets fresh install failures and autoload collisions.
+
+**Key fixes:**
+1. `composer.json`: Removed `App\\Extensions\\` → `CodeToUse/` PSR-4 mapping (autoload collision prevention)
+2. Federation migration: Added `Schema::hasTable()` guards for `tz_signals` and `tz_rewind_snapshots`
+3. Model namespace deduplication: `Inspection\\InspectionInstance` (canonical), `Facility\\SiteAsset` (canonical)
+4. Source quarantine: 9 stale Voice copies + AiSocialMedia v4.5 + aicore shadow → `CodeToUse/_Quarantine/`
+
+**Conflicts:** None.
+
+**Gap analysis:** Non-canonical `Work\\InspectionInstance` and `Work\\SiteAsset` still exist (`@deprecated`) — deletion pass needed.
+
+See: [PR_240_AUDIT.md](pr-audits/PR_240_AUDIT.md)
+
+---
+
+## PR #243 — [WIP] HRM Pass 2
+
+**Decision: HOLD**
+
+**Reason:** Only initial plan commit — zero implementation. Full 12-stage HRM completion pass required.
+
+See: [PR_243_AUDIT.md](pr-audits/PR_243_AUDIT.md)
+
+---
+
+## Post-Merge Validation — Pass 2
+
+### Provider/Route/Namespace Check
+
+| Check | Status |
+|---|---|
+| `EventServiceProvider` PHP syntax | ✅ Valid |
+| MODULE 10 Mesh events registered | ✅ All 6 events in `$listen` |
+| FSM drift events registered (28) | ✅ All registered with empty `[]` listeners |
+| `FieldServiceAgreement` events registered (6) | ✅ All registered |
+| `WorkCoreServiceProvider` morphMap | ✅ service_job/dispatch_route/shift aliases |
+| `mesh.routes.php` auto-loads | ✅ Follows `lowercase.routes.php` naming |
+| `work.routes.php` and `portal.routes.php` updated | ✅ FSA routes added |
+| Migration timestamp conflicts | ✅ None — `500600` and `001000` are unique |
+| `composer.json` autoload | ✅ `App\\Extensions\\` mapping removed |
+| FSM module status | ✅ `titan_mesh: installed`, `fieldservice_sale_agreement: installed` |
+
+### Remaining Open Issues From Pass 1 (Carry-Forward)
+
+1. ExecutionTimeGraph events not registered → **RESOLVED in Pass 2** (PR #238)
+2. TitanMesh implementation → **RESOLVED in Pass 2** (PR #233)
+3. `ServiceAgreement.$guarded = []` hardening → **Still deferred**
+4. `ProcessContractRenewals` / `RunPredictionSchedules` command scheduling → **Still deferred**
+5. `SupplierBill` naming convention (`lines` vs `items`) → **Still deferred**
+6. `JobCostEntry` routes/controller → **Still deferred**
+
+### New Issues Raised in Pass 2
+
+1. Non-canonical `Work\\InspectionInstance` + `Work\\SiteAsset` still exist (`@deprecated`) → deletion pass
+2. `CodeToUse/_Quarantine/AI_aicore_titancore_shadow_copy` is a full host repo shadow → should be deleted
+3. 28 FSM drift events registered with empty listeners → listener wiring pass
+4. `FieldServiceAgreement` auto-invoice on activation not implemented → billing integration pass
+5. HRM Pass 2 not implemented → PR #243 execution needed
+
+---
+
+## Merge Order Log — Pass 2
+
+| Step | PR | Action | Files |
+|------|-----|--------|-------|
+| 1 | #240 | Applied structural fixes | `composer.json`, migration guards, model namespace fixes, docs, source quarantine (12k+ files) |
+| 2 | #239 | Applied FSM module files | 26 files: events, model, service, controller, views, routes, test |
+| 3 | #238 | Applied ORM repairs + events | 19 files: model methods, RepairOrderService, WorkCoreServiceProvider, EventServiceProvider |
+| 4 | #233 | Applied TitanMesh module | 29 files: Mesh domain (events/listeners/models/services/controllers/routes/tests) |
+| 5 | Manual | Resolved EventServiceProvider conflicts | All 4 PRs' event registrations combined |
+| 6 | Manual | Updated fsm_module_status.json | titan_mesh + fieldservice_sale_agreement + graph verification pass |

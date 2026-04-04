@@ -1,0 +1,67 @@
+{
+    "report_type": "fsm_shadow_subsystems",
+    "generated_at": "2026-04-04",
+    "description": "Audit of potential shadow or detached FSM subsystems — services, models, or event families that operate outside the canonical execution graph.",
+    "shadow_subsystems_found": 0,
+    "findings": [
+        {
+            "id": "SS-NONE",
+            "verdict": "No fully detached shadow FSM subsystems were found.",
+            "detail": "All major service objects (DispatchService, VehicleService, KanbanStatusService, RepairTemplateService, etc.) connect to canonical Work/Route/Vehicle/Equipment models. There is no parallel scheduling surface, no duplicate route planner, and no independent dispatch board model outside the canonical architecture."
+        }
+    ],
+    "warnings": [
+        {
+            "id": "SW-001",
+            "title": "28 Work-namespace events were unregistered in EventServiceProvider",
+            "severity": "high",
+            "description": "These events were declared as PHP classes in app/Events/Work/ but had no entries in the EventServiceProvider $listen array. This meant they could be dispatched but no listeners would fire — a 'silent signal' pattern that resembles shadow behavior without being a true shadow subsystem.",
+            "events": [
+                "ActivityFollowUpScheduled",
+                "AgreementEquipmentCoverageCreated",
+                "AgreementEquipmentCoverageExtended",
+                "DispatchETAChanged",
+                "DispatchJobLate",
+                "DispatchReadinessChanged",
+                "DispatchStockBlocked",
+                "DispatchVehicleBlocked",
+                "RecurringEquipmentServiceCreated",
+                "RecurringPlanGenerated",
+                "RecurringPlanUpdated",
+                "RecurringSaleCreated",
+                "RecurringVisitMaterialized",
+                "SaleRecurringAgreementCreated",
+                "SaleRecurringAgreementUpdated",
+                "SaleRecurringCoverageApplied",
+                "SaleRecurringPlanGenerated",
+                "SaleRecurringVisitMaterialized",
+                "SaleRecurringVisitProjected",
+                "TimesheetApproved",
+                "TimesheetRejected",
+                "TimesheetSubmitted",
+                "VehicleAssignedToJob",
+                "VehicleEquipmentMissing",
+                "VehicleLocationUpdated",
+                "VehicleRouteReady",
+                "VehicleStockConsumed",
+                "VehicleStockReserved"
+            ],
+            "status": "repaired — all 28 events registered in EventServiceProvider in this pass"
+        },
+        {
+            "id": "SW-002",
+            "title": "Repair lifecycle had no orchestrating service",
+            "severity": "medium",
+            "description": "The RepairOrder model and its full schema existed, RepairOrderCreated/Completed/Cancelled events existed, listeners existed — but no RepairOrderService existed to create the lifecycle path from external callers. This meant RepairOrder records could only be manipulated via direct model operations, bypassing event emission and lifecycle consistency.",
+            "status": "repaired — RepairOrderService created in this pass"
+        },
+        {
+            "id": "SW-003",
+            "title": "VehicleAssignment morph inverse missing on ServiceJob",
+            "severity": "medium",
+            "description": "VehicleAssignment polymorphic relationship covered ServiceJob, DispatchRoute, and Shift, but only the vehicle side (Vehicle.assignments) had an explicit HasMany. The ServiceJob side had no morphMany, making the canonical vehicle-to-job assignment graph effectively one-directional at the ORM layer.",
+            "status": "repaired — vehicleAssignments() MorphMany added to ServiceJob"
+        }
+    ],
+    "conclusion": "The FSM system operates as one unified execution graph after the repairs in this pass. No shadow subsystems remain. All previously silent events are now registered. The repair lifecycle is now accessible via RepairOrderService."
+}

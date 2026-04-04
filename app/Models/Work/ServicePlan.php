@@ -7,6 +7,7 @@ namespace App\Models\Work;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Crm\Customer;
+use App\Models\Money\Quote;
 use App\Models\Premises\Premises;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -116,6 +117,22 @@ class ServicePlan extends Model
     public function agreement(): BelongsTo
     {
         return $this->belongsTo(ServiceAgreement::class, 'agreement_id');
+    }
+
+    /**
+     * The originating sale quote that generated this plan.
+     */
+    public function originatingQuote(): BelongsTo
+    {
+        return $this->belongsTo(Quote::class, 'origin_quote_id');
+    }
+
+    /**
+     * The sale agreement that backs this plan's recurring commercial terms.
+     */
+    public function saleAgreement(): BelongsTo
+    {
+        return $this->belongsTo(ServiceAgreement::class, 'sale_agreement_id');
     }
 
     public function visits(): HasMany

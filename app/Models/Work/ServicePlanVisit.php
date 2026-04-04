@@ -9,6 +9,7 @@ use App\Events\Work\ServicePlanVisitDispatched;
 use App\Events\Work\ServicePlanVisitScheduled;
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\OwnedByUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,6 +50,9 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         // fieldservice_sale_recurring_agreement
         'sale_originated',
         'sale_agreement_id',
+        // fieldservice_sale_agreement
+        'field_service_agreement_id',
+        'sale_line_id',
     ];
 
     protected $casts = [
@@ -77,6 +81,22 @@ class ServicePlanVisit extends Model implements SchedulableEntity
     public function project(): BelongsTo
     {
         return $this->belongsTo(FieldServiceProject::class, 'project_id');
+    }
+
+    /**
+     * The sale agreement that originated this visit (from recurring sale commercial terms).
+     */
+    public function saleAgreement(): BelongsTo
+    {
+        return $this->belongsTo(ServiceAgreement::class, 'sale_agreement_id');
+    }
+
+    /**
+     * The user assigned to carry out this visit.
+     */
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
@@ -392,5 +412,25 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         }
 
         return $this->plan?->originatingSaleAgreement();
+    }
+
+    /**
+     * The FieldServiceAgreement that drives this visit's execution schedule.
+     *
+     * Mirrors Odoo fieldservice_sale_agreement: contract visit scheduling.
+     */
+    public function fieldServiceAgreement(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(FieldServiceAgreement::class, 'field_service_agreement_id');
+    }
+
+    /**
+     * The specific quote line (sale order line) that originated this visit.
+     *
+     * Mirrors Odoo fieldservice_sale: sale.order.line → fsm visit projection.
+     */
+    public function saleLine(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
     }
 }

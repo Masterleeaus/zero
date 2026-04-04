@@ -31,6 +31,7 @@ use App\Models\FSM\FsmJobPriorityScore;
 use App\Models\FSM\FsmJobStatusMeta;
 use App\Models\Repair\RepairOrder;
 use App\Models\Vehicle\Vehicle;
+use App\Models\Vehicle\VehicleAssignment;
 use App\Models\Vehicle\VehicleStock;
 use App\Models\Premises\JobInjectedDocument;
 
@@ -126,6 +127,9 @@ class ServiceJob extends Model implements SchedulableEntity
         // fieldservice_vehicle
         'assigned_vehicle_id',
         'required_vehicle_type',
+        // fieldservice_sale_agreement
+        'contract_visit_id',
+        'recurring_source_id',
     ];
 
     protected $casts = [
@@ -202,6 +206,24 @@ class ServiceJob extends Model implements SchedulableEntity
     public function quoteItem(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Money\QuoteItem::class, 'sale_line_id');
+    }
+
+    /**
+     * The ServicePlanVisit that spawned this job (contract visit origin).
+     *
+     * Mirrors Odoo fieldservice_sale_agreement: contract visit → order linkage.
+     */
+    public function contractVisit(): BelongsTo
+    {
+        return $this->belongsTo(ServicePlanVisit::class, 'contract_visit_id');
+    }
+
+    /**
+     * The FieldServiceAgreement that is the recurring commercial source for this job.
+     */
+    public function recurringSource(): BelongsTo
+    {
+        return $this->belongsTo(FieldServiceAgreement::class, 'recurring_source_id');
     }
 
     public function assignedUser(): BelongsTo
@@ -1401,5 +1423,27 @@ class ServiceJob extends Model implements SchedulableEntity
     public function injectedDocuments(): HasMany
     {
         return $this->hasMany(JobInjectedDocument::class, 'job_id');
+    }
+
+    // ── FSM Graph repair — missing inverse relationships ──────────────────────
+
+    /**
+     * All vehicle assignments (polymorphic) for this job.
+     *
+     * @return MorphMany<VehicleAssignment>
+     */
+    public function vehicleAssignments(): MorphMany
+    {
+        return $this->morphMany(VehicleAssignment::class, 'assignable');
+    }
+
+    /**
+     * Vehicle stock items reserved for this job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<VehicleStock>
+     */
+    public function vehicleStockItems(): HasMany
+    {
+        return $this->hasMany(VehicleStock::class, 'reserved_for_job_id');
     }
 }
