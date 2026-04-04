@@ -19,16 +19,18 @@ use App\Models\Money\Invoice;
  */
 class InvoiceObserver
 {
+    public function __construct(
+        private readonly \App\Services\TitanMoney\AccountingService $accounting,
+    ) {}
+
     /**
      * Handle the Invoice "updated" event.
-     * When an invoice transitions to `issued`, a journal entry should be posted.
-     *
-     * @todo Phase 7 — wire AccountingService::postJournalEntry() here.
+     * When an invoice transitions to `issued`, post a journal entry.
      */
     public function updated(Invoice $invoice): void
     {
         if ($invoice->wasChanged('status') && $invoice->status === 'issued') {
-            // Phase 7: post debit A/R + credit Income journal entry via AccountingService
+            $this->accounting->postInvoiceIssued($invoice);
         }
     }
 }

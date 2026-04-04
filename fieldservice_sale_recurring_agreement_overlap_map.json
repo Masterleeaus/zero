@@ -1,0 +1,141 @@
+{
+    "module": "fieldservice_sale_recurring_agreement",
+    "description": "Sale-backed recurring service agreements — commercial commitment flowing into recurring service execution",
+    "scanned_at": "2026-04-03",
+    "overlaps": {
+        "Customer": {
+            "status": "partially_linked",
+            "notes": "soldAgreements() + saleToServiceTimeline() exist. Missing: recurringCoverageFromSales(), upcomingSoldRecurringVisits()",
+            "actions": "add recurringCoverageFromSales() and upcomingSoldRecurringVisits() helpers"
+        },
+        "Enquiry": {
+            "status": "not_connected",
+            "notes": "Enquiries can generate quotes that become recurring agreements, but no direct link",
+            "actions": "no direct action required — covered by Quote→Customer chain"
+        },
+        "Deal": {
+            "status": "not_connected",
+            "notes": "Deals can precede quotes but FSM recurring pipeline starts at Quote",
+            "actions": "no action required in this pass"
+        },
+        "Quote": {
+            "status": "partially_linked",
+            "notes": "coversAgreementPlan() exists. Missing: generatedAgreement(), generatedRecurringPlan(), serviceCommitmentSummary()",
+            "actions": "add generatedAgreement(), generatedRecurringPlan(), serviceCommitmentSummary() helpers"
+        },
+        "Invoice": {
+            "status": "not_connected",
+            "notes": "Invoices linked to quotes but not directly to recurring agreements in this pass",
+            "actions": "no action required — billing covered by fieldservice_account (module 18)"
+        },
+        "Payment": {
+            "status": "not_connected",
+            "notes": "Payments track invoice settlement, not recurring coverage directly",
+            "actions": "no action required in this pass"
+        },
+        "ServiceAgreement": {
+            "status": "partially_linked",
+            "notes": "originatingSale() + saleCoverageSummary() exist. Missing: commercialCoverageSource(), recurringObligationSummary(), recurring_source/sale_recurrence_terms columns",
+            "actions": "add new columns + commercialCoverageSource() + recurringObligationSummary() helpers"
+        },
+        "ServicePlan": {
+            "status": "partially_linked",
+            "notes": "originatingSale() exists. Missing: originatingSaleAgreement(), commercialOriginSummary(), originated_from_sale/sale_recurring_type columns",
+            "actions": "add new columns + originatingSaleAgreement() + commercialOriginSummary() helpers"
+        },
+        "ServicePlanVisit": {
+            "status": "partially_linked",
+            "notes": "generateJob()/dispatch() exist. Missing: commercialSource(), saleAgreementSource(), sale_originated/sale_agreement_id columns",
+            "actions": "add new columns + commercialSource() + saleAgreementSource() helpers"
+        },
+        "ServiceJob": {
+            "status": "already_linked",
+            "notes": "originatingSale(), saleLineContext() exist. agreement_id FK exists. No additional changes needed.",
+            "actions": "no changes required"
+        },
+        "InspectionInstance": {
+            "status": "not_connected",
+            "notes": "Inspections are execution artifacts, not commercial commitments",
+            "actions": "no action required"
+        },
+        "ChecklistRun": {
+            "status": "not_connected",
+            "notes": "Checklist runs are execution artifacts, not commercial commitments",
+            "actions": "no action required"
+        },
+        "Premises": {
+            "status": "partially_linked",
+            "notes": "servicePlans() and serviceVisits() exist. Missing: recurringCoveredVisitsBySale(), upcomingCoveredRecurringVisits()",
+            "actions": "add recurring sale coverage visibility helpers"
+        },
+        "Equipment": {
+            "status": "not_connected",
+            "notes": "Equipment is not directly tied to recurring sale agreements in this pass",
+            "actions": "no action required — covered by fieldservice_sale_agreement_equipment_stock"
+        },
+        "InstalledEquipment": {
+            "status": "not_connected",
+            "notes": "InstalledEquipment coverage tracked via EquipmentWarranty, not recurring sale agreements",
+            "actions": "no action required"
+        },
+        "SiteAsset": {
+            "status": "not_connected",
+            "notes": "Assets not directly tied to recurring sale agreements in this pass",
+            "actions": "no action required"
+        },
+        "EquipmentWarranty": {
+            "status": "compatible",
+            "notes": "Warranty coverage is independent from sale-recurring coverage. No conflict.",
+            "actions": "no action required — safe coexistence"
+        },
+        "WarrantyClaim": {
+            "status": "compatible",
+            "notes": "Warranty claims may arise from recurring covered visits. No conflict.",
+            "actions": "no action required"
+        },
+        "RepairOrder": {
+            "status": "not_connected",
+            "notes": "Repairs are reactive work, not recurring commercial commitments",
+            "actions": "no action required"
+        },
+        "FieldServiceSaleService": {
+            "status": "partially_linked",
+            "notes": "createAgreementFromQuote/activateAgreementFromQuote/convertQuoteToServicePlan exist but do not handle recurring terms detection or visit projection",
+            "actions": "create SaleRecurringAgreementService extending the pipeline"
+        },
+        "AgreementSchedulerService": {
+            "status": "compatible",
+            "notes": "Runs due agreements and creates jobs. Sale-recurring agreements will feed into this.",
+            "actions": "no changes needed — SaleRecurringAgreementService will create plans/visits that AgreementSchedulerService can dispatch"
+        },
+        "SchedulingSurfaceProvider": {
+            "status": "compatible",
+            "notes": "ServicePlanVisit implements SchedulableEntity. Visits generated via sale-recurring path will automatically appear on calendar.",
+            "actions": "no changes needed"
+        },
+        "existing_events": {
+            "FieldServiceAgreementSaleCreated": "reuse",
+            "FieldServiceAgreementSaleActivated": "reuse",
+            "FieldServiceAgreementSaleExtended": "reuse",
+            "SaleServiceCoverageApplied": "reuse",
+            "FieldServiceSaleConvertedToPlan": "reuse",
+            "ServicePlanVisitScheduled": "reuse",
+            "ServicePlanVisitDispatched": "reuse"
+        },
+        "new_events_required": [
+            "SaleRecurringAgreementCreated",
+            "SaleRecurringAgreementUpdated",
+            "SaleRecurringPlanGenerated",
+            "SaleRecurringVisitProjected",
+            "SaleRecurringVisitMaterialized",
+            "SaleRecurringCoverageApplied"
+        ],
+        "duplicate_risk": {
+            "sale_engine": "NONE — extending FieldServiceSaleService, not replacing",
+            "recurring_engine": "NONE — extending AgreementSchedulerService, not replacing",
+            "calendar_engine": "NONE — reusing SchedulableEntity contract on ServicePlanVisit",
+            "billing_engine": "NONE — no invoice/payment logic in this pass",
+            "event_vocabulary": "LOW — new events cover the specific recurring-agreement lifecycle moment not already present"
+        }
+    }
+}

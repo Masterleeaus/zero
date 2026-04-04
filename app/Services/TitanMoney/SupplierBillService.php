@@ -4,153 +4,176 @@ declare(strict_types=1);
 
 namespace App\Services\TitanMoney;
 
-use App\Events\Money\SupplierBillRecorded;
-use App\Events\Money\SupplierPaymentRecorded;
 use App\Models\Inventory\Supplier;
 use App\Models\Money\SupplierBill;
-use App\Models\Money\SupplierBillLine;
-use App\Models\Money\SupplierPayment;
+use App\Models\Money\SupplierBillItem;
 use Illuminate\Support\Facades\DB;
 
 /**
- * SupplierBillService — orchestrates the AP lifecycle.
+ * SupplierBillService — Accounts Payable lifecycle management.
  *
  * Responsibilities:
- *   - Create / update supplier bills and their lines
- *   - Record payments against bills
- *   - Trigger journal posting via AccountingService
- *   - Dispatch domain events
+ *   - Create supplier bills (AP documents)
+ *   - Approve bills (move to accounts payable liability)
+ *   - Record partial / full payments against bills
+ *   - Provide aging report data
  */
 class SupplierBillService
 {
-    public function __construct(private readonly AccountingService $accounting) {}
-
-    // -----------------------------------------------------------------------
-    // Supplier Bills
-    // -----------------------------------------------------------------------
-
     /**
-     * Create a supplier bill with optional line items.
+     * Create a new supplier bill in draft status.
      *
-     * $data keys: supplier_id, purchase_order_id, reference, bill_date, due_date,
-     *             currency, subtotal, tax_total, total, status, notes
-     * $lines[]: account_id, service_job_id, description, amount, tax_rate, tax_amount
+     * @param  array{
+     *   company_id: int,
+     *   supplier_id: int,
+     *   bill_date: string,
+     *   due_date: string,
+     *   items: array<array{description: string, quantity: float, unit_price: float, account_id?: int}>,
+     *   purchase_order_id?: int,
+     *   reference?: string,
+     *   notes?: string,
+     *   created_by?: int,
+     * } $payload
      */
-    public function createBill(array $data, array $lines = []): SupplierBill
+    public function create(array $payload): SupplierBill
     {
-        return DB::transaction(function () use ($data, $lines): SupplierBill {
-            $bill = SupplierBill::create($data);
+        return DB::transaction(function () use ($payload): SupplierBill {
+            $bill = SupplierBill::create([
+                'company_id'        => $payload['company_id'],
+                'created_by'        => $payload['created_by'] ?? null,
+                'supplier_id'       => $payload['supplier_id'],
+                'purchase_order_id' => $payload['purchase_order_id'] ?? null,
+                'bill_number'       => $this->nextBillNumber($payload['company_id']),
+                'reference'         => $payload['reference'] ?? null,
+                'bill_date'         => $payload['bill_date'],
+                'due_date'          => $payload['due_date'],
+                'notes'             => $payload['notes'] ?? null,
+                'status'            => SupplierBill::STATUS_DRAFT,
+            ]);
 
-            foreach ($lines as $line) {
-                $bill->lines()->create($line);
+            foreach (($payload['items'] ?? []) as $item) {
+                $qty   = (float) ($item['quantity'] ?? 1);
+                $price = (float) ($item['unit_price'] ?? 0);
+                $tax   = (float) ($item['tax_amount'] ?? 0);
+
+                SupplierBillItem::create([
+                    'company_id'       => $payload['company_id'],
+                    'supplier_bill_id' => $bill->id,
+                    'description'      => $item['description'] ?? '',
+                    'quantity'         => $qty,
+                    'unit_price'       => $price,
+                    'amount'           => round($qty * $price, 2),
+                    'tax_amount'       => $tax,
+                    'account_id'       => $item['account_id'] ?? null,
+                ]);
             }
 
-            $bill->refresh();
+            $bill->recalculate();
 
-            // Auto-post journal entry when bill is not a draft
-            if ($bill->status !== SupplierBill::STATUS_DRAFT) {
-                $this->accounting->postSupplierBillRecorded($bill);
-            }
-
-            event(new SupplierBillRecorded($bill));
-
-            return $bill;
+            return $bill->fresh();
         });
     }
 
     /**
-     * Update an existing supplier bill.
+     * Approve a draft supplier bill (moves liability to AP).
      */
-    public function updateBill(SupplierBill $bill, array $data, array $lines = []): SupplierBill
+    public function approve(SupplierBill $bill, int $approvedBy): SupplierBill
     {
-        return DB::transaction(function () use ($bill, $data, $lines): SupplierBill {
-            $bill->update($data);
-
-            if (! empty($lines)) {
-                $bill->lines()->delete();
-                foreach ($lines as $line) {
-                    $bill->lines()->create($line);
-                }
-            }
-
-            $bill->refresh();
-
-            // Post journal if transitioning to awaiting_payment
-            if ($bill->wasChanged('status') && $bill->status === SupplierBill::STATUS_AWAITING_PAYMENT) {
-                $this->accounting->postSupplierBillRecorded($bill);
-            }
-
-            return $bill;
-        });
-    }
-
-    /**
-     * Recalculate and persist subtotal/tax_total/total from lines.
-     */
-    public function recalculateTotals(SupplierBill $bill): SupplierBill
-    {
-        $lines    = $bill->lines()->get();
-        $subtotal = $lines->sum('amount');
-        $taxTotal = $lines->sum('tax_amount');
+        if (! $bill->isDraft()) {
+            throw new \RuntimeException("Only draft bills can be approved. Current status: {$bill->status}");
+        }
 
         $bill->update([
-            'subtotal'  => $subtotal,
-            'tax_total' => $taxTotal,
-            'total'     => $subtotal + $taxTotal,
+            'status'      => SupplierBill::STATUS_APPROVED,
+            'approved_by' => $approvedBy,
+            'approved_at' => now(),
         ]);
 
         return $bill->fresh();
     }
 
-    // -----------------------------------------------------------------------
-    // Supplier Payments
-    // -----------------------------------------------------------------------
-
     /**
      * Record a payment against a supplier bill.
      *
-     * $data keys: company_id, created_by, payment_account_id, amount, payment_date, reference, notes
+     * @param  float $amount Amount being paid now.
      */
-    public function recordPayment(SupplierBill $bill, array $data): SupplierPayment
+    public function recordPayment(SupplierBill $bill, float $amount): SupplierBill
     {
-        return DB::transaction(function () use ($bill, $data): SupplierPayment {
-            $payment = $bill->payments()->create(array_merge($data, [
-                'supplier_bill_id' => $bill->id,
-            ]));
+        if ($bill->isPaid()) {
+            throw new \RuntimeException('Bill is already fully paid.');
+        }
 
-            // Update bill paid amount and status
-            $newPaid = (float) $bill->amount_paid + (float) $payment->amount;
-            $status  = $newPaid >= (float) $bill->total
-                ? SupplierBill::STATUS_PAID
-                : SupplierBill::STATUS_PARTIAL;
+        $newPaid = (float) $bill->amount_paid + $amount;
 
-            $bill->update([
-                'amount_paid' => $newPaid,
-                'status'      => $status,
-            ]);
+        $status = $newPaid >= (float) $bill->total_amount
+            ? SupplierBill::STATUS_PAID
+            : SupplierBill::STATUS_APPROVED;
 
-            // Post journal: Dr AP / Cr Bank
-            $this->accounting->postSupplierPaymentRecorded($payment);
+        $bill->update([
+            'amount_paid' => $newPaid,
+            'status'      => $status,
+            'paid_at'     => $status === SupplierBill::STATUS_PAID ? now() : $bill->paid_at,
+        ]);
 
-            event(new SupplierPaymentRecorded($payment));
+        return $bill->fresh();
+    }
 
-            return $payment;
-        });
+    /**
+     * Vendor aging summary: buckets overdue bills by age bands.
+     *
+     * @return array<string, float> Keys: current, 1_30, 31_60, 61_90, over_90
+     */
+    public function agingSummary(int $companyId): array
+    {
+        $today = now()->startOfDay();
+
+        $buckets = [
+            'current' => 0.0,
+            '1_30'    => 0.0,
+            '31_60'   => 0.0,
+            '61_90'   => 0.0,
+            'over_90' => 0.0,
+        ];
+
+        SupplierBill::where('company_id', $companyId)
+            ->unpaid()
+            ->get()
+            ->each(function (SupplierBill $bill) use ($today, &$buckets): void {
+                $balance = $bill->balanceDue();
+                if ($balance <= 0) {
+                    return;
+                }
+
+                if ($bill->due_date === null || $bill->due_date->isFuture()) {
+                    $buckets['current'] += $balance;
+                    return;
+                }
+
+                // diffInDays(date, false) returns negative when $bill->due_date is in the past.
+                // Multiply by -1 to get a positive "days overdue" value for bucket comparison.
+                $days = (int) $today->diffInDays($bill->due_date, false) * -1;
+
+                if ($days <= 30) {
+                    $buckets['1_30'] += $balance;
+                } elseif ($days <= 60) {
+                    $buckets['31_60'] += $balance;
+                } elseif ($days <= 90) {
+                    $buckets['61_90'] += $balance;
+                } else {
+                    $buckets['over_90'] += $balance;
+                }
+            });
+
+        return $buckets;
     }
 
     // -----------------------------------------------------------------------
-    // Supplier helpers
+    // Internals
     // -----------------------------------------------------------------------
 
-    /**
-     * Return outstanding bills for a given supplier.
-     */
-    public function outstandingBills(Supplier $supplier): \Illuminate\Database\Eloquent\Collection
+    private function nextBillNumber(int $companyId): string
     {
-        return SupplierBill::query()
-            ->where('supplier_id', $supplier->id)
-            ->whereNotIn('status', [SupplierBill::STATUS_PAID, SupplierBill::STATUS_VOID])
-            ->orderBy('due_date')
-            ->get();
+        $count = SupplierBill::where('company_id', $companyId)->withTrashed()->count() + 1;
+        return 'BILL-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
     }
 }

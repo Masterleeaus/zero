@@ -2,11 +2,13 @@
 
 namespace App\Services\Work;
 
+use App\Models\Route\TechnicianAvailability;
 use App\Models\Work\DispatchConstraint;
 use App\Models\Work\ServiceJob;
 use App\Models\Premises\Premises;
 use App\Models\User;
 use App\Services\Team\CapabilityRegistryService;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class DispatchConstraintService
@@ -81,4 +83,40 @@ class DispatchConstraintService
 
         return 0.3;
     }
+
+    /**
+     * Evaluate whether a technician is available on the job's scheduled date.
+     *
+     * Returns 1.0 for confirmed availability, 0.5 when no schedule data is
+     * available (assume available), and 0.0 when the technician is explicitly
+     * unavailable on the required date.
+     */
+    public function evaluateAvailability(User $tech, ServiceJob $job): float
+    {
+        $scheduledDate = $job->scheduled_at ?? $job->scheduled_date_start;
+        if (! $scheduledDate) {
+            return 0.5; // No date set — cannot evaluate
+        }
+
+        $date = Carbon::parse($scheduledDate);
+        $dayBit = (int) pow(2, $date->dayOfWeek === 0 ? 6 : $date->dayOfWeek - 1); // Mon=1 → bit0
+
+        $availability = TechnicianAvailability::where('user_id', $tech->id)
+            ->where('is_active', true)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('effective_from')->orWhere('effective_from', '<=', $date->toDateString());
+            })
+            ->where(function ($q) use ($date) {
+                $q->whereNull('effective_to')->orWhere('effective_to', '>=', $date->toDateString());
+            })
+            ->first();
+
+        if (! $availability) {
+            return 0.5; // No schedule defined — assume available
+        }
+
+        // Check bitmask for the scheduled day
+        return ($availability->active_days_mask & $dayBit) ? 1.0 : 0.0;
+    }
 }
+

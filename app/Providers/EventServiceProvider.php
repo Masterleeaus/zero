@@ -118,6 +118,13 @@ use App\Listeners\Route\RouteAssignedListener;
 use App\Listeners\Route\RouteCapacityExceededListener;
 use App\Listeners\Route\RouteStopCompletedListener;
 use App\Listeners\YokassaWebhookListener;
+// ── MODULE 03 TrustWorkLedger ──────────────────────────────────────────────
+use App\Events\Trust\ChainSealed;
+use App\Events\Trust\ChainTamperingDetected;
+use App\Events\Trust\LedgerEntryRecorded;
+use App\Listeners\Trust\RecordInspectionCompletedOnLedger;
+use App\Listeners\Trust\RecordInspectionFailedOnLedger;
+use App\Listeners\Trust\RecordJobCompletionOnLedger;
 // ── Repair domain events (Modules 9 + 10) ────────────────────────────────────
 use App\Events\Repair\RepairOrderCreated;
 use App\Events\Repair\RepairOrderCompleted;
@@ -184,6 +191,22 @@ use App\Events\Team\CertificationRevoked;
 use App\Events\Team\CapabilityGapDetected;
 use App\Listeners\Team\NotifyOnCertificationExpiry;
 use App\Listeners\Team\RecordCapabilityAuditTrail;
+// ── MODULE_07 TitanPredict ───────────────────────────────────────────────────
+use App\Events\Predict\PredictionGenerated;
+use App\Events\Predict\HighConfidencePrediction;
+use App\Events\Predict\PredictionTriggered;
+use App\Events\Predict\PredictionFeedbackRecorded;
+use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
+use App\Listeners\Predict\UpdateAssetPredictionOnServiceEvent;
+use App\Listeners\Predict\UpdateSLAPredictionOnJobCompletion;
+// ── MODULE 09 — ExecutionFinanceLayer ────────────────────────────────────────
+use App\Events\Finance\JobCostRecorded;
+use App\Events\Finance\JobFinancialSummaryUpdated;
+use App\Events\Finance\UnprofitableJobDetected;
+use App\Events\Finance\JobInvoiced as FinanceJobInvoiced;
+use App\Listeners\Finance\RecalculateFinancialSummaryOnCostChange;
+use App\Listeners\Finance\NotifyOnUnprofitableJob;
+use App\Listeners\Finance\RecordRevenueOnJobBilled;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -194,6 +217,36 @@ use App\Events\Work\FieldServiceAgreementSaleExtended;
 use App\Events\Work\SaleServiceCoverageApplied;
 use App\Listeners\Work\FieldServiceSaleApprovedListener;
 use App\Listeners\Work\FieldServiceAgreementSaleActivatedListener;
+// ── MODULE 04 TitanContracts — agreement entitlement signals ──────────────
+use App\Events\Work\ContractEntitlementExhausted;
+use App\Events\Work\ContractExpired;
+use App\Events\Work\ContractHealthDegraded;
+use App\Events\Work\ContractRenewed;
+use App\Events\Work\ContractSLABreached;
+use App\Listeners\Work\CheckSLAOnJobStatusChange;
+use App\Listeners\Work\NotifyOnContractExpiry;
+use App\Listeners\Work\UpdateContractHealthOnJobCompletion;
+use App\Listeners\Crm\LinkAgreementToDeal;
+// ── MODULE 05 — TitanEdgeSync events ─────────────────────────────────────────
+use App\Events\Sync\EdgeBatchSynced;
+use App\Events\Sync\EdgeConflictDetected;
+use App\Events\Sync\EdgeConflictResolved;
+use App\Events\Sync\EdgeSyncFailed;
+use App\Listeners\Sync\RecordSyncEventOnTrustLedger;
+// ── MODULE_06 ExecutionTimeGraph events ──────────────────────────────────────
+use App\Events\TimeGraph\ExecutionGraphOpened;
+use App\Events\TimeGraph\ExecutionGraphCompleted;
+use App\Events\TimeGraph\ExecutionCheckpointCreated;
+use App\Events\TimeGraph\ExecutionAnomalyDetected;
+// ── MODULE_08 DocsExecutionBridge ────────────────────────────────────────────
+use App\Events\Docs\DocumentsInjectedForJob;
+use App\Events\Docs\MandatoryDocumentAcknowledged;
+use App\Events\Docs\DocumentVersionPublished;
+use App\Events\Docs\DocumentReviewDue;
+use App\Events\Work\JobCreated;
+use App\Listeners\Docs\InjectDocumentsOnJobCreated;
+use App\Listeners\Docs\InjectDocumentsOnInspectionScheduled;
+use App\Listeners\Docs\BlockJobCompletionIfMandatoryUnacknowledged;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -268,9 +321,11 @@ class EventServiceProvider extends ServiceProvider
         // ── Work / Field Service events ───────────────────────────────────
         JobStageChanged::class => [
             JobStageChangedListener::class,
+            BlockJobCompletionIfMandatoryUnacknowledged::class,
         ],
         JobCompleted::class => [
             JobCompletedListener::class,
+            RecordJobCompletionOnLedger::class,
         ],
         // The following Work events are defined for downstream automation.
         // Listeners can be added here as automation rules are wired up.
@@ -300,10 +355,16 @@ class EventServiceProvider extends ServiceProvider
         ServicePlanVisitRescheduled::class => [],
         InspectionRescheduled::class       => [],
         // ── Inspection lifecycle signals (canonical Inspection namespace) ──
-        InspectionScheduled::class        => [],
+        InspectionScheduled::class        => [
+            InjectDocumentsOnInspectionScheduled::class,
+        ],
         InspectionStarted::class          => [],
-        InspectionCompleted::class        => [],
-        InspectionFailed::class           => [],
+        InspectionCompleted::class        => [
+            RecordInspectionCompletedOnLedger::class,
+        ],
+        InspectionFailed::class           => [
+            RecordInspectionFailedOnLedger::class,
+        ],
         InspectionFollowupRequired::class => [],
         // ── Equipment lifecycle signals ────────────────────────────────────
         EquipmentInstalled::class => [],
@@ -468,6 +529,60 @@ class EventServiceProvider extends ServiceProvider
         ],
         CapabilityGapDetected::class => [
             RecordCapabilityAuditTrail::class,
+        ],
+        // ── MODULE 03 TrustWorkLedger — trust signals ──────────────────────
+        LedgerEntryRecorded::class    => [],
+        ChainTamperingDetected::class => [],
+        ChainSealed::class            => [],
+        // ── MODULE 04 TitanContracts — entitlement + SLA + renewal signals ──
+        ContractEntitlementExhausted::class => [],
+        ContractExpired::class => [
+            NotifyOnContractExpiry::class,
+        ],
+        ContractHealthDegraded::class => [
+            UpdateContractHealthOnJobCompletion::class,
+        ],
+        ContractRenewed::class        => [],
+        ContractSLABreached::class    => [
+            CheckSLAOnJobStatusChange::class,
+        ],
+        // ── MODULE 05 — TitanEdgeSync lifecycle signals ───────────────────
+        EdgeBatchSynced::class      => [
+            RecordSyncEventOnTrustLedger::class,
+        ],
+        EdgeConflictDetected::class => [],
+        EdgeConflictResolved::class => [],
+        EdgeSyncFailed::class       => [],
+        // ── MODULE_06 ExecutionTimeGraph — temporal lifecycle signals ─────────
+        ExecutionGraphOpened::class       => [],
+        ExecutionGraphCompleted::class    => [],
+        ExecutionCheckpointCreated::class => [],
+        ExecutionAnomalyDetected::class   => [],
+        // ── MODULE_07 TitanPredict — predictive lifecycle signals ──────────────
+        PredictionGenerated::class => [],
+        HighConfidencePrediction::class => [
+            NotifyOnHighConfidencePrediction::class,
+        ],
+        PredictionTriggered::class       => [],
+        PredictionFeedbackRecorded::class => [],
+        // ── MODULE_08 DocsExecutionBridge — document injection signals ────────
+        JobCreated::class => [
+            InjectDocumentsOnJobCreated::class,
+        ],
+        DocumentsInjectedForJob::class    => [],
+        MandatoryDocumentAcknowledged::class => [],
+        DocumentVersionPublished::class   => [],
+        DocumentReviewDue::class          => [],
+        // ── MODULE 09 — ExecutionFinanceLayer ──────────────────────────────────────
+        JobCostRecorded::class => [
+            RecalculateFinancialSummaryOnCostChange::class,
+        ],
+        JobFinancialSummaryUpdated::class => [],
+        UnprofitableJobDetected::class => [
+            NotifyOnUnprofitableJob::class,
+        ],
+        FinanceJobInvoiced::class => [
+            RecordRevenueOnJobBilled::class,
         ],
     ];
 

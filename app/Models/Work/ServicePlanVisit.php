@@ -46,12 +46,16 @@ class ServicePlanVisit extends Model implements SchedulableEntity
         'coverage_source',
         'recurring_sale_ref',
         'notes',
+        // fieldservice_sale_recurring_agreement
+        'sale_originated',
+        'sale_agreement_id',
     ];
 
     protected $casts = [
-        'scheduled_for'  => 'datetime',
-        'completed_at'   => 'datetime',
-        'scheduled_date' => 'date',
+        'scheduled_for'   => 'datetime',
+        'completed_at'    => 'datetime',
+        'scheduled_date'  => 'date',
+        'sale_originated' => 'boolean',
     ];
 
     protected $attributes = [
@@ -360,5 +364,33 @@ class ServicePlanVisit extends Model implements SchedulableEntity
             return \Illuminate\Support\Carbon::parse($this->scheduled_for)->format('d M Y');
         }
         return 'To be confirmed';
+    }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * The Quote/sale that commercially funded this visit.
+     *
+     * Resolves via the sale agreement (sale_agreement_id) → originating quote.
+     */
+    public function commercialSource(): ?\App\Models\Money\Quote
+    {
+        $agreement = $this->saleAgreementSource();
+
+        return $agreement?->commercialCoverageSource();
+    }
+
+    /**
+     * The ServiceAgreement that funded this visit through a sale.
+     *
+     * Checks sale_agreement_id first, then falls back to the plan's agreement.
+     */
+    public function saleAgreementSource(): ?\App\Models\Work\ServiceAgreement
+    {
+        if ($this->sale_agreement_id) {
+            return \App\Models\Work\ServiceAgreement::find($this->sale_agreement_id);
+        }
+
+        return $this->plan?->originatingSaleAgreement();
     }
 }

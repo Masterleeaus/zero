@@ -411,4 +411,50 @@ class Premises extends Model
             'installed_assets' => $this->installedEquipment()->count(),
         ];
     }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * Upcoming service plan visits for this premises that originated from sale-backed
+     * recurring plans (sale_originated = true).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServicePlanVisit>
+     */
+    public function upcomingCoveredRecurringVisits(): \Illuminate\Database\Eloquent\Collection
+    {
+        $planIds = \App\Models\Work\ServicePlan::query()
+            ->where('premises_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('originated_from_sale', true)
+            ->where('status', 'active')
+            ->pluck('id');
+
+        if ($planIds->isEmpty()) {
+            return \App\Models\Work\ServicePlanVisit::query()->whereRaw('1=0')->get();
+        }
+
+        return \App\Models\Work\ServicePlanVisit::query()
+            ->whereIn('service_plan_id', $planIds)
+            ->where('sale_originated', true)
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '>=', now()->toDateString())
+            ->orderBy('scheduled_date')
+            ->get();
+    }
+
+    /**
+     * All sale-backed recurring service plans active at this premises.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServicePlan>
+     */
+    public function recurringCoveredVisitsBySale(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\ServicePlan::query()
+            ->where('premises_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('originated_from_sale', true)
+            ->where('status', 'active')
+            ->orderByDesc('commercial_start_date')
+            ->get();
+    }
 }

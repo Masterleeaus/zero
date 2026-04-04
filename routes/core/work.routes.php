@@ -213,5 +213,19 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
                 Route::post('/auto', [\App\Http\Controllers\Work\DispatchController::class, 'autoDispatch'])->name('auto');
                 Route::get('/history', [\App\Http\Controllers\Work\DispatchController::class, 'history'])->name('history');
             });
+
+            // ── MODULE_04 — TitanContracts ─────────────────────────────────────
+            Route::prefix('contracts')->as('contracts.')->group(function () {
+                Route::get('renewal-queue', [\App\Http\Controllers\Work\ContractController::class, 'renewalQueue'])
+                    ->name('renewal-queue');
+                Route::get('{agreement}/entitlements', [\App\Http\Controllers\Work\ContractController::class, 'entitlements'])
+                    ->name('entitlements');
+                Route::get('{agreement}/sla-status', [\App\Http\Controllers\Work\ContractController::class, 'slaStatus'])
+                    ->name('sla-status');
+                Route::get('{agreement}/health', [\App\Http\Controllers\Work\ContractController::class, 'health'])
+                    ->name('health');
+                Route::post('{agreement}/renew', [\App\Http\Controllers\Work\ContractController::class, 'renew'])
+                    ->name('renew');
+            });
         });
     });

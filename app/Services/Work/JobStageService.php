@@ -65,6 +65,37 @@ class JobStageService
                 JobReadyForInvoice::dispatch($job);
             }
 
+            // Time graph integration — record stage transition event
+            try {
+                $graphService = app(\App\Services\TimeGraph\ExecutionTimeGraphService::class);
+                $graph = \App\Models\TimeGraph\ExecutionGraph::query()
+                    ->withoutGlobalScope('company')
+                    ->where('root_subject_type', get_class($job))
+                    ->where('root_subject_id', $job->getKey())
+                    ->where('status', 'active')
+                    ->first();
+
+                if ($graph) {
+                    $graphService->record(
+                        graphId: $graph->graph_id,
+                        eventClass: JobStageChanged::class,
+                        subject: $job,
+                        payload: [
+                            'from_stage'    => $previousStage?->name,
+                            'to_stage'      => $newStage->name,
+                            'from_stage_id' => $previousStage?->id,
+                            'to_stage_id'   => $newStage->id,
+                        ],
+                        eventType: 'stage_transition',
+                        actorType: auth()->check() ? 'user' : 'system',
+                        actorId: auth()->id(),
+                    );
+                }
+            } catch (\Throwable $e) {
+                // Time graph recording must not disrupt the stage transition
+                logger()->warning('ExecutionTimeGraph: failed to record stage transition', ['error' => $e->getMessage()]);
+            }
+
             return $job;
         });
     }
@@ -106,6 +137,31 @@ class JobStageService
             throw ValidationException::withMessages([
                 'activities' => __('All required activities must be completed before closing this job.'),
             ]);
+        }
+
+        // MODULE 08 — block closure when mandatory documents are unacknowledged
+        if ($newStage->is_closed) {
+            /** @var \App\Services\Docs\DocsExecutionBridgeService|null $docsBridge */
+            $docsBridge = app()->bound(\App\Services\Docs\DocsExecutionBridgeService::class)
+                ? app(\App\Services\Docs\DocsExecutionBridgeService::class)
+                : null;
+
+            if ($docsBridge !== null) {
+                $unacknowledged = $docsBridge->getMandatoryUnacknowledged($job);
+
+                if ($unacknowledged->isNotEmpty()) {
+                    $titles = $unacknowledged
+                        ->map(static fn ($pivot) => $pivot->document?->title ?? 'Document #' . $pivot->document_id)
+                        ->implode(', ');
+
+                    throw ValidationException::withMessages([
+                        'mandatory_documents' => __(
+                            'The following mandatory documents must be acknowledged before completing this job: :titles',
+                            ['titles' => $titles],
+                        ),
+                    ]);
+                }
+            }
         }
     }
 

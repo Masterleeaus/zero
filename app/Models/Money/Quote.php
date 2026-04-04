@@ -185,4 +185,81 @@ class Quote extends Model
     {
         return $query->whereIn($query->qualifyColumn('status'), ['accepted', 'approved']);
     }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * The ServiceAgreement generated from this quote (via quote_id or originating_quote_id).
+     *
+     * Returns the first/primary agreement created when this quote was approved.
+     */
+    public function generatedAgreement(): ?\App\Models\Work\ServiceAgreement
+    {
+        return \App\Models\Work\ServiceAgreement::query()
+            ->where(function ($q) {
+                $q->where('quote_id', $this->id)
+                  ->orWhere('originating_quote_id', $this->id);
+            })
+            ->where('company_id', $this->company_id)
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * The recurring ServicePlan generated from this quote's sale agreement.
+     *
+     * Resolves via the generated agreement's originated_from_sale plan.
+     */
+    public function generatedRecurringPlan(): ?\App\Models\Work\ServicePlan
+    {
+        $agreement = $this->generatedAgreement();
+
+        if (! $agreement) {
+            return null;
+        }
+
+        return $agreement->servicePlans()
+            ->where('originated_from_sale', true)
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * Summary of the service commitments generated from this quote.
+     *
+     * @return array{
+     *     quote_id: int,
+     *     has_field_work: bool,
+     *     has_recurring: bool,
+     *     agreement_id: int|null,
+     *     plan_id: int|null,
+     *     committed_visits: int|null,
+     *     projected_visits: int,
+     *     materialized_jobs: int
+     * }
+     */
+    public function serviceCommitmentSummary(): array
+    {
+        $agreement = $this->generatedAgreement();
+        $plan      = $this->generatedRecurringPlan();
+
+        $projectedVisits   = 0;
+        $materializedJobs  = 0;
+
+        if ($plan) {
+            $projectedVisits  = $plan->visits()->count();
+            $materializedJobs = $plan->visits()->whereNotNull('service_job_id')->count();
+        }
+
+        return [
+            'quote_id'          => $this->id,
+            'has_field_work'    => $this->createsFieldWork(),
+            'has_recurring'     => $this->coversAgreementPlan(),
+            'agreement_id'      => $agreement?->id,
+            'plan_id'           => $plan?->id,
+            'committed_visits'  => $agreement?->committed_visits,
+            'projected_visits'  => $projectedVisits,
+            'materialized_jobs' => $materializedJobs,
+        ];
+    }
 }

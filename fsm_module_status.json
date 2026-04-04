@@ -1,39 +1,188 @@
 {
     "roadmap": "FSM 30-module integration",
     "modules": {
-        "module_1": { "name": "fieldservice_base", "status": "merged" },
-        "module_2": { "name": "fieldservice_purchase", "status": "merged" },
-        "module_3": { "name": "fieldservice_sale", "status": "merged", "confirmed_at": "2026-04-03", "notes": "Sale pipeline: quote→job, quote→plan, agreement activation, events, FieldServiceSaleService" },
-        "module_4": { "name": "fieldservice_activity", "status": "merged" },
-        "module_5": { "name": "fieldservice_kanban_info", "status": "merged" },
-        "module_6": { "name": "fieldservice_crm", "status": "merged" },
-        "module_7": { "name": "fieldservice_equipment_stock", "status": "merged" },
-        "module_8": { "name": "fieldservice_equipment_warranty", "status": "merged" },
-        "module_9": { "name": "fieldservice_calendar", "status": "pending" },
-        "module_10": { "name": "fieldservice_recurring", "status": "pending" },
-        "module_11": { "name": "fieldservice_route_planning", "status": "pending" },
-        "module_12": { "name": "fieldservice_stock", "status": "pending" },
-        "module_13": { "name": "fieldservice_vehicle", "status": "pending" },
-        "module_14": { "name": "fieldservice_geoengine", "status": "pending" },
-        "module_15": { "name": "fieldservice_timeline", "status": "pending" },
-        "module_16": { "name": "fieldservice_skill", "status": "pending" },
-        "module_17": { "name": "fieldservice_partner_multi_relation", "status": "pending" },
-        "module_18": { "name": "fieldservice_account", "status": "pending" },
-        "module_19": { "name": "fieldservice_account_analytic", "status": "pending" },
-        "module_20": { "name": "fieldservice_hr", "status": "pending" },
-        "module_21": { "name": "fieldservice_portal", "status": "merged" },
-        "module_22": { "name": "fieldservice_project", "status": "merged" },
-        "module_23": { "name": "fieldservice_repair", "status": "pending" },
-        "module_24": { "name": "fieldservice_maintenance", "status": "pending" },
-        "module_25": { "name": "fieldservice_mrp", "status": "pending" },
-        "module_26": { "name": "fieldservice_helpdesk", "status": "pending" },
-        "module_27": { "name": "fieldservice_location_geolocalize", "status": "pending" },
-        "module_28": { "name": "fieldservice_distribution", "status": "pending" },
-        "module_29": { "name": "fieldservice_change_management", "status": "pending" },
-        "module_30": { "name": "fieldservice_quality", "status": "pending" },
-        "titan_dispatch": { "name": "titan_dispatch", "status": "installed", "installed_at": "2026-04-03" },
-        "capability_registry": { "name": "capability_registry", "status": "installed", "installed_at": "2026-04-03", "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes" }
+        "module_1": {
+            "name": "fieldservice_base",
+            "status": "merged"
+        },
+        "module_2": {
+            "name": "fieldservice_purchase",
+            "status": "merged"
+        },
+        "module_3": {
+            "name": "fieldservice_sale",
+            "status": "merged",
+            "confirmed_at": "2026-04-03",
+            "notes": "Sale pipeline: quote→job, quote→plan, agreement activation, events, FieldServiceSaleService"
+        },
+        "module_4": {
+            "name": "fieldservice_activity",
+            "status": "merged"
+        },
+        "module_5": {
+            "name": "fieldservice_kanban_info",
+            "status": "merged"
+        },
+        "module_6": {
+            "name": "fieldservice_crm",
+            "status": "merged"
+        },
+        "module_7": {
+            "name": "fieldservice_equipment_stock",
+            "status": "merged"
+        },
+        "module_8": {
+            "name": "fieldservice_equipment_warranty",
+            "status": "merged"
+        },
+        "module_9": {
+            "name": "fieldservice_calendar",
+            "status": "pending"
+        },
+        "module_10": {
+            "name": "fieldservice_recurring",
+            "status": "pending"
+        },
+        "module_11": {
+            "name": "fieldservice_route_planning",
+            "status": "pending"
+        },
+        "module_12": {
+            "name": "fieldservice_stock",
+            "status": "pending"
+        },
+        "module_13": {
+            "name": "fieldservice_vehicle",
+            "status": "pending"
+        },
+        "module_14": {
+            "name": "fieldservice_geoengine",
+            "status": "pending"
+        },
+        "module_15": {
+            "name": "fieldservice_timeline",
+            "status": "pending"
+        },
+        "module_16": {
+            "name": "fieldservice_skill",
+            "status": "pending"
+        },
+        "module_17": {
+            "name": "fieldservice_partner_multi_relation",
+            "status": "pending"
+        },
+        "module_18": {
+            "name": "fieldservice_account",
+            "status": "pending"
+        },
+        "module_19": {
+            "name": "fieldservice_account_analytic",
+            "status": "pending"
+        },
+        "module_20": {
+            "name": "fieldservice_hr",
+            "status": "pending"
+        },
+        "module_21": {
+            "name": "fieldservice_portal",
+            "status": "merged"
+        },
+        "module_22": {
+            "name": "fieldservice_project",
+            "status": "merged"
+        },
+        "module_23": {
+            "name": "fieldservice_repair",
+            "status": "pending"
+        },
+        "module_24": {
+            "name": "fieldservice_maintenance",
+            "status": "pending"
+        },
+        "module_25": {
+            "name": "fieldservice_mrp",
+            "status": "pending"
+        },
+        "module_26": {
+            "name": "fieldservice_helpdesk",
+            "status": "pending"
+        },
+        "module_27": {
+            "name": "fieldservice_location_geolocalize",
+            "status": "pending"
+        },
+        "module_28": {
+            "name": "fieldservice_distribution",
+            "status": "pending"
+        },
+        "module_29": {
+            "name": "fieldservice_change_management",
+            "status": "pending"
+        },
+        "module_30": {
+            "name": "fieldservice_quality",
+            "status": "pending"
+        },
+        "titan_dispatch": {
+            "name": "titan_dispatch",
+            "status": "installed",
+            "installed_at": "2026-04-03"
+        },
+        "capability_registry": {
+            "name": "capability_registry",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_02: SkillDefinition/TechnicianSkill/Certification/SkillRequirement/AvailabilityWindow/AvailabilityOverride models, CapabilityRegistryService, SkillComplianceService, 4 events, 2 listeners, CapabilityController, capabilities routes"
+        },
+        "module_sale_recurring_agreement": {
+            "name": "fieldservice_sale_recurring_agreement",
+            "status": "merged",
+            "confirmed_at": "2026-04-03",
+            "notes": "Sale-backed recurring agreements: SaleRecurringAgreementService, migration 500410, 6 new events"
+        },
+        "trust_work_ledger": {
+            "name": "trust_work_ledger",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_03: TrustLedgerEntry/TrustChainSeal/TrustEvidenceAttachment models, TrustLedgerService+TrustVerificationService, 3 events+4 listeners, TrustLedgerController, trust routes"
+        },
+        "titan_contracts": {
+            "name": "titan_contracts",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_04: ContractEntitlement/ContractSLABreach/ContractRenewal models, ContractEntitlementService+ContractSLAService+ContractHealthService+ContractRenewalService, 5 events+4 listeners, ContractController, contracts routes"
+        },
+        "titan_edge_sync": {
+            "name": "titan_edge_sync",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_05: EdgeDeviceSession/EdgeSyncQueue/EdgeSyncLog/EdgeSyncConflict models, EdgeSyncService+EdgeConflictResolverService+EdgeSyncPayloadProcessor, 4 events+1 listener, EdgeSyncController at /api/v1/sync/*"
+        },
+        "execution_time_graph": {
+            "name": "execution_time_graph",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_06: ExecutionGraph/ExecutionEvent/ExecutionGraphCheckpoint models, ExecutionTimeGraphService+ExecutionReplayService, 4 events, RecordSignalToTimeGraph job, ExecutionTimeGraphController routes at dashboard.timegraph.*"
+        },
+        "titan_predict": {
+            "name": "titan_predict",
+            "status": "installed",
+            "installed_at": "2026-04-04",
+            "notes": "MODULE_07: Prediction/PredictionSignal/PredictionOutcome/PredictionSchedule models, TitanPredictService+PredictionSignalExtractorService+PredictionModelService, 4 events+3 listeners, TitanPredictController routes at dashboard.predict.*"
+        },
+        "docs_execution_bridge": {
+            "name": "docs_execution_bridge",
+            "status": "installed",
+            "installed_at": "2026-04-04",
+            "notes": "MODULE_08: FacilityDocument/JobInjectedDocument/InspectionInjectedDocument/DocumentInjectionRule models, DocsExecutionBridgeService+DocumentSearchService+DocumentVersionService, 4 Docs events + JobCreated, 3 listeners, DocsExecutionBridgeController routes at dashboard.docs.*"
+        },
+        "execution_finance_layer": {
+            "name": "execution_finance_layer",
+            "status": "installed",
+            "installed_at": "2026-04-04",
+            "notes": "MODULE_09: JobCostRecord/JobRevenueRecord/JobFinancialSummary/FinancialRollup models, JobCostingService+JobRevenueService+JobProfitabilityService+FinancialRollupService, 4 Finance events+3 listeners, JobFinanceController routes at dashboard.money.finance.*"
+        }
     },
     "next_module": "module_9",
-    "updated_at": "2026-04-03"
+    "updated_at": "2026-04-04"
 }

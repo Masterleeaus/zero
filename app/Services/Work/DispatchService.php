@@ -2,6 +2,9 @@
 
 namespace App\Services\Work;
 
+use App\Events\Work\DispatchReadinessChanged;
+use App\Events\Work\DispatchStockBlocked;
+use App\Events\Work\DispatchVehicleBlocked;
 use App\Events\Work\JobDispatched;
 use App\Events\Work\JobDispatchFailed;
 use App\Events\Work\JobReDispatched;
@@ -20,6 +23,7 @@ class DispatchService
         protected DispatchConstraintService $constraintService,
         protected SignalDispatcher $signals,
         protected AuditTrail $auditTrail,
+        protected DispatchReadinessService $readinessService,
     ) {}
 
     public function manualAssign(ServiceJob $job, int $technicianId): DispatchAssignment
@@ -188,6 +192,50 @@ class DispatchService
         ]);
 
         return $assignment;
+    }
+
+    /**
+     * Check job readiness before dispatch, emitting canonical events for
+     * vehicle and stock blockers if the readiness service is available.
+     *
+     * Returns the full readiness array.
+     */
+    public function checkReadiness(ServiceJob $job): array
+    {
+        $readiness = $this->readinessService->dispatchReadiness($job);
+
+        if (!$readiness['ready']) {
+            DispatchReadinessChanged::dispatch($job, false, $readiness['blockers']);
+
+            // Vehicle-specific blocker event
+            if (!$readiness['vehicle_ready'] && $job->assigned_vehicle_id) {
+                $vehicle = $job->assignedVehicle ?? $job->vehicle ?? null;
+                if ($vehicle) {
+                    $vehicleBlockers = array_filter(
+                        $readiness['blockers'],
+                        fn ($b) => str_contains(strtolower($b), 'vehicle'),
+                    );
+                    if (!empty($vehicleBlockers)) {
+                        DispatchVehicleBlocked::dispatch($job, $vehicle, array_values($vehicleBlockers));
+                    }
+                }
+            }
+
+            // Stock-specific blocker event
+            if (!$readiness['stock_ready']) {
+                $stockBlockers = array_filter(
+                    $readiness['blockers'],
+                    fn ($b) => str_contains(strtolower($b), 'stock')
+                        || str_contains(strtolower($b), 'parts')
+                        || str_contains(strtolower($b), 'material'),
+                );
+                if (!empty($stockBlockers)) {
+                    DispatchStockBlocked::dispatch($job, array_values($stockBlockers));
+                }
+            }
+        }
+
+        return $readiness;
     }
 
     protected function emitSignal(string $type, ServiceJob $job, ?User $tech, array $context): void
