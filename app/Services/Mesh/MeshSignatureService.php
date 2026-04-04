@@ -11,7 +11,7 @@ class MeshSignatureService
     private const ALGORITHM = 'sha256';
 
     /**
-     * Sign a payload using the company's own node key (stored in config or resolved at runtime).
+     * Sign a payload using this node's signing key.
      *
      * @return string Base64-encoded HMAC-SHA256 signature
      */
@@ -49,21 +49,35 @@ class MeshSignatureService
     /**
      * Wrap a payload in a signed mesh envelope.
      *
+     * The signature covers the full envelope (action + payload + signed_at) to
+     * prevent cross-endpoint replay and to bind the timestamp for freshness checks.
+     *
      * @return array{action: string, payload: array, signed_at: string, signature: string}
      */
     public function buildMeshEnvelope(array $payload, string $action): array
     {
+        $companyId = auth()->user()?->company_id
+            ?? $payload['company_id']
+            ?? throw new \RuntimeException(
+                'MeshSignatureService: cannot resolve company_id for envelope signing. ' .
+                'Either authenticate a user or include company_id in the payload.'
+            );
+
         $envelope = [
             'action'    => $action,
             'payload'   => $payload,
             'signed_at' => now()->toISOString(),
         ];
 
-        $companyId = auth()->user()?->company_id
-            ?? $payload['company_id']
-            ?? throw new \RuntimeException('MeshSignatureService: cannot resolve company_id for envelope signing.');
+        // Sign the full envelope (excluding the signature key itself) so action and
+        // timestamp are bound to the signature, preventing cross-endpoint replay.
+        $signable = [
+            'action'    => $envelope['action'],
+            'payload'   => $envelope['payload'],
+            'signed_at' => $envelope['signed_at'],
+        ];
 
-        $envelope['signature'] = $this->signPayload($envelope['payload'], (int) $companyId);
+        $envelope['signature'] = $this->signPayload($signable, (int) $companyId);
 
         return $envelope;
     }
@@ -71,7 +85,7 @@ class MeshSignatureService
     // ── Private helpers ──────────────────────────────────────────────────────
 
     /**
-     * JSON-encode the payload in a deterministic (sorted-key) order.
+     * JSON-encode in a deterministic (recursively sorted-key) order.
      */
     private function canonicalise(array $payload): string
     {
@@ -105,13 +119,37 @@ class MeshSignatureService
     }
 
     /**
-     * Resolve the signing secret for this company's own node.
-     * Uses the application key as a fallback for single-node deployments.
+     * Resolve the signing secret for this node.
+     *
+     * Uses the application key for single-node deployments. Supports Laravel
+     * application keys stored either as raw strings or in the usual
+     * "base64:{encoded-bytes}" format.
+     *
+     * Per-company mesh secrets can be introduced later by wiring them through a
+     * dedicated config/env source (e.g., config('mesh.company_secrets.{id}')).
      */
     private function resolveOwnSecret(int $companyId): string
     {
-        $configured = config("mesh.company_secrets.{$companyId}");
+        $appKey = config('app.key');
 
-        return $configured ?? config('app.key');
+        if (! is_string($appKey) || $appKey === '') {
+            throw new \RuntimeException(
+                'MeshSignatureService: app.key must be configured to sign mesh payloads.'
+            );
+        }
+
+        if (str_starts_with($appKey, 'base64:')) {
+            $decoded = base64_decode(substr($appKey, 7), true);
+
+            if ($decoded === false) {
+                throw new \RuntimeException(
+                    'MeshSignatureService: app.key uses an invalid base64 encoding.'
+                );
+            }
+
+            return $decoded;
+        }
+
+        return $appKey;
     }
 }

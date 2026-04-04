@@ -30,19 +30,25 @@ class MeshTrustService
     }
 
     /**
-     * Compute a trust score (0.0–1.0) based on completed jobs vs total events.
+     * Compute a trust score (0.0–1.0) based on completed jobs vs disputes.
+     * Uses DB aggregation to avoid loading all trust events into memory.
      */
     public function computeTrustScore(MeshNode $node): float
     {
-        $events = MeshTrustEvent::forNode($node->node_id)->get();
+        $aggregates = MeshTrustEvent::forNode($node->node_id)
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw("SUM(CASE WHEN event_type = 'job_completed' THEN 1 ELSE 0 END) as completed")
+            ->selectRaw("SUM(CASE WHEN event_type = 'dispute_raised' THEN 1 ELSE 0 END) as disputes")
+            ->first();
 
-        if ($events->isEmpty()) {
+        $total = (int) ($aggregates?->total ?? 0);
+
+        if ($total === 0) {
             return 0.0;
         }
 
-        $completed = $events->where('event_type', 'job_completed')->count();
-        $disputes  = $events->where('event_type', 'dispute_raised')->count();
-        $total     = $events->count();
+        $completed = (int) ($aggregates?->completed ?? 0);
+        $disputes  = (int) ($aggregates?->disputes ?? 0);
 
         // Simple weighted scoring: +1 completed, -2 disputes
         $score = ($completed - ($disputes * 2)) / max($total, 1);

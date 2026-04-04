@@ -14,9 +14,18 @@ class MeshSettlementService
 {
     /**
      * Calculate and persist a settlement record for a completed dispatch request.
+     *
+     * @throws \InvalidArgumentException if the dispatch request has no fulfilling company.
      */
     public function calculateSettlement(MeshDispatchRequest $request): MeshSettlement
     {
+        if ($request->fulfilling_company_id === null) {
+            throw new \InvalidArgumentException(
+                "Cannot create settlement for dispatch request [{$request->id}]: fulfilling_company_id is not set. " .
+                'A request must be accepted by a fulfilling node before settlement can be calculated.'
+            );
+        }
+
         $amount           = $this->deriveAmount($request);
         $commissionAmount = round($amount * (float) $request->commission_rate, 2);
         $netAmount        = round($amount - $commissionAmount, 2);

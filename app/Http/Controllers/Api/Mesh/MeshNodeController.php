@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Mesh;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mesh\MeshDispatchRequest;
 use App\Models\Mesh\MeshNode;
 use App\Services\Mesh\MeshDispatchService;
 use App\Services\Mesh\MeshRegistryService;
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\Log;
  *
  * Security: ALL requests must carry a valid HMAC-SHA256 signature in the
  * X-Mesh-Signature header. Unsigned or invalid payloads are rejected with 401.
+ *
+ * Cross-node references use `mesh_job_reference` (a portable UUID-like string)
+ * rather than internal DB IDs, which are not stable across separate instances.
  */
 class MeshNodeController extends Controller
 {
@@ -78,8 +82,8 @@ class MeshNodeController extends Controller
     public function offer(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'node_id'                  => ['required', 'uuid'],
-            'mesh_dispatch_request_id' => ['required', 'integer'],
+            'node_id'             => ['required', 'uuid'],
+            'mesh_job_reference'  => ['required', 'string', 'max:64'],
         ]);
 
         $node = $this->resolveAndVerifyNode($request, $data['node_id']);
@@ -88,7 +92,13 @@ class MeshNodeController extends Controller
             return $this->unauthorised('Insufficient trust level for dispatch offers.');
         }
 
-        $meshRequest = \App\Models\Mesh\MeshDispatchRequest::findOrFail($data['mesh_dispatch_request_id']);
+        $meshRequest = MeshDispatchRequest::where('mesh_job_reference', $data['mesh_job_reference'])
+            ->where('status', MeshDispatchRequest::STATUS_OPEN)
+            ->first();
+
+        if ($meshRequest === null) {
+            return response()->json(['error' => 'Dispatch request not found or not in open state.'], 404);
+        }
 
         $this->dispatch->offerToNode($meshRequest, $node);
 
@@ -100,8 +110,8 @@ class MeshNodeController extends Controller
     public function accept(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'node_id'                  => ['required', 'uuid'],
-            'mesh_dispatch_request_id' => ['required', 'integer'],
+            'node_id'            => ['required', 'uuid'],
+            'mesh_job_reference' => ['required', 'string', 'max:64'],
         ]);
 
         $node = $this->resolveAndVerifyNode($request, $data['node_id']);
@@ -110,7 +120,14 @@ class MeshNodeController extends Controller
             return $this->unauthorised('Insufficient trust level for dispatch acceptance.');
         }
 
-        $meshRequest = \App\Models\Mesh\MeshDispatchRequest::findOrFail($data['mesh_dispatch_request_id']);
+        $meshRequest = MeshDispatchRequest::where('mesh_job_reference', $data['mesh_job_reference'])
+            ->where('fulfilling_company_id', $node->company_id)
+            ->where('status', MeshDispatchRequest::STATUS_OFFERED)
+            ->first();
+
+        if ($meshRequest === null) {
+            return response()->json(['error' => 'Dispatch request not found, not in offered state, or not targeted at this node.'], 404);
+        }
 
         $this->dispatch->acceptOffer($meshRequest);
 
@@ -122,9 +139,9 @@ class MeshNodeController extends Controller
     public function complete(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'node_id'                  => ['required', 'uuid'],
-            'mesh_dispatch_request_id' => ['required', 'integer'],
-            'evidence'                 => ['required', 'array'],
+            'node_id'            => ['required', 'uuid'],
+            'mesh_job_reference' => ['required', 'string', 'max:64'],
+            'evidence'           => ['required', 'array'],
         ]);
 
         $node = $this->resolveAndVerifyNode($request, $data['node_id']);
@@ -133,7 +150,14 @@ class MeshNodeController extends Controller
             return $this->unauthorised('Insufficient trust level for evidence submission.');
         }
 
-        $meshRequest = \App\Models\Mesh\MeshDispatchRequest::findOrFail($data['mesh_dispatch_request_id']);
+        $meshRequest = MeshDispatchRequest::where('mesh_job_reference', $data['mesh_job_reference'])
+            ->where('fulfilling_company_id', $node->company_id)
+            ->whereIn('status', [MeshDispatchRequest::STATUS_ACCEPTED, MeshDispatchRequest::STATUS_EXECUTING])
+            ->first();
+
+        if ($meshRequest === null) {
+            return response()->json(['error' => 'Dispatch request not found, not in accepted/executing state, or not owned by this node.'], 404);
+        }
 
         $this->dispatch->completeRequest($meshRequest, $data['evidence']);
 
@@ -144,7 +168,7 @@ class MeshNodeController extends Controller
 
     /**
      * Look up the calling peer node and verify its signature.
-     * Returns null if verification fails.
+     * Returns null if the node is unknown or the signature is invalid.
      */
     private function resolveAndVerifyNode(Request $request, string $nodeId): ?MeshNode
     {

@@ -44,7 +44,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('requesting_company_id')->index();
             $table->unsignedBigInteger('fulfilling_company_id')->nullable()->index();
-            $table->unsignedBigInteger('original_job_id')->nullable();
+            $table->unsignedBigInteger('original_job_id')->nullable()->index();
+            $table->foreign('original_job_id')->references('id')->on('service_jobs')->nullOnDelete();
             $table->json('required_capabilities');
             $table->json('location')->nullable();
             $table->enum('urgency', ['low', 'normal', 'high', 'emergency'])->default('normal');
@@ -81,7 +82,8 @@ return new class extends Migration
         // ── mesh_settlements ────────────────────────────────────────────────
         Schema::create('mesh_settlements', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('mesh_dispatch_request_id')->index();
+            $table->unsignedBigInteger('mesh_dispatch_request_id')->unique();
+            $table->foreign('mesh_dispatch_request_id')->references('id')->on('mesh_dispatch_requests')->cascadeOnDelete();
             $table->unsignedBigInteger('requesting_company_id')->index();
             $table->unsignedBigInteger('fulfilling_company_id')->index();
             $table->decimal('amount', 12, 2);

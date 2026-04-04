@@ -241,4 +241,18 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/cases/{case}/snapshots', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'snapshots'])->name('cases.snapshots');
         Route::post('/cases/{case}/promote-lifecycle', [\App\Extensions\TitanRewind\System\Http\Controllers\TitanRewindApiController::class, 'promoteLifecycle'])->name('cases.promoteLifecycle');
     });
+
+    // ── MODULE 10 TitanMesh: Inbound peer-to-peer mesh protocol ──────────────
+    Route::prefix('mesh')->as('api.mesh.')->middleware(['throttle:60,1'])->group(static function () {
+        Route::post('handshake',         [\App\Http\Controllers\Api\Mesh\MeshNodeController::class, 'handshake'])
+            ->name('handshake');
+        Route::post('capabilities',      [\App\Http\Controllers\Api\Mesh\MeshNodeController::class, 'capabilities'])
+            ->name('capabilities');
+        Route::post('dispatch/offer',    [\App\Http\Controllers\Api\Mesh\MeshNodeController::class, 'offer'])
+            ->name('dispatch.offer');
+        Route::post('dispatch/accept',   [\App\Http\Controllers\Api\Mesh\MeshNodeController::class, 'accept'])
+            ->name('dispatch.accept');
+        Route::post('dispatch/complete', [\App\Http\Controllers\Api\Mesh\MeshNodeController::class, 'complete'])
+            ->name('dispatch.complete');
+    });
 });

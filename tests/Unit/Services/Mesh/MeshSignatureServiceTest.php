@@ -80,7 +80,6 @@ it('verifyPayload returns false for an incorrect signature', function () {
 // ── buildMeshEnvelope ────────────────────────────────────────────────────────
 
 it('buildMeshEnvelope returns required envelope keys', function () {
-    // Mock Auth so the service can resolve a company_id
     $payload  = ['company_id' => 1, 'data' => 'test'];
     $envelope = $this->service->buildMeshEnvelope($payload, 'handshake');
 
@@ -89,14 +88,48 @@ it('buildMeshEnvelope returns required envelope keys', function () {
     expect($envelope['signature'])->toBeString()->not->toBeEmpty();
 });
 
-it('buildMeshEnvelope signature can be verified using app key', function () {
+it('buildMeshEnvelope signature covers the full envelope not just payload', function () {
     $payload  = ['company_id' => 1, 'ref' => 'test-ref'];
     $envelope = $this->service->buildMeshEnvelope($payload, 'test');
 
-    // The envelope signature is built with the app key (fallback)
-    $appKey   = config('app.key');
-    $node     = new MeshNode();
+    // The signature is over action+payload+signed_at, resolved with the app key.
+    // Verify by reconstructing the signable object and signing it with the app key.
+    $appKey = config('app.key');
+    if (str_starts_with($appKey, 'base64:')) {
+        $appKey = base64_decode(substr($appKey, 7), true);
+    }
+
+    $signable = [
+        'action'    => $envelope['action'],
+        'payload'   => $envelope['payload'],
+        'signed_at' => $envelope['signed_at'],
+    ];
+
+    $node             = new MeshNode();
     $node->public_key = $appKey;
 
-    expect($this->service->verifyPayload($envelope['payload'], $envelope['signature'], $node))->toBeTrue();
+    // The signature was built with signPayload($signable), verify the same way
+    expect($this->service->verifyPayload($signable, $envelope['signature'], $node))->toBeTrue();
+});
+
+it('buildMeshEnvelope signature fails verification if action is changed', function () {
+    $payload  = ['company_id' => 1];
+    $envelope = $this->service->buildMeshEnvelope($payload, 'original-action');
+
+    $appKey = config('app.key');
+    if (str_starts_with($appKey, 'base64:')) {
+        $appKey = base64_decode(substr($appKey, 7), true);
+    }
+
+    $node             = new MeshNode();
+    $node->public_key = $appKey;
+
+    // Tamper with action — verification must fail
+    $tamperedSignable = [
+        'action'    => 'tampered-action',
+        'payload'   => $envelope['payload'],
+        'signed_at' => $envelope['signed_at'],
+    ];
+
+    expect($this->service->verifyPayload($tamperedSignable, $envelope['signature'], $node))->toBeFalse();
 });

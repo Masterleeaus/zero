@@ -13,27 +13,34 @@ use Illuminate\Support\Facades\Log;
  *
  * The listener is intentionally tolerant: if TrustLedgerService is not yet
  * available (Modules 01–06 gate not passed), it logs and continues silently
- * rather than breaking the mesh workflow.
+ * rather than breaking the mesh workflow. This allows safe module installation
+ * order flexibility without hard coupling to Module 03.
  */
 class RecordMeshOperationOnTrustLedger
 {
-    public function handleHandshake(MeshNodeHandshaked $event): void
+    /**
+     * Laravel calls this method when the listener is wired via $listen.
+     * We branch on the concrete event type to produce the correct ledger entry.
+     */
+    public function handle(object $event): void
     {
-        $this->record('mesh_node_handshaked', [
-            'node_id'     => $event->node->node_id,
-            'company_id'  => $event->node->company_id,
-            'trust_level' => $event->node->trust_level,
-        ]);
-    }
+        if ($event instanceof MeshNodeHandshaked) {
+            $this->record('mesh_node_handshaked', [
+                'node_id'     => $event->node->node_id,
+                'company_id'  => $event->node->company_id,
+                'trust_level' => $event->node->trust_level,
+            ]);
+            return;
+        }
 
-    public function handleCompleted(MeshDispatchCompleted $event): void
-    {
-        $this->record('mesh_job_completed', [
-            'mesh_dispatch_request_id' => $event->request->id,
-            'requesting_company_id'    => $event->request->requesting_company_id,
-            'fulfilling_company_id'    => $event->request->fulfilling_company_id,
-            'evidence_hash'            => $event->request->evidence_hash,
-        ]);
+        if ($event instanceof MeshDispatchCompleted) {
+            $this->record('mesh_job_completed', [
+                'mesh_dispatch_request_id' => $event->request->id,
+                'requesting_company_id'    => $event->request->requesting_company_id,
+                'fulfilling_company_id'    => $event->request->fulfilling_company_id,
+                'evidence_hash'            => $event->request->evidence_hash,
+            ]);
+        }
     }
 
     private function record(string $entryType, array $payload): void

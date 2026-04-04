@@ -75,10 +75,14 @@ class MeshDispatchService
 
     /**
      * Mark the request as completed and attach evidence hash.
+     *
+     * The evidence hash is produced from a canonically serialised representation
+     * (recursively sorted keys) to ensure consistent hashes across different peer
+     * implementations regardless of JSON key order.
      */
     public function completeRequest(MeshDispatchRequest $request, array $evidenceData): void
     {
-        $evidenceHash = hash('sha256', json_encode($evidenceData));
+        $evidenceHash = hash('sha256', $this->canonicalise($evidenceData));
 
         $request->update([
             'status'        => MeshDispatchRequest::STATUS_COMPLETED,
@@ -98,5 +102,35 @@ class MeshDispatchService
         }
 
         return null;
+    }
+
+    /**
+     * Produce a deterministic canonical JSON string for hashing.
+     * Recursively sorts associative array keys; preserves list ordering.
+     */
+    private function canonicalise(array $data): string
+    {
+        return json_encode(
+            $this->canonicaliseValue($data),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+        );
+    }
+
+    /** @return mixed */
+    private function canonicaliseValue(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        foreach ($value as $key => $v) {
+            $value[$key] = $this->canonicaliseValue($v);
+        }
+
+        if (! array_is_list($value)) {
+            ksort($value);
+        }
+
+        return $value;
     }
 }
