@@ -199,6 +199,14 @@ use App\Events\Predict\PredictionFeedbackRecorded;
 use App\Listeners\Predict\NotifyOnHighConfidencePrediction;
 use App\Listeners\Predict\UpdateAssetPredictionOnServiceEvent;
 use App\Listeners\Predict\UpdateSLAPredictionOnJobCompletion;
+// ── MODULE 09 — ExecutionFinanceLayer ────────────────────────────────────────
+use App\Events\Finance\JobCostRecorded;
+use App\Events\Finance\JobFinancialSummaryUpdated;
+use App\Events\Finance\UnprofitableJobDetected;
+use App\Events\Finance\JobInvoiced as FinanceJobInvoiced;
+use App\Listeners\Finance\RecalculateFinancialSummaryOnCostChange;
+use App\Listeners\Finance\NotifyOnUnprofitableJob;
+use App\Listeners\Finance\RecordRevenueOnJobBilled;
 use App\Events\Work\FieldServiceSaleCreated;
 use App\Events\Work\FieldServiceSaleApproved;
 use App\Events\Work\FieldServiceSaleConvertedToJob;
@@ -561,6 +569,17 @@ class EventServiceProvider extends ServiceProvider
         MandatoryDocumentAcknowledged::class => [],
         DocumentVersionPublished::class   => [],
         DocumentReviewDue::class          => [],
+        // ── MODULE 09 — ExecutionFinanceLayer ──────────────────────────────────────
+        JobCostRecorded::class => [
+            RecalculateFinancialSummaryOnCostChange::class,
+        ],
+        JobFinancialSummaryUpdated::class => [],
+        UnprofitableJobDetected::class => [
+            NotifyOnUnprofitableJob::class,
+        ],
+        FinanceJobInvoiced::class => [
+            RecordRevenueOnJobBilled::class,
+        ],
     ];
 
     /**
