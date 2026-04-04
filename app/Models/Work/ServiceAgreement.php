@@ -27,6 +27,11 @@ class ServiceAgreement extends Model
         'expired_at'             => 'datetime',
         'has_equipment_coverage' => 'boolean',
         'recurring_plan_count'   => 'integer',
+        'sale_recurrence_terms'  => 'array',
+        'commercial_start_date'  => 'date',
+        'commercial_end_date'    => 'date',
+        'committed_visits'       => 'integer',
+        'covered_visits_used'    => 'integer',
     ];
 
     public function scopeActive($query)
@@ -233,6 +238,72 @@ class ServiceAgreement extends Model
             'pending_jobs'         => $this->jobs()->whereNotIn('status', ['completed', 'cancelled'])->count(),
             'total_visits'         => $this->visits()->count(),
             'completed_visits'     => $this->visits()->where('status', 'completed')->count(),
+        ];
+    }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * The Quote or commercial source that funded the recurring coverage on this agreement.
+     *
+     * Checks originating_quote_id first (explicit recurring source),
+     * then renewal_quote_id (latest renewal), then quote_id (general sale link).
+     */
+    public function commercialCoverageSource(): ?\App\Models\Money\Quote
+    {
+        if ($this->originating_quote_id) {
+            $q = \App\Models\Money\Quote::find($this->originating_quote_id);
+            if ($q) {
+                return $q;
+            }
+        }
+
+        if ($this->renewal_quote_id) {
+            $q = \App\Models\Money\Quote::find($this->renewal_quote_id);
+            if ($q) {
+                return $q;
+            }
+        }
+
+        return $this->quote;
+    }
+
+    /**
+     * Summary of recurring obligations committed under this agreement.
+     *
+     * @return array{
+     *     agreement_id: int,
+     *     recurring_source: string|null,
+     *     frequency: string|null,
+     *     committed_visits: int|null,
+     *     covered_visits_used: int,
+     *     visits_remaining: int|null,
+     *     commercial_start_date: string|null,
+     *     commercial_end_date: string|null,
+     *     projected_visits: int,
+     *     pending_visits: int
+     * }
+     */
+    public function recurringObligationSummary(): array
+    {
+        $totalProjected = $this->visits()->count();
+        $pending        = $this->visits()->whereIn('status', ['pending', 'scheduled'])->count();
+
+        $remaining = $this->committed_visits !== null
+            ? max(0, $this->committed_visits - ($this->covered_visits_used ?? 0))
+            : null;
+
+        return [
+            'agreement_id'         => $this->id,
+            'recurring_source'     => $this->recurring_source,
+            'frequency'            => $this->frequency,
+            'committed_visits'     => $this->committed_visits,
+            'covered_visits_used'  => $this->covered_visits_used ?? 0,
+            'visits_remaining'     => $remaining,
+            'commercial_start_date' => $this->commercial_start_date?->toDateString(),
+            'commercial_end_date'   => $this->commercial_end_date?->toDateString(),
+            'projected_visits'     => $totalProjected,
+            'pending_visits'       => $pending,
         ];
     }
 }

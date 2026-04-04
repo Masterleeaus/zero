@@ -676,6 +676,9 @@ class Customer extends Model
         return \App\Models\Equipment\InstalledEquipment::query()
             ->whereIn('premises_id', $premisesIds)
             ->where('company_id', $this->company_id)
+            ->get();
+    }
+
     // ── fieldservice_sale helpers ─────────────────────────────────────────────
 
     /**
@@ -704,6 +707,10 @@ class Customer extends Model
             ->where('company_id', $this->company_id)
             ->where('status', 'active')
             ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
      * Service agreements for this customer that were created via a quote/sale.
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceAgreement>
@@ -733,6 +740,9 @@ class Customer extends Model
             ->whereIn('invoice_id', $invoiceIds)
             ->orderByDesc('created_at')
             ->get();
+    }
+
+    /**
      * Chronological timeline of quote-to-service transitions for this customer.
      *
      * Returns a merged view of:
@@ -796,5 +806,55 @@ class Customer extends Model
         }
 
         return $entries->sortByDesc('date')->values();
+    }
+
+    // ── fieldservice_sale_recurring_agreement helpers ─────────────────────────
+
+    /**
+     * Active service agreements for this customer that have sale-backed recurring coverage.
+     *
+     * Returns agreements where recurring_source = 'sale' and status = 'active'.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServiceAgreement>
+     */
+    public function recurringCoverageFromSales(): \Illuminate\Database\Eloquent\Collection
+    {
+        return \App\Models\Work\ServiceAgreement::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('recurring_source', 'sale')
+            ->where('status', 'active')
+            ->orderByDesc('commercial_start_date')
+            ->get();
+    }
+
+    /**
+     * Upcoming service plan visits projected from sale-originated recurring plans.
+     *
+     * Returns pending/scheduled visits with sale_originated = true,
+     * ordered by scheduled_date ascending.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Work\ServicePlanVisit>
+     */
+    public function upcomingSoldRecurringVisits(): \Illuminate\Database\Eloquent\Collection
+    {
+        $planIds = \App\Models\Work\ServicePlan::query()
+            ->where('customer_id', $this->id)
+            ->where('company_id', $this->company_id)
+            ->where('originated_from_sale', true)
+            ->where('status', 'active')
+            ->pluck('id');
+
+        if ($planIds->isEmpty()) {
+            return \App\Models\Work\ServicePlanVisit::query()->whereRaw('1=0')->get();
+        }
+
+        return \App\Models\Work\ServicePlanVisit::query()
+            ->whereIn('service_plan_id', $planIds)
+            ->where('sale_originated', true)
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->where('scheduled_date', '>=', now()->toDateString())
+            ->orderBy('scheduled_date')
+            ->get();
     }
 }
