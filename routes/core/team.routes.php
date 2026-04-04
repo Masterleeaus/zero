@@ -120,5 +120,14 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('app.dashb
                 Route::get('gaps', [\App\Http\Controllers\Team\CapabilityController::class, 'gaps'])
                     ->name('gaps');
             });
+
+            // ── HRM Pass 2: Departments ───────────────────────────────────────
+            Route::resource('departments', \App\Http\Controllers\Core\Team\DepartmentController::class);
+
+            // ── HRM Pass 2: Leave approval ────────────────────────────────────
+            Route::post('work/leaves/{leave}/approve', [\App\Http\Controllers\Core\Work\LeaveController::class, 'approve'])
+                ->name('work.leaves.approve');
+            Route::post('work/leaves/{leave}/reject', [\App\Http\Controllers\Core\Work\LeaveController::class, 'reject'])
+                ->name('work.leaves.reject');
         });
     });

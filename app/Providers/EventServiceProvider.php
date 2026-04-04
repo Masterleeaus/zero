@@ -691,6 +691,12 @@ class EventServiceProvider extends ServiceProvider
             RecordMeshEventOnTimeGraph::class,
         ],
         MeshSettlementDue::class => [],
+        // ── MODULE HRM_PASS2 — HRM Extension signals ──────────────────────────────
+        \App\Events\Work\ShiftAssigned::class          => [],
+        \App\Events\Work\LeaveApproved::class          => [],
+        \App\Events\Work\LeaveRejected::class          => [],
+        \App\Events\Work\EmployeeStatusChanged::class  => [],
+        \App\Events\Work\DepartmentAssigned::class     => [],
     ];
 
     /**

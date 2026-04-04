@@ -452,4 +452,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(AvailabilityOverride::class);
     }
+
+    // ── HRM ──────────────────────────────────────────────────────────────────
+
+    public function staffProfile(): HasOne
+    {
+        return $this->hasOne(\App\Models\Work\StaffProfile::class);
+    }
+
+    public function directReportProfiles(): HasMany
+    {
+        return $this->hasMany(\App\Models\Work\StaffProfile::class, 'manager_id');
+    }
 }
