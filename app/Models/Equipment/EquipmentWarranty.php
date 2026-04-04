@@ -106,7 +106,7 @@ class EquipmentWarranty extends Model
 
     public function siteAsset(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Work\SiteAsset::class, 'site_asset_id');
+        return $this->belongsTo(\App\Models\Facility\SiteAsset::class, 'site_asset_id');
     }
 
     public function agreement(): BelongsTo
