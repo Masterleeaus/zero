@@ -157,6 +157,12 @@
             "status": "installed",
             "installed_at": "2026-04-03",
             "notes": "MODULE_05: EdgeDeviceSession/EdgeSyncQueue/EdgeSyncLog/EdgeSyncConflict models, EdgeSyncService+EdgeConflictResolverService+EdgeSyncPayloadProcessor, 4 events+1 listener, EdgeSyncController at /api/v1/sync/*"
+        },
+        "execution_time_graph": {
+            "name": "execution_time_graph",
+            "status": "installed",
+            "installed_at": "2026-04-03",
+            "notes": "MODULE_06: ExecutionGraph/ExecutionEvent/ExecutionGraphCheckpoint models, ExecutionTimeGraphService+ExecutionReplayService, 4 events, RecordSignalToTimeGraph job, ExecutionTimeGraphController routes at dashboard.timegraph.*"
         }
     },
     "next_module": "module_9",
