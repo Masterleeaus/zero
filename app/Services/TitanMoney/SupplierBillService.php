@@ -212,7 +212,7 @@ class SupplierBillService
                 'notes'             => "Generated from PO {$po->po_number}",
             ], $overrides));
 
-            foreach ($po->items as $item) {
+            foreach ($po->loadMissing('items.inventoryItem')->items as $item) {
                 $qty = $item->qty_received > 0 ? $item->qty_received : $item->qty_ordered;
 
                 SupplierBillItem::create([

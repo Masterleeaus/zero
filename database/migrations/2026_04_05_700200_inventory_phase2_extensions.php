@@ -137,7 +137,12 @@ return new class extends Migration
 
         Schema::table('stock_movements', static function (Blueprint $table) {
             if (Schema::hasColumn('stock_movements', 'service_job_id')) {
-                $table->dropIndex(['service_job_id']);
+                // Safely drop the index (name may vary by driver)
+                try {
+                    $table->dropIndex('stock_movements_service_job_id_index');
+                } catch (\Throwable) {
+                    // Index may not exist or name differs — skip
+                }
                 $table->dropColumn('service_job_id');
             }
             if (Schema::hasColumn('stock_movements', 'movement_reason')) {
@@ -148,7 +153,11 @@ return new class extends Migration
         Schema::table('job_material_usage', static function (Blueprint $table) {
             foreach (['company_id', 'service_job_id', 'stock_movement_id'] as $col) {
                 if (Schema::hasColumn('job_material_usage', $col)) {
-                    $table->dropIndex([$col]);
+                    try {
+                        $table->dropIndex("job_material_usage_{$col}_index");
+                    } catch (\Throwable) {
+                        // Index may not exist or name differs — skip
+                    }
                 }
             }
             $columns = array_filter(
@@ -156,7 +165,7 @@ return new class extends Migration
                 fn ($col) => Schema::hasColumn('job_material_usage', $col)
             );
             if ($columns) {
-                $table->dropColumn($columns);
+                $table->dropColumn(array_values($columns));
             }
         });
     }

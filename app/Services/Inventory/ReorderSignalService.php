@@ -22,7 +22,7 @@ class ReorderSignalService
             ->where('company_id', $companyId)
             ->where('track_quantity', true)
             ->where('status', 'active')
-            ->whereRaw('qty_on_hand <= reorder_point')
+            ->whereColumn('qty_on_hand', '<=', 'reorder_point')
             ->get();
 
         $signals = [];
@@ -51,7 +51,7 @@ class ReorderSignalService
             ->where('company_id', $companyId)
             ->where('track_quantity', true)
             ->where('low_stock_flag', true)
-            ->whereRaw('qty_on_hand > reorder_point')
+            ->whereColumn('qty_on_hand', '>', 'reorder_point')
             ->update(['low_stock_flag' => false]);
 
         return $signals;

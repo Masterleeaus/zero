@@ -41,6 +41,7 @@ class MaterialUsageService
             DB::table('job_material_usage')->insert([
                 'company_id'        => $data['company_id'],
                 'created_by'        => $data['created_by'] ?? null,
+                // job_id is the legacy column name; service_job_id is the Phase 2 alias
                 'job_id'            => $data['service_job_id'],
                 'service_job_id'    => $data['service_job_id'],
                 'item_id'           => $data['item_id'],

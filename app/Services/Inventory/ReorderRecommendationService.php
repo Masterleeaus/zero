@@ -19,7 +19,7 @@ class ReorderRecommendationService
             ->where('company_id', $companyId)
             ->where('track_quantity', true)
             ->where('status', 'active')
-            ->whereRaw('qty_on_hand <= reorder_point')
+            ->whereColumn('qty_on_hand', '<=', 'reorder_point')
             ->get();
 
         if ($lowItems->isEmpty()) {
