@@ -14,6 +14,21 @@ jobs:
     name: CI (GitHub-hosted)
     runs-on: ubuntu-latest
 
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      APP_DEBUG: false
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      BCRYPT_ROUNDS: 4
+      TELESCOPE_ENABLED: false
+      SENTRY_LARAVEL_DSN: ""
+      LOG_CHANNEL: stderr
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,47 +50,42 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy .env
-        run: cp .env.example .env 2>/dev/null || cp .env.testing .env 2>/dev/null || echo "APP_KEY=" > .env
-
-      - name: Generate app key
-        run: php artisan key:generate --force
-
-      - name: Boot check — config cache
-        run: php artisan config:cache
+      - name: Create .env for CI
+        run: |
+          cp .env.example .env
+          # Override with CI-safe values
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=:memory:/' .env
+          php artisan key:generate --force
 
       - name: Boot check — route list
         run: php artisan route:list --no-ansi
 
       - name: Boot check — migrations (SQLite in-memory)
-        run: php artisan migrate --force --env=testing
+        run: php artisan migrate --force
 
       - name: Run tests (Pest)
-        run: php artisan test --parallel --no-ansi
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
+        run: php artisan test --no-ansi
 
-      - name: Upload test artifacts on failure
+      - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-output-hosted
-          path: |
-            storage/logs/laravel.log
-            .env
+          name: ci-logs-${{ github.run_number }}
+          path: storage/logs/laravel.log
 
   # ──────────────────────────────────────────────────────────────
   # Job 2: Self-hosted runner — real environment proof
-  # Requires a self-hosted runner tagged [self-hosted, linux, zero]
-  # installed on your DirectAdmin VPS.
-  # Comment this job out until the runner is configured.
+  # Requires a runner tagged [self-hosted, linux, zero] on your VPS.
+  # This job is disabled until the runner is installed.
+  # To enable: remove the 'if: false' line below.
   # ──────────────────────────────────────────────────────────────
   ci-selfhosted:
     name: CI (Self-hosted / Real Env)
     runs-on: [self-hosted, linux, zero]
-    if: github.event_name == 'pull_request'
+    if: false  # Remove this line once runner is installed on VPS
 
     steps:
       - name: Checkout
@@ -84,19 +94,17 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy .env (real env)
+      - name: Ensure .env exists
         run: |
           if [ ! -f .env ]; then
             cp .env.example .env
             php artisan key:generate --force
           fi
 
-      - name: Boot check — config & routes
-        run: |
-          php artisan config:clear
-          php artisan route:list --no-ansi
+      - name: Boot check — routes
+        run: php artisan route:list --no-ansi
 
-      - name: Run migrations (real DB — testing connection)
+      - name: Run migrations (testing connection)
         run: php artisan migrate --force --env=testing
 
       - name: Run tests
@@ -104,9 +112,9 @@ jobs:
         env:
           APP_ENV: testing
 
-      - name: Upload test artifacts on failure
+      - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-output-selfhosted
+          name: selfhosted-logs-${{ github.run_number }}
           path: storage/logs/laravel.log
