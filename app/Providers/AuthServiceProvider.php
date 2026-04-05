@@ -55,6 +55,8 @@ class AuthServiceProvider extends ServiceProvider
         SupplierBill::class    => SupplierBillPolicy::class,
         SupplierPayment::class => SupplierPaymentPolicy::class,
         \App\Models\Money\JobCostAllocation::class => \App\Policies\JobCostAllocationPolicy::class,
+        \App\Models\Money\Budget::class => \App\Policies\BudgetPolicy::class,
+        \App\Models\Money\FinancialActionRecommendation::class => \App\Policies\FinancialActionRecommendationPolicy::class,
         // ── HRM Pass 2 ─────────────────────────────────────────────────────
         StaffProfile::class    => StaffProfilePolicy::class,
         Department::class      => DepartmentPolicy::class,

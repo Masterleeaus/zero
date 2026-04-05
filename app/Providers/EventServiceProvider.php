@@ -689,6 +689,14 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\Money\CashRunwayWarning::class        => [],
         \App\Events\Money\CashflowRiskDetected::class     => [],
         \App\Events\Money\FinancialRiskDetected::class    => [],
+        \App\Events\Money\BudgetCreated::class             => [],
+        \App\Events\Money\BudgetThresholdExceeded::class   => [],
+        \App\Events\Money\LiquidityRiskDetected::class     => [],
+        \App\Events\Money\PayablesPressureDetected::class  => [],
+        \App\Events\Money\MarginErosionEscalated::class    => [],
+        \App\Events\Money\RecommendationCreated::class     => [],
+        \App\Events\Money\RecommendationApproved::class    => [],
+        \App\Events\Money\RecommendationRejected::class    => [],
         // ── MODULE_10 TitanMesh — federated capability exchange signals ───────
         MeshNodeHandshaked::class => [
             RecordMeshOperationOnTrustLedger::class,
