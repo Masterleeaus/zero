@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       APP_ENV: testing
       APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
       APP_DEBUG: false
@@ -33,10 +34,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: curl, zip, sqlite3, pdo_sqlite, mbstring, openssl, bcmath, xml
           coverage: none
 
@@ -59,6 +60,9 @@ jobs:
           sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
           sed -i 's/^DB_DATABASE=.*/DB_DATABASE=:memory:/' .env
           php artisan key:generate --force
+
+      - name: Prepare storage
+        run: mkdir -p storage/logs storage/framework/{cache,sessions,views}
 
       - name: Boot check — route list
         run: php artisan route:list --no-ansi
