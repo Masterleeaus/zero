@@ -36,17 +36,23 @@ jobs:
             gh label create "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || true
           done
 
-      # ── 2. Auto-label new issues as queued ─────────────────────────────
-      - name: Auto-label newly opened issues as spark:queued
+      # ── 2. Auto-label new issues as queued (Spark title only) ───────────
+      - name: Auto-label spark issues as spark:queued
         if: github.event_name == 'issues' && github.event.action == 'opened'
         run: |
           NUMBER=${{ github.event.issue.number }}
-          # Only label if it doesn't already have any spark: label
-          HAS_SPARK=$(gh issue view $NUMBER --repo "$REPO" --json labels \
-            --jq '[.labels[].name | select(startswith("spark:"))] | length')
-          if [ "$HAS_SPARK" -eq 0 ]; then
-            gh issue edit $NUMBER --repo "$REPO" --add-label "spark:queued"
-            echo "Labelled #$NUMBER as spark:queued"
+          TITLE="${{ github.event.issue.title }}"
+
+          # Only queue issues with [Spark] or [spark] in the title
+          if echo "$TITLE" | grep -qi "\[spark\]"; then
+            HAS_SPARK=$(gh issue view $NUMBER --repo "$REPO" --json labels \
+              --jq '[.labels[].name | select(startswith("spark:"))] | length')
+            if [ "$HAS_SPARK" -eq 0 ]; then
+              gh issue edit $NUMBER --repo "$REPO" --add-label "spark:queued"
+              echo "Labelled #$NUMBER as spark:queued"
+            fi
+          else
+            echo "Issue #$NUMBER is not a Spark request (no [Spark] in title) — skipping"
           fi
 
       # ── 3. When issue closes — mark done, free slot ────────────────────
@@ -79,11 +85,11 @@ jobs:
             exit 0
           fi
 
-          # Get next queued issues — oldest first (lowest issue number)
+          # Get next queued issues — oldest first, must have [Spark] in title
           QUEUED=$(gh issue list --repo "$REPO" \
             --label "spark:queued" --state open \
             --json number,title \
-            --jq "sort_by(.number) | .[:$AVAILABLE]")
+            --jq "[.[] | select(.title | test(\"\\\\[[Ss]park\\\\]\"))] | sort_by(.number) | .[:$AVAILABLE]")
 
           COUNT=$(echo "$QUEUED" | jq 'length')
           if [ "$COUNT" -eq 0 ]; then
