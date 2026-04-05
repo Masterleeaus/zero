@@ -186,6 +186,25 @@ Merge implementation reports.
 
 ---
 
+## `docs/titan-omni/`
+
+Titan Omni architecture, source maps, and alignment documents.
+
+### `docs/titan-omni/source-maps/`
+
+| Doc Name | Purpose | Domain | Updated By | Date |
+|----------|---------|--------|-----------|------|
+| TITAN_OMNI_EXISTING_CODE_AUDIT.md | Full audit of host + donor comms code | Omni | Copilot | 2026-04-05 |
+| TITAN_OMNI_HOST_INSERTION_MAP.md | Exact insertion points across app/routes/db/config | Omni | Copilot | 2026-04-05 |
+
+### `docs/titan-omni/alignment/`
+
+| Doc Name | Purpose | Domain | Updated By | Date |
+|----------|---------|--------|-----------|------|
+| TITAN_OMNI_OWNERSHIP_FREEZE.md | Authoritative ownership boundaries for all Omni passes | Omni | Copilot | 2026-04-05 |
+
+---
+
 ## `docs/issues/`
 
 GitHub issue module specs.
