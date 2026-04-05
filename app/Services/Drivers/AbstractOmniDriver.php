@@ -35,7 +35,7 @@ abstract class AbstractOmniDriver implements OmniDriverContract
     public function isConfigured(): bool
     {
         foreach ($this->requiredConfigKeys() as $key) {
-            if (empty($this->config[$key])) {
+            if (!isset($this->config[$key]) || $this->config[$key] === '' || $this->config[$key] === null) {
                 return false;
             }
         }
