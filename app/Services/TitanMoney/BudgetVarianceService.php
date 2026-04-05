@@ -33,7 +33,7 @@ class BudgetVarianceService
             $actual   = $this->resolveActual($companyId, $line, $from, $to);
             $budgeted = (float) $line->amount;
             $variance = $actual - $budgeted;
-            $variancePct = $budgeted != 0 ? round(($variance / abs($budgeted)) * 100, 2) : null;
+            $variancePct = $budgeted !== 0.0 ? round(($variance / abs($budgeted)) * 100, 2) : null;
 
             $lines[] = [
                 'id'               => $line->id,
@@ -54,7 +54,7 @@ class BudgetVarianceService
         }
 
         $totalVariance    = round($totalActual - $totalBudget, 2);
-        $totalVariancePct = $totalBudget != 0 ? round(($totalVariance / abs($totalBudget)) * 100, 2) : null;
+        $totalVariancePct = $totalBudget !== 0.0 ? round(($totalVariance / abs($totalBudget)) * 100, 2) : null;
 
         return [
             'budget_id'          => $budget->id,

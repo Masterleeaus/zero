@@ -215,7 +215,7 @@ class ScenarioSimulationService
 
     private function impactSeverity(float $marginImpact, float $baselineMargin): string
     {
-        if ($baselineMargin == 0) return 'unknown';
+        if ($baselineMargin === 0.0) return 'unknown';
         $impactPct = abs($marginImpact / $baselineMargin) * 100;
         if ($impactPct < 5)  return 'low';
         if ($impactPct < 15) return 'medium';
