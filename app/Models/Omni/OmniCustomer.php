@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Models\Omni;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Crm\Customer;
+use App\Models\Traits\HasOmniTenancy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -30,6 +34,7 @@ use Illuminate\Support\Str;
 class OmniCustomer extends Model
 {
     use BelongsToCompany;
+    use HasOmniTenancy;
 
     protected $table = 'omni_customers';
 
@@ -63,6 +68,20 @@ class OmniCustomer extends Model
         });
     }
 
+    // ── Host model relationships (read-only bridge) ───────────────────────────
+
+    /**
+     * The canonical CRM Customer record this identity bridges to.
+     * Nullable — channel identities may exist before a CRM match is confirmed.
+     * Omni READS this, never writes to the customers table.
+     */
+    public function crmCustomer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'crm_customer_id');
+    }
+
+    // ── Omni relationships ────────────────────────────────────────────────────
+
     public function conversations(): HasMany
     {
         return $this->hasMany(OmniConversation::class, 'omni_customer_id');
@@ -76,5 +95,23 @@ class OmniCustomer extends Model
     public function callbackSchedules(): HasMany
     {
         return $this->hasMany(Voice\OmniCallbackSchedule::class, 'omni_customer_id');
+    }
+
+    // ── Named scopes ─────────────────────────────────────────────────────────
+
+    /**
+     * Scope: customers whose channel_identities contain the given channel type.
+     */
+    public function scopeOnChannel(Builder $query, string $channel): Builder
+    {
+        return $query->whereJsonContainsKey("channel_identities->{$channel}");
+    }
+
+    /**
+     * Eager-load CRM customer alongside Omni identity for resolution views.
+     */
+    public function scopeWithCrmContext(Builder $query): Builder
+    {
+        return $query->with('crmCustomer');
     }
 }

@@ -41,6 +41,11 @@ use App\TitanCore\Zero\Rewind\RewindManager;
 use App\TitanCore\Zero\Signals\SignalBridge;
 use App\TitanCore\Zero\Telemetry\TelemetryManager;
 use App\TitanCore\Zylos\ZylosBridge;
+use App\Services\Omni\OmniAnalyticsService;
+use App\Services\Omni\OmniChannelService;
+use App\Services\Omni\OmniConversationService;
+use App\Services\Omni\OmniInboxService;
+use App\Services\Omni\OmniKnowledgeService;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -150,6 +155,13 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(PulseManager::class);
         $this->app->singleton(OmniManager::class);
         $this->app->singleton(AgentStudioManager::class);
+
+        // ── Omni services ────────────────────────────────────────────────────
+        $this->app->singleton(OmniConversationService::class);
+        $this->app->singleton(OmniChannelService::class);
+        $this->app->singleton(OmniKnowledgeService::class);
+        $this->app->singleton(OmniInboxService::class);
+        $this->app->singleton(OmniAnalyticsService::class);
 
         // ── Chat Bridge ──────────────────────────────────────────────────────
         // Canonical bridge: all chat surfaces (AIChatPro, Canvas, Chatbot, channels)

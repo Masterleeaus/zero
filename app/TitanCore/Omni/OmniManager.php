@@ -2,6 +2,9 @@
 
 namespace App\TitanCore\Omni;
 
+use App\Models\Omni\OmniConversation;
+use App\Models\Omni\OmniMessage;
+use App\Services\Omni\OmniConversationService;
 use App\TitanCore\Zero\AI\TitanAIRouter;
 use App\TitanCore\Zero\Telemetry\TelemetryManager;
 use Illuminate\Support\Str;
@@ -11,6 +14,7 @@ class OmniManager
     public function __construct(
         protected TelemetryManager $telemetryManager,
         protected TitanAIRouter $router,
+        protected ?OmniConversationService $conversationService = null,
     ) {
     }
 
@@ -82,5 +86,70 @@ class OmniManager
         $envelope['company_id'] = $envelope['company_id'] ?? ($envelope['team_id'] ?? null);
 
         return $envelope;
+    }
+
+    /**
+     * Persist or retrieve the OmniConversation for the given envelope.
+     *
+     * Delegates to OmniConversationService::findOrCreate() when the service
+     * is available (injected in the container). Falls back to a no-op null
+     * return when running outside the Omni context (e.g. workspace chat).
+     *
+     * @param  array<string, mixed>  $envelope  Normalised dispatch envelope
+     */
+    public function persistConversation(array $envelope): ?OmniConversation
+    {
+        if (! $this->conversationService) {
+            return null;
+        }
+
+        $companyId = $envelope['company_id'] ?? null;
+        $agentId   = $envelope['agent_id'] ?? null;
+
+        if (! $companyId || ! $agentId) {
+            return null;
+        }
+
+        return $this->conversationService->findOrCreate([
+            'company_id'               => $companyId,
+            'agent_id'                 => $agentId,
+            'channel_type'             => $envelope['channel'] ?? 'web',
+            'channel_id'               => $envelope['channel_id'] ?? ($envelope['session_id'] ?? null),
+            'session_id'               => $envelope['session_id'] ?? null,
+            'external_conversation_id' => $envelope['external_conversation_id'] ?? null,
+            'omni_customer_id'         => $envelope['omni_customer_id'] ?? null,
+            'crm_customer_id'          => $envelope['crm_customer_id'] ?? null,
+            'customer_name'            => $envelope['customer_name'] ?? null,
+            'customer_email'           => $envelope['customer_email'] ?? null,
+            'metadata'                 => $envelope['metadata'] ?? null,
+        ]);
+    }
+
+    /**
+     * Persist an OmniMessage against an existing OmniConversation.
+     *
+     * @param  array<string, mixed>  $envelope  Normalised dispatch envelope
+     */
+    public function persistMessage(OmniConversation $conversation, array $envelope): ?OmniMessage
+    {
+        if (! $this->conversationService) {
+            return null;
+        }
+
+        return $this->conversationService->appendMessage($conversation, [
+            'agent_id'            => $envelope['agent_id'] ?? $conversation->agent_id,
+            'direction'           => $envelope['direction'] ?? 'inbound',
+            'content_type'        => $envelope['content_type'] ?? 'text',
+            'content'             => $envelope['content'] ?? ($envelope['message'] ?? null),
+            'sender_type'         => $envelope['sender_type'] ?? 'customer',
+            'sender_id'           => $envelope['sender_id'] ?? null,
+            'media_url'           => $envelope['media_url'] ?? null,
+            'media_type'          => $envelope['media_type'] ?? null,
+            'voice_file_url'      => $envelope['voice_file_url'] ?? null,
+            'voice_transcript'    => $envelope['voice_transcript'] ?? null,
+            'external_message_id' => $envelope['external_message_id'] ?? null,
+            'is_internal_note'    => $envelope['is_internal_note'] ?? false,
+            'metadata'            => $envelope['metadata'] ?? null,
+        ]);
     }
 }
