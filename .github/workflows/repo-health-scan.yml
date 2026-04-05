@@ -1,0 +1,422 @@
+name: Repo Health Scan
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"   # every 4 hours
+  workflow_dispatch:
+
+concurrency:
+  group: repo-health-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan & Create Top 10 Issues
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, zip, sqlite3, pdo_sqlite, mbstring, openssl, bcmath, xml
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Ensure scan label exists
+        run: |
+          gh label create "health-scan"    --color "D93F0B" --description "Auto-detected by repo health scan" --repo "$REPO" 2>/dev/null || true
+          gh label create "agent:queued"   --color "E4E669" --description "Normal issue waiting for agent"    --repo "$REPO" 2>/dev/null || true
+          gh label create "bug"            --color "d73a4a" --description "Something is broken"               --repo "$REPO" 2>/dev/null || true
+          gh label create "enhancement"    --color "a2eeef" --description "Missing or incomplete feature"     --repo "$REPO" 2>/dev/null || true
+
+      # ── SCAN 1: PHP syntax errors ────────────────────────────────────────
+      - name: Scan — PHP syntax errors
+        id: scan_syntax
+        run: |
+          mkdir -p /tmp/scan
+          echo "[]" > /tmp/scan/syntax.json
+
+          ERRORS=$(find app/ -name "*.php" -exec php -l {} 2>&1 \; | grep "^PHP Parse error" | head -20)
+
+          if [ -n "$ERRORS" ]; then
+            python3 -c "
+          import json, sys
+          errors = []
+          for line in '''$ERRORS'''.strip().split('\n'):
+              if line:
+                  errors.append({'title': 'PHP syntax error: ' + line[:120], 'score': 10, 'type': 'bug', 'body': '### PHP Syntax Error\n\n\`\`\`\n' + line + '\n\`\`\`\n\nDetected by repo health scan.'})
+          print(json.dumps(errors))
+          " > /tmp/scan/syntax.json
+          fi
+          echo "Syntax findings: $(cat /tmp/scan/syntax.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 2: Feature gaps from FEATURE_STATUS.json ───────────────────
+      - name: Scan — Feature gaps from FEATURE_STATUS.json
+        id: scan_features
+        run: |
+          python3 -c "
+          import json
+
+          with open('docs/repo-audit/FEATURE_STATUS.json') as f:
+              features = json.load(f)
+
+          findings = []
+          for feat in features:
+              status = feat.get('status', '')
+              gaps = feat.get('gaps', [])
+              name = feat.get('feature_name', '')
+              domain = feat.get('domain', '')
+
+              if status in ('MISSING', 'NOT_STARTED'):
+                  findings.append({
+                      'title': f'[{domain}] Feature missing: {name}',
+                      'score': 9,
+                      'type': 'enhancement',
+                      'body': f'### Missing Feature: {name}\n\n**Domain:** {domain}\n**Status:** {status}\n\n**Evidence gaps:**\n' + '\n'.join(f'- {g}' for g in gaps) + '\n\nDetected by repo health scan from \`docs/repo-audit/FEATURE_STATUS.json\`.'
+                  })
+              elif status in ('PARTIAL', 'INCOMPLETE', 'BROKEN'):
+                  findings.append({
+                      'title': f'[{domain}] Incomplete feature: {name}',
+                      'score': 8,
+                      'type': 'bug',
+                      'body': f'### Incomplete Feature: {name}\n\n**Domain:** {domain}\n**Status:** {status}\n\n**Known gaps:**\n' + '\n'.join(f'- {g}' for g in gaps) + '\n\nDetected by repo health scan.'
+                  })
+              elif gaps:
+                  findings.append({
+                      'title': f'[{domain}] Gaps detected in: {name}',
+                      'score': 6,
+                      'type': 'enhancement',
+                      'body': f'### Feature Gaps: {name}\n\n**Domain:** {domain}\n**Status:** {status}\n\n**Gaps:**\n' + '\n'.join(f'- {g}' for g in gaps[:5]) + '\n\nDetected by repo health scan.'
+                  })
+
+          print(json.dumps(findings))
+          " > /tmp/scan/features.json
+          echo "Feature findings: $(cat /tmp/scan/features.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 3: Routes pointing to missing controllers ───────────────────
+      - name: Scan — Missing route controllers
+        id: scan_routes
+        run: |
+          python3 -c "
+          import subprocess, json, os, re
+
+          result = subprocess.run(
+              ['grep', '-rh', '::class', 'routes/'],
+              capture_output=True, text=True
+          )
+
+          findings = []
+          seen = set()
+          for line in result.stdout.splitlines():
+              matches = re.findall(r'(App\\\\[A-Za-z\\\\]+)', line)
+              for cls in matches:
+                  if cls in seen:
+                      continue
+                  seen.add(cls)
+                  path = 'app/' + cls.replace('App\\\\', '').replace('\\\\', '/') + '.php'
+                  if not os.path.exists(path):
+                      findings.append({
+                          'title': f'Missing controller: {cls.split(chr(92))[-1]}',
+                          'score': 8,
+                          'type': 'bug',
+                          'body': f'### Missing Controller\n\nRoute references \`{cls}\` but the file does not exist:\n\n\`{path}\`\n\nDetected by repo health scan.'
+                      })
+
+          print(json.dumps(findings[:10]))
+          " > /tmp/scan/routes.json
+          echo "Route findings: $(cat /tmp/scan/routes.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 4: Duplicate migration timestamps ───────────────────────────
+      - name: Scan — Duplicate migration timestamps
+        id: scan_migrations
+        run: |
+          python3 -c "
+          import os, json
+          from collections import defaultdict
+
+          files = os.listdir('database/migrations')
+          timestamps = defaultdict(list)
+          for f in files:
+              if f.endswith('.php'):
+                  ts = f[:17]
+                  timestamps[ts].append(f)
+
+          findings = []
+          for ts, names in timestamps.items():
+              if len(names) > 1:
+                  findings.append({
+                      'title': f'Duplicate migration timestamp: {ts}',
+                      'score': 9,
+                      'type': 'bug',
+                      'body': f'### Duplicate Migration Timestamp\n\nTimestamp \`{ts}\` is shared by {len(names)} migrations:\n\n' + '\n'.join(f'- \`{n}\`' for n in names) + '\n\nThis will cause \`php artisan migrate\` to fail. Rename one file with a +1 second offset.\n\nDetected by repo health scan.'
+                  })
+
+          print(json.dumps(findings))
+          " > /tmp/scan/migrations.json
+          echo "Migration findings: $(cat /tmp/scan/migrations.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 5: Orphan listeners ─────────────────────────────────────────
+      - name: Scan — Orphan listeners not in EventServiceProvider
+        id: scan_listeners
+        run: |
+          python3 -c "
+          import os, json
+
+          esp = open('app/Providers/EventServiceProvider.php').read() if os.path.exists('app/Providers/EventServiceProvider.php') else ''
+
+          findings = []
+          for root, dirs, files in os.walk('app/Listeners'):
+              for f in files:
+                  if f.endswith('.php'):
+                      name = f[:-4]
+                      if name not in esp:
+                          findings.append({
+                              'title': f'Orphan listener not registered: {name}',
+                              'score': 6,
+                              'type': 'bug',
+                              'body': f'### Orphan Listener\n\n\`{name}\` exists in \`app/Listeners/\` but is not registered in \`app/Providers/EventServiceProvider.php\`.\n\nThis listener will never be triggered.\n\nDetected by repo health scan.'
+                          })
+
+          print(json.dumps(findings[:5]))
+          " > /tmp/scan/listeners.json
+          echo "Listener findings: $(cat /tmp/scan/listeners.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 6: TODO / FIXME / HACK in app/ ─────────────────────────────
+      - name: Scan — TODO/FIXME/HACK markers in app/
+        id: scan_todos
+        run: |
+          python3 -c "
+          import subprocess, json, re
+
+          result = subprocess.run(
+              ['grep', '-rn', '-E', 'TODO|FIXME|HACK|XXX|BUG:', 'app/', '--include=*.php'],
+              capture_output=True, text=True
+          )
+
+          findings = []
+          seen_files = set()
+          for line in result.stdout.splitlines()[:30]:
+              parts = line.split(':', 2)
+              if len(parts) >= 3:
+                  filepath = parts[0]
+                  lineno = parts[1]
+                  content = parts[2].strip()
+                  if filepath not in seen_files:
+                      seen_files.add(filepath)
+                      tag = re.search(r'(TODO|FIXME|HACK|XXX|BUG)', content)
+                      tag = tag.group(1) if tag else 'TODO'
+                      findings.append({
+                          'title': f'{tag} in {filepath.split(\"/\")[-1]}: {content[:80]}',
+                          'score': 4,
+                          'type': 'enhancement',
+                          'body': f'### Unresolved {tag}\n\n**File:** \`{filepath}\` (line {lineno})\n\n\`\`\`\n{content}\n\`\`\`\n\nDetected by repo health scan.'
+                      })
+
+          print(json.dumps(findings[:5]))
+          " > /tmp/scan/todos.json
+          echo "TODO findings: $(cat /tmp/scan/todos.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 7: Docs mentioning broken/missing items ─────────────────────
+      - name: Scan — Docs flagging missing or broken items
+        id: scan_docs
+        run: |
+          python3 -c "
+          import os, json, re
+
+          keywords = re.compile(r'(missing|broken|not implemented|TODO|error|failing|unresolved|gap|drift)', re.IGNORECASE)
+          findings = []
+          seen = set()
+
+          for root, dirs, files in os.walk('docs/'):
+              for fname in files:
+                  if not fname.endswith('.md'):
+                      continue
+                  path = os.path.join(root, fname)
+                  try:
+                      content = open(path).read()
+                  except:
+                      continue
+                  matches = keywords.findall(content)
+                  if len(matches) >= 3:
+                      key = fname
+                      if key not in seen:
+                          seen.add(key)
+                          # Extract most relevant line
+                          for line in content.splitlines():
+                              if keywords.search(line) and len(line) > 20:
+                                  findings.append({
+                                      'title': f'Doc flags issue in {fname}: {line.strip()[:90]}',
+                                      'score': 5,
+                                      'type': 'enhancement',
+                                      'body': f'### Documentation Flags Issue\n\n**File:** \`{path}\`\n\n**Flagged line:**\n> {line.strip()}\n\n**Keyword hits:** {len(matches)} references to missing/broken items in this doc.\n\nDetected by repo health scan.'
+                                  })
+                                  break
+
+          print(json.dumps(findings[:5]))
+          " > /tmp/scan/docs.json
+          echo "Doc findings: $(cat /tmp/scan/docs.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 8: Missing env vars in .env.example ─────────────────────────
+      - name: Scan — Config keys not in .env.example
+        id: scan_env
+        run: |
+          python3 -c "
+          import subprocess, json, re
+
+          env_example = open('.env.example').read() if __import__('os').path.exists('.env.example') else ''
+          defined_keys = set(re.findall(r'^([A-Z_]+)=', env_example, re.MULTILINE))
+
+          result = subprocess.run(
+              ['grep', '-rh', '-E', r\"env\\\('[A-Z_]+'", 'config/'],
+              capture_output=True, text=True
+          )
+
+          findings = []
+          missing = set()
+          for match in re.findall(r\"env\\\('([A-Z_]+)'\", result.stdout):
+              if match not in defined_keys and match not in missing:
+                  missing.add(match)
+                  findings.append({
+                      'title': f'Missing .env.example entry: {match}',
+                      'score': 5,
+                      'type': 'bug',
+                      'body': f'### Missing .env.example Entry\n\n\`config/\` references \`env(\"{match}\")\` but \`{match}\` is not defined in \`.env.example\`.\n\nThis will cause silent null values or unexpected behaviour in fresh installs and CI.\n\nDetected by repo health scan.'
+                  })
+
+          print(json.dumps(findings[:5]))
+          " > /tmp/scan/env.json
+          echo "Env findings: $(cat /tmp/scan/env.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── SCAN 9: Open issues already flagging errors ───────────────────────
+      - name: Scan — Existing open issues flagging errors
+        id: scan_issues
+        run: |
+          OPEN_ISSUES=$(gh issue list --repo "$REPO" --state open --limit 100 \
+            --json number,title,labels \
+            --jq '[.[] | select(.labels | map(.name) | inside(["health-scan"]) | not)]')
+
+          python3 -c "
+          import json, re
+
+          issues = json.loads('''$OPEN_ISSUES'''.replace(\"'\", ''))
+          error_words = re.compile(r'(error|bug|broken|missing|fail|crash|exception)', re.IGNORECASE)
+          findings = []
+
+          for issue in issues:
+              if error_words.search(issue.get('title', '')):
+                  findings.append({
+                      'title': f'Unresolved error issue #{issue[\"number\"]}: {issue[\"title\"][:80]}',
+                      'score': 7,
+                      'type': 'bug',
+                      'body': f'### Unresolved Error Issue\n\nIssue #{issue[\"number\"]} has been open and references an error/bug:\n\n**Title:** {issue[\"title\"]}\n\nThis was surfaced by the repo health scan as a high-priority unresolved item.\n\nSee: #{issue[\"number\"]}'
+                  })
+
+          print(json.dumps(findings[:3]))
+          " > /tmp/scan/issues.json
+          echo "Issue findings: $(cat /tmp/scan/issues.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')"
+
+      # ── RANK & CREATE TOP 10 ISSUES ──────────────────────────────────────
+      - name: Rank findings and create top 10 issues
+        run: |
+          # Get existing health-scan issue titles to avoid duplicates
+          EXISTING=$(gh issue list --repo "$REPO" --label "health-scan" --state open \
+            --json title --jq '[.[].title]' 2>/dev/null || echo "[]")
+
+          python3 << 'PYEOF'
+          import json, subprocess, os, re
+
+          # Load all scan results
+          scans = ['syntax','features','routes','migrations','listeners','todos','docs','env','issues']
+          all_findings = []
+          for scan in scans:
+              try:
+                  with open(f'/tmp/scan/{scan}.json') as f:
+                      all_findings.extend(json.load(f))
+              except:
+                  pass
+
+          # Sort by score descending
+          all_findings.sort(key=lambda x: x.get('score', 0), reverse=True)
+
+          # Load existing issue titles
+          existing_raw = os.environ.get('EXISTING', '[]')
+          try:
+              existing_titles = [t.lower() for t in json.loads(existing_raw)]
+          except:
+              existing_titles = []
+
+          # Take top 10, skip duplicates
+          created = 0
+          skipped = 0
+          repo = os.environ['REPO']
+
+          for finding in all_findings:
+              if created >= 10:
+                  break
+
+              title = finding['title']
+              # Check for near-duplicate (first 60 chars match)
+              title_key = title.lower()[:60]
+              is_dupe = any(title_key in existing.lower() or existing[:60] in title_key
+                            for existing in existing_titles)
+
+              if is_dupe:
+                  skipped += 1
+                  print(f'SKIP (duplicate): {title[:80]}')
+                  continue
+
+              issue_type = finding.get('type', 'enhancement')
+              score = finding.get('score', 0)
+              priority = 'critical' if score >= 9 else 'high' if score >= 7 else 'medium' if score >= 5 else 'low'
+
+              body = finding['body'] + f"""
+
+---
+*Auto-detected by Repo Health Scan · Priority: {priority} · Score: {score}/10*
+"""
+
+              labels = f"health-scan,agent:queued,{issue_type}"
+
+              result = subprocess.run([
+                  'gh', 'issue', 'create',
+                  '--repo', repo,
+                  '--title', title,
+                  '--body', body,
+                  '--label', labels
+              ], capture_output=True, text=True)
+
+              if result.returncode == 0:
+                  issue_url = result.stdout.strip()
+                  print(f'CREATED [{priority}]: {title[:80]} → {issue_url}')
+                  existing_titles.append(title.lower())
+                  created += 1
+              else:
+                  print(f'FAILED: {title[:80]} — {result.stderr.strip()}')
+
+          print(f'\n── Health Scan Complete ──────────────────')
+          print(f'  Total findings:  {len(all_findings)}')
+          print(f'  Issues created:  {created}')
+          print(f'  Duplicates skipped: {skipped}')
+          PYEOF
+        env:
+          EXISTING: ${{ env.EXISTING }}
