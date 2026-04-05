@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Core\Inventory\APBridgeController;
 use App\Http\Controllers\Core\Inventory\InventoryDashboardController;
 use App\Http\Controllers\Core\Inventory\InventoryItemController;
 use App\Http\Controllers\Core\Inventory\PurchaseOrderController;
+use App\Http\Controllers\Core\Inventory\ReorderController;
+use App\Http\Controllers\Core\Inventory\StockIssueController;
 use App\Http\Controllers\Core\Inventory\StockMovementController;
 use App\Http\Controllers\Core\Inventory\StocktakeController;
 use App\Http\Controllers\Core\Inventory\SupplierController;
@@ -53,6 +56,9 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
             Route::delete('purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchase-orders.destroy');
             Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
 
+            // AP Bridge: generate supplier bill from PO
+            Route::post('purchase-orders/{purchaseOrder}/create-bill', [APBridgeController::class, 'createBillFromPO'])->name('purchase-orders.create-bill');
+
             // Stocktakes
             Route::get('stocktakes', [StocktakeController::class, 'index'])->name('stocktakes.index');
             Route::get('stocktakes/create', [StocktakeController::class, 'create'])->name('stocktakes.create');
@@ -65,6 +71,14 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
 
             // Stock Movements (read-only)
             Route::get('stock-movements', [StockMovementController::class, 'index'])->name('stock-movements.index');
+
+            // Stock Issue to Job
+            Route::get('stock-issue/create', [StockIssueController::class, 'create'])->name('stock-issue.create');
+            Route::post('stock-issue', [StockIssueController::class, 'store'])->name('stock-issue.store');
+
+            // Reorder recommendations
+            Route::get('reorder', [ReorderController::class, 'index'])->name('reorder.index');
+            Route::post('reorder/scan', [ReorderController::class, 'scan'])->name('reorder.scan');
 
             // Audit log
             Route::get('audit', [InventoryDashboardController::class, 'audit'])->name('audit');

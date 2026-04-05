@@ -19,11 +19,14 @@ class StocktakeLine extends Model
         'item_id',
         'expected_qty',
         'counted_qty',
+        'variance',
+        'note',
     ];
 
     protected $casts = [
         'expected_qty' => 'integer',
         'counted_qty'  => 'integer',
+        'variance'     => 'integer',
     ];
 
     public function stocktake(): BelongsTo

@@ -33,11 +33,15 @@ class PurchaseOrder extends Model
         'tax_amount',
         'total_amount',
         'currency_code',
+        'received_by',
+        'received_at',
+        'receiving_notes',
     ];
 
     protected $casts = [
         'order_date'    => 'date',
         'expected_date' => 'date',
+        'received_at'   => 'datetime',
         'subtotal'      => 'decimal:2',
         'tax_amount'    => 'decimal:2',
         'total_amount'  => 'decimal:2',
@@ -63,5 +67,10 @@ class PurchaseOrder extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function supplierBills(): HasMany
+    {
+        return $this->hasMany(\App\Models\Money\SupplierBill::class, 'purchase_order_id');
     }
 }
