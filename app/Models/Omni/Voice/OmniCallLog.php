@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Omni\Voice;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Traits\HasImmutableTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OmniCallLog extends Model
 {
     use BelongsToCompany;
+    use HasImmutableTimestamps;
 
     protected $table = 'omni_call_logs';
 
@@ -46,5 +49,10 @@ class OmniCallLog extends Model
     public function voiceCall(): BelongsTo
     {
         return $this->belongsTo(OmniVoiceCall::class, 'voice_call_id');
+    }
+
+    public function scopeOfType(Builder $query, string $type): Builder
+    {
+        return $query->where('event_type', $type);
     }
 }

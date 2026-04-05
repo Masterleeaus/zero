@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Omni;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Crm\Customer;
+use App\Models\Money\Invoice;
+use App\Models\Traits\HasOmniTenancy;
+use App\Models\User;
+use App\Models\Work\ServiceJob;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -44,6 +50,7 @@ use Illuminate\Support\Str;
 class OmniConversation extends Model
 {
     use BelongsToCompany;
+    use HasOmniTenancy;
 
     protected $table = 'omni_conversations';
 
@@ -105,6 +112,43 @@ class OmniConversation extends Model
         return $this->belongsTo(OmniCustomer::class, 'omni_customer_id');
     }
 
+    // ── Host model relationships (read-only links) ────────────────────────────
+
+    /**
+     * Link to the canonical CRM Customer (nullable — not all conversations have a CRM customer).
+     * Omni READS this, never writes to the customers table.
+     */
+    public function crmCustomer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'crm_customer_id');
+    }
+
+    /**
+     * Link to a Service Job (nullable — optional context link).
+     */
+    public function serviceJob(): BelongsTo
+    {
+        return $this->belongsTo(ServiceJob::class, 'linked_job_id');
+    }
+
+    /**
+     * Link to an Invoice (nullable — optional billing context).
+     */
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'linked_invoice_id');
+    }
+
+    /**
+     * The user currently assigned to handle this conversation.
+     */
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    // ── Omni child relationships ──────────────────────────────────────────────
+
     public function messages(): HasMany
     {
         return $this->hasMany(OmniMessage::class, 'conversation_id');
@@ -115,13 +159,28 @@ class OmniConversation extends Model
         return $this->hasMany(Voice\OmniVoiceCall::class, 'conversation_id');
     }
 
-    public function scopeOpen(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    // ── Named scopes ─────────────────────────────────────────────────────────
+
+    public function scopeOpen(Builder $query): Builder
     {
         return $query->where('status', 'open');
     }
 
-    public function scopeResolved(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeResolved(Builder $query): Builder
     {
         return $query->where('status', 'resolved');
+    }
+
+    public function scopeForChannel(Builder $query, string $channel): Builder
+    {
+        return $query->where('channel_type', $channel);
+    }
+
+    /**
+     * Eager-load standard inbox context (N+1 guard for list views).
+     */
+    public function scopeWithInboxContext(Builder $query): Builder
+    {
+        return $query->with(['agent', 'omniCustomer', 'assignedUser']);
     }
 }

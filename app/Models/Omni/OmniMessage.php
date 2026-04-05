@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Models\Omni;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Traits\HasImmutableTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
@@ -46,6 +49,7 @@ use Illuminate\Support\Str;
 class OmniMessage extends Model
 {
     use BelongsToCompany;
+    use HasImmutableTimestamps;
 
     protected $table = 'omni_messages';
 
@@ -101,6 +105,14 @@ class OmniMessage extends Model
         });
     }
 
+    /**
+     * Delivery-evidence columns that may be set once but never overwritten.
+     * Enforced by HasImmutableTimestamps::bootHasImmutableTimestamps().
+     *
+     * @var list<string>
+     */
+    protected array $immutableColumns = ['delivered_at', 'read_at', 'failed_at'];
+
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(OmniConversation::class, 'conversation_id');
@@ -109,5 +121,35 @@ class OmniMessage extends Model
     public function agent(): BelongsTo
     {
         return $this->belongsTo(OmniAgent::class, 'agent_id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(OmniMessageAttachment::class, 'message_id');
+    }
+
+    // ── Named scopes ─────────────────────────────────────────────────────────
+
+    public function scopeInbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'inbound');
+    }
+
+    public function scopeOutbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'outbound');
+    }
+
+    public function scopeUndelivered(Builder $query): Builder
+    {
+        return $query->whereNull('delivered_at')->whereNull('failed_at');
+    }
+
+    /**
+     * Eager-load attachments for message list rendering (N+1 guard).
+     */
+    public function scopeWithAttachments(Builder $query): Builder
+    {
+        return $query->with('attachments');
     }
 }
