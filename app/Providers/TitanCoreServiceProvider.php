@@ -65,6 +65,7 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(base_path('config/titan_core.php'), 'titan_core');
         $this->mergeConfigFrom(base_path('config/titan_ai.php'), 'titan_ai');
         $this->mergeConfigFrom(base_path('config/titan_budgets.php'), 'titan_budgets');
+        $this->mergeConfigFrom(base_path('config/titan_omni.php'), 'titan_omni');
 
         // Optional legacy config files — skip gracefully if absent
         if (file_exists(base_path('config/titan_process.php'))) {

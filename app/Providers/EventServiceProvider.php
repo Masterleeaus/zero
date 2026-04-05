@@ -730,6 +730,18 @@ class EventServiceProvider extends ServiceProvider
         // ── Finance Pass 5A signals ────────────────────────────────────────────
         \App\Events\Money\SupplierLiabilityThresholdExceeded::class   => [],
         \App\Events\Money\MaterialCostThresholdCrossed::class         => [],
+        // ── MODULE: Omni — unified channel orchestration signals ──────────────
+        \App\Events\Omni\OmniConversationStarted::class     => [],
+        \App\Events\Omni\OmniMessageReceived::class         => [],
+        \App\Events\Omni\OmniMessageSent::class             => [],
+        \App\Events\Omni\OmniConversationResolved::class    => [],
+        \App\Events\Omni\OmniConversationTransferred::class => [],
+        \App\Events\Omni\OmniCampaignLaunched::class        => [],
+        \App\Events\Omni\OmniCampaignCompleted::class       => [],
+        \App\Events\Omni\OmniChannelRegistered::class       => [],
+        \App\Events\Omni\OmniChannelDeregistered::class     => [],
+        \App\Events\Omni\OmniVoiceCallStarted::class        => [],
+        \App\Events\Omni\OmniVoiceCallEnded::class          => [],
     ];
 
     /**
