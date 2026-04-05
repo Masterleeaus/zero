@@ -1,0 +1,228 @@
+name: PR Manager — Auto Sync & Merge
+
+on:
+  push:
+    branches: [main, master, develop]   # re-sync all PRs when main advances
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: "*/30 * * * *"   # sweep every 30 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: pr-manager
+  cancel-in-progress: false
+
+jobs:
+  manage-prs:
+    name: Sync & Merge PRs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # ── 1. Get all open non-draft PRs ────────────────────────────────────
+      - name: Load open PRs
+        id: load_prs
+        run: |
+          gh pr list --repo "$REPO" --state open \
+            --json number,title,headRefName,baseRefName,isDraft,mergeable,mergeStateStatus,reviewDecision \
+            --limit 50 > /tmp/prs.json
+
+          TOTAL=$(jq 'length' /tmp/prs.json)
+          echo "Open PRs: $TOTAL"
+          cat /tmp/prs.json | jq -r '.[] | "#\(.number) [\(.mergeStateStatus)] \(.title[:60])"'
+
+      # ── 2. Sync conflicting PRs with base branch ─────────────────────────
+      - name: Sync conflicting PRs (merge base into head)
+        run: |
+          python3 << 'PYEOF'
+          import json, subprocess, os
+
+          repo = os.environ['REPO']
+
+          with open('/tmp/prs.json') as f:
+              prs = json.load(f)
+
+          for pr in prs:
+              number     = pr['number']
+              title      = pr['title'][:60]
+              head       = pr['headRefName']
+              base       = pr['baseRefName']
+              is_draft   = pr['isDraft']
+              state      = pr['mergeStateStatus']   # CLEAN, DIRTY, BLOCKED, UNKNOWN
+
+              if is_draft:
+                  print(f'#{number} SKIP (draft): {title}')
+                  continue
+
+              if state not in ('DIRTY', 'UNKNOWN'):
+                  print(f'#{number} OK [{state}]: {title}')
+                  continue
+
+              print(f'#{number} CONFLICT [{state}] — attempting sync: {title}')
+
+              # Fetch and checkout the PR branch
+              sync = subprocess.run([
+                  'git', 'fetch', 'origin',
+                  f'{head}:{head}',
+                  f'{base}:{base}'
+              ], capture_output=True, text=True)
+
+              checkout = subprocess.run(
+                  ['git', 'checkout', head],
+                  capture_output=True, text=True
+              )
+              if checkout.returncode != 0:
+                  print(f'  Could not checkout {head}: {checkout.stderr[:200]}')
+                  continue
+
+              # Attempt merge of base into head
+              merge = subprocess.run(
+                  ['git', 'merge', f'origin/{base}', '--no-edit',
+                   '-m', f'chore: merge {base} into {head} [skip ci]'],
+                  capture_output=True, text=True
+              )
+
+              if merge.returncode == 0:
+                  # Push resolved branch
+                  push = subprocess.run(
+                      ['git', 'push', 'origin', head],
+                      capture_output=True, text=True
+                  )
+                  if push.returncode == 0:
+                      subprocess.run([
+                          'gh', 'pr', 'comment', str(number),
+                          '--repo', repo,
+                          '--body', f'🔄 **PR Manager** — automatically merged `{base}` into this branch to resolve conflicts. CI re-triggered.'
+                      ])
+                      print(f'  ✅ Synced and pushed #{number}')
+                  else:
+                      print(f'  Push failed: {push.stderr[:200]}')
+              else:
+                  # Unresolvable conflict — abort and comment
+                  subprocess.run(['git', 'merge', '--abort'], capture_output=True)
+                  subprocess.run(['git', 'checkout', 'main'], capture_output=True)
+
+                  conflict_files = [
+                      line.replace('CONFLICT (content): Merge conflict in ', '').strip()
+                      for line in merge.stdout.splitlines() + merge.stderr.splitlines()
+                      if 'CONFLICT' in line
+                  ]
+                  files_list = '\n'.join(f'- `{f}`' for f in conflict_files[:10]) or '- (unknown files)'
+
+                  subprocess.run([
+                      'gh', 'pr', 'comment', str(number),
+                      '--repo', repo,
+                      '--body', f"""⚠️ **PR Manager** — could not auto-resolve conflicts with `{base}`.
+
+**Conflicting files:**
+{files_list}
+
+Manual resolution required. Checkout this branch and run:
+\`\`\`bash
+git fetch origin
+git checkout {head}
+git merge origin/{base}
+# resolve conflicts, then:
+git push origin {head}
+\`\`\`"""
+                  ])
+                  print(f'  ❌ Unresolvable conflicts in #{number}')
+
+              # Return to main for next iteration
+              subprocess.run(['git', 'checkout', 'main'], capture_output=True)
+          PYEOF
+
+      # ── 3. Auto-merge clean PRs ──────────────────────────────────────────
+      - name: Auto-merge ready PRs
+        run: |
+          python3 << 'PYEOF'
+          import json, subprocess, os
+
+          repo = os.environ['REPO']
+
+          # Re-fetch PR states (may have changed after sync step)
+          result = subprocess.run([
+              'gh', 'pr', 'list', '--repo', repo, '--state', 'open',
+              '--json', 'number,title,isDraft,mergeStateStatus,reviewDecision,labels,headRefName',
+              '--limit', '50'
+          ], capture_output=True, text=True)
+
+          prs = json.loads(result.stdout)
+
+          # Labels that should block auto-merge
+          BLOCK_LABELS = {'do-not-merge', 'wip', 'hold', 'blocked', 'needs-review'}
+
+          for pr in prs:
+              number   = pr['number']
+              title    = pr['title'][:60]
+              is_draft = pr['isDraft']
+              state    = pr['mergeStateStatus']
+              decision = pr['reviewDecision'] or ''
+              labels   = {l['name'].lower() for l in pr.get('labels', [])}
+              head     = pr['headRefName']
+
+              # Skip drafts
+              if is_draft:
+                  continue
+
+              # Skip if blocked label
+              if labels & BLOCK_LABELS:
+                  print(f'#{number} SKIP (blocked label): {title}')
+                  continue
+
+              # Skip if changes requested
+              if decision == 'CHANGES_REQUESTED':
+                  print(f'#{number} SKIP (changes requested): {title}')
+                  continue
+
+              # Only merge CLEAN PRs (CI passed, no conflicts)
+              if state != 'CLEAN':
+                  print(f'#{number} NOT READY [{state}]: {title}')
+                  continue
+
+              print(f'#{number} MERGING [{state}]: {title}')
+
+              merge = subprocess.run([
+                  'gh', 'pr', 'merge', str(number),
+                  '--repo', repo,
+                  '--merge',
+                  '--subject', f'{title} (#{number})',
+                  '--delete-branch'
+              ], capture_output=True, text=True)
+
+              if merge.returncode == 0:
+                  print(f'  ✅ Merged #{number}')
+              else:
+                  err = merge.stderr.strip()
+                  print(f'  ❌ Could not merge #{number}: {err[:200]}')
+          PYEOF
+
+      # ── 4. Report ────────────────────────────────────────────────────────
+      - name: Summary
+        if: always()
+        run: |
+          echo "── PR Manager Run Complete ─────────────────"
+          gh pr list --repo "$REPO" --state open \
+            --json number,title,mergeStateStatus,isDraft \
+            --jq '.[] | "  #\(.number) [\(if .isDraft then "DRAFT" else .mergeStateStatus end)] \(.title[:55])"'
+          echo "────────────────────────────────────────────"

@@ -1,0 +1,151 @@
+name: Spark Queue Manager
+
+on:
+  issues:
+    types: [opened, closed, labeled]
+  schedule:
+    - cron: "*/10 * * * *"   # safety net — check every 10 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: spark-queue
+  cancel-in-progress: false   # never cancel — queue must always finish processing
+
+jobs:
+  process-queue:
+    name: Process Spark Queue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      MAX_ACTIVE: 2   # max Copilot agents working at once
+
+    steps:
+      # ── 1. Ensure labels exist ──────────────────────────────────────────
+      - name: Ensure spark labels exist
+        run: |
+          for LABEL in "spark:queued:FFA500:Spark request waiting in queue" \
+                       "spark:in-progress:0075ca:Spark request actively being built by Copilot" \
+                       "spark:done:0e8a16:Spark request completed"; do
+            NAME=$(echo $LABEL | cut -d: -f1-2)
+            COLOR=$(echo $LABEL | cut -d: -f3)
+            DESC=$(echo $LABEL | cut -d: -f4-)
+            gh label create "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || true
+          done
+
+      # ── 2. Auto-label new issues as queued (Spark title only) ───────────
+      - name: Auto-label spark issues as spark:queued
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: |
+          NUMBER=${{ github.event.issue.number }}
+          TITLE="${{ github.event.issue.title }}"
+
+          # Only queue issues with [Spark] or [spark] in the title
+          if echo "$TITLE" | grep -qi "\[spark\]"; then
+            HAS_SPARK=$(gh issue view $NUMBER --repo "$REPO" --json labels \
+              --jq '[.labels[].name | select(startswith("spark:"))] | length')
+            if [ "$HAS_SPARK" -eq 0 ]; then
+              gh issue edit $NUMBER --repo "$REPO" --add-label "spark:queued"
+              echo "Labelled #$NUMBER as spark:queued"
+            fi
+          else
+            echo "Issue #$NUMBER is not a Spark request (no [Spark] in title) — skipping"
+          fi
+
+      # ── 3. When issue closes — mark done, free slot ────────────────────
+      - name: Mark closed issue as spark:done
+        if: github.event_name == 'issues' && github.event.action == 'closed'
+        run: |
+          NUMBER=${{ github.event.issue.number }}
+          HAS_IN_PROGRESS=$(gh issue view $NUMBER --repo "$REPO" --json labels \
+            --jq '[.labels[].name | select(. == "spark:in-progress")] | length')
+          if [ "$HAS_IN_PROGRESS" -gt 0 ]; then
+            gh issue edit $NUMBER --repo "$REPO" \
+              --remove-label "spark:in-progress" \
+              --add-label "spark:done"
+            echo "Marked #$NUMBER as spark:done — slot freed"
+          fi
+
+      # ── 4. Core queue logic — fill available slots ─────────────────────
+      - name: Fill available Copilot slots from queue
+        run: |
+          # Count currently active
+          ACTIVE=$(gh issue list --repo "$REPO" \
+            --label "spark:in-progress" --state open \
+            --json number --jq 'length')
+
+          echo "Active: $ACTIVE / $MAX_ACTIVE"
+
+          AVAILABLE=$((MAX_ACTIVE - ACTIVE))
+          if [ "$AVAILABLE" -le 0 ]; then
+            echo "Queue full. No slots available."
+            exit 0
+          fi
+
+          # Get next queued issues — oldest first, must have [Spark] in title
+          QUEUED=$(gh issue list --repo "$REPO" \
+            --label "spark:queued" --state open \
+            --json number,title \
+            --jq "[.[] | select(.title | test(\"\\\\[[Ss]park\\\\]\"))] | sort_by(.number) | .[:$AVAILABLE]")
+
+          COUNT=$(echo "$QUEUED" | jq 'length')
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No issues in queue. Nothing to do."
+            exit 0
+          fi
+
+          echo "Activating $COUNT issue(s)..."
+
+          echo "$QUEUED" | jq -c '.[]' | while read -r ISSUE; do
+            NUMBER=$(echo "$ISSUE" | jq -r '.number')
+            TITLE=$(echo "$ISSUE" | jq -r '.title')
+
+            echo "→ Activating #$NUMBER: $TITLE"
+
+            # Swap label: queued → in-progress
+            gh issue edit $NUMBER --repo "$REPO" \
+              --remove-label "spark:queued" \
+              --add-label "spark:in-progress"
+
+            # Assign Copilot coding agent
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/$REPO/issues/$NUMBER/copilot" \
+              2>/dev/null || \
+            gh issue edit $NUMBER --repo "$REPO" --add-assignee "Copilot" \
+              2>/dev/null || true
+
+            # Post queue status comment
+            REMAINING=$(gh issue list --repo "$REPO" \
+              --label "spark:queued" --state open \
+              --json number --jq 'length')
+
+            gh issue comment $NUMBER --repo "$REPO" --body "$(cat <<COMMENT
+🤖 **Spark Queue Manager** — picked up and assigned to Copilot.
+
+| | |
+|---|---|
+| **Status** | \`spark:in-progress\` |
+| **Slot** | $((ACTIVE + 1)) of $MAX_ACTIVE |
+| **Remaining in queue** | $REMAINING |
+
+Copilot will build this now. The next queued issue will start automatically when this one closes.
+COMMENT
+)"
+          done
+
+      # ── 5. Report queue state ───────────────────────────────────────────
+      - name: Report queue state
+        if: always()
+        run: |
+          ACTIVE=$(gh issue list --repo "$REPO" --label "spark:in-progress" --state open --json number --jq 'length')
+          QUEUED=$(gh issue list --repo "$REPO" --label "spark:queued" --state open --json number --jq 'length')
+          echo "── Spark Queue Status ──────────────────"
+          echo "  Active:  $ACTIVE / $MAX_ACTIVE"
+          echo "  Queued:  $QUEUED"
+          echo "───────────────────────────────────────"
