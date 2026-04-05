@@ -286,5 +286,17 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 Route::get('/job/{job}', [\App\Http\Controllers\Core\Money\ProfitabilityController::class, 'job'])->name('job');
                 Route::get('/by-period', [\App\Http\Controllers\Core\Money\ProfitabilityController::class, 'byPeriod'])->name('by-period');
             });
+
+            // ── Finance Pass 4 — Dashboards / Forecasting / KPIs ─────────────
+            Route::get('dashboard', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'dashboard'])
+                ->name('dashboard.index');
+            Route::get('cashflow', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'cashflow'])
+                ->name('cashflow.index');
+            Route::get('forecast', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'forecast'])
+                ->name('forecast.index');
+            Route::get('kpis', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'kpis'])
+                ->name('kpis.index');
+            Route::get('job-profitability', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'jobProfitability'])
+                ->name('job-profitability.index');
         });
     });

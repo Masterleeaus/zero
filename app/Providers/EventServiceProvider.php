@@ -679,8 +679,16 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\Money\PayrollInputFinalized::class => [
             \App\Listeners\Money\PostPayrollInputFinalizedToLedger::class,
         ],
-        \App\Events\Money\CostAllocationCreated::class  => [],
-        \App\Events\Money\MaterialIssuedToJob::class    => [],
+        \App\Events\Money\CostAllocationCreated::class   => [],
+        \App\Events\Money\MaterialIssuedToJob::class     => [],
+        // ── Finance Pass 4 — Reporting / Dashboard / Forecasting signals ──────
+        \App\Events\Money\FinancialSnapshotUpdated::class => [],
+        \App\Events\Money\ForecastGenerated::class        => [],
+        \App\Events\Money\MarginDropDetected::class       => [],
+        \App\Events\Money\MarginThresholdCrossed::class   => [],
+        \App\Events\Money\CashRunwayWarning::class        => [],
+        \App\Events\Money\CashflowRiskDetected::class     => [],
+        \App\Events\Money\FinancialRiskDetected::class    => [],
         // ── MODULE_10 TitanMesh — federated capability exchange signals ───────
         MeshNodeHandshaked::class => [
             RecordMeshOperationOnTrustLedger::class,
