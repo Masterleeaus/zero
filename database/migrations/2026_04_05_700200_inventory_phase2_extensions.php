@@ -93,32 +93,71 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('inventory_items', static function (Blueprint $table) {
-            $table->dropForeign(['preferred_supplier_id']);
-            $table->dropColumn(['reorder_qty', 'min_stock', 'preferred_supplier_id', 'low_stock_flag']);
+            if (Schema::hasColumn('inventory_items', 'preferred_supplier_id')) {
+                $table->dropForeign(['preferred_supplier_id']);
+            }
+            $columns = array_filter(
+                ['reorder_qty', 'min_stock', 'preferred_supplier_id', 'low_stock_flag'],
+                fn ($col) => Schema::hasColumn('inventory_items', $col)
+            );
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
 
         Schema::table('stocktakes', static function (Blueprint $table) {
-            $table->dropColumn(['finalized_by', 'finalized_at', 'adjustment_reason']);
+            $columns = array_filter(
+                ['finalized_by', 'finalized_at', 'adjustment_reason'],
+                fn ($col) => Schema::hasColumn('stocktakes', $col)
+            );
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
 
         Schema::table('stocktake_lines', static function (Blueprint $table) {
-            $table->dropColumn(['variance', 'note']);
+            $columns = array_filter(
+                ['variance', 'note'],
+                fn ($col) => Schema::hasColumn('stocktake_lines', $col)
+            );
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
 
         Schema::table('purchase_orders', static function (Blueprint $table) {
-            $table->dropColumn(['received_by', 'received_at', 'receiving_notes']);
+            $columns = array_filter(
+                ['received_by', 'received_at', 'receiving_notes'],
+                fn ($col) => Schema::hasColumn('purchase_orders', $col)
+            );
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
 
         Schema::table('stock_movements', static function (Blueprint $table) {
-            $table->dropIndex(['service_job_id']);
-            $table->dropColumn(['service_job_id', 'movement_reason']);
+            if (Schema::hasColumn('stock_movements', 'service_job_id')) {
+                $table->dropIndex(['service_job_id']);
+                $table->dropColumn('service_job_id');
+            }
+            if (Schema::hasColumn('stock_movements', 'movement_reason')) {
+                $table->dropColumn('movement_reason');
+            }
         });
 
         Schema::table('job_material_usage', static function (Blueprint $table) {
-            $table->dropIndex(['company_id']);
-            $table->dropIndex(['service_job_id']);
-            $table->dropIndex(['stock_movement_id']);
-            $table->dropColumn(['company_id', 'created_by', 'service_job_id', 'stock_movement_id']);
+            foreach (['company_id', 'service_job_id', 'stock_movement_id'] as $col) {
+                if (Schema::hasColumn('job_material_usage', $col)) {
+                    $table->dropIndex([$col]);
+                }
+            }
+            $columns = array_filter(
+                ['company_id', 'created_by', 'service_job_id', 'stock_movement_id'],
+                fn ($col) => Schema::hasColumn('job_material_usage', $col)
+            );
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };

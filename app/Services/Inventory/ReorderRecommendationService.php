@@ -22,22 +22,29 @@ class ReorderRecommendationService
             ->whereRaw('qty_on_hand <= reorder_point')
             ->get();
 
+        if ($lowItems->isEmpty()) {
+            return [];
+        }
+
+        // Pre-fetch all open PO quantities in one query to avoid N+1
+        $openPOQties = PurchaseOrderItem::withoutGlobalScopes()
+            ->whereIn('item_id', $lowItems->pluck('id'))
+            ->whereHas('purchaseOrder', fn ($q) => $q
+                ->where('company_id', $companyId)
+                ->whereIn('status', ['draft', 'sent', 'partial'])
+            )
+            ->selectRaw('item_id, SUM(qty_ordered - qty_received) as pending_qty')
+            ->groupBy('item_id')
+            ->pluck('pending_qty', 'item_id');
+
         $recommendations = [];
 
         foreach ($lowItems as $item) {
-            $openPOQty = PurchaseOrderItem::withoutGlobalScopes()
-                ->where('item_id', $item->id)
-                ->whereHas('purchaseOrder', fn ($q) => $q
-                    ->where('company_id', $companyId)
-                    ->whereIn('status', ['draft', 'sent', 'partial'])
-                )
-                ->selectRaw('SUM(qty_ordered - qty_received) as pending_qty')
-                ->value('pending_qty') ?? 0;
-
-            $shortfall    = max(0, $item->reorder_point - $item->qty_on_hand - (int) $openPOQty);
+            $openPOQty    = (int) ($openPOQties[$item->id] ?? 0);
+            $shortfall    = max(0, $item->reorder_point - $item->qty_on_hand - $openPOQty);
             $suggestedQty = max($item->reorder_qty, $shortfall);
 
-            if ($suggestedQty <= 0 && (int) $openPOQty > 0) {
+            if ($suggestedQty <= 0 && $openPOQty > 0) {
                 // Already on order — no new recommendation needed
                 continue;
             }
@@ -49,7 +56,7 @@ class ReorderRecommendationService
                 'qty_on_hand'           => $item->qty_on_hand,
                 'reorder_point'         => $item->reorder_point,
                 'min_stock'             => $item->min_stock,
-                'open_po_qty'           => (int) $openPOQty,
+                'open_po_qty'           => $openPOQty,
                 'suggested_order_qty'   => $suggestedQty,
                 'preferred_supplier_id' => $item->preferred_supplier_id,
                 'preferred_supplier'    => $item->preferredSupplier?->name,
