@@ -1,0 +1,146 @@
+name: Issue Queue Manager
+
+on:
+  issues:
+    types: [opened, closed]
+  schedule:
+    - cron: "*/10 * * * *"   # safety net every 10 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: issue-queue
+  cancel-in-progress: false
+
+jobs:
+  process-queue:
+    name: Process Issue Queue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      MAX_ACTIVE: 3   # max normal issue agents at once
+
+    steps:
+      # ── 1. Ensure labels exist ──────────────────────────────────────────
+      - name: Ensure agent labels exist
+        run: |
+          gh label create "agent:queued"      --color "E4E669" --description "Normal issue waiting for agent"    --repo "$REPO" 2>/dev/null || true
+          gh label create "agent:in-progress" --color "0075ca" --description "Agent actively working on this"   --repo "$REPO" 2>/dev/null || true
+          gh label create "agent:done"        --color "0e8a16" --description "Agent completed this issue"       --repo "$REPO" 2>/dev/null || true
+
+      # ── 2. Auto-label new normal issues as agent:queued ─────────────────
+      - name: Auto-label normal issues as agent:queued
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: |
+          NUMBER=${{ github.event.issue.number }}
+          TITLE="${{ github.event.issue.title }}"
+
+          # Skip [Spark] issues — handled by spark-queue.yml
+          if echo "$TITLE" | grep -qi "\[spark\]"; then
+            echo "Issue #$NUMBER is a Spark request — skipping (handled by spark-queue)"
+            exit 0
+          fi
+
+          # Skip if already has any agent: or spark: label
+          HAS_LABEL=$(gh issue view $NUMBER --repo "$REPO" --json labels \
+            --jq '[.labels[].name | select(startswith("agent:") or startswith("spark:"))] | length')
+
+          if [ "$HAS_LABEL" -eq 0 ]; then
+            gh issue edit $NUMBER --repo "$REPO" --add-label "agent:queued"
+            echo "Labelled #$NUMBER as agent:queued"
+          fi
+
+      # ── 3. Mark closed issues as agent:done, free slot ─────────────────
+      - name: Mark closed issue as agent:done
+        if: github.event_name == 'issues' && github.event.action == 'closed'
+        run: |
+          NUMBER=${{ github.event.issue.number }}
+          HAS_IN_PROGRESS=$(gh issue view $NUMBER --repo "$REPO" --json labels \
+            --jq '[.labels[].name | select(. == "agent:in-progress")] | length')
+          if [ "$HAS_IN_PROGRESS" -gt 0 ]; then
+            gh issue edit $NUMBER --repo "$REPO" \
+              --remove-label "agent:in-progress" \
+              --add-label "agent:done"
+            echo "Marked #$NUMBER as agent:done — slot freed"
+          fi
+
+      # ── 4. Fill available agent slots from queue ────────────────────────
+      - name: Fill available agent slots
+        run: |
+          ACTIVE=$(gh issue list --repo "$REPO" \
+            --label "agent:in-progress" --state open \
+            --json number --jq 'length')
+
+          echo "Active: $ACTIVE / $MAX_ACTIVE"
+
+          AVAILABLE=$((MAX_ACTIVE - ACTIVE))
+          if [ "$AVAILABLE" -le 0 ]; then
+            echo "All slots full. Nothing to do."
+            exit 0
+          fi
+
+          # Next queued normal issues — oldest first, exclude [Spark] titles
+          QUEUED=$(gh issue list --repo "$REPO" \
+            --label "agent:queued" --state open \
+            --json number,title \
+            --jq "[.[] | select(.title | test(\"\\\\[[Ss]park\\\\]\") | not)] | sort_by(.number) | .[:$AVAILABLE]")
+
+          COUNT=$(echo "$QUEUED" | jq 'length')
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No issues in queue. Nothing to do."
+            exit 0
+          fi
+
+          echo "Activating $COUNT issue(s)..."
+
+          echo "$QUEUED" | jq -c '.[]' | while read -r ISSUE; do
+            NUMBER=$(echo "$ISSUE" | jq -r '.number')
+            TITLE=$(echo "$ISSUE" | jq -r '.title')
+
+            echo "→ Activating #$NUMBER: $TITLE"
+
+            gh issue edit $NUMBER --repo "$REPO" \
+              --remove-label "agent:queued" \
+              --add-label "agent:in-progress"
+
+            # Assign Copilot coding agent
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/$REPO/issues/$NUMBER/copilot" \
+              2>/dev/null || \
+            gh issue edit $NUMBER --repo "$REPO" --add-assignee "Copilot" \
+              2>/dev/null || true
+
+            REMAINING=$(gh issue list --repo "$REPO" \
+              --label "agent:queued" --state open \
+              --json number --jq 'length')
+
+            gh issue comment $NUMBER --repo "$REPO" --body "$(cat <<COMMENT
+🤖 **Issue Queue Manager** — picked up and assigned to Copilot.
+
+| | |
+|---|---|
+| **Status** | \`agent:in-progress\` |
+| **Slot** | $((ACTIVE + 1)) of $MAX_ACTIVE |
+| **Remaining in queue** | $REMAINING |
+
+The next queued issue will start automatically when this one closes.
+COMMENT
+)"
+          done
+
+      # ── 5. Report queue state ───────────────────────────────────────────
+      - name: Report queue state
+        if: always()
+        run: |
+          ACTIVE=$(gh issue list --repo "$REPO" --label "agent:in-progress" --state open --json number --jq 'length')
+          QUEUED=$(gh issue list --repo "$REPO" --label "agent:queued" --state open --json number --jq 'length')
+          echo "── Issue Queue Status ──────────────────"
+          echo "  Active:  $ACTIVE / $MAX_ACTIVE"
+          echo "  Queued:  $QUEUED"
+          echo "───────────────────────────────────────"
