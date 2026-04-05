@@ -298,5 +298,30 @@ Route::middleware(['auth', 'updateUserActivity', $dashboardThrottleMiddleware])
                 ->name('kpis.index');
             Route::get('job-profitability', [\App\Http\Controllers\Core\Money\FinancialDashboardController::class, 'jobProfitability'])
                 ->name('job-profitability.index');
+
+            // ── Finance Pass 5B — Budgets ─────────────────────────────────────
+            Route::prefix('budgets')->name('budgets.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Money\BudgetController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\Core\Money\BudgetController::class, 'store'])->name('store');
+            });
+
+            // ── Finance Pass 5B — Budget Variance ─────────────────────────────
+            Route::get('budget-variance', [\App\Http\Controllers\Core\Money\BudgetVarianceController::class, 'index'])
+                ->name('budget-variance.index');
+
+            // ── Finance Pass 5B — Scenario Simulation ─────────────────────────
+            Route::prefix('scenarios')->name('scenarios.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Money\ScenarioSimulationController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\Core\Money\ScenarioSimulationController::class, 'store'])->name('store');
+            });
+
+            // ── Finance Pass 5B — Recommendations ─────────────────────────────
+            Route::prefix('recommendations')->name('recommendations.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Core\Money\FinancialRecommendationController::class, 'index'])->name('index');
+                Route::get('/{recommendation}', [\App\Http\Controllers\Core\Money\FinancialRecommendationController::class, 'review'])->name('review');
+                Route::post('/{recommendation}/approve', [\App\Http\Controllers\Core\Money\FinancialRecommendationController::class, 'approve'])->name('approve');
+                Route::post('/{recommendation}/reject', [\App\Http\Controllers\Core\Money\FinancialRecommendationController::class, 'reject'])->name('reject');
+                Route::post('/{recommendation}/dismiss', [\App\Http\Controllers\Core\Money\FinancialRecommendationController::class, 'dismiss'])->name('dismiss');
+            });
         });
     });
