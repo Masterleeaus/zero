@@ -18,10 +18,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: curl, zip, sqlite3, pdo_sqlite, mbstring, openssl, bcmath, xml
           coverage: none
 
@@ -75,7 +75,7 @@ jobs:
   ci-selfhosted:
     name: CI (Self-hosted / Real Env)
     runs-on: [self-hosted, linux, zero]
-    if: github.event_name == 'pull_request'
+    if: false  # disabled until self-hosted runner is configured on VPS
 
     steps:
       - name: Checkout
