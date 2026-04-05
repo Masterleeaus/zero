@@ -32,11 +32,14 @@ class StockMovement extends Model
         'moveable_type',
         'moveable_id',
         'cost_per_unit',
+        'service_job_id',
+        'movement_reason',
     ];
 
     protected $casts = [
         'qty_change'    => 'integer',
         'cost_per_unit' => 'decimal:4',
+        'service_job_id' => 'integer',
     ];
 
     public function item(): BelongsTo

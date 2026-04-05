@@ -714,6 +714,14 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\Work\LeaveRejected::class          => [],
         \App\Events\Work\EmployeeStatusChanged::class  => [],
         \App\Events\Work\DepartmentAssigned::class     => [],
+        // ── Inventory Phase 2 signals ──────────────────────────────────────────
+        \App\Events\Inventory\InventoryLowStockDetected::class        => [],
+        \App\Events\Inventory\StockVarianceDetected::class            => [],
+        \App\Events\Inventory\ReorderSuggested::class                 => [],
+        \App\Events\Inventory\MaterialIssuedToJob::class              => [],
+        // ── Finance Pass 5A signals ────────────────────────────────────────────
+        \App\Events\Money\SupplierLiabilityThresholdExceeded::class   => [],
+        \App\Events\Money\MaterialCostThresholdCrossed::class         => [],
     ];
 
     /**

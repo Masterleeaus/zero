@@ -176,4 +176,56 @@ class SupplierBillService
         $count = SupplierBill::where('company_id', $companyId)->withTrashed()->count() + 1;
         return 'BILL-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Create a supplier bill draft from a completed/partial purchase order.
+     * Idempotent — returns existing non-cancelled bill if one already exists.
+     */
+    public function createFromPurchaseOrder(\App\Models\Inventory\PurchaseOrder $po, array $overrides = []): SupplierBill
+    {
+        return DB::transaction(function () use ($po, $overrides): SupplierBill {
+            $existing = SupplierBill::withoutGlobalScopes()
+                ->where('purchase_order_id', $po->id)
+                ->where('company_id', $po->company_id)
+                ->whereNotIn('status', ['cancelled'])
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
+            $bill = SupplierBill::create(array_merge([
+                'company_id'        => $po->company_id,
+                'created_by'        => $po->created_by,
+                'supplier_id'       => $po->supplier_id,
+                'purchase_order_id' => $po->id,
+                'bill_number'       => $this->nextBillNumber($po->company_id),
+                'reference'         => $po->po_number,
+                'bill_date'         => now()->toDateString(),
+                'due_date'          => now()->addDays(30)->toDateString(),
+                'status'            => SupplierBill::STATUS_DRAFT,
+                'subtotal'          => $po->subtotal,
+                'tax_amount'        => $po->tax_amount,
+                'total_amount'      => $po->total_amount,
+                'amount_paid'       => 0,
+                'currency'          => $po->currency_code ?? 'AUD',
+                'notes'             => "Generated from PO {$po->po_number}",
+            ], $overrides));
+
+            foreach ($po->items as $item) {
+                $qty = $item->qty_received > 0 ? $item->qty_received : $item->qty_ordered;
+
+                SupplierBillItem::create([
+                    'company_id'       => $po->company_id,
+                    'supplier_bill_id' => $bill->id,
+                    'description'      => $item->description ?? ($item->inventoryItem?->name ?? 'Item'),
+                    'quantity'         => $qty,
+                    'unit_price'       => $item->unit_price,
+                    'amount'           => round($qty * $item->unit_price, 2),
+                ]);
+            }
+
+            return $bill->fresh(['items']);
+        });
+    }
 }

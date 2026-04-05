@@ -26,6 +26,13 @@ class Stocktake extends Model
         'warehouse_id',
         'status',
         'notes',
+        'finalized_by',
+        'finalized_at',
+        'adjustment_reason',
+    ];
+
+    protected $casts = [
+        'finalized_at' => 'datetime',
     ];
 
     protected $attributes = [

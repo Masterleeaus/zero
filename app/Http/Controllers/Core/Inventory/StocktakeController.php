@@ -111,27 +111,53 @@ class StocktakeController extends Controller
 
     public function finalize(Request $request, Stocktake $stocktake): RedirectResponse|JsonResponse
     {
-        DB::transaction(function () use ($stocktake) {
-            foreach ($stocktake->lines as $line) {
-                $current = $this->stockService->onHand($line->item_id, $stocktake->warehouse_id);
-                $line->update(['expected_qty' => $current]);
+        if ($stocktake->status === 'final') {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Stocktake already finalized.'], 422);
+            }
+            return redirect()->route('dashboard.inventory.stocktakes.show', $stocktake)
+                ->with('error', __('Stocktake has already been finalized.'));
+        }
 
-                if ($line->counted_qty !== $current) {
+        $data = $request->validate([
+            'adjustment_reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($stocktake, $data) {
+            foreach ($stocktake->lines as $line) {
+                $current  = $this->stockService->onHand($line->item_id, $stocktake->warehouse_id);
+                $variance = $line->counted_qty - $current;
+                $line->update([
+                    'expected_qty' => $current,
+                    'variance'     => $variance,
+                ]);
+
+                if ($variance !== 0) {
                     $this->stockService->recordMovement([
-                        'company_id'   => $stocktake->company_id,
-                        'created_by'   => $stocktake->created_by,
-                        'item_id'      => $line->item_id,
-                        'warehouse_id' => $stocktake->warehouse_id,
-                        'type'         => 'adjust',
-                        'qty_change'   => $line->counted_qty - $current,
-                        'reference'    => $stocktake->ref ?? "ST-{$stocktake->id}",
-                        'note'         => "Stocktake finalization adjustment",
+                        'company_id'      => $stocktake->company_id,
+                        'created_by'      => $stocktake->created_by,
+                        'item_id'         => $line->item_id,
+                        'warehouse_id'    => $stocktake->warehouse_id,
+                        'type'            => 'adjust',
+                        'qty_change'      => $variance,
+                        'reference'       => $stocktake->ref ?? "ST-{$stocktake->id}",
+                        'note'            => $data['adjustment_reason'] ?? 'Stocktake finalization adjustment',
+                        'movement_reason' => 'stocktake',
                     ]);
                 }
             }
 
-            $stocktake->update(['status' => 'final']);
+            $stocktake->update([
+                'status'            => 'final',
+                'finalized_by'      => auth()->id(),
+                'finalized_at'      => now(),
+                'adjustment_reason' => $data['adjustment_reason'] ?? null,
+            ]);
         });
+
+        // Emit variance signals
+        $signalService = app(\App\Services\Inventory\ReorderSignalService::class);
+        $signalService->detectVariances($stocktake->fresh(['lines.item']));
 
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Stocktake finalized.']);
