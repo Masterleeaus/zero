@@ -48,7 +48,13 @@ jobs:
         run: php artisan route:list --no-ansi
 
       - name: Boot check — migrations (SQLite in-memory)
-        run: php artisan migrate --force --env=testing
+        run: |
+          php artisan config:clear
+          php artisan migrate --force
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
 
       - name: Run tests (Pest)
         run: php artisan test --parallel --no-ansi

@@ -339,7 +339,7 @@ jobs:
       - name: Rank findings and create top 10 issues
         run: |
           # Get existing health-scan issue titles to avoid duplicates
-          EXISTING=$(gh issue list --repo "$REPO" --label "health-scan" --state open \
+          export EXISTING=$(gh issue list --repo "$REPO" --label "health-scan" --state open \
             --json title --jq '[.[].title]' 2>/dev/null || echo "[]")
 
           python3 << 'PYEOF'
@@ -418,5 +418,3 @@ jobs:
           print(f'  Issues created:  {created}')
           print(f'  Duplicates skipped: {skipped}')
           PYEOF
-        env:
-          EXISTING: ${{ env.EXISTING }}

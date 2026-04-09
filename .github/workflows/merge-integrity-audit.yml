@@ -253,7 +253,7 @@ jobs:
 
       # ── 8. Commit report back to repo ─────────────────────────────────
       - name: Commit audit report to repo
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
