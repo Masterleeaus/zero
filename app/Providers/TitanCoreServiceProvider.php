@@ -163,6 +163,33 @@ class TitanCoreServiceProvider extends ServiceProvider
         $this->app->singleton(OmniInboxService::class);
         $this->app->singleton(OmniAnalyticsService::class);
 
+        // ── Omni driver registry ──────────────────────────────────────────────
+        $this->app->singleton(\App\Services\Omni\OmniDriverRegistry::class, function ($app) {
+            $registry = new \App\Services\Omni\OmniDriverRegistry();
+
+            $registry->register(new \App\Services\Drivers\SmsDriver(
+                config('titan_omni.drivers.sms', [])
+            ));
+            $registry->register(new \App\Services\Drivers\EmailDriver(
+                config('titan_omni.drivers.email', [])
+            ));
+            $registry->register(new \App\Services\Drivers\WhatsAppMetaDriver(
+                config('titan_omni.drivers.whatsapp_meta', [])
+            ));
+            $registry->register(new \App\Services\Drivers\WhatsAppTwilioDriver(
+                config('titan_omni.drivers.whatsapp_twilio', [])
+            ));
+            $registry->register(new \App\Services\Drivers\TelegramDriver(
+                config('titan_omni.drivers.telegram', [])
+            ));
+            $registry->register(new \App\Services\Drivers\WebchatDriver());
+            $registry->register(new \App\Services\Drivers\VoiceDriver(
+                config('titan_omni.drivers.voice', [])
+            ));
+
+            return $registry;
+        });
+
         // ── Chat Bridge ──────────────────────────────────────────────────────
         // Canonical bridge: all chat surfaces (AIChatPro, Canvas, Chatbot, channels)
         // route execution through TitanChatBridge → OmniManager → TitanAIRouter.
