@@ -120,18 +120,9 @@ jobs:
               --label "agent:queued" --state open \
               --json number --jq 'length')
 
-            gh issue comment $NUMBER --repo "$REPO" --body "$(cat <<COMMENT
-🤖 **Issue Queue Manager** — picked up and assigned to Copilot.
-
-| | |
-|---|---|
-| **Status** | \`agent:in-progress\` |
-| **Slot** | $((ACTIVE + 1)) of $MAX_ACTIVE |
-| **Remaining in queue** | $REMAINING |
-
-The next queued issue will start automatically when this one closes.
-COMMENT
-)"
+            printf '🤖 **Issue Queue Manager** — picked up and assigned to Copilot.\n\n| | |\n|---|---|\n| **Status** | `agent:in-progress` |\n| **Slot** | %d of %d |\n| **Remaining in queue** | %d |\n\nThe next queued issue will start automatically when this one closes.\n' \
+              "$((ACTIVE + 1))" "$MAX_ACTIVE" "$REMAINING" > /tmp/issue-comment.md
+            gh issue comment $NUMBER --repo "$REPO" --body-file /tmp/issue-comment.md
           done
 
       # ── 5. Report queue state ───────────────────────────────────────────

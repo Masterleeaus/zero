@@ -389,11 +389,11 @@ jobs:
               score = finding.get('score', 0)
               priority = 'critical' if score >= 9 else 'high' if score >= 7 else 'medium' if score >= 5 else 'low'
 
-              body = finding['body'] + f"""
-
----
-*Auto-detected by Repo Health Scan · Priority: {priority} · Score: {score}/10*
-"""
+              body = (
+                  finding['body']
+                  + "\n\n---\n"
+                  + f"*Auto-detected by Repo Health Scan \u00b7 Priority: {priority} \u00b7 Score: {score}/10*\n"
+              )
 
               labels = f"health-scan,agent:queued,{issue_type}"
 

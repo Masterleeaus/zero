@@ -129,22 +129,17 @@ jobs:
                   ]
                   files_list = '\n'.join(f'- `{f}`' for f in conflict_files[:10]) or '- (unknown files)'
 
+                  conflict_body = (
+                      f"\u26a0\ufe0f **PR Manager** \u2014 could not auto-resolve conflicts with `{base}`.\n\n"
+                      f"**Conflicting files:**\n{files_list}\n\n"
+                      f"Manual resolution required. Checkout this branch and run:\n"
+                      f"```bash\ngit fetch origin\ngit checkout {head}\n"
+                      f"git merge origin/{base}\n# resolve conflicts, then:\ngit push origin {head}\n```"
+                  )
                   subprocess.run([
                       'gh', 'pr', 'comment', str(number),
                       '--repo', repo,
-                      '--body', f"""⚠️ **PR Manager** — could not auto-resolve conflicts with `{base}`.
-
-**Conflicting files:**
-{files_list}
-
-Manual resolution required. Checkout this branch and run:
-\`\`\`bash
-git fetch origin
-git checkout {head}
-git merge origin/{base}
-# resolve conflicts, then:
-git push origin {head}
-\`\`\`"""
+                      '--body', conflict_body,
                   ])
                   print(f'  ❌ Unresolvable conflicts in #{number}')
 
