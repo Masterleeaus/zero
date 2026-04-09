@@ -125,18 +125,16 @@ jobs:
               --label "spark:queued" --state open \
               --json number --jq 'length')
 
-            gh issue comment $NUMBER --repo "$REPO" --body "$(cat <<COMMENT
-🤖 **Spark Queue Manager** — picked up and assigned to Copilot.
-
-| | |
-|---|---|
-| **Status** | \`spark:in-progress\` |
-| **Slot** | $((ACTIVE + 1)) of $MAX_ACTIVE |
-| **Remaining in queue** | $REMAINING |
-
-Copilot will build this now. The next queued issue will start automatically when this one closes.
-COMMENT
-)"
+            BODY_SLOT="$((ACTIVE + 1)) of $MAX_ACTIVE"
+            BODY=$(printf '%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s' \
+              '🤖 **Spark Queue Manager** — picked up and assigned to Copilot.' \
+              '| | |' \
+              '|---|---|' \
+              "| **Status** | \`spark:in-progress\` |" \
+              "| **Slot** | ${BODY_SLOT} |" \
+              "| **Remaining in queue** | ${REMAINING} |" \
+              'Copilot will build this now. The next queued issue will start automatically when this one closes.')
+            gh issue comment $NUMBER --repo "$REPO" --body "$BODY"
           done
 
       # ── 5. Report queue state ───────────────────────────────────────────

@@ -34,6 +34,9 @@ jobs:
           key: composer-${{ hashFiles('composer.lock') }}
           restore-keys: composer-
 
+      - name: Configure Composer GitHub OAuth
+        run: composer config -g github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
@@ -207,23 +210,24 @@ jobs:
             echo ""
             echo "---"
             echo ""
-            cat /tmp/migration_report.txt
+            mkdir -p docs/repo-audit
+            cat /tmp/migration_report.txt 2>/dev/null || echo "(migration scan skipped)"
             echo ""
             echo "---"
             echo ""
-            cat /tmp/provider_report.txt
+            cat /tmp/provider_report.txt 2>/dev/null || echo "(provider scan skipped)"
             echo ""
             echo "---"
             echo ""
-            cat /tmp/route_report.txt
+            cat /tmp/route_report.txt 2>/dev/null || echo "(route scan skipped)"
             echo ""
             echo "---"
             echo ""
-            cat /tmp/listener_report.txt
+            cat /tmp/listener_report.txt 2>/dev/null || echo "(listener scan skipped)"
             echo ""
             echo "---"
             echo ""
-            cat /tmp/mcp_report.txt
+            cat /tmp/mcp_report.txt 2>/dev/null || echo "(mcp scan skipped)"
             echo ""
             echo "---"
             echo ""
