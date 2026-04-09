@@ -208,10 +208,10 @@ Route::middleware(['auth', 'updateUserActivity', 'throttle:' . config('throttle.
 
             // ── MODULE_01 — TitanDispatch ──────────────────────────────────────
             Route::prefix('dispatch')->as('dispatch.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Work\DispatchController::class, 'index'])->name('index');
-                Route::post('/assign', [\App\Http\Controllers\Work\DispatchController::class, 'assign'])->name('assign');
-                Route::post('/auto', [\App\Http\Controllers\Work\DispatchController::class, 'autoDispatch'])->name('auto');
-                Route::get('/history', [\App\Http\Controllers\Work\DispatchController::class, 'history'])->name('history');
+                Route::get('/', [DispatchController::class, 'index'])->name('index');
+                Route::post('/assign', [DispatchController::class, 'assign'])->name('assign');
+                Route::post('/auto', [DispatchController::class, 'autoDispatch'])->name('auto');
+                Route::get('/history', [DispatchController::class, 'history'])->name('history');
             });
 
             // ── MODULE_04 — TitanContracts ─────────────────────────────────────
