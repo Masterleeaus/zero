@@ -1,1 +1,0 @@
-<?php // Eloquent model for voice_command_logs table ?>

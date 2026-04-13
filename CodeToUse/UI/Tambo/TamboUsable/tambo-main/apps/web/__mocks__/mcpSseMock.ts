@@ -1,3 +1,0 @@
-export class SSEClientTransport {
-  constructor() {}
-}

@@ -1,3 +1,0 @@
-@php
-    $timesheetRouteBase = 'timesheet.';
-@endphp

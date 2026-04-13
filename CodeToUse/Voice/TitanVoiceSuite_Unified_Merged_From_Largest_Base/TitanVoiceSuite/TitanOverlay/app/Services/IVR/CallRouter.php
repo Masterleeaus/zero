@@ -1,3 +1,0 @@
-<?php
-// Business-hours + IVR routing logic
-HAGuZZWGdACPHcMWJrKlrWfzSLaeDAYOCdpiVTHMajsrAcrzypNBpNuvZkglfrVKMDzyQWGigDYKPzZqAXEuOMeDezqXTMLATuMoJtwpUxyXRcPSEcHwMLwgiROtsPmXDYJuiHMCpGENTdIkQQljwwPGyWrEzDTSgwzSXIVyAzCMUuHgMLqXXOLNtnkFRpolgcGhsHZG

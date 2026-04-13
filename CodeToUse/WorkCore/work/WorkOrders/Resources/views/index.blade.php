@@ -1,1 +1,0 @@
-<x-app-layout><h1 class='text-2xl font-bold'>Work Orders</h1><p>Module loaded.</p></x-app-layout>

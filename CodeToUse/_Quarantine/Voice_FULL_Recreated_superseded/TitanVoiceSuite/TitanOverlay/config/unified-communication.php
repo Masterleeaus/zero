@@ -1,1 +1,0 @@
-<?php return ['channels'=>['sms'=>true,'voice'=>true,'whatsapp'=>true]];EUtpItKBNBCiBuGfjbMEgPqqVPkQYdAZGpkvxVbqKAwSPUMLKIOznuDNhxYCCiAbYEJkXluhtiXUpARwLEDOMnFPuzCTrKbXHAhDQNmISFihlaDXMRSsyqPYZRaDAxOnlgNNBpLnQWCAxxaBfyisGHIuWUFunUsoxjVPLFfqYJsvGjGooNBuNnKRguDPKgGNISqEwKmY

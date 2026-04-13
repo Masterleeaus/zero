@@ -1,1 +1,0 @@
-Webhook → Router → Parser → Handler → Storage → Response.

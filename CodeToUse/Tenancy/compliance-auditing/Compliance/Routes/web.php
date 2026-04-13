@@ -1,1 +1,0 @@
-<?php use Illuminate\Support\Facades\Route; Route::middleware(['web','auth','can:compliance.access'])->prefix('compliance')->group(function(){ Route::view('/','Compliance::index'); });

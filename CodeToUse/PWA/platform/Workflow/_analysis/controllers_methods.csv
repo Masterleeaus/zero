@@ -1,3 +1,0 @@
-controller_file,class,methods
-Http/Controllers/WorkflowController.php,WorkflowController,"__construct, index"
-Http/Controllers/WorkflowApiController.php,WorkflowApiController,"store, update"

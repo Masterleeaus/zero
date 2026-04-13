@@ -1,1 +1,0 @@
-<?php // adds SMS + voice columns
