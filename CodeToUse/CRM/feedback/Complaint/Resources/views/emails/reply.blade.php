@@ -1,1 +1,0 @@
-{!! $complaintReply->message !!}

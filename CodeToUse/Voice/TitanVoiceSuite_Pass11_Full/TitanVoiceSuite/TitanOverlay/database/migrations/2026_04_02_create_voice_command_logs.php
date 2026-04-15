@@ -1,3 +1,0 @@
-<?php
-// Voice command logs table
-BXNFzjtCmmAYriWqUEqFtMXvVAGFGYrnhlogcczOGjLrvFBuHasthqQLBFHJSolWceQGCsMUdVxtRpOUqcziyNAmVWfADkuuITLaMWTwCTqELHkqaExrlcWUNepRQfymAFnRLQXlbHXMGuFCLcMakZLgDhSZqUBIJfgwkUUZxLluALOFEDbHXrmrUXPciYDRtjqKyJtr

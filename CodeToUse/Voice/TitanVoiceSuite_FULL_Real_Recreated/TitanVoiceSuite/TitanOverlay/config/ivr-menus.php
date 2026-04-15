@@ -1,1 +1,0 @@
-<?php return ['main'=>['1'=>'sales','2'=>'support','0'=>'operator']]; ?>

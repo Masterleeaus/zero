@@ -1,1 +1,0 @@
-<?php // callback schedules table

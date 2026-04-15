@@ -1,8 +1,0 @@
-# Optional: requires Lighthouse or equivalent
-type AIConverseConversation { id: ID!, channel: String, external_ref: String, created_at: String }
-type AIConverseMessage { id: ID!, conversation_id: ID!, sender: String, text: String, created_at: String }
-
-type Query {
-  aiconverseConversations: [AIConverseConversation!]! @field(resolver: "Modules\\AIConverse\\GraphQL\\Resolvers\\ConversationResolver@all")
-  aiconverseMessages(conversation_id: ID!): [AIConverseMessage!]! @field(resolver: "Modules\\AIConverse\\GraphQL\\Resolvers\\MessageResolver@byConversation")
-}

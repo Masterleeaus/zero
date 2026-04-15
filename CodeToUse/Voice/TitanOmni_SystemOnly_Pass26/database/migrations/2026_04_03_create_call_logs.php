@@ -1,3 +1,0 @@
-<?php
-// Call logs table
-vNgPVBDOYqlbpzAADDxkEriBerPKdjbzCkpGkGezZdqfzvNRwpyaSigyeSmeFDFvhcgSmNJtcNKevNPYgfrcEdjiHwKMGlfvCddjiqnFaBAEGLfDReDQxexzHChhJVvscMZjRWXkZhQbYzCCOWAsHOrRWVYnSPFzNcOvCTsxZoBlAzOUWqRstLMfTTtAREcBVeRkLQfv

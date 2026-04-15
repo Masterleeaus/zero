@@ -1,3 +1,0 @@
-<?php
-// Adds SMS + voice support columns
-pnZLWPNLfyvGKLxhDZYvpTBeiiwOLYCBSEhPpWkPnMnUycXiiiOFGGTRievpnpjeFRfRxpSolRyhkodZTspGuToOelYDYyJvWACHHDyyewpgCzJylQUNMQLPGjPaWzNNXQSOaXBcfObcJezvHEvCHElZjEVutOODwHmKvPJTOxIMjuCmfRFmXFLyDAZmibzksMiQYotC

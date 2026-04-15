@@ -1,1 +1,0 @@
-DISPATCH_ORGANIZATION_SCHEMA_PREFIX = "dispatch_organization"

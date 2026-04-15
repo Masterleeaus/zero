@@ -1,3 +1,0 @@
-<?php
-namespace Modules\Treasury\Http\Controllers\Api; use Illuminate\Routing\Controller; use Modules\Treasury\Models\BankAccount; use Modules\Treasury\Models\BankTransaction;
-class TreasuryApiController extends Controller{public function accounts(){return response()->json(['ok'=>true,'data'=>BankAccount::query()->limit(200)->get()]);}public function unreconciled(){return response()->json(['ok'=>true,'data'=>BankTransaction::where('status','unreconciled')->limit(500)->get()]);}}

@@ -1,1 +1,0 @@
-Voice command parser, intent router, permission gate, context manager, and response generator were added in Pass 2. This pass enables confirmable command parsing for create_ticket, create_job, list_tasks, schedule_callback, and update_status.

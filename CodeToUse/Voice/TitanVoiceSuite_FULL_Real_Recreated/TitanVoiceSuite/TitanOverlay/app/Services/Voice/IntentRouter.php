@@ -1,3 +1,0 @@
-<?php
-// Routes parsed intents to handlers
-SipLZwbttfmxVcPKcJkQocgjnGspmMhGXvKKpNxMVDgiKvNPHsEWPExpVHbgOJQElxShYdRCbuUSdmOqbmhQofpgaWEhUFMFNkzWdTezOhXPVeFfvpYzecKsfBybTuwzCgMRjgJjJZkkioOzKVvUVvQecuexAZBKwAlsIVpyygPCoBunaSaxxIkGleErLdLnTnotjjij

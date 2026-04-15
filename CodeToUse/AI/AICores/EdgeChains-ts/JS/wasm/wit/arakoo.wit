@@ -1,7 +1,0 @@
-package arakoo:edgechains;
-
-world reactor {
-    import http;
-    import utils;
-    export inbound-http;
-}
