@@ -598,3 +598,151 @@ See: [PR_243_AUDIT.md](pr-audits/PR_243_AUDIT.md)
 | 4 | #233 | Applied TitanMesh module | 29 files: Mesh domain (events/listeners/models/services/controllers/routes/tests) |
 | 5 | Manual | Resolved EventServiceProvider conflicts | All 4 PRs' event registrations combined |
 | 6 | Manual | Updated fsm_module_status.json | titan_mesh + fieldservice_sale_agreement + graph verification pass |
+
+---
+
+---
+
+# AUDIT PASS 3
+
+**Date:** 2026-04-05  
+**Agent:** GitHub Copilot Merge/Review Agent  
+**Base Branch:** `main` (3e77a29a — via PR #251 merged)  
+**Working Branch:** `copilot/merge-pr-audit-pass`  
+**PRs Reviewed:** 3  
+**PRs Merged:** 0 (both #233 and #239 already integrated in prior passes)  
+**PRs Held:** 1 (#252)
+
+---
+
+## Executive Summary — Pass 3
+
+All three currently open GitHub pull requests have been reviewed.
+
+- **PR #233 (TitanMesh MODULE 10)** — Content fully integrated in Pass 2. Confirmed present in main. GitHub PR remains open due to branch divergence but is functionally merged. No re-merge needed.
+- **PR #239 (FSM modules: FSA + recurring)** — Content fully integrated in Pass 2. Confirmed present in main. GitHub PR remains open due to branch divergence but is functionally merged. No re-merge needed.
+- **PR #252 (Inventory Phase 2 + Finance Pass 5A)** — WIP DRAFT. Contains exactly one empty "Initial plan" commit with zero file changes. Implementation has not started. HOLD until all 13 stages are implemented.
+
+### Accumulated Open Work Items (Pass 3 carry-forward)
+
+1. `ServiceAgreement.$guarded = []` hardening → **Still deferred**
+2. `ProcessContractRenewals` / `RunPredictionSchedules` command scheduling → **Still deferred**
+3. `SupplierBill` naming convention (`lines` vs `items`) → **Still deferred**
+4. `JobCostEntry` routes/controller → **Still deferred**
+5. Non-canonical `Work\\InspectionInstance` + `Work\\SiteAsset` deletion pass → **Still deferred**
+6. 28 FSM drift events with empty listeners → **Still deferred**
+7. `FieldServiceAgreement` auto-invoice on activation → **Still deferred**
+8. HRM Pass 2 (#243) → **Still deferred**
+9. Inventory Phase 2 + Finance Pass 5A (#252) → **NEW — HOLD, implementation pass required**
+
+---
+
+## PR Inventory — Pass 3
+
+| PR# | Title | Domain | Risk | Decision |
+|-----|-------|--------|------|----------|
+| #233 | MODULE 10 — TitanMesh: Federated Capability Exchange Engine | TitanMesh | High | **ALREADY MERGED (Pass 2)** |
+| #239 | Merge FSM modules: fieldservice_sale_agreement + fieldservice_sale_recurring | FSM/Work | Medium | **ALREADY MERGED (Pass 2)** |
+| #252 | [WIP] Implement inventory phase 2 and finance pass 5a completion | Inventory/Finance | High | **HOLD** |
+
+---
+
+## PR #233 — MODULE 10: TitanMesh (Pass 3 Confirmation)
+
+**Decision: ALREADY MERGED (Pass 2)**
+
+**Confirmation:**
+
+All TitanMesh content confirmed present in main:
+- `app/Models/Mesh/` — 5 models (MeshNode, MeshCapabilityExport, MeshDispatchRequest, MeshSettlement, MeshTrustEvent)
+- `app/Services/Mesh/` — 5 services (MeshRegistryService, MeshDispatchService, MeshTrustService, MeshSettlementService, MeshSignatureService)
+- `app/Events/Mesh/` — 6 events
+- `app/Listeners/Mesh/` — 3 listeners
+- `routes/core/mesh.routes.php` — loaded via RouteServiceProvider
+- `database/migrations/2026_04_04_001000_create_titan_mesh_tables.php`
+- `fsm_module_status.json` → `titan_mesh: installed`
+- `EventServiceProvider` — MODULE 10 section present
+
+**GitHub PR state:** Open due to branch divergence (head branch `copilot/add-titanmesh-capability-exchange` no longer fast-forwards to main). No merge action required.
+
+See full audit: [PR_233_AUDIT.md](pr-audits/PR_233_AUDIT.md)
+
+---
+
+## PR #239 — FSM Modules: FSA + Recurring (Pass 3 Confirmation)
+
+**Decision: ALREADY MERGED (Pass 2)**
+
+**Confirmation:**
+
+All FSA content confirmed present in main:
+- `app/Models/Work/FieldServiceAgreement.php`
+- `app/Services/Work/FieldServiceAgreementService.php`
+- `app/Http/Controllers/Core/Work/FieldServiceAgreementController.php`
+- `database/migrations/2026_04_03_500600_create_field_service_agreements_table.php`
+- 6 FSA lifecycle events registered in `EventServiceProvider`
+- FSA routes at `dashboard.work.fsm-agreements.*`
+- Portal agreement routes and views
+- Feature test: `tests/Feature/FieldServiceAgreementTest.php`
+
+**GitHub PR state:** Open due to branch divergence (head branch `copilot/merge-fsm-modules-fieldservice` no longer fast-forwards to main). No merge action required.
+
+See full audit: [PR_239_AUDIT.md](pr-audits/PR_239_AUDIT.md)
+
+---
+
+## PR #252 — Inventory Phase 2 + Finance Pass 5A
+
+**Decision: HOLD — WIP DRAFT**
+
+**Reason:** Zero implementation committed. Single "Initial plan" commit contains no file changes.
+
+**Scope summary:** 13 stages covering receiving completion, stocktake finalize, issue-to-job, material costing bridge, AP bridge, reorder thresholds, signal/recommendation layer, routes, policies, tests, and documentation.
+
+**Foundation readiness (confirmed in base):**
+- InventoryItem, StockMovement, Stocktake, PurchaseOrder/Item, Warehouse, Supplier — all present
+- StockService, PurchaseOrderService, SupplierService — all present
+- MaterialCostingService, FinancialSignalService, SupplierBillService, AccountingService — all present in TitanMoney
+- `company_id` tenancy enforced across all inventory models
+
+**Key gaps to close in implementation:**
+- `reorder_qty`, `min_stock`, `preferred_supplier_id` columns on `inventory_items`
+- Stocktake finalize service + variance movement creation
+- `issueToJob()` / `transferStock()` in StockService
+- `ReorderSignalService`, `ReorderRecommendationService`
+- 4 new inventory signal events
+- PO → SupplierBill draft bridge
+- Inventory routes and views for new surfaces
+- Inventory policies for new actions
+- Tests for all new flows
+
+**Conditions for merge:** All 13 stages implemented; no migration collisions; no duplication of TitanMoney services; PR removed from Draft status.
+
+See full audit: [PR_252_AUDIT.md](pr-audits/PR_252_AUDIT.md)
+
+---
+
+## Post-Merge Validation — Pass 3
+
+No merges were performed in Pass 3 (no new implementation PRs ready). Status of all integration points confirmed stable from Pass 2.
+
+| Check | Status |
+|---|---|
+| TitanMesh models/services/routes | ✅ Present and confirmed |
+| FSA model/service/controller/routes | ✅ Present and confirmed |
+| EventServiceProvider MODULE 01–10 | ✅ All registered |
+| Inventory Phase 1 foundation | ✅ Complete and stable |
+| Finance Pass 1–4 services | ✅ Complete and stable |
+| HRM Pass 1–2 | ✅ Complete and stable |
+| Migration namespace gaps | ✅ None new in Pass 3 |
+| Composer autoload | ✅ `App\\Extensions\\` mapping removed (Pass 2) |
+
+---
+
+## Merge Order Log — Pass 3
+
+| Step | PR | Action | Files |
+|------|-----|--------|-------|
+| — | #233 | Confirmed already integrated | No changes needed |
+| — | #239 | Confirmed already integrated | No changes needed |
+| — | #252 | Audited as HOLD (WIP draft) | docs/pr-audits/PR_252_AUDIT.md created |
