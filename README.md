@@ -58,4 +58,5 @@ Use only local secrets in `.env`; never commit credentials, production data, or 
 
 ## Banner
 
-A verified project-specific banner has not been found in this repository, so this landing page uses a typographic header rather than an unrelated image.
+A checked-in project-specific banner is displayed above.
+
