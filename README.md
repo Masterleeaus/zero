@@ -1,6 +1,6 @@
 <div align="center">
 
-# Titan Zero — Legacy Laravel Application
+# Titan Zero Legacy Laravel Platform
 
 **A Laravel business application and source archive that predates the current TypeScript field-service workforce platform.**
 
