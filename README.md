@@ -1,3 +1,5 @@
+![Titan Zero Legacy Laravel Platform — LEGACY LARAVEL APPLICATION](docs/images/portfolio-banner.svg)
+
 <div align="center">
 
 # Titan Zero Legacy Laravel Platform
