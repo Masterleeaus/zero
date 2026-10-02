@@ -8,6 +8,13 @@
 
 </div>
 
+## Product architecture and engineering highlights
+
+A legacy Laravel business platform that preserves MagicAI/WorkCore-era modules, application code, and migration notes from an earlier stage of the Titan ecosystem.
+
+- **Architecture:** A Composer-managed Laravel application combines modular domains, packages, database migrations, and frontend assets, with repository-specific installation and test scripts.
+- **Distinctive engineering:** The repository is useful as a source-history and migration reference alongside the current TypeScript field-service platform.
+
 > **Status: legacy source repository; active maintenance status unverified.** The inspected repository contains a large Laravel application and migration notes. The canonical current field-service product is [Titan Zero Field Service Workforce](https://github.com/Masterleeaus/Titan-Zero-Field-Service-Workforce).
 
 ## Purpose and relationship
